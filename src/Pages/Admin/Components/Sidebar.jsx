@@ -22,15 +22,15 @@ function Sidebar() {
     return () => clearTimeout(timer);
   }, []);
 
-  const menus = [
-    { name: "Dashboard", path: "/admin", icon: FaChartLine },
-    { name: "Users", path: "/admin/users", icon: FaUsers },
-    { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
-    { name: "Market Insights", path: "/admin/insights", icon: FaChartBar },
-    { name: "News Management", path: "/admin/news", icon: FaNewspaper },
-    { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
-    { name: "Settings", path: "/admin/settings", icon: FaCog },
-  ];
+ const menus = [
+  { name: "Dashboard", path: "/admin", icon: FaChartLine },
+  { name: "Users", path: "/admin/users", icon: FaUsers },
+  { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
+  { name: "Market Insights", path: "/admin/insights", icon: FaChartBar },
+  { name: "News Management", path: "/admin/news", icon: FaNewspaper },
+  { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
+  { name: "Settings", path: "/admin/settings", icon: FaCog },
+];
 
   const isActive = (path) => {
     if (path === "/admin") {
@@ -42,42 +42,35 @@ function Sidebar() {
   return (
     <aside 
       className={`
-        w-64 bg-gradient-to-b border border-gray-700 shadow-lg rounded-xl text-white p-6
+        hidden lg:block w-64 bg-transparent shadow-lg rounded-xl text-white p-4 sm:p-6 border border-gray-700
         transition-all duration-700 ease-out transform
-        ${isMounted ? 'opacity-100 translate-x-0 glow-fade' : 'opacity-0 -translate-x-8'}
+        ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}
       `}
-      style={{ animationDelay: "0.2s" }}
     >
       {/* Header */}
-      <div 
-        className={`
-          mb-8 transition-all duration-500 ease-out
-          ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}
-        `}
-        style={{ animationDelay: "0.3s" }}
-      >
-        <h2 className="text-2xl font-bold text-cyan-400">Admin Panel</h2>
-        <p className="text-sm text-gray-400 mt-2">Platform Management</p>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg flex-shrink-0">
+            A
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl font-bold text-cyan-400 truncate">Admin Panel</h2>
+            <p className="text-sm text-gray-400 truncate">Platform Management</p>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Menu */}
       <nav>
         <ul className="space-y-2">
           {menus.map((item, index) => (
-            <li 
-              key={index}
-              className={`
-                transition-all duration-500 ease-out
-                ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}
-              `}
-              style={{ animationDelay: `${0.4 + (index * 0.1)}s` }}
-            >
+            <li key={index}>
               <Link
                 to={item.path}
                 className={`
                   flex items-center justify-between p-3 rounded-xl transition-all duration-300 group
                   ${isActive(item.path) 
-                    ? 'bg-cyan-600/20 text-cyan-400 border-l-4 border-cyan-400 shadow-lg' 
+                    ? 'bg-cyan-600/20 text-cyan-400 border-l-4 border-cyan-400 shadow' 
                     : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-l-4 hover:border-gray-500'
                   }
                 `}
@@ -110,13 +103,7 @@ function Sidebar() {
       </nav>
 
       {/* Quick Stats Section */}
-      <div 
-        className={`
-          mt-8 pt-6 border-t border-gray-700 transition-all duration-800 ease-out
-          ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-        `}
-        style={{ animationDelay: "1.1s" }}
-      >
+      <div className="mt-6 pt-4 border-t border-gray-700">
         <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">
           Quick Stats
         </h3>
@@ -128,13 +115,11 @@ function Sidebar() {
           ].map((stat, index) => (
             <div 
               key={index}
-              className={`
-                flex justify-between items-center p-2 transition-all duration-500 ease-out
-                ${isMounted ? 'opacity-100' : 'opacity-0'}
-              `}
-              style={{ animationDelay: `${1.2 + (index * 0.1)}s` }}
+              className="flex justify-between items-center p-2"
             >
-              <span className="text-xs text-gray-400">{stat.label}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">{stat.label}</span>
+              </div>
               <span className={`text-sm font-semibold ${stat.color}`}>
                 {stat.value}
               </span>
@@ -144,33 +129,16 @@ function Sidebar() {
       </div>
 
       {/* Admin Actions */}
-      <div 
-        className={`
-          mt-6 transition-all duration-900 ease-out
-          ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-        `}
-        style={{ animationDelay: "1.5s" }}
-      >
+      <div className="mt-4">
         <button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm">
           Quick Actions
         </button>
       </div>
 
-      {/* Footer */}
-      <div 
-        className={`
-          mt-6 pt-4 border-t border-gray-700 text-center transition-all duration-1000 ease-out
-          ${isMounted ? 'opacity-100' : 'opacity-0'}
-        `}
-        style={{ animationDelay: "1.6s" }}
-      >
-        <p className="text-xs text-gray-500">
-          Admin Portal
-        </p>
-        {/* <p className="text-xs text-gray-600 mt-1">
-          Secure • Managed • Efficient
-        </p> */}
-      </div>
+      {/* Footer
+      <div className="mt-4 pt-4 border-t border-gray-700 text-center">
+        <p className="text-xs text-gray-500">Admin Portal</p>
+      </div> */}
     </aside>
   );
 }

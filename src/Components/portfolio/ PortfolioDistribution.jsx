@@ -16,19 +16,39 @@ const PortfolioDistribution = ({ data, loading }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Calculate portfolio distribution from data prop
-  const distributionData = data.map((coin, index) => ({
-    name: coin.coinSymbol?.toUpperCase() || `Coin ${index + 1}`,
-    value: (coin.quantity || 1) * coin.coinPriceUSD,
-    fullName: coin.coinName,
-  }));
+  // Group same coins together and calculate total value for each
+  const portfolioMap = {};
+  
+  const coinsList = Array.isArray(data) ? data : [];
+  
+  coinsList.forEach((coin) => {
+    const symbol = coin.coinSymbol?.toUpperCase() || coin.coin_id;
+    const name = coin.coinName || `Coin ${symbol}`;
+    if (!symbol) return;
+    
+    if (!portfolioMap[symbol]) {
+      portfolioMap[symbol] = {
+        name: symbol,
+        fullName: name,
+        value: 0,
+        quantity: 0
+      };
+    }
+    
+    portfolioMap[symbol].value += (Number(coin.quantity) || 0) * (Number(coin.coinPriceUSD) || 0);
+    portfolioMap[symbol].quantity += Number(coin.quantity) || 0;
+  });
+
+  // Convert to array
+  const distributionData = Object.values(portfolioMap).filter(item => item.value > 0);
 
   // Add cash to distribution if there's any balance
   if (balance > 0) {
     distributionData.unshift({
       name: "CASH",
       value: balance,
-      fullName: "Virtual Cash"
+      fullName: "Virtual Cash",
+      quantity: balance
     });
   }
 
@@ -87,6 +107,11 @@ const PortfolioDistribution = ({ data, loading }) => {
       return (
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-white text-sm">{data.fullName || data.name}</p>
+          {data.name !== "CASH" && (
+            <p className="text-gray-300 text-xs">
+              Quantity: {data.quantity.toFixed(4)}
+            </p>
+          )}
           <p className="text-cyan-400 font-medium">
             ₹{data.value.toLocaleString('en-IN')}
           </p>

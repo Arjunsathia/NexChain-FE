@@ -22,10 +22,10 @@ import TradeModal from "../UserProfile/Components/TradeModal";
 const TradePanel = React.memo(
   ({
     className = "",
-    buyAmount,
-    coinAmount,
-    onBuyAmountChange,
-    onCoinAmountChange,
+    // buyAmount,
+    // coinAmount,
+    // onBuyAmountChange,
+    // onCoinAmountChange,
     onBuy,
     onSell,
     symbol,
@@ -41,7 +41,7 @@ const TradePanel = React.memo(
 
       <div className="space-y-3 sm:space-y-4">
         {/* USD Amount Input */}
-        <div>
+        {/* <div>
           <label className="block text-xs sm:text-sm text-gray-400 mb-2">
             Amount (USD)
           </label>
@@ -53,10 +53,10 @@ const TradePanel = React.memo(
             step="0.01"
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
           />
-        </div>
+        </div> */}
 
         {/* Coin Amount Input */}
-        <div>
+        {/* <div>
           <label className="block text-xs sm:text-sm text-gray-400 mb-2">
             Amount ({symbol?.toUpperCase()})
           </label>
@@ -68,7 +68,7 @@ const TradePanel = React.memo(
             step="0.000001"
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
           />
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <button

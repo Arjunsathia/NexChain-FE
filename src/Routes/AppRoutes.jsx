@@ -10,6 +10,7 @@ import LearningHub from "@/Pages/LearningHub";
 import Admin from "@/Pages/Admin/Admin";
 import AdminDashboard from "@/Pages/Admin/Pages/AdminDashboard";
 import Users from "@/Pages/Admin/Pages/Users";
+import AdminCryptocurrencies from "@/Pages/Admin/Pages/AdminCryptocurrencies"; // ADD THIS IMPORT
 import UserDashboard from "@/Pages/UserProfile/Pages/UserDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRoute from "./AuthRoute";
@@ -49,6 +50,7 @@ export default function AppRoutes() {
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<Users />} />
+            <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} /> {/* ADD THIS ROUTE */}
           </Route>
         </Route>
       </Route>

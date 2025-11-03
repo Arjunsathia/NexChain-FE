@@ -7,36 +7,56 @@ function Portfolio() {
   const { balance } = useWalletContext();
   const { purchasedCoins = [], loading } = usePurchasedCoins() || { purchasedCoins: [], loading: false };
 
-  // Prepare data for pie chart
+  const portfolioMap = {};
+  
   const coinsList = Array.isArray(purchasedCoins) ? purchasedCoins : [];
+  
+  coinsList.forEach((coin) => {
+    const symbol = coin.coinSymbol?.toUpperCase() || coin.coin_id;
+    if (!symbol) return;
+    
+    if (!portfolioMap[symbol]) {
+      portfolioMap[symbol] = {
+        name: symbol,
+        quantity: 0,
+        totalValue: 0,
+        color: getColorForSymbol(symbol)
+      };
+    }
+    
+    portfolioMap[symbol].quantity += Number(coin.quantity) || 0;
+    portfolioMap[symbol].totalValue += (Number(coin.quantity) || 0) * (Number(coin.coinPriceUSD) || 0);
+  });
 
-  const portfolioData = coinsList.map((coin, index) => ({
-    name: coin.coinSymbol?.toUpperCase() || coin.coin_id || `COIN-${index + 1}`,
-    value: (Number(coin.quantity) || 0) * (Number(coin.coinPriceUSD) || 0),
-    color: ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'][index % 5]
-  })).filter(item => item.value > 0); // filter out zero-value entries
+  const portfolioData = Object.values(portfolioMap).filter(item => item.totalValue > 0);
 
-  // Add cash to portfolio if exists
   const cashValue = Number(balance) || 0;
   if (cashValue > 0) {
     portfolioData.unshift({
       name: 'CASH',
-      value: cashValue,
+      totalValue: cashValue,
+      quantity: cashValue,
       color: '#6B7280'
     });
   }
 
-  const totalPortfolioValue = portfolioData.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  const totalPortfolioValue = portfolioData.reduce((sum, item) => sum + (Number(item.totalValue) || 0), 0);
+
+  function getColorForSymbol(symbol) {
+    const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316'];
+    const index = symbol.charCodeAt(0) % colors.length;
+    return colors[index];
+  }
 
   if (loading) {
     return (
-      <div className="bg-transparent p-6 rounded-xl shadow-lg border border-gray-700">
-        <h2 className="text-xl font-semibold mb-4 text-white">Portfolio Summary</h2>
+      <div className="bg-transparent border border-gray-700 rounded-xl p-3 sm:p-4 h-full">
+        <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-white">Portfolio</h2>
         <div className="animate-pulse">
-          <div className="h-48 bg-gray-700 rounded mb-4"></div>
-          <div className="space-y-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-700 rounded"></div>
+          <div className="h-24 sm:h-32 bg-gray-700 rounded mb-2 sm:mb-3"></div>
+          <div className="space-y-1">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="h-3 bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -45,28 +65,27 @@ function Portfolio() {
   }
 
   return (
-    <div className="bg-transparent p-6 rounded-xl shadow-lg border border-gray-700">
-      <h2 className="text-xl font-semibold mb-4 text-white">Portfolio Summary</h2>
+    <div className="bg-transparent border border-gray-700 rounded-xl p-3 sm:p-4 h-full">
+      <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-white">Portfolio</h2>
       
       {portfolioData.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-6xl mb-4">📊</div>
-          <p className="text-gray-400">No portfolio data</p>
-          <p className="text-sm text-gray-500 mt-1">Start investing to build your portfolio</p>
+        <div className="text-center py-3 sm:py-4">
+          <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">📊</div>
+          <p className="text-gray-400 text-xs sm:text-sm">No portfolio data</p>
         </div>
       ) : (
         <>
-          <div className="h-48 mb-4">
+          <div className="h-24 sm:h-32 mb-2 sm:mb-3">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={portfolioData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
+                  innerRadius={25}
+                  outerRadius={50}
+                  paddingAngle={1}
+                  dataKey="totalValue"
                 >
                   {portfolioData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -79,22 +98,22 @@ function Portfolio() {
             </ResponsiveContainer>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
-              <span className="text-gray-300">Total Portfolio Value</span>
-              <span className="text-xl font-bold text-cyan-400">
+          <div className="space-y-1 sm:space-y-2">
+            <div className="flex justify-between items-center p-2 bg-gray-800/30 rounded-lg text-xs sm:text-sm">
+              <span className="text-gray-300">Total Value</span>
+              <span className="font-bold text-cyan-400">
                 ₹{Number(totalPortfolioValue).toLocaleString('en-IN')}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-center p-2 bg-gray-800 rounded">
+            <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs">
+              <div className="text-center p-1 sm:p-2 bg-gray-800/30 rounded">
                 <div className="text-gray-400">Invested</div>
                 <div className="text-green-400 font-semibold">
                   ₹{Math.max(0, Number(totalPortfolioValue) - cashValue).toLocaleString('en-IN')}
                 </div>
               </div>
-              <div className="text-center p-2 bg-gray-800 rounded">
+              <div className="text-center p-1 sm:p-2 bg-gray-800/30 rounded">
                 <div className="text-gray-400">Cash</div>
                 <div className="text-blue-400 font-semibold">
                   ₹{cashValue.toLocaleString('en-IN')}
@@ -102,19 +121,23 @@ function Portfolio() {
               </div>
             </div>
 
-            {/* Portfolio breakdown */}
-            <div className="space-y-2 max-h-32 overflow-y-auto">
+            <div className="space-y-1 max-h-20 sm:max-h-24 overflow-y-auto text-xs">
               {portfolioData.map((item, index) => (
-                <div key={index} className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-2">
+                <div key={index} className="flex justify-between items-center py-1">
+                  <div className="flex items-center gap-1 min-w-0 flex-1">
                     <div 
-                      className="w-3 h-3 rounded-full" 
+                      className="w-2 h-2 rounded-full flex-shrink-0" 
                       style={{ backgroundColor: item.color }}
                     ></div>
-                    <span className="text-gray-300">{item.name}</span>
+                    <span className="text-gray-300 truncate">{item.name}</span>
+                    {item.name !== 'CASH' && (
+                      <span className="text-gray-500 text-xs ml-1 flex-shrink-0">
+                        ({item.quantity.toFixed(2)})
+                      </span>
+                    )}
                   </div>
-                  <span className="text-gray-400">
-                    ₹{Number(item.value).toLocaleString('en-IN')}
+                  <span className="text-gray-400 text-right flex-shrink-0 ml-2">
+                    ₹{Number(item.totalValue).toLocaleString('en-IN')}
                   </span>
                 </div>
               ))}

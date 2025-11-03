@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-
 import Sidebar from "./Components/Sidebar";
 import MobileNavbar from "./Components/MobileNavbar";
 
@@ -24,8 +23,12 @@ function Admin() {
 
   return (
     <div className="min-h-screen text-white flex">
-      {/* Show Sidebar only on desktop */}
-      {isDesktop && <Sidebar />}
+      {/* Show Sidebar only on desktop - Fixed position */}
+      {isDesktop && (
+        <div className="sticky top-0 h-screen overflow-y-auto flex-shrink-0">
+          <Sidebar />
+        </div>
+      )}
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-h-screen">
@@ -37,8 +40,8 @@ function Admin() {
           />
         )}
         
-        {/* Page content */}
-        <div className="flex-1">
+        {/* Page content - Scrollable area */}
+        <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>
       </div>

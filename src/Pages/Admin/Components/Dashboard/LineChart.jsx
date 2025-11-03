@@ -12,17 +12,33 @@ function UserLineChart() {
     { name: "Sen", users: 10000 },
     { name: "Sun", users: 11500 },
   ];
+  
   return (
-    <ResponsiveContainer width="100%" height={250}>
+    <ResponsiveContainer width="100%" height={200}>
       <ReLineChart data={data}>
-        <XAxis dataKey="name" stroke="#8884d8" />
-        <YAxis />
-        <Tooltip />
+        <XAxis 
+          dataKey="name" 
+          stroke="#6B7280"
+          fontSize={12}
+        />
+        <YAxis 
+          stroke="#6B7280"
+          fontSize={12}
+        />
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: '#1F2937', 
+            border: '1px solid #374151',
+            borderRadius: '8px',
+            color: '#F9FAFB'
+          }}
+        />
         <Line
           type="monotone"
           dataKey="users"
           stroke="#0ea5e9"
           strokeWidth={2}
+          dot={{ fill: '#0ea5e9', strokeWidth: 2 }}
         />
       </ReLineChart>
     </ResponsiveContainer>
