@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { FaSearch, FaEye } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // ADD THIS IMPORT
+import { FaSearch, FaEye, FaChartLine, FaCoins, FaArrowUp } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
 
 function AdminCryptocurrencies() {
   const { coins, coinsLoading } = useCoinContext();
-  const navigate = useNavigate(); // ADD THIS HOOK
+  const navigate = useNavigate();
 
   // Search and Pagination state
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,8 +44,6 @@ function AdminCryptocurrencies() {
     return { paginatedCoins, totalPages };
   }, [filteredCoins, currentPage, itemsPerPage]);
 
-//   const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-//   const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const handlePageClick = (page) => setCurrentPage(page);
 
   // Reset to first page when search term changes
@@ -54,12 +52,7 @@ function AdminCryptocurrencies() {
     setCurrentPage(1);
   };
 
-//   const clearSearch = () => {
-//     setSearchTerm("");
-//     setCurrentPage(1);
-//   };
-
-  // View coin details - UPDATED TO NAVIGATE
+  // View coin details
   const handleView = (coin) => {
     navigate(`/coin/coin-details/${coin.id}`);
   };
@@ -126,7 +119,7 @@ function AdminCryptocurrencies() {
   if (coinsLoading) {
     return (
       <div className="flex-1 px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-6 fade-in">
-        <div className="bg-transparent border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
           <div className="flex justify-center items-center gap-2 sm:gap-3 text-cyan-400">
             <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
             <span className="text-xs sm:text-sm lg:text-base">Loading cryptocurrencies...</span>
@@ -141,7 +134,9 @@ function AdminCryptocurrencies() {
       {/* Header Section with Search */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 fade-in">
         <div className="flex-1 w-full sm:w-auto min-w-0">
-          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-cyan-400 truncate">Cryptocurrencies Management</h1>
+<h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-t from-cyan-400 to-blue-500 bg-clip-text text-transparent truncate">
+  Cryptocurrencies Management
+</h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-1 truncate">Monitor all cryptocurrencies in the system</p>
         </div>
         
@@ -163,40 +158,76 @@ function AdminCryptocurrencies() {
         </div>
       </div>
 
-      {/* Stats Cards - Removed Top Losers */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 fade-in">
-        <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 border border-cyan-500/30 rounded-xl p-4 sm:p-6">
-          <div className="text-cyan-400 text-xs sm:text-sm font-semibold mb-2">Total Coins</div>
-          <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{coins.length}</div>
-        </div>
-        <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-4 sm:p-6">
-          <div className="text-green-400 text-xs sm:text-sm font-semibold mb-2">Active Coins</div>
-          <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{coins.filter(c => c.current_price > 0).length}</div>
-        </div>
-        <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-xl p-4 sm:p-6">
-          <div className="text-purple-400 text-xs sm:text-sm font-semibold mb-2">Top Gainers</div>
-          <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
-            {coins.filter(c => c.price_change_percentage_24h > 0).length}
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:scale-105 group cursor-pointer">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg shadow-lg">
+              <FaCoins className="text-white text-base" />
+            </div>
+            <div className="flex items-center gap-2 text-sm bg-cyan-400/10 px-3 py-1.5 rounded-full border border-cyan-400/20">
+              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+              <span className="text-cyan-400 font-semibold">Total</span>
+            </div>
           </div>
+          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+            {coins.length}
+          </p>
+          <p className="text-sm text-gray-400 font-medium">Total Coins</p>
+          <p className="text-xs text-gray-500 mt-1">All cryptocurrencies</p>
+        </div>
+
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:scale-105 group cursor-pointer">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-lg">
+              <FaChartLine className="text-white text-base" />
+            </div>
+            <div className="flex items-center gap-2 text-sm bg-green-400/10 px-3 py-1.5 rounded-full border border-green-400/20">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-green-400 font-semibold">Active</span>
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-green-300 transition-colors">
+            {coins.filter(c => c.current_price > 0).length}
+          </p>
+          <p className="text-sm text-gray-400 font-medium">Active Coins</p>
+          <p className="text-xs text-gray-500 mt-1">Currently trading</p>
+        </div>
+
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:scale-105 group cursor-pointer">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-lg">
+              <FaArrowUp className="text-white text-base" />
+            </div>
+            <div className="flex items-center gap-2 text-sm bg-purple-400/10 px-3 py-1.5 rounded-full border border-purple-400/20">
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+              <span className="text-purple-400 font-semibold">Gaining</span>
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-purple-300 transition-colors">
+            {coins.filter(c => c.price_change_percentage_24h > 0).length}
+          </p>
+          <p className="text-sm text-gray-400 font-medium">Top Gainers</p>
+          <p className="text-xs text-gray-500 mt-1">24h positive change</p>
         </div>
       </div>
 
       {/* Content Section */}
       {filteredCoins.length === 0 ? (
-        <div className="bg-transparent border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in">
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in">
           <div className="text-gray-400 text-sm sm:text-base lg:text-lg">
             {searchTerm ? "No coins found matching your search" : "No cryptocurrencies available"}
           </div>
         </div>
       ) : (
-        <div className="bg-transparent border border-gray-700 rounded-xl overflow-hidden fade-in">
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden fade-in">
           {/* Mobile/Tablet Card View */}
           <div className="xl:hidden space-y-2 sm:space-y-3 p-2 sm:p-3 lg:p-4">
             {paginatedCoins.map((coin, index) => (
               <div
                 key={coin.id}
-                className="bg-gray-800/30 rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-gray-700
-                  transition-all duration-300 ease-out hover:bg-gray-800/50 hover:border-gray-600 fade-in"
+                className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-gray-700
+                  transition-all duration-300 ease-out hover:bg-gray-800/50 hover:border-cyan-400/50 fade-in"
                 style={{ animationDelay: `${0.3 + index * 0.1}s` }}
               >
                 <div className="flex justify-between items-start mb-2 sm:mb-3">
@@ -244,14 +275,14 @@ function AdminCryptocurrencies() {
                   </span>
                 </div>
                 
-                {/* Only View button remains */}
+                {/* View button */}
                 <div className="flex justify-center mt-3">
                   <button
-                    className="bg-gray-700/50 hover:bg-blue-600 text-blue-400 hover:text-white 
+                    className="bg-gray-700/50 hover:bg-cyan-600 text-cyan-400 hover:text-white 
                               rounded-lg p-2 sm:p-3 transition-all duration-200 
                               flex items-center justify-center gap-2
-                              border border-gray-600 hover:border-blue-500
-                              shadow-sm hover:shadow-blue-500/25 transform hover:scale-105
+                              border border-gray-600 hover:border-cyan-500
+                              shadow-sm hover:shadow-cyan-500/25 transform hover:scale-105
                               w-full sm:w-auto text-xs sm:text-sm"
                     onClick={() => handleView(coin)}
                   >
@@ -296,7 +327,7 @@ function AdminCryptocurrencies() {
                         />
                         <div className="min-w-0 flex-1">
                           <div className="text-white font-medium text-sm lg:text-base">{coin.name}</div>
-                          <div className="text-gray-400 text-xs lg:text-sm uppercase">{coin.symbol.toUpperCase()}</div>
+                          <div className="text-cyan-400 text-xs lg:text-sm uppercase">{coin.symbol.toUpperCase()}</div>
                         </div>
                       </div>
                     </td>
@@ -323,14 +354,14 @@ function AdminCryptocurrencies() {
                     <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6">
                       <div className="flex items-center justify-center">
                         <button
-                          className="bg-gray-700/50 hover:bg-blue-600 text-blue-400 hover:text-white 
-                                    rounded-lg lg:rounded-xl p-2 transition-all duration-200 
-                                    hover:shadow-blue-500/25 transform hover:scale-105 border border-gray-600 hover:border-blue-500
-                                    flex items-center gap-1 lg:gap-2 group text-xs lg:text-sm"
+                          className="bg-gray-700/50 hover:bg-cyan-600 text-cyan-400 hover:text-white 
+                                    rounded-lg lg:rounded-xl p-2 lg:p-2.5 xl:p-3 transition-all duration-200 
+                                    hover:shadow-cyan-500/25 transform hover:scale-105 border border-gray-600 hover:border-cyan-500
+                                    flex items-center gap-1 lg:gap-1.5 xl:gap-2 group text-xs lg:text-sm"
                           onClick={() => handleView(coin)}
                           title="View Details"
                         >
-                          <FaEye className="text-xs lg:text-sm" />
+                          <FaEye className="text-xs lg:text-sm group-hover:scale-110 transition-transform" />
                           <span className="font-medium">View</span>
                         </button>
                       </div>

@@ -9,21 +9,39 @@ function PurchaseDetails({ coinName = "Bitcoin", amount = 1 }) {
   };
 
   return (
-    <div className="h-100 flex flex-fill justify-center">
-      <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-lg max-w-md w-full text-center space-y-4">
-        <CheckCircle className="mx-auto text-green-500 w-14 h-14" />
-        <h2 className="text-2xl font-semibold">Purchase Successful</h2>
-        <p className="text-sm text-gray-300">
-          You have successfully purchased <strong>{amount}</strong> unit's of{" "}
-          <strong>{coinName}</strong>.
+    <div className="min-h-screen flex items-center justify-center p-4 fade-in" style={{ animationDelay: "0.1s" }}>
+      <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-6 fade-in" style={{ animationDelay: "0.2s" }}>
+        {/* Success Icon */}
+        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+          <CheckCircle className="mx-auto text-green-500 w-16 h-16 mb-2" />
+        </div>
+        
+        {/* Title */}
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent fade-in" style={{ animationDelay: "0.4s" }}>
+          Purchase Successful
+        </h2>
+        
+        {/* Message */}
+        <p className="text-gray-300 leading-relaxed fade-in" style={{ animationDelay: "0.5s" }}>
+          You have successfully purchased <strong className="text-cyan-400">{amount}</strong> unit{amount !== 1 ? 's' : ''} of{" "}
+          <strong className="text-cyan-400">{coinName}</strong>.
         </p>
 
+        {/* Action Button */}
         <button
           onClick={handleGoBack}
-          className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition"
+          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 fade-in"
+          style={{ animationDelay: "0.6s" }}
         >
           Go to Portfolio
         </button>
+
+        {/* Additional Info */}
+        <div className="pt-4 border-t border-gray-700 fade-in" style={{ animationDelay: "0.7s" }}>
+          <p className="text-xs text-gray-500">
+            Your transaction has been processed successfully
+          </p>
+        </div>
       </div>
     </div>
   );

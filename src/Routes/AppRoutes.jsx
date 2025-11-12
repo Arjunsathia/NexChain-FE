@@ -10,7 +10,7 @@ import LearningHub from "@/Pages/LearningHub";
 import Admin from "@/Pages/Admin/Admin";
 import AdminDashboard from "@/Pages/Admin/Pages/AdminDashboard";
 import Users from "@/Pages/Admin/Pages/Users";
-import AdminCryptocurrencies from "@/Pages/Admin/Pages/AdminCryptocurrencies"; // ADD THIS IMPORT
+import AdminCryptocurrencies from "@/Pages/Admin/Pages/AdminCryptocurrencies";
 import UserDashboard from "@/Pages/UserProfile/Pages/UserDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRoute from "./AuthRoute";
@@ -18,6 +18,8 @@ import PublicRoute from "./PublicRoute";
 import CoinDetailsPage from "@/Pages/CoinDetails/CoinDetailsPage";
 import PurchaseDetails from "@/Pages/PurchaseDetails";
 import CoinPageOutlet from "@/Pages/CoinDetails/CoinPageOutlet";
+import AdminFeedback from "@/Pages/Admin/Pages/AdminFeedback";
+import MarketInsights from "@/Pages/Admin/Pages/MarketInsights"; // ADD THIS IMPORT
 
 export default function AppRoutes() {
   return (
@@ -50,7 +52,9 @@ export default function AppRoutes() {
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<Users />} />
-            <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} /> {/* ADD THIS ROUTE */}
+            <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} />
+            <Route path="feedback" element={<AdminFeedback />} />
+            <Route path="insights" element={<MarketInsights />} /> {/* ADD THIS ROUTE */}
           </Route>
         </Route>
       </Route>

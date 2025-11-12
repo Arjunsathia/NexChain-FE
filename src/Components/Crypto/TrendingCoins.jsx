@@ -38,8 +38,8 @@ function TrendingCoins() {
   }, [fetchTrendingCoins]);
 
   return (
-    <div className="border border-gray-700  rounded-xl p-5 shadow-md fade-in" style={{ animationDelay: "0.3s" }}>
-      <h2 className="text-lg font-semibold text-white mb-4 fade-in" style={{ animationDelay: "0.4s" }}>
+    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-2xl fade-in" style={{ animationDelay: "0.1s" }}>
+      <h2 className="text-lg font-semibold text-white mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
         🔥 Trending Coins
       </h2>
 
@@ -51,7 +51,7 @@ function TrendingCoins() {
               <li
                 key={index}
                 className="flex justify-between items-center text-sm fade-in"
-                style={{ animationDelay: `${0.5 + (index * 0.1)}s` }}
+                style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
               >
                 <Skeleton
                   width={150}
@@ -69,7 +69,7 @@ function TrendingCoins() {
             ))}
         </ul>
       ) : error || coins.length === 0 ? (
-        <div className="text-center text-gray-400 mt-4 flex flex-col items-center justify-center gap-2 fade-in" style={{ animationDelay: "0.5s" }}>
+        <div className="text-center text-gray-400 mt-4 flex flex-col items-center justify-center gap-2 fade-in" style={{ animationDelay: "0.3s" }}>
           <FaExclamationTriangle className="text-3xl text-gray-500" />
           <p className="text-sm">{error || "No trending coins found."}</p>
         </div>
@@ -79,10 +79,10 @@ function TrendingCoins() {
             <li
               key={coin.id}
               className="flex justify-between items-center text-sm text-white border-b border-gray-700 last:border-b-0 pb-2 fade-in"
-              style={{ animationDelay: `${0.5 + (index * 0.1)}s` }}
+              style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
             >
               <span
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer hover:text-cyan-400 transition-colors"
                 onClick={() => navigate(`/coin/${coin.id}`)}
               >
                 <img
@@ -96,8 +96,8 @@ function TrendingCoins() {
               <span
                 className={
                   coin.price_change_percentage_1h_in_currency < 0
-                    ? "text-red-500"
-                    : "text-green-400"
+                    ? "text-red-500 font-semibold"
+                    : "text-green-400 font-semibold"
                 }
               >
                 ${coin.current_price.toLocaleString()} (

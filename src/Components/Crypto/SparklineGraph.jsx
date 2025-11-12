@@ -9,7 +9,7 @@ const data = [
 
 export default function SparklineGraph() {
   return (
-    <div className="w-32 h-16 fade-in" style={{ animationDelay: "0.3s" }}>
+    <div className="w-32 h-16 fade-in" style={{ animationDelay: "0.1s" }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <Line

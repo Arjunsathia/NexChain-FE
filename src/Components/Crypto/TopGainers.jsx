@@ -28,8 +28,8 @@ function TopGainers() {
   }, []);
 
   return (
-    <div className="border-gray-700 border rounded-xl p-5 shadow-md fade-in" style={{ animationDelay: "0.4s" }}>
-      <h2 className="text-lg font-semibold mb-4 text-white fade-in" style={{ animationDelay: "0.5s" }}>📈 Top Gainers</h2>
+    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-2xl fade-in" style={{ animationDelay: "0.1s" }}>
+      <h2 className="text-lg font-semibold mb-4 text-white fade-in" style={{ animationDelay: "0.2s" }}>📈 Top Gainers</h2>
 
       {loading ? (
         <ul className="space-y-3">
@@ -37,7 +37,7 @@ function TopGainers() {
             <li
               key={index}
               className="flex justify-between items-center text-sm fade-in"
-              style={{ animationDelay: `${0.6 + (index * 0.1)}s` }}
+              style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
             >
               <Skeleton
                 width={120}
@@ -60,10 +60,10 @@ function TopGainers() {
             <li
               key={coin.id}
               className="flex justify-between items-center text-sm border-b border-gray-700 last:border-b-0 pb-2 fade-in"
-              style={{ animationDelay: `${0.6 + (index * 0.1)}s` }}
+              style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
             >
               <span
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer hover:text-cyan-400 transition-colors"
                 onClick={() => navigate(`/coin/${coin.id}`)}
               >
                 <img
@@ -74,7 +74,7 @@ function TopGainers() {
                 {coin.name} ({coin.symbol.toUpperCase()})
               </span>
 
-              <span className="text-green-400">
+              <span className="text-green-400 font-semibold">
                 ₹{Number(coin.current_price).toLocaleString("en-IN")} ( +
                 {coin.price_change_percentage_24h?.toFixed(2)}%)
               </span>
@@ -82,7 +82,7 @@ function TopGainers() {
           ))}
         </ul>
       ) : (
-        <div className="text-center text-gray-400 mt-4 flex flex-col items-center justify-center gap-2 fade-in" style={{ animationDelay: "0.6s" }}>
+        <div className="text-center text-gray-400 mt-4 flex flex-col items-center justify-center gap-2 fade-in" style={{ animationDelay: "0.3s" }}>
           <FaExclamationTriangle className="text-3xl" />
           <p className="text-sm">
             Unable to load top gainers. Please try again later.

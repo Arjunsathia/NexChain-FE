@@ -1,16 +1,240 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  FaTimes,
+  FaExchangeAlt,
+  FaWallet,
+  FaArrowUp,
+  FaArrowDown,
+  FaCoins,
+  FaMoneyBillWave,
+  FaInfoCircle,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
-import { FaTimes, FaExchangeAlt } from "react-icons/fa";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
 
-function TradeModal({ show, onClose, coin, type = "buy" }) {
+function TradeModal({
+  show,
+  onClose,
+  coin,
+  type = "buy",
+  showHoldingsInfo = false,
+  purchasedCoins = [],
+}) {
   const { user } = useUserContext();
+  const { balance, refreshBalance } = useWalletContext();
+  const { addPurchase, sellCoins, refreshPurchasedCoins } = usePurchasedCoins();
+
+  const [activeTab, setActiveTab] = useState("details");
   const [usdAmount, setUsdAmount] = useState("");
   const [coinAmount, setCoinAmount] = useState("");
   const [slippage, setSlippage] = useState(1.0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addPurchase, sellCoins } = usePurchasedCoins();
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const userHoldings = useMemo(() => {
+    if (!coin || !purchasedCoins || purchasedCoins.length === 0) return null;
+
+    const coinId = coin.id || coin.coinId;
+    const holding = purchasedCoins.find((pc) => {
+      return (
+        pc.coin_id === coinId ||
+        pc.coinId === coinId ||
+        pc.id === coinId ||
+        (pc.coin_id && coinId && pc.coin_id.toString() === coinId.toString()) ||
+        (pc.coinId && coinId && pc.coinId.toString() === coinId.toString()) ||
+        (pc.id && coinId && pc.id.toString() === coinId.toString())
+      );
+    });
+
+    return holding;
+  }, [coin, purchasedCoins]);
+
+  const hasHoldings = useMemo(() => {
+    return (
+      userHoldings &&
+      (userHoldings.totalQuantity > 0 || userHoldings.quantity > 0)
+    );
+  }, [userHoldings]);
+
+  const shouldShowHoldingsInfo = showHoldingsInfo || hasHoldings;
+  const isBuyOperation = useMemo(
+    () => (shouldShowHoldingsInfo ? activeTab === "deposit" : type === "buy"),
+    [shouldShowHoldingsInfo, activeTab, type]
+  );
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setIsVisible(false);
+      setTimeout(onClose, 300);
+    }
+  };
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(onClose, 300);
+  };
+
+  const holdingsSummary = useMemo(() => {
+    if (!shouldShowHoldingsInfo || !coin) return null;
+
+    const holdings = userHoldings || {};
+    const totalQuantity = holdings.totalQuantity || holdings.quantity || 0;
+    const averagePrice =
+      holdings.averagePrice ||
+      holdings.avgBuyPrice ||
+      holdings.coin_price_usd ||
+      0;
+    const remainingInvestment =
+      holdings.remainingInvestment ||
+      holdings.total_cost ||
+      holdings.totalCost ||
+      0;
+    const currentValue = totalQuantity * currentPrice;
+    const profitLoss = currentValue - remainingInvestment;
+    const profitLossPercentage =
+      remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
+
+    return {
+      totalQuantity,
+      averagePrice,
+      remainingInvestment,
+      currentValue,
+      profitLoss,
+      profitLossPercentage,
+      coinName: coin.coinName || coin.name,
+      coinSymbol: coin.coinSymbol || coin.symbol,
+    };
+  }, [shouldShowHoldingsInfo, coin, currentPrice, userHoldings]);
+
+  const maxAvailable = useMemo(() => {
+    const isSellMode = shouldShowHoldingsInfo
+      ? activeTab === "withdraw"
+      : type === "sell";
+    if (isSellMode && holdingsSummary) {
+      return holdingsSummary.totalQuantity || 0;
+    }
+
+    if (balance && currentPrice > 0) {
+      const maxUSD = balance * 0.95;
+      return maxUSD / currentPrice;
+    }
+
+    return 0;
+  }, [
+    shouldShowHoldingsInfo,
+    activeTab,
+    type,
+    holdingsSummary,
+    balance,
+    currentPrice,
+  ]);
+
+  const shouldShowSellAll = useMemo(() => {
+    const isSellMode = shouldShowHoldingsInfo
+      ? activeTab === "withdraw"
+      : type === "sell";
+    return isSellMode && holdingsSummary && holdingsSummary.totalQuantity > 0;
+  }, [holdingsSummary, shouldShowHoldingsInfo, activeTab, type]);
+
+  useEffect(() => {
+    if (show && coin) {
+      setUsdAmount("");
+      setCoinAmount("");
+      setSlippage(1.0);
+      setIsSubmitting(false);
+      setIsVisible(false);
+
+      setTimeout(() => setIsVisible(true), 10);
+
+      if (shouldShowHoldingsInfo) {
+        setActiveTab("details");
+      } else {
+        setActiveTab(type === "buy" ? "deposit" : "withdraw");
+      }
+
+      const price =
+        coin.current_price ||
+        coin.currentPrice ||
+        coin.coinPriceUSD ||
+        coin.market_data?.current_price?.usd ||
+        0;
+      setCurrentPrice(price);
+    }
+  }, [show, coin, type, shouldShowHoldingsInfo]);
+
+  const handleUsdAmountChange = (e) => {
+    const value = e.target.value;
+    setUsdAmount(value);
+
+    if (value && currentPrice > 0) {
+      const amount = parseFloat(value);
+      if (!isNaN(amount) && amount > 0) {
+        const calculatedCoins = amount / currentPrice;
+        setCoinAmount(calculatedCoins.toFixed(8));
+      } else {
+        setCoinAmount("");
+      }
+    }
+  };
+
+  const handleCoinAmountChange = (e) => {
+    const value = e.target.value;
+    setCoinAmount(value);
+
+    if (value && currentPrice > 0) {
+      const coins = parseFloat(value);
+      if (!isNaN(coins) && coins > 0) {
+        const calculatedUSD = coins * currentPrice;
+        setUsdAmount(calculatedUSD.toFixed(2));
+      } else {
+        setUsdAmount("");
+      }
+    }
+  };
+
+  const setMaxAmount = () => {
+    const maxCoins = maxAvailable;
+    if (maxCoins > 0) {
+      setCoinAmount(maxCoins.toFixed(8));
+      const calculatedUSD = maxCoins * currentPrice;
+      setUsdAmount(calculatedUSD.toFixed(2));
+
+      const isSellMode = shouldShowHoldingsInfo
+        ? activeTab === "withdraw"
+        : type === "sell";
+      if (isSellMode) {
+        toast.info(
+          `Set to maximum: ${maxCoins.toFixed(6)} ${coin.symbol?.toUpperCase()}`
+        );
+      }
+    }
+  };
+
+  const handleSellAll = () => {
+    if (holdingsSummary && holdingsSummary.totalQuantity > 0) {
+      const totalQuantity = holdingsSummary.totalQuantity;
+      setCoinAmount(totalQuantity.toFixed(8));
+      const calculatedUSD = totalQuantity * currentPrice;
+      setUsdAmount(calculatedUSD.toFixed(2));
+
+      toast.success(
+        `Filled with entire holdings: ${totalQuantity.toFixed(6)} ${(
+          coin.symbol || coin.coinSymbol
+        )?.toUpperCase()}`
+      );
+    } else {
+      toast.error("You don't have any holdings to sell");
+    }
+  };
+
+  const calculateTotal = useMemo(() => {
+    if (!usdAmount) return 0;
+    const amount = parseFloat(usdAmount);
+    return amount.toFixed(2);
+  }, [usdAmount]);
 
   const handleTradeSubmit = useCallback(
     async (tradeData) => {
@@ -19,173 +243,104 @@ function TradeModal({ show, onClose, coin, type = "buy" }) {
         return;
       }
 
-      const { type, symbol, usdAmount, coinAmount, fees, total, coinData } =
-        tradeData;
+      const { type, symbol, coinAmount, total, coinData } = tradeData;
 
       try {
         if (type === "buy") {
-
           if (!coinData) {
             throw new Error("Coin data not found");
           }
 
-          // Prepare purchase data for backend
+          const cryptocurrencyId = coinData.coinId || coinData.id;
+
           const purchaseData = {
             user_id: user.id,
-            coin_id: coinData.id,
-            coin_name: coinData.name,
-            coin_symbol: coinData.symbol,
-            coin_price_usd: coinData.current_price,
+            coin_id: cryptocurrencyId,
+            coin_name: coinData.name || coinData.coinName,
+            coin_symbol: coinData.symbol || coinData.coinSymbol,
+            coin_price_usd: currentPrice,
             quantity: parseFloat(coinAmount),
             total_cost: parseFloat(total),
-            fees: parseFloat(fees),
+            fees: 0,
             image: coinData.image,
           };
 
-          // console.log("📤 Sending purchase data to backend:", purchaseData);
-
-          // Call the actual purchase API
           const result = await addPurchase(purchaseData);
-
-          // console.log("✅ Backend purchase response:", result);
-
           if (result.success) {
             toast.success(
-              `Buy order executed! Bought ${coinAmount} ${symbol.toUpperCase()} for $${usdAmount}`,
-              {
-                icon: "✅",
-                style: {
-                  background: "#111827",
-                  color: "#22c55e",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  padding: "12px 16px",
-                  borderRadius: "8px",
-                },
-              }
+              `✅ Successfully bought ${parseFloat(coinAmount).toFixed(
+                6
+              )} ${symbol.toUpperCase()}`
             );
           } else {
             throw new Error(result.error || "Purchase failed");
           }
         } else {
-
           if (!coinData) {
             throw new Error("Coin data not found");
           }
 
+          const cryptocurrencyId = coinData.coinId || coinData.id;
+
           const sellData = {
             user_id: user.id,
-            coin_id: coinData.id,
+            coin_id: cryptocurrencyId,
             quantity: parseFloat(coinAmount),
-            current_price: coinData.current_price,
+            current_price: parseFloat(currentPrice),
           };
 
-          // console.log("📤 Sending sell data to backend:", sellData);
-
           const result = await sellCoins(sellData);
-
-          // console.log("✅ Backend sell response:", result);
-
           if (result.success) {
             toast.success(
-              `Sell order executed! Sold ${coinAmount} ${symbol.toUpperCase()} for $${usdAmount}`,
-              {
-                icon: "✅",
-                style: {
-                  background: "#111827",
-                  color: "#ef4444",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  padding: "12px 16px",
-                  borderRadius: "8px",
-                },
-              }
+              `✅ Successfully sold ${parseFloat(coinAmount).toFixed(
+                6
+              )} ${symbol.toUpperCase()} for $${result.saleAmount?.toFixed(2)}`
             );
           } else {
             throw new Error(result.error || "Sell failed");
           }
         }
-      } catch (error) {
-        console.error("❌ Trade execution error:", error);
-        console.error(
-          "❌ Error details:",
-          error.response?.data || error.message
-        );
 
-        toast.error(
-          error.message ||
-            `${type === "buy" ? "Purchase" : "Sale"} failed. Please try again.`
-        );
+        let retryCount = 0;
+        const maxRetries = 3;
+        const refreshBalanceWithRetry = async () => {
+          try {
+            const newBalance = await refreshBalance();
+            return newBalance;
+          } catch (error) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              return refreshBalanceWithRetry();
+            } else {
+              throw error;
+            }
+          }
+        };
+
+        await refreshBalanceWithRetry();
+
+        if (typeof refreshPurchasedCoins === "function") {
+          try {
+            await refreshPurchasedCoins();
+          } catch (purchaseError) {
+            console.error("Error refreshing purchased coins:", purchaseError);
+          }
+        }
+      } catch (error) {
+        console.error("Trade execution error:", error);
+        throw error;
       }
     },
-    [user, addPurchase, sellCoins]
+    [
+      user,
+      addPurchase,
+      sellCoins,
+      currentPrice,
+      refreshBalance,
+      refreshPurchasedCoins,
+    ]
   );
-
-  // Reset form when modal opens/closes or coin changes
-  useEffect(() => {
-    if (show) {
-      setUsdAmount("");
-      setCoinAmount("");
-      setSlippage(1.0);
-      setIsSubmitting(false);
-    }
-  }, [show, coin]);
-
-  // Handle USD amount change
-  const handleUsdAmountChange = (e) => {
-    const value = e.target.value;
-    setUsdAmount(value);
-
-    if (value && coin?.current_price) {
-      const amount = parseFloat(value);
-      if (!isNaN(amount) && amount > 0) {
-        const calculatedCoins = amount / coin.current_price;
-        setCoinAmount(calculatedCoins.toFixed(8));
-      } else {
-        setCoinAmount("");
-      }
-    }
-  };
-
-  // Handle coin amount change
-  const handleCoinAmountChange = (e) => {
-    const value = e.target.value;
-    setCoinAmount(value);
-
-    if (value && coin?.current_price) {
-      const coins = parseFloat(value);
-      if (!isNaN(coins) && coins > 0) {
-        const calculatedUSD = coins * coin.current_price;
-        setUsdAmount(calculatedUSD.toFixed(2));
-      } else {
-        setUsdAmount("");
-      }
-    }
-  };
-
-  // Calculate trading fees (mock calculation)
-  const calculateFees = useMemo(() => {
-    if (!usdAmount) return { amount: 0, percentage: 0.1 };
-    const amount = parseFloat(usdAmount);
-    const fee = amount * 0.001; // 0.1% trading fee
-    return {
-      amount: fee.toFixed(2),
-      percentage: 0.1,
-    };
-  }, [usdAmount]);
-
-  // Calculate total cost/earnings
-  const calculateTotal = useMemo(() => {
-    if (!usdAmount) return 0;
-    const amount = parseFloat(usdAmount);
-    const fee = calculateFees.amount;
-
-    if (type === "buy") {
-      return (amount + parseFloat(fee)).toFixed(2);
-    } else {
-      return (amount - parseFloat(fee)).toFixed(2);
-    }
-  }, [usdAmount, calculateFees, type]);
 
   const handleSubmit = async () => {
     if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
@@ -193,22 +348,79 @@ function TradeModal({ show, onClose, coin, type = "buy" }) {
       return;
     }
 
+    const isSellMode = shouldShowHoldingsInfo
+      ? activeTab === "withdraw"
+      : type === "sell";
+    if (isSellMode) {
+      const quantity = parseFloat(coinAmount);
+      const availableQuantity = holdingsSummary?.totalQuantity || 0;
+
+      if (quantity <= 0) {
+        toast.error("Please enter a valid amount to sell");
+        return;
+      }
+
+      if (quantity > availableQuantity) {
+        toast.error(
+          `You only have ${availableQuantity.toFixed(6)} ${(
+            coin.symbol || coin.coinSymbol
+          )?.toUpperCase()} available`
+        );
+        return;
+      }
+
+      if (quantity < 0.000001) {
+        toast.error("Minimum sell amount is 0.000001");
+        return;
+      }
+
+      if (!holdingsSummary || availableQuantity === 0) {
+        toast.error(
+          "No holdings found for this coin. Please refresh and try again."
+        );
+        return;
+      }
+    }
+
+    const isBuyMode = shouldShowHoldingsInfo
+      ? activeTab === "deposit"
+      : type === "buy";
+    if (isBuyMode) {
+      const quantity = parseFloat(coinAmount);
+      if (quantity > maxAvailable) {
+        toast.error("Insufficient balance for this purchase");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
+
     try {
+      const tradeType = shouldShowHoldingsInfo
+        ? activeTab === "deposit"
+          ? "buy"
+          : "sell"
+        : type;
+
       await handleTradeSubmit({
-        type,
-        coin: coin.name,
-        symbol: coin.symbol,
+        type: tradeType,
+        coin: coin.name || coin.coinName,
+        symbol: coin.symbol || coin.coinSymbol,
         usdAmount: parseFloat(usdAmount),
         coinAmount: parseFloat(coinAmount),
         slippage,
-        fees: calculateFees.amount,
         total: parseFloat(calculateTotal),
-        coinData: coin
+        coinData: coin,
       });
-      onClose();
+
+      handleClose();
     } catch (error) {
       console.error("Trade error:", error);
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Trade failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -216,150 +428,504 @@ function TradeModal({ show, onClose, coin, type = "buy" }) {
 
   if (!show || !coin) return null;
 
-  const isBuy = type === "buy";
-  const buttonColor = isBuy
-    ? "from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-    : "from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700";
+  const symbol = coin.symbol?.toUpperCase() || coin.coinSymbol?.toUpperCase();
+  const coinName = coin.name || coin.coinName;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm fade-in">
-      <div className="bg-[#111827] border border-gray-700 rounded-2xl w-full max-w-md mx-4 shadow-2xl transform transition-all duration-300 scale-100">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={handleBackdropClick}
+    >
+      <div className={`bg-gray-900 border border-gray-700 rounded-xl w-full max-w-md mx-4 shadow-xl max-h-[90vh] overflow-hidden transition-all duration-300 ${
+        isVisible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4"
+      }`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div
+          className={`relative flex items-center justify-between p-4 border-b transition-all duration-300 ${
+            shouldShowHoldingsInfo && activeTab === "details"
+              ? "border-cyan-500/50 bg-cyan-900/20"
+              : isBuyOperation
+              ? "border-green-500/50 bg-green-900/20"
+              : "border-red-500/50 bg-red-900/20"
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div
-              className={`p-2 rounded-lg ${
-                isBuy ? "bg-green-500/20" : "bg-red-500/20"
-              }`}
-            >
-              <FaExchangeAlt
-                className={isBuy ? "text-green-400" : "text-red-400"}
+            <div className="relative group">
+              <img
+                src={coin.image}
+                alt={coinName}
+                className="w-10 h-10 rounded-full border-2 border-gray-600 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
               />
+              <div
+                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-900 transition-all duration-300 ${
+                  shouldShowHoldingsInfo && activeTab === "details"
+                    ? "bg-cyan-500 animate-pulse"
+                    : isBuyOperation
+                    ? "bg-green-500 animate-pulse"
+                    : "bg-red-500 animate-pulse"
+                }`}
+              ></div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                {isBuy ? "Buy" : "Sell"} {coin.symbol?.toUpperCase()}
+            <div className="fade-in">
+              <h2 className="text-lg font-bold text-white">
+                {shouldShowHoldingsInfo ? (
+                  <>
+                    {coinName}
+                    <span className="text-cyan-400 ml-1 text-sm">
+                      ({symbol})
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={
+                        isBuyOperation ? "text-green-400" : "text-red-400"
+                      }
+                    >
+                      {isBuyOperation ? "Deposit" : "Withdraw"}
+                    </span>{" "}
+                    {symbol}
+                  </>
+                )}
               </h2>
-              <p className="text-gray-400 text-sm">
-                Current Price: ${coin.current_price?.toLocaleString() || "0"}
+              <p className="text-gray-300 text-xs flex items-center gap-1 mt-1">
+                <FaMoneyBillWave className="text-yellow-400 " />
+                <span className="font-semibold">
+                  $
+                  {currentPrice.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: currentPrice < 1 ? 6 : 2,
+                  })}
+                </span>
               </p>
             </div>
           </div>
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700 rounded-lg"
+            onClick={handleClose}
+            className="text-gray-400 hover:text-white transition-all duration-200 p-1 hover:bg-red-500/20 rounded-lg hover:rotate-90 transform group"
           >
-            <FaTimes className="text-lg" />
+            <FaTimes className="text-lg group-hover:scale-110 transition-transform" />
           </button>
         </div>
 
+        {/* Navigation Tabs */}
+        {shouldShowHoldingsInfo && (
+          <div className="border-b border-gray-700 bg-gray-800/50">
+            <div className="flex">
+              {[
+                {
+                  key: "details",
+                  label: "Holdings",
+                  icon: FaCoins,
+                  color: "cyan",
+                },
+                {
+                  key: "deposit",
+                  label: "Deposit",
+                  icon: FaArrowUp,
+                  color: "green",
+                },
+                {
+                  key: "withdraw",
+                  label: "Withdraw",
+                  icon: FaArrowDown,
+                  color: "red",
+                },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex-1 py-3 px-2 text-sm font-bold transition-all relative group ${
+                      activeTab === tab.key
+                        ? tab.key === "details"
+                          ? "text-cyan-400 bg-cyan-500/10"
+                          : tab.key === "deposit"
+                          ? "text-green-400 bg-green-500/10"
+                          : "text-red-400 bg-red-500/10"
+                        : "text-gray-400 hover:text-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <Icon className={`text-sm transition-all duration-300 ${
+                        activeTab === tab.key ? "animate-bounce" : "group-hover:scale-110 group-hover:-translate-y-0.5"
+                      }`} />
+                      {tab.label}
+                    </div>
+                    {activeTab === tab.key && (
+                      <div
+                        className={`absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-300 ${
+                          tab.key === "details"
+                            ? "bg-cyan-400"
+                            : tab.key === "deposit"
+                            ? "bg-green-400"
+                            : "bg-red-400"
+                        }`}
+                      ></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Content */}
-        <div className="p-6 space-y-4">
-          {/* Amount Inputs */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Amount (USD)
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={usdAmount}
-                onChange={handleUsdAmountChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
+        <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {/* Holdings Summary */}
+          {shouldShowHoldingsInfo && holdingsSummary && (
+            <div className={`mb-4 p-4 rounded-lg border glow-fade transition-all duration-300 ${
+              activeTab === "details" 
+                ? "bg-cyan-500/10 border-cyan-500/30" 
+                : "bg-gray-800/50 border-gray-600"
+            }`}>
+              <h3 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+                <FaCoins className="text-yellow-400 " />
+                Holdings Summary
+              </h3>
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Amount ({coin.symbol?.toUpperCase()})
-              </label>
-              <input
-                type="number"
-                placeholder="0.00000000"
-                value={coinAmount}
-                onChange={handleCoinAmountChange}
-                step="0.00000001"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  { label: "Quantity", value: holdingsSummary.totalQuantity.toFixed(6), suffix: symbol },
+                  { label: "Current Value", value: `$${holdingsSummary.currentValue.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, suffix: "USD" },
+                  { label: "Avg. Price", value: `$${holdingsSummary.averagePrice.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: holdingsSummary.averagePrice < 1 ? 6 : 2})}`, suffix: "" },
+                  { label: "Investment", value: `$${holdingsSummary.remainingInvestment.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, suffix: "" }
+                ].map((item, index) => (
+                  <div key={index} className="bg-gray-800/50 rounded-lg p-2 border border-gray-700 fade-in hover:scale-105 transition-all duration-300" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="text-xs text-gray-400 mb-1">{item.label}</div>
+                    <div className="text-sm font-bold text-white">{item.value}</div>
+                    {item.suffix && <div className="text-xs text-cyan-400">{item.suffix}</div>}
+                  </div>
+                ))}
+              </div>
 
-          {/* Trading Details */}
-          <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-600 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Price</span>
-              <span className="text-white font-semibold">
-                ${coin.current_price?.toLocaleString() || "0"}
-              </span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">
-                Trading Fee ({calculateFees.percentage}%)
-              </span>
-              <span className="text-yellow-400">${calculateFees.amount}</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Slippage Tolerance</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={slippage}
-                  onChange={(e) =>
-                    setSlippage(parseFloat(e.target.value) || 1.0)
-                  }
-                  step="0.1"
-                  min="0.1"
-                  max="5"
-                  className="w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm text-center focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                />
-                <span className="text-gray-400 text-sm">%</span>
+              {/* Profit/Loss Section */}
+              <div
+                className={`p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                  holdingsSummary.profitLoss >= 0
+                    ? "bg-green-500/10 border-green-500/30"
+                    : "bg-red-500/10 border-red-500/30"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-300">
+                    Total P&L
+                  </span>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      holdingsSummary.profitLoss >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {holdingsSummary.profitLoss >= 0 ? (
+                      <FaArrowUp className="text-sm animate-bounce" />
+                    ) : (
+                      <FaArrowDown className="text-sm animate-bounce" />
+                    )}
+                    <span className="text-base font-bold">
+                      $
+                      {Math.abs(holdingsSummary.profitLoss).toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )}
+                    </span>
+                    <span
+                      className={`text-xs font-bold px-2 py-1 rounded-full ${
+                        holdingsSummary.profitLoss >= 0
+                          ? "bg-green-500/20 text-green-300"
+                          : "bg-red-500/20 text-red-300"
+                      }`}
+                    >
+                      {holdingsSummary.profitLoss >= 0 ? "+" : ""}
+                      {holdingsSummary.profitLossPercentage.toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
 
-            <div className="border-t border-gray-600 pt-3">
-              <div className="flex justify-between text-base font-semibold">
-                <span className="text-gray-300">
-                  Total {isBuy ? "Cost" : "Earnings"}
+          {/* Transaction Form */}
+          {(!shouldShowHoldingsInfo || activeTab !== "details") && (
+            <div className="space-y-4 fade-in">
+              {/* Amount Inputs */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="glow-fade" style={{animationDelay: "100ms"}}>
+                  <label className="flex text-xs font-semibold text-gray-300 mb-2 items-center gap-1">
+                    <FaCoins className="text-yellow-400" />
+                    Amount ({symbol})
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="0.000000"
+                      value={coinAmount}
+                      onChange={handleCoinAmountChange}
+                      step="0.000001"
+                      min="0.000001"
+                      className="w-full bg-gray-800 border border-gray-600 rounded-lg pl-3 pr-20 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm font-semibold transition-all duration-300"
+                    />
+                    <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex gap-1">
+                      {shouldShowSellAll && (
+                        <button
+                          onClick={handleSellAll}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 flex items-center gap-1 hover:scale-110 group"
+                          title="Sell All Holdings"
+                        >
+                          <FaCoins className="text-xs group-hover:rotate-12 transition-transform" />
+                          ALL
+                        </button>
+                      )}
+                      <button
+                        onClick={setMaxAmount}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 hover:scale-110 group"
+                      >
+                        <span className="group-hover:scale-110 inline-block transition-transform">MAX</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="glow-fade" style={{animationDelay: "200ms"}}>
+                  <label className="flex text-xs font-semibold text-gray-300 mb-2 items-center gap-1">
+                    <FaMoneyBillWave className="text-green-400" />
+                    Amount (USD)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={usdAmount}
+                    onChange={handleUsdAmountChange}
+                    className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm font-semibold transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Available Balance Info */}
+              <div className="flex justify-between items-center text-xs bg-gray-800/50 rounded-lg px-3 py-2 border border-gray-600 glow-fade hover:border-cyan-500/50 transition-all duration-300" style={{animationDelay: "300ms"}}>
+                <div className="flex items-center gap-1">
+                  <FaInfoCircle className="text-cyan-400 text-xs animate-pulse" />
+                  <span className="text-gray-300">
+                    Available:{" "}
+                    <span className="text-white font-bold">
+                      {maxAvailable.toFixed(6)}
+                    </span>{" "}
+                    {symbol}
+                  </span>
+                </div>
+                <span className="text-gray-400">
+                  ≈{" "}
+                  <span className="text-white font-bold">
+                    $
+                    {(
+                      parseFloat(coinAmount || 0) * currentPrice
+                    ).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                 </span>
-                <span className={isBuy ? "text-green-400" : "text-red-400"}>
-                  ${calculateTotal}
+              </div>
+
+              {/* Trading Details */}
+              <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 space-y-3 glow-fade hover:border-cyan-500/50 transition-all duration-300" style={{animationDelay: "400ms"}}>
+                <h4 className="text-sm font-bold text-gray-200 mb-2 flex items-center gap-2">
+                  <FaExchangeAlt className="text-cyan-400 animate-pulse" />
+                  Transaction Details
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">
+                      Price per {symbol}
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      $
+                      {currentPrice.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: currentPrice < 1 ? 6 : 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">
+                      Slippage Tolerance
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={slippage}
+                        onChange={(e) =>
+                          setSlippage(parseFloat(e.target.value) || 1.0)
+                        }
+                        step="0.1"
+                        min="0.1"
+                        max="5"
+                        className="w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-xs text-center focus:outline-none focus:ring-2 focus:ring-cyan-500 font-semibold transition-all duration-300"
+                      />
+                      <span className="text-gray-400 text-xs">%</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-600 pt-2 mt-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-gray-200">
+                        Total {isBuyOperation ? "Cost" : "You Receive"}
+                      </span>
+                      <span
+                        className={`text-lg font-bold ${
+                          isBuyOperation ? "text-green-400" : "text-red-400"
+                        }`}
+                      >
+                        ${calculateTotal}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button
+  onClick={handleSubmit}
+  disabled={
+    !usdAmount ||
+    parseFloat(usdAmount) <= 0 ||
+    parseFloat(coinAmount) <= 0 ||
+    isSubmitting
+  }
+  className={`w-full py-2 px-4 font-bold text-sm rounded-lg 
+              transition-all duration-300 
+              disabled:opacity-50 disabled:cursor-not-allowed 
+              flex items-center justify-center gap-2 
+              hover:scale-105 group glow-fade
+              ${
+                isBuyOperation
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
+  style={{ animationDelay: "500ms" }}
+>
+  {isSubmitting ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      <span>Processing...</span>
+    </>
+  ) : (
+    <>
+      <FaExchangeAlt
+        className={`text-sm transition-all duration-300 ${
+          isBuyOperation ? "group-hover:rotate-180" : "group-hover:-rotate-180"
+        }`}
+      />
+      <span>{isBuyOperation ? "Deposit" : "Withdraw"} {symbol}</span>
+
+      {isBuyOperation ? (
+        <FaArrowUp className="text-sm transition-transform duration-300 group-hover:-translate-y-1" />
+      ) : (
+        <FaArrowDown className="text-sm transition-transform duration-300 group-hover:translate-y-1" />
+      )}
+    </>
+  )}
+</button>
+
+
+              {/* Help Text */}
+              <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-800/30 rounded px-2 py-1 border border-gray-600 glow-fade hover:border-cyan-500/50 transition-all duration-300" style={{animationDelay: "600ms"}}>
+                <FaInfoCircle className="text-cyan-400 flex-shrink-0 text-xs animate-pulse" />
+                <span>
+                  {isBuyOperation
+                    ? "You'll receive the coins instantly after purchase confirmation."
+                    : "Funds will be credited to your wallet immediately after sale."}
                 </span>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 bg-transparent text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded-xl transition-all duration-200 hover:bg-gray-700/50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={
-                !usdAmount || parseFloat(usdAmount) <= 0 || isSubmitting
-              }
-              className={`flex-1 px-4 py-3 bg-gradient-to-r ${buttonColor} text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <FaExchangeAlt className="text-sm" />
-                  {isBuy ? "Buy" : "Sell"} {coin.symbol?.toUpperCase()}
-                </>
-              )}
-            </button>
+          {/* Quick Actions for Details Tab */}
+          {shouldShowHoldingsInfo && activeTab === "details" && (
+            <div className="space-y-3">
+              <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 glow-fade" style={{animationDelay: "200ms"}}>
+  <h3 className="text-sm font-bold text-gray-200 mb-3 flex items-center gap-2">
+    <FaWallet className="text-green-400 animate-pulse" />
+    Quick Actions
+  </h3>
+
+  <div className="grid grid-cols-2 gap-3">
+    <button
+      onClick={() => setActiveTab("deposit")}
+      className="py-2 px-3 bg-green-600 hover:bg-green-700 text-white 
+                 rounded-lg transition-all duration-300 font-bold 
+                 flex flex-col items-center gap-1 
+                 hover:scale-105 group"
+    >
+      <FaArrowUp className="text-lg group-hover:-translate-y-1 transition-transform duration-300" />
+      <span className="text-xs">Deposit</span>
+    </button>
+
+    <button
+      onClick={() => setActiveTab("withdraw")}
+      className="py-2 px-3 bg-red-600 hover:bg-red-700 text-white 
+                 rounded-lg transition-all duration-300 font-bold 
+                 flex flex-col items-center gap-1 
+                 hover:scale-105 group"
+    >
+      <FaArrowDown className="text-lg group-hover:translate-y-1 transition-transform duration-300" />
+      <span className="text-xs">Withdraw</span>
+    </button>
+  </div>
+</div>
+
+
+              {/* Market Info Card */}
+              <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 glow-fade hover:border-cyan-500/50 transition-all duration-300" style={{animationDelay: "300ms"}}>
+                <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                  <FaInfoCircle className="text-cyan-400 animate-pulse" />
+                  <span className="font-semibold">Market Information</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="fade-in" style={{animationDelay: "400ms"}}>
+                    <span className="text-gray-500">Current Price</span>
+                    <div className="text-white font-bold mt-1">
+                      $
+                      {currentPrice.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: currentPrice < 1 ? 6 : 2,
+                      })}
+                    </div>
+                  </div>
+                  <div className="fade-in" style={{animationDelay: "500ms"}}>
+                    <span className="text-gray-500">Your Avg. Price</span>
+                    <div className="text-white font-bold mt-1">
+                      $
+                      {holdingsSummary?.averagePrice.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits:
+                          holdingsSummary?.averagePrice < 1 ? 6 : 2,
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-gray-700 bg-gray-800/50">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1 text-gray-400">
+              <FaInfoCircle className="text-cyan-400 text-xs animate-pulse" />
+              <span>Live prices • Updated every 60s</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping"></div>
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full absolute"></div>
+              <span className="text-green-400 font-bold ml-1">Real-time</span>
+            </div>
           </div>
         </div>
       </div>

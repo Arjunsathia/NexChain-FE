@@ -33,44 +33,35 @@ const sampleNews = [
 
 function NewsSection() {
   return (
-    <div className="mt-10 fade-in" style={{ animationDelay: "0.3s" }}>
-      <h2 className="text-xl font-bold text-white mb-4 fade-in" style={{ animationDelay: "0.4s" }}>
+    <div className="mt-10 fade-in" style={{ animationDelay: "0.1s" }}>
+      <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
         Latest Crypto News
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {sampleNews.map((news, index) => (
           <div
             key={news.id}
-            className="border-gray-700 border rounded-xl overflow-hidden shadow-md fade-in"
-            style={{ animationDelay: `${0.5 + (index * 0.1)}s` }}
+            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden shadow-2xl hover:border-cyan-400/30 transition-all duration-300 group cursor-pointer fade-in"
+            style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
           >
             <img
               src={news.image}
               alt={news.title}
-              className="w-full h-40 object-cover"
+              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="p-4 space-y-2">
-              <h3 className="font-semibold text-sm text-white">{news.title}</h3>
-              {news.length > 0 && (
-                <div className="flex items-center gap-2 text-xs mt-1">
-                  {news.tags.map((idx) => (
-                    <span
-                      key={idx}
-                      className="bg-gray-700 text-white px-2 py-0.5 rounded-full text-xs"
-                    >
-                    </span>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-gray-400">{news.source}</p>
-              <p className="text-xs text-gray-500">{news.time}</p>
+              <h3 className="font-semibold text-sm text-white group-hover:text-cyan-400 transition-colors">{news.title}</h3>
+              <div className="flex items-center justify-between text-xs">
+                <p className="text-cyan-400">{news.source}</p>
+                <p className="text-gray-500">{news.time}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex justify-center mt-6 fade-in" style={{ animationDelay: "0.9s" }}>
-        <button className="bg-gray-700 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-600 transition">
+      <div className="flex justify-center mt-6 fade-in" style={{ animationDelay: "0.7s" }}>
+        <button className="bg-gray-700 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 hover:scale-105">
           See More News
         </button>
       </div>

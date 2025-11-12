@@ -29,12 +29,14 @@ function LearningHub() {
   ];
 
   return (
-    <div className="p-4 lg:p-8 text-white fade-in" style={{ animationDelay: "0.1s" }}>
+    <div className="min-h-screen text-white p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 fade-in" style={{ animationDelay: "0.2s" }}>
-          <h1 className="text-2xl lg:text-3xl font-bold text-cyan-400 mb-2">Learning Hub</h1>
-          <p className="text-base text-gray-400">
+        <div className="mb-8 fade-in" style={{ animationDelay: "0.1s" }}>
+          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            Learning Hub
+          </h1>
+          <p className="text-base text-gray-400 mt-2">
             Beginner's guides to crypto terms and trading
           </p>
         </div>
@@ -45,13 +47,13 @@ function LearningHub() {
             <div
               key={idx}
               className="
-                bg-transparent border border-gray-700 rounded-xl p-5 lg:p-6 shadow-lg 
+                bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 lg:p-6 shadow-2xl 
                 transition-all duration-300 ease-in-out transform 
                 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl 
                 hover:border-cyan-400/30 will-change-transform
                 group cursor-pointer fade-in
               "
-              style={{ animationDelay: `${0.3 + (idx * 0.1)}s` }}
+              style={{ animationDelay: `${0.2 + (idx * 0.1)}s` }}
             >
               <h3 className="text-lg lg:text-xl font-semibold text-white mb-3 group-hover:text-cyan-400 transition-colors">
                 {topic.title}
@@ -70,12 +72,12 @@ function LearningHub() {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-8 lg:mt-12 text-center fade-in" style={{ animationDelay: "0.9s" }}>
-          <div className="bg-transparent border border-gray-700 rounded-xl p-6 lg:p-8">
-            <h3 className="text-xl font-bold text-cyan-400 mb-3">
+        <div className="mt-8 lg:mt-12 text-center fade-in" style={{ animationDelay: "0.8s" }}>
+          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 lg:p-8 shadow-2xl">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-3">
               Start Your Crypto Journey
             </h3>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-400 max-w-2xl mx-auto text-sm lg:text-base">
               Explore our comprehensive learning resources designed to help you understand 
               cryptocurrency trading, blockchain technology, and investment strategies.
             </p>
