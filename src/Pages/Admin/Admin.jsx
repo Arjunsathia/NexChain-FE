@@ -22,26 +22,28 @@ function Admin() {
   }, [isMobileMenuOpen]);
 
   return (
-    <div className="min-h-screen text-white flex">
+    <div className="min-h-screen  text-white flex font-sans selection:bg-cyan-500/30">
       {/* Show Sidebar only on desktop - Fixed position */}
       {isDesktop && (
-        <div className="sticky top-0 h-screen overflow-y-auto flex-shrink-0">
+        <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar />
         </div>
       )}
       
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen relative">
         {/* Show MobileNavbar only on small and medium screens */}
         {!isDesktop && (
-          <MobileNavbar
-            isOpen={isMobileMenuOpen} 
-            onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-          />
+          <div className="sticky top-0 z-50">
+            <MobileNavbar
+              isOpen={isMobileMenuOpen} 
+              onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            />
+          </div>
         )}
         
         {/* Page content - Scrollable area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 w-full max-w-[1600px] mx-auto">
           <Outlet />
         </div>
       </div>

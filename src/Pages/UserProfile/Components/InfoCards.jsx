@@ -1,15 +1,47 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { FaWallet, FaCoins, FaChartLine, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
-// import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { useLivePortfolio } from '@/hooks/useLivePortfolio';
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
 function InfoCards() {
+  const isLight = useThemeCheck();
   const { balance } = useWalletContext();
-  // const { purchasedCoins } = usePurchasedCoins();
   const { watchlist } = useWatchlist();
   const { groupedHoldings, portfolioSummary } = useLivePortfolio();
+
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+
+    bgCard: isLight ? "bg-white border-gray-300 shadow-md" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
+    textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
+    
+    textGreen: isLight ? "text-green-700" : "text-green-400",
+    textRed: isLight ? "text-red-700" : "text-red-400",
+    textGray: isLight ? "text-gray-700" : "text-gray-400",
+
+  }), [isLight]);
+
 
   const portfolioStats = useMemo(() => {
     // Use groupedHoldings from useLivePortfolio for accurate count
@@ -92,8 +124,8 @@ function InfoCards() {
   };
 
   const getTrendColor = (trend) => {
-    if (trend === null) return "text-gray-400";
-    return trend >= 0 ? "text-green-400" : "text-red-400";
+    if (trend === null) return TC.textSecondary;
+    return trend >= 0 ? TC.textGreen : TC.textRed;
   };
 
   const getTrendIcon = (trend) => {
@@ -111,7 +143,7 @@ function InfoCards() {
           <span>{`${trend >= 0 ? '+' : ''}${Math.abs(trend).toFixed(2)}%`}</span>
         </div>
         {trendValue !== undefined && (
-          <div className="text-xs opacity-80">
+          <div className={`text-xs opacity-80 ${TC.textSecondary}`}>
             {trendValue >= 0 ? '+' : '-'}{formatTrendValue(trendValue)}
           </div>
         )}
@@ -129,7 +161,7 @@ function InfoCards() {
         return (
           <div
             key={idx}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 shadow-xl rounded-xl p-4 transition-all duration-300 hover:scale-105 group cursor-pointer fade-in"
+            className={`${TC.bgCard} rounded-xl p-4 transition-all duration-300 hover:scale-105 group cursor-pointer fade-in`}
             style={{ animationDelay: `${0.1 + idx * 0.1}s` }}
           >
             <div className="flex items-center justify-between mb-3">
@@ -143,14 +175,14 @@ function InfoCards() {
               )}
             </div>
             
-            <p className="text-lg font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+            <p className={`text-lg font-bold mb-1 transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
               {formatValue(card.value, card.format)}
             </p>
             
-            <p className="text-sm text-gray-400 font-medium">
+            <p className={`text-sm font-medium ${TC.textSecondary}`}>
               {card.title}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className={`text-xs mt-1 ${TC.textTertiary}`}>
               {card.description}
             </p>
           </div>

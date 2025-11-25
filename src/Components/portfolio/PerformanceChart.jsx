@@ -1,37 +1,69 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area } from "recharts";
-import { useLivePortfolio } from '@/hooks/useLivePortfolio';
-import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
 import { FaArrowUp, FaArrowDown, FaChartLine } from "react-icons/fa";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-const PerformanceChart = () => {
-  const { balance } = useWalletContext();
-  const { portfolioSummary, loading } = useLivePortfolio();
+const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [timeRange, setTimeRange] = useState('7d');
+
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    bgContainer: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    bgRangeButtonActive: isLight ? "bg-cyan-600 text-white" : "bg-cyan-600 text-white",
+    bgRangeButtonDefault: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-300",
+    bgRangeContainer: isLight ? "bg-gray-100 border-gray-300" : "bg-gray-800 border-gray-700",
+    bgStatCard: isLight ? "bg-gray-50/50 border-gray-200" : "bg-gray-800/30 border-gray-700",
+    bgPillPositive: isLight ? "bg-green-100 border-green-300" : "bg-green-500/10 border-green-500/30",
+    bgPillNegative: isLight ? "bg-red-100 border-red-300" : "bg-red-500/10 border-red-500/30",
+    textPositive: isLight ? "text-green-700" : "text-green-400",
+    textNegative: isLight ? "text-red-700" : "text-red-400",
+    chartStroke: isLight ? "#9CA3AF" : "#9CA3AF",
+    chartGrid: isLight ? "#e5e7eb" : "#374151",
+    tooltipBg: isLight ? "bg-white border-gray-300" : "bg-gray-800 border-gray-700",
+    tooltipTextPrimary: isLight ? "text-gray-900" : "text-white",
+    tooltipTextSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
+  }), [isLight]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  // Calculate current metrics from props
   const currentMetrics = useMemo(() => {
-    const currentValue = (portfolioSummary?.totalCurrentValue || 0) + (balance || 0);
-    const totalInvestment = portfolioSummary?.remainingInvestment || 0;
-    const profitLoss = portfolioSummary?.totalProfitLoss || 0;
-    const profitLossPercentage = portfolioSummary?.totalProfitLossPercentage || 0;
+    let totalCurrentValue = 0;
+    let totalInvestment = 0;
+
+    if (groupedHoldings && groupedHoldings.length > 0) {
+      groupedHoldings.forEach(coin => {
+        const currentPrice = coin.currentPrice || 0;
+        const currentValue = (coin.totalQuantity || 0) * currentPrice;
+        const remainingInvestment = coin.remainingInvestment || 0;
+
+        totalCurrentValue += currentValue;
+        totalInvestment += remainingInvestment;
+      });
+    }
+
+    const portfolioValue = totalCurrentValue + (balance || 0);
+    const profitLoss = totalCurrentValue - totalInvestment;
+    const profitLossPercentage = totalInvestment > 0 ? (profitLoss / totalInvestment) * 100 : 0;
 
     return { 
-      currentValue, 
-      totalInvestment, 
-      profitLoss, 
-      profitLossPercentage,
+      currentValue: portfolioValue, totalInvestment, profitLoss, profitLossPercentage,
       investedValue: totalInvestment
     };
-  }, [portfolioSummary, balance]);
+  }, [groupedHoldings, balance]);
 
+  // Generate performance data (Simulated for now as we don't have historical DB data)
   const performanceData = useMemo(() => {
-    const { totalInvestment, profitLossPercentage } = currentMetrics;
+    const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
     
     if (totalInvestment === 0) return [];
 
@@ -39,6 +71,12 @@ const PerformanceChart = () => {
     const data = [];
     
     const startingValue = totalInvestment;
+    const currentValue = startingValue + profitLoss;
+    
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
     
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
@@ -47,19 +85,22 @@ const PerformanceChart = () => {
       let value, dailyProfitLoss, dailyProfitLossPercentage;
 
       if (i === 0) {
-        value = startingValue + currentMetrics.profitLoss;
-        dailyProfitLoss = currentMetrics.profitLoss;
+        value = currentValue;
+        dailyProfitLoss = profitLoss;
         dailyProfitLossPercentage = startingValue > 0 ? (dailyProfitLoss / startingValue) * 100 : 0;
       } else {
-        const volatility = 0.02;
         const progress = (days - i) / days;
         const targetChange = (profitLossPercentage / 100) * progress;
-        const randomChange = (Math.random() - 0.5) * volatility;
+        
+        const volatility = 0.02;
+        const seed = i * 12345 + days * 67890;
+        const randomChange = (seededRandom(seed) - 0.5) * volatility;
         const totalChange = targetChange + randomChange;
         
         value = startingValue * (1 + totalChange);
         dailyProfitLoss = value - startingValue;
         dailyProfitLossPercentage = startingValue > 0 ? (dailyProfitLoss / startingValue) * 100 : 0;
+        
         value = Math.max(value, startingValue * 0.1);
       }
 
@@ -69,7 +110,7 @@ const PerformanceChart = () => {
         profitLoss: dailyProfitLoss,
         profitLossPercentage: dailyProfitLossPercentage,
         investment: startingValue,
-        day: i === 0 ? 'Today' : i === 1 ? 'Yesterday' : null
+        day: i === 0 ? 'Today' : i === 1 ? 'Yesterday' : null,
       });
     }
     
@@ -77,12 +118,7 @@ const PerformanceChart = () => {
   }, [currentMetrics, timeRange]);
 
   const periodReturns = useMemo(() => {
-    if (performanceData.length < 2) return { 
-      '7d': 0, 
-      '30d': 0, 
-      '90d': 0,
-      current: 0
-    };
+    if (performanceData.length < 2) return { '7d': 0, '30d': 0, '90d': 0, current: 0 };
 
     const firstValue = performanceData[0].investment;
     const lastValue = performanceData[performanceData.length - 1].value;
@@ -101,148 +137,143 @@ const PerformanceChart = () => {
     };
   }, [performanceData, timeRange]);
 
-  if (loading) return <LoadingState />;
-  if (currentMetrics.totalInvestment === 0) return <EmptyState isMounted={isMounted} />;
+  if (loading) return (
+    <div className={`rounded-2xl p-6 border ${TC.bgContainer}`}>
+      <Skeleton height={300} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+    </div>
+  );
+
+  if (currentMetrics.totalInvestment === 0) return <EmptyState isMounted={isMounted} isLight={isLight} TC={TC} />;
 
   return (
-    <div className="p-4">
-      <div className={`bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-2xl fade-in ${
-        isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-      }`}>
-        <Header timeRange={timeRange} setTimeRange={setTimeRange} />
-        <StatsGrid 
-          currentMetrics={currentMetrics} 
-          periodReturns={periodReturns}
-          timeRange={timeRange}
-        />
-        <Chart performanceData={performanceData} currentMetrics={currentMetrics} />
-        <Footer periodReturns={periodReturns} />
-      </div>
+    <div className={`rounded-2xl p-6 border transition-all duration-300 ${TC.bgContainer} ${
+      isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+    }`}>
+      <Header 
+        isLight={isLight}
+        timeRange={timeRange} 
+        setTimeRange={setTimeRange} 
+        TC={TC}
+      />
+      <StatsGrid 
+        isLight={isLight}
+        currentMetrics={currentMetrics} 
+        periodReturns={periodReturns}
+        timeRange={timeRange}
+        TC={TC}
+      />
+      <Chart isLight={isLight} performanceData={performanceData} currentMetrics={currentMetrics} TC={TC} />
     </div>
   );
 };
 
-const LoadingState = () => (
-  <div className="p-4">
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 fade-in">
-      <div className="animate-pulse space-y-4">
-        <div className="h-6 bg-gray-700 rounded-lg w-1/2"></div>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="h-16 bg-gray-700 rounded-lg"></div>
-          <div className="h-16 bg-gray-700 rounded-lg"></div>
-          <div className="h-16 bg-gray-700 rounded-lg"></div>
-        </div>
-        <div className="h-48 bg-gray-700 rounded-lg"></div>
-      </div>
-    </div>
-  </div>
-);
-
-const EmptyState = ({ isMounted }) => (
-  <div className="p-4">
-    <div className={`bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-2xl fade-in ${
+const EmptyState = ({ isMounted, isLight, TC }) => {
+  return (
+    <div className={`rounded-2xl p-6 border shadow-sm fade-in ${TC.bgContainer} ${
       isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
     }`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-          <FaChartLine className="text-cyan-400" />
+        <h2 className={`text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2`}>
+          <FaChartLine className="text-cyan-500" />
           Portfolio Performance
         </h2>
       </div>
-      <div className="flex flex-col items-center justify-center text-gray-400 py-12 fade-in">
+      <div className={`flex flex-col items-center justify-center py-12 fade-in ${TC.textSecondary}`}>
         <div className="text-4xl mb-3">📊</div>
-        <p className="text-center text-base">No investment data available</p>
-        <p className="text-sm text-gray-500 mt-2 text-center">Start investing to track your performance</p>
-      </div>
-    </div>
-  </div>
-);
-
-const Header = ({ timeRange, setTimeRange }) => (
-  <div className="flex items-center justify-between mb-4 fade-in">
-    <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-      <FaChartLine className="text-cyan-400" />
-      Investment Performance
-    </h2>
-    <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700 fade-in" style={{ animationDelay: "0.1s" }}>
-      {['7d', '30d', '90d'].map((range) => (
-        <button key={range} onClick={() => setTimeRange(range)} className={`px-3 py-1 text-sm rounded-md transition-all ${
-          timeRange === range ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-300'
-        }`}>
-          {range}
-        </button>
-      ))}
-    </div>
-  </div>
-);
-
-const StatsGrid = ({ currentMetrics, periodReturns, timeRange }) => {
-  const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
-
-  return (
-    <div className="grid grid-cols-3 gap-3 mb-4 fade-in" style={{ animationDelay: "0.15s" }}>
-      <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-3 fade-in" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 bg-cyan-400/20 rounded-lg">
-            <FaChartLine className="text-cyan-400 text-sm" />
-          </div>
-          <p className="text-sm text-gray-400">Total Investment</p>
-        </div>
-        <p className="text-lg font-bold text-cyan-400">
-          ${totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Current: ${currentMetrics.currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </p>
-      </div>
-
-      <div className={`border rounded-lg p-3 fade-in ${
-        profitLoss >= 0 ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'
-      }`} style={{ animationDelay: "0.25s" }}>
-        <div className="flex items-center gap-2 mb-2">
-          {profitLoss >= 0 ? (
-            <FaArrowUp className="text-green-400 text-sm" />
-          ) : (
-            <FaArrowDown className="text-red-400 text-sm" />
-          )}
-          <p className="text-sm text-gray-400">Investment P&L</p>
-        </div>
-        <p className={`text-lg font-bold ${profitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          {profitLoss >= 0 ? '+' : ''}${Math.abs(profitLoss).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </p>
-        <p className={`text-xs ${profitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)
-        </p>
-      </div>
-
-      <div className={`border rounded-lg p-3 fade-in ${
-        periodReturns[timeRange] >= 0 ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'
-      }`} style={{ animationDelay: "0.3s" }}>
-        <div className="flex items-center gap-2 mb-2">
-          {periodReturns[timeRange] >= 0 ? (
-            <FaArrowUp className="text-green-400 text-sm" />
-          ) : (
-            <FaArrowDown className="text-red-400 text-sm" />
-          )}
-          <p className="text-sm text-gray-400">{timeRange.toUpperCase()} Return</p>
-        </div>
-        <p className={`text-lg font-bold ${periodReturns[timeRange] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          {periodReturns[timeRange] >= 0 ? '+' : ''}{periodReturns[timeRange].toFixed(2)}%
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          On ${currentMetrics.totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-        </p>
+        <p className={`text-center text-base ${TC.textPrimary}`}>No investment data available</p>
+        <p className={`text-sm mt-2 text-center ${TC.textSecondary}`}>Start investing to track your performance</p>
       </div>
     </div>
   );
 };
 
-const Chart = ({ performanceData, currentMetrics }) => {
+const Header = ({ isLight, timeRange, setTimeRange, TC }) => {
+  return (
+    <div className="flex items-center justify-between mb-6 fade-in">
+      <div className="flex items-center gap-3">
+        <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
+          <FaChartLine className="text-cyan-500" />
+          Performance
+        </h2>
+      </div>
+      <div className={`flex rounded-lg p-1 border fade-in ${TC.bgRangeContainer}`} style={{ animationDelay: "0.1s" }}>
+        {['7d', '30d', '90d'].map((range) => (
+          <button key={range} onClick={() => setTimeRange(range)} className={`px-3 py-1 text-sm rounded-md transition-all ${
+            timeRange === range ? TC.bgRangeButtonActive : TC.bgRangeButtonDefault
+          }`}>
+            {range}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const StatsGrid = ({ isLight, currentMetrics, periodReturns, timeRange, TC }) => {
+  const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
+  
+  return (
+    <div className="grid grid-cols-3 gap-4 mb-6 fade-in" style={{ animationDelay: "0.15s" }}>
+      <div className={`border rounded-xl p-4 fade-in ${TC.bgStatCard}`} style={{ animationDelay: "0.2s" }}>
+        <p className={`text-xs mb-1 ${TC.textSecondary}`}>Invested</p>
+        <p className={`text-lg font-bold ${TC.textPrimary}`}>
+          ${totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+        </p>
+      </div>
+
+      <div className={`border rounded-xl p-4 fade-in ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`} style={{ animationDelay: "0.25s" }}>
+        <p className={`text-xs mb-1 ${TC.textSecondary}`}>Total P&L</p>
+        <div className={`flex items-center gap-1 font-bold ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
+          {profitLoss >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
+          <span>${Math.abs(profitLoss).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+        </div>
+      </div>
+
+      <div className={`border rounded-xl p-4 fade-in ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`} style={{ animationDelay: "0.3s" }}>
+        <p className={`text-xs mb-1 ${TC.textSecondary}`}>{timeRange} Return</p>
+        <div className={`flex items-center gap-1 font-bold ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
+          {periodReturns[timeRange] >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
+          <span>{Math.abs(periodReturns[timeRange]).toFixed(2)}%</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
   const isPositive = currentMetrics.profitLoss >= 0;
   const gradientId = `performanceGradient`;
 
+  if (!performanceData || performanceData.length === 0) {
+    return (
+      <div className="h-64 fade-in flex items-center justify-center text-gray-400" style={{ animationDelay: "0.35s" }}>
+        <p className="text-sm">No performance data available</p>
+      </div>
+    );
+  }
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const isPositive = data.profitLoss >= 0;
+      
+      return (
+        <div className={`rounded-lg p-3 shadow-lg min-w-[150px] fade-in ${TC.tooltipBg}`}>
+          <p className={`font-semibold text-sm mb-1 ${TC.tooltipTextPrimary}`}>{data.day || data.date}</p>
+          <div className={`text-sm font-bold ${TC.tooltipTextPrimary}`}>
+            ${data.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className={`text-xs mt-1 ${isPositive ? TC.textPositive : TC.textNegative}`}>
+            {isPositive ? '+' : ''}{data.profitLossPercentage.toFixed(2)}%
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="h-48 fade-in" style={{ animationDelay: "0.35s" }}>
+    <div className="h-64 fade-in w-full" style={{ animationDelay: "0.35s" }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={performanceData}>
           <defs>
@@ -251,102 +282,44 @@ const Chart = ({ performanceData, currentMetrics }) => {
               <stop offset="95%" stopColor={isPositive ? "#10B981" : "#EF4444"} stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" stroke={TC.chartGrid} vertical={false} opacity={0.5} />
           <XAxis 
             dataKey="date" 
-            stroke="#9CA3AF" 
+            stroke={TC.chartStroke} 
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            interval="preserveStartEnd"
+            minTickGap={30}
           />
           <YAxis 
-            stroke="#9CA3AF" 
+            stroke={TC.chartStroke} 
             fontSize={11}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: TC.chartStroke, strokeWidth: 1, strokeDasharray: '3 3' }} />
           <Area 
             type="monotone" 
             dataKey="value" 
             stroke="none"
             fill={`url(#${gradientId})`}
             fillOpacity={1}
+            isAnimationActive={false}
           />
           <Line 
             type="monotone" 
             dataKey="value" 
             stroke={isPositive ? "#10B981" : "#EF4444"}
-            strokeWidth={2}
+            strokeWidth={3}
             dot={false}
-            activeDot={{ 
-              r: 4, 
-              fill: isPositive ? "#059669" : "#DC2626", 
-              stroke: isPositive ? "#047857" : "#B91C1C", 
-              strokeWidth: 2 
-            }}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
     </div>
   );
 };
-
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const isPositive = data.profitLoss >= 0;
-    
-    return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg min-w-[200px] fade-in">
-        <p className="font-semibold text-white text-sm mb-2">{data.day || data.date}</p>
-        
-        <div className="space-y-2">
-          <div>
-            <p className="text-cyan-400 font-medium text-sm">
-              Value: ${data.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-gray-400 text-xs">
-              Investment: ${data.investment.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-          
-          <div className={`text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            P&L: {isPositive ? '+' : ''}${Math.abs(data.profitLoss).toLocaleString('en-IN', { 
-              minimumFractionDigits: 2, 
-              maximumFractionDigits: 2 
-            })}
-            <span className="text-xs ml-1">
-              ({isPositive ? '+' : ''}{data.profitLossPercentage.toFixed(2)}%)
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-const Footer = ({ periodReturns }) => (
-  <div className="flex items-center justify-between mt-4 text-sm text-gray-400 fade-in" style={{ animationDelay: "0.4s" }}>
-    <div className="flex items-center gap-2">
-      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-      <span>Investment performance (excl. cash balance)</span>
-    </div>
-    <div className="flex items-center gap-4">
-      <div className={`text-sm font-medium ${periodReturns['7d'] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-        7D: {periodReturns['7d'] >= 0 ? '+' : ''}{periodReturns['7d'].toFixed(2)}%
-      </div>
-      <div className={`text-sm font-medium ${periodReturns['30d'] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-        30D: {periodReturns['30d'] >= 0 ? '+' : ''}{periodReturns['30d'].toFixed(2)}%
-      </div>
-      <div className={`text-sm font-medium ${periodReturns['90d'] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-        90D: {periodReturns['90d'] >= 0 ? '+' : ''}{periodReturns['90d'].toFixed(2)}%
-      </div>
-    </div>
-  </div>
-);
 
 export default PerformanceChart;

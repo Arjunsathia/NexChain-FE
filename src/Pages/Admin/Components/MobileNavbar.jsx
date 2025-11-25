@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FaChartLine,
@@ -13,10 +13,82 @@ import {
   FaSignal
 } from "react-icons/fa";
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
 function MobileNavbar({ isOpen, onToggle }) {
+  const isLight = useThemeCheck();
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    // Text Colors
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+
+    // Navbar Container (Top Nav on Mobile, Wrapper on Desktop)
+    bgNavbar: isLight 
+      ? "bg-white border-gray-300 shadow-xl" 
+      : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-cyan-500/30 shadow-lg",
+    
+    // Header
+    headerTitle: isLight ? "text-blue-600" : "text-cyan-400",
+
+    // Toggle Button (Mobile)
+    btnToggleBase: isLight 
+      ? "text-gray-700 bg-gray-100 hover:text-gray-900 hover:bg-gray-200 border-gray-300" 
+      : "text-gray-300 bg-gray-800/50 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 border-cyan-500/30",
+    btnToggleActive: "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105 rotate-90",
+
+    // Mobile Menu Panel (Hidden menu on mobile, Sidebar on desktop)
+    bgMenuPanel: isLight
+      ? "bg-white lg:bg-gray-50 border-gray-300 lg:border-r"
+      : "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-950 lg:bg-gray-900 lg:border-r lg:border-cyan-500/30",
+    
+    // Links Container
+    borderLinkContainer: isLight ? "border-gray-300" : "border-cyan-500/30",
+
+    // Link Item Base
+    linkBase: isLight
+      ? "text-gray-700 bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-blue-400 hover:shadow-md"
+      : "text-gray-300 bg-gray-800/40 border-gray-700/50 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-cyan-600/20 hover:text-white hover:border-cyan-500/40",
+      
+    // Link Item Active
+    linkActive: isLight
+      ? "bg-blue-100/50 text-blue-700 shadow-md border-blue-600/60"
+      : "bg-gradient-to-r from-cyan-600/30 to-blue-600/30 text-cyan-300 shadow-md border-cyan-500/60 backdrop-blur-sm",
+    
+    // Link Icon Colors
+    linkIconBase: isLight ? "text-gray-600" : "text-gray-400",
+    linkIconActive: isLight ? "text-blue-600" : "text-cyan-400",
+    linkIconBg: isLight ? "bg-gray-200 border-gray-300" : "bg-white/10 border-white/20",
+
+    // Stats Section
+    bgStatsSection: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-800/30 border-gray-700/50",
+    textStatsHeader: isLight ? "text-blue-600" : "text-cyan-400",
+
+    // Footer
+    bgFooter: isLight ? "bg-gray-100/50 border-gray-300" : "bg-gray-800/30 border-gray-700/50",
+    textFooter: isLight ? "text-gray-600" : "text-gray-400",
+  }), [isLight]);
+
 
   useEffect(() => {
     const checkSize = () => setIsDesktop(window.innerWidth >= 1024);
@@ -57,11 +129,18 @@ function MobileNavbar({ isOpen, onToggle }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
+  const statsData = [
+    { label: "Users", value: "5", color: "text-cyan", bg: "from-cyan", border: "border-cyan" },
+    { label: "Coins", value: "100", color: "text-blue", bg: "from-blue", border: "border-blue" },
+    { label: "Trades", value: "0", color: "text-green", bg: "from-green", border: "border-green" },
+    { label: "Watchlist", value: "0", color: "text-yellow", bg: "from-yellow", border: "border-yellow" },
+  ];
+
   return (
     <>
       {/* Fully Rounded Top Navigation Bar */}
       <nav className={`
-        bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-cyan-500/30 shadow-lg sticky top-0 z-50 rounded-3xl mx-2 mt-2
+        ${TC.bgNavbar} shadow-lg sticky top-0 z-50 rounded-3xl mx-2 mt-2
         transition-all duration-500 ease-out
         ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}
       `}>
@@ -70,10 +149,10 @@ function MobileNavbar({ isOpen, onToggle }) {
             {/* Compact Logo and Title */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h2 className="text-lg font-bold text-cyan-400 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text">
+                <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>
                   Admin
                 </h2>
-                <p className="text-xs text-gray-400 hidden sm:block">Control Panel</p>
+                <p className={`text-xs ${TC.textSecondary} hidden sm:block`}>Control Panel</p>
               </div>
             </div>
 
@@ -82,10 +161,10 @@ function MobileNavbar({ isOpen, onToggle }) {
               onClick={onToggle}
               className={`
                 lg:hidden inline-flex items-center justify-center p-2 rounded-xl
-                text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600
-                transition-all duration-150 transform border border-cyan-500/30 shadow-md
+                transition-all duration-150 transform border shadow-md
+                ${TC.btnToggleBase}
                 ${isMounted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
-                ${isOpen ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105 rotate-90' : 'hover:scale-105'}
+                ${isOpen ? TC.btnToggleActive : 'hover:scale-105'}
               `}
             >
               {isOpen ? (
@@ -97,73 +176,73 @@ function MobileNavbar({ isOpen, onToggle }) {
           </div>
         </div>
 
-        {/* Fully Rounded Mobile Navigation Menu */}
+        {/* Fully Rounded Mobile Navigation Menu / Desktop Sidebar Panel */}
         <div className={`
           transition-all duration-400 ease-in-out overflow-hidden
-          bg-gradient-to-b from-gray-800 via-gray-900 to-gray-950 rounded-b-3xl
+          ${TC.bgMenuPanel} rounded-b-3xl
           ${(isOpen || isDesktop) ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
-          lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-52 lg:max-h-screen lg:overflow-y-auto lg:translate-x-0 lg:bg-gray-900 lg:border-r lg:border-cyan-500/30 lg:rounded-3xl lg:m-2 lg:mt-2 lg:pt-3 lg:pb-4
+          lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-52 lg:max-h-screen lg:overflow-y-auto lg:translate-x-0 lg:rounded-3xl lg:m-2 lg:mt-2 lg:pt-3 lg:pb-4
         `}>
-          <div className="px-3 pt-3 pb-4 space-y-1 border-t border-cyan-500/30 lg:border-t-0 lg:pt-3 lg:pb-4 lg:space-y-1">
+          <div className={`px-3 pt-3 pb-4 space-y-1 border-t ${TC.borderLinkContainer} lg:border-t-0 lg:pt-3 lg:pb-4 lg:space-y-1`}>
             {/* Compact Navigation Items */}
             {menus.map((item, index) => (
               <Link
                 key={index}
                 to={item.path}
+                onClick={!isDesktop ? onToggle : undefined} // Close on mobile navigation
                 className={`
                   flex items-center gap-2 px-3 py-2.5 rounded-2xl
                   text-xs font-medium transition-all duration-150 transform
                   border shadow-sm
-                  ${isActive(item.path)
-                    ? 'bg-gradient-to-r from-cyan-600/30 to-blue-600/30 text-cyan-300 shadow-md border-cyan-500/60 backdrop-blur-sm'
-                    : 'text-gray-300 bg-gray-800/40 border-gray-700/50 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-cyan-600/20 hover:text-white hover:border-cyan-500/40 hover:scale-102 hover:shadow-sm'
-                  }
+                  ${isActive(item.path) ? TC.linkActive : TC.linkBase}
                   ${ (isOpen || isDesktop) ? 'translate-x-0 opacity-100' : 'translate-x-3 opacity-0'}
                 `}
                 style={{ transitionDelay: `${index * 30}ms` }}
               >
-                <div className={`p-1.5 rounded-lg bg-white/10 border border-white/20 flex-shrink-0 transition-all duration-150`}>
-                  <item.icon className={`text-sm ${isActive(item.path) ? 'text-cyan-400' : 'text-gray-400'}`} />
+                <div className={`p-1.5 rounded-lg border flex-shrink-0 transition-all duration-150 ${TC.linkIconBg}`}>
+                  <item.icon className={`text-sm ${isActive(item.path) ? TC.linkIconActive : TC.linkIconBase}`} />
                 </div>
-                <span className="font-medium text-sm">{item.name}</span>
+                <span className={`font-medium text-sm ${isActive(item.path) ? "" : TC.textPrimary}`}>{item.name}</span>
                 {isActive(item.path) && (
-                  <div className="ml-auto w-1.5 h-1.5 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full animate-pulse"></div>
+                  <div className={`ml-auto w-1.5 h-1.5 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full animate-pulse`}></div>
                 )}
               </Link>
             ))}
 
-            {/* Compact Quick Stats Section */}
-            <div className="pt-3 pb-2 border-t border-cyan-500/30 mt-2 hidden lg:block">
-              <h3 className="text-xs font-semibold text-cyan-400 mb-2 uppercase tracking-wider flex items-center justify-center rounded-full bg-gray-800/50 px-2 py-1 mx-auto w-fit border border-cyan-500/30">
+            {/* Compact Quick Stats Section (Desktop Sidebar Only) */}
+            <div className={`pt-3 pb-2 border-t ${TC.borderLinkContainer} mt-2 hidden lg:block`}>
+              <h3 className={`text-xs font-semibold ${TC.textStatsHeader} mb-2 uppercase tracking-wider flex items-center justify-center rounded-full ${TC.bgStatsSection} px-2 py-1 mx-auto w-fit border`}>
                 <FaSignal className="mr-1 text-xs" />
-                Stats
+                Quick Stats
               </h3>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: "Users", value: "5", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-cyan-600/20", border: "border-cyan-500/40" },
-                  { label: "Coins", value: "100", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-blue-600/20", border: "border-blue-500/40" },
-                  { label: "Trades", value: "0", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-green-600/20", border: "border-green-500/40" },
-                  { label: "Watchlist", value: "0", color: "text-yellow-400", bg: "bg-gradient-to-br from-yellow-500/20 to-yellow-600/20", border: "border-yellow-500/40" },
-                ].map((stat, index) => (
-                  <div
-                    key={index}
-                    className={`p-2 rounded-xl ${stat.bg} border ${stat.border} transition-all duration-150 backdrop-blur-sm shadow-md hover:scale-102 hover:shadow-sm cursor-pointer`}
-                    style={{ transitionDelay: `${200 + (index * 30)}ms` }}
-                  >
-                    <div className="flex flex-col items-center text-center space-y-0.5">
-                      <span className={`text-sm font-bold ${stat.color}`}>
-                        {stat.value}
-                      </span>
-                      <span className="text-xs text-gray-300 leading-tight font-medium">{stat.label}</span>
-                    </div>
-                  </div>
-                ))}
+                {statsData.map((stat, index) => {
+                    const statColor = isLight ? stat.color + "-700" : stat.color + "-400";
+                    const statBg = isLight ? `bg-${stat.color}-100 border-${stat.color}-300` : `${stat.bg}-500/20 to-${stat.color}-600/20 border-opacity-40`;
+                    const statBorder = isLight ? `border-${stat.color}-300` : `${stat.border}-500/40`;
+
+                    return (
+                        <div
+                            key={index}
+                            className={`p-2 rounded-xl border ${statBg} ${statBorder} transition-all duration-150 backdrop-blur-sm shadow-md hover:scale-102 hover:shadow-sm cursor-pointer`}
+                            style={{ transitionDelay: `${200 + (index * 30)}ms` }}
+                        >
+                            <div className="flex flex-col items-center text-center space-y-0.5">
+                            <span className={`text-sm font-bold ${statColor}`}>
+                                {stat.value}
+                            </span>
+                            <span className={`text-xs ${TC.textSecondary} leading-tight font-medium`}>{stat.label}</span>
+                            </div>
+                        </div>
+                    );
+                })}
               </div>
             </div>
+            
             {/* Compact Footer */}
-            <div className="pt-2 border-t border-cyan-500/30 mt-2">
-              <div className="text-center space-y-0.5 rounded-xl bg-gray-800/30 p-2 border border-gray-700/50">
-                <p className="text-xs text-gray-400 font-semibold">
+            <div className={`pt-2 border-t ${TC.borderLinkContainer} mt-2`}>
+              <div className={`text-center space-y-0.5 rounded-xl p-2 border ${TC.bgFooter}`}>
+                <p className={`text-xs font-semibold ${TC.textFooter}`}>
                   Admin Portal
                 </p>
               </div>

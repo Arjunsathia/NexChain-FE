@@ -1,4 +1,18 @@
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
+import React, { useMemo } from "react";
+
+// Assuming useThemeCheck is available in this scope or imported
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = React.useState(!document.documentElement.classList.contains('dark'));
+    React.useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+    return isLight;
+};
 
 const data = [
   { time: "1h", price: 30 },
@@ -8,18 +22,45 @@ const data = [
 ];
 
 export default function SparklineGraph() {
+  const isLight = useThemeCheck();
+
+  // Define line color based on theme
+  const lineColor = isLight ? "#0e7490" : "#3b82f6";
+
+  // Tooltip content style adjustment for light mode
+  const tooltipStyle = {
+    backgroundColor: isLight ? '#fff' : '#1f2937',
+    border: isLight ? '1px solid #e5e7eb' : '1px solid #4b5563',
+    color: isLight ? '#1f2937' : '#fff',
+    borderRadius: '8px',
+    padding: '8px',
+    fontSize: '12px'
+  };
+  
+  // Custom Tooltip component to apply dynamic styles
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={tooltipStyle}>
+          <p className="label">{`${label} : $${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="w-32 h-16 fade-in" style={{ animationDelay: "0.1s" }}>
+    <div className="w-full h-full fade-in" style={{ animationDelay: "0.1s" }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <Line
             type="monotone"
             dataKey="price"
-            stroke="#3b82f6"
+            stroke={lineColor}
             strokeWidth={2}
             dot={false}
           />
-          <Tooltip />
+          <Tooltip content={<CustomTooltip />} />
         </LineChart>
       </ResponsiveContainer>
     </div>

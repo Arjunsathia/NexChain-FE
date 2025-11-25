@@ -1,23 +1,129 @@
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Userdata from "./Userdata";
 import ChartSection from "./ChartSection";
 import NewsPanel from "./NewsPanel";
 import TrendingCoins from "./TrendingCoins";
 import LearningHub from "./LearningHub";
-import { useEffect, useState } from "react";
 import { getCoins } from "@/api/coinApis";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import WatchlistPreview from "./WatchlistPreview";
-import { FaCoins, FaChartLine, FaFire } from "react-icons/fa";
+import TopCoins from "./TopCoins";
+import { FaWallet } from "react-icons/fa";
+import useUserContext from '@/Context/UserContext/useUserContext';
+import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
+
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
+
+// Compact Profile Component for Small Screens (Dual Mode)
+const CompactProfile = () => {
+  const isLight = useThemeCheck();
+  const { user } = useUserContext();
+  const { balance } = useWalletContext();
+
+  const TC = {
+    bgCard: isLight ? "bg-white border-gray-300" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textBalance: isLight ? "text-green-700" : "text-green-400",
+    textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
+  };
+  
+  return (
+    <div className={`rounded-xl p-4 fade-in border ${TC.bgCard}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg">
+            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+          </div>
+          <div className="min-w-0">
+            <h3 className={`font-semibold text-sm truncate ${TC.textPrimary}`}>{user?.name || 'User'}</h3>
+            <p className={`text-xs truncate ${TC.textSecondary}`}>{user?.email || 'user@example.com'}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className={`flex items-center gap-1 text-xs mb-1 ${TC.textSecondary}`}>
+            <FaWallet className={`${TC.textIcon} text-xs`} />
+            Balance
+          </div>
+          <p className={`font-bold text-sm ${TC.textBalance}`}>${balance?.toLocaleString('en-IN')}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+// WebSocket symbols mapping
+const coinToSymbol = {
+  bitcoin: "btcusdt",
+  ethereum: "ethusdt",
+  "usd-coin": "usdcusdt",
+  binancecoin: "bnbusdt",
+  ripple: "xrpusdt",
+  cardano: "adausdt",
+  solana: "solusdt",
+  dogecoin: "dogeusdt",
+};
 
 export default function Dashboard() {
+  const isLight = useThemeCheck();
   const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
   const [topCoins, setTopCoins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [liveData, setLiveData] = useState({});
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const ws = useRef(null);
+  const liveDataRef = useRef({});
+
+  // 💡 Theme Classes for Skeleton
+  const TC = useMemo(() => ({
+    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+    bgSkeletonItem: isLight ? "bg-white/90 border-gray-300" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+  }), [isLight]);
+
+
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, []);
+
+  // Update ref when liveData changes
+  useEffect(() => {
+    liveDataRef.current = liveData;
+  }, [liveData]);
 
   useEffect(() => {
     const fetchTopCoins = async () => {
       try {
+        setLoading(true);
         const data = await getCoins();
         const topThree = data.slice(0, 3);
         setTopCoins(topThree);
@@ -35,198 +141,285 @@ export default function Dashboard() {
     fetchTopCoins();
   }, []);
 
-  // Enhanced Top Coins Grid Component with Better Skeletons
-  const TopCoinsGrid = ({ isMobile = false }) => (
-    <div className={`${isMobile ? 'mb-6' : ''}`}>
-      {/* Section Header */}
-      {/* <div className="flex items-center gap-3 mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
-        <div className="p-2 bg-cyan-400/10 rounded-lg">
-          <FaCoins className="text-cyan-400 text-base" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Top Cryptocurrencies
-          </h2>
-          <p className="text-xs text-gray-400">Market leaders</p>
-        </div>
-      </div> */}
+  // WebSocket setup for live data (Logic remains the same, relies on dynamic ApexCharts options in ChartSection)
+  useEffect(() => {
+    if (topCoins.length === 0) return;
 
-      {/* Coins Grid */}
-      <div className={`grid grid-cols-3 gap-3 sm:gap-4`}>
-        {loading
-          ? [1, 2, 3].map((_, i) => (
-              <div 
-                key={i} 
-                className="bg-gray-800/50 border border-gray-700 rounded-xl shadow-2xl p-3 sm:p-4 fade-in"
-                style={{ animationDelay: `${0.3 + (i * 0.1)}s` }}
-              >
-                {/* Coin Image Skeleton */}
-                <div className="flex justify-center mb-3">
-                  <Skeleton 
-                    circle 
-                    width={isMobile ? 40 : 48} 
-                    height={isMobile ? 40 : 48} 
-                    baseColor="#2d3748" 
-                    highlightColor="#374151"
-                    className="mb-2"
-                  />
-                </div>
-                
-                {/* Coin Info Skeleton */}
-                <div className="text-center space-y-2">
-                  <Skeleton 
-                    width={isMobile ? 50 : 60} 
-                    height={14} 
-                    baseColor="#2d3748" 
-                    highlightColor="#374151"
-                    className="mx-auto"
-                  />
-                  <Skeleton 
-                    width={isMobile ? 40 : 60} 
-                    height={12} 
-                    baseColor="#2d3748" 
-                    highlightColor="#374151"
-                    className="mx-auto"
-                  />
-                  <Skeleton 
-                    width={isMobile ? 35 : 50} 
-                    height={12} 
-                    baseColor="#2d3748" 
-                    highlightColor="#374151"
-                    className="mx-auto"
-                  />
-                </div>
+    const symbols = topCoins
+      .map((coin) => coinToSymbol[coin.id])
+      .filter(Boolean)
+      .map((symbol) => `${symbol}@ticker`)
+      .join("/");
 
-                {/* Price Change Badge Skeleton */}
-                <div className="flex justify-center mt-3">
-                  <Skeleton 
-                    width={isMobile ? 40 : 50} 
-                    height={18} 
-                    baseColor="#2d3748" 
-                    highlightColor="#374151"
-                    className="rounded-full"
-                  />
+    if (!symbols) return;
+
+    try {
+      ws.current = new WebSocket(
+        `wss://stream.binance.com:9443/stream?streams=${symbols}`
+      );
+
+      ws.current.onopen = () => {
+        console.log("WebSocket connected for top coins");
+      };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.stream && data.data) {
+          const symbol = data.stream.replace("@ticker", "");
+          const coinId = Object.keys(coinToSymbol).find(
+            (key) => coinToSymbol[key] === symbol
+          );
+
+          if (coinId) {
+            const newPrice = parseFloat(data.data.c);
+            const newChange = parseFloat(data.data.P);
+
+            // Only update if data actually changed
+            const currentData = liveDataRef.current[coinId];
+            if (
+              !currentData ||
+              currentData.price !== newPrice ||
+              currentData.change !== newChange
+            ) {
+              setLiveData((prev) => ({
+                ...prev,
+                [coinId]: {
+                  price: newPrice,
+                  change: newChange,
+                  isPositive: newChange >= 0,
+                },
+              }));
+            }
+          }
+        }
+      };
+
+      ws.current.onerror = (error) => { console.error("WebSocket error:", error); };
+      ws.current.onclose = () => { console.log("WebSocket disconnected"); };
+    } catch (error) { console.error("WebSocket setup failed:", error); }
+
+    return () => {
+      if (ws.current) { ws.current.close(); }
+    };
+  }, [topCoins]);
+
+  // Enhanced skeleton for the entire dashboard (Dual Mode)
+  const renderDashboardSkeleton = () => (
+    <div className={`min-h-screen p-4 lg:p-6 fade-in ${isLight ? "text-gray-900" : "text-white"}`}>
+      {/* Mobile & Medium Layout Skeleton */}
+      <div className="xl:hidden flex flex-col gap-4">
+        {/* Compact Profile Skeleton for Small Screens */}
+        <div className="sm:hidden fade-in" style={{ animationDelay: "0.2s" }}>
+          <div className={`rounded-xl p-4 h-20 border ${TC.bgSkeletonItem}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton circle width={40} height={40} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <div>
+                  <Skeleton width={80} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
+                  <Skeleton width={120} height={12} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
                 </div>
               </div>
-            ))
-          : topCoins.map((coin, index) => (
-              <div
-                key={coin.id}
-                onClick={() => setSelectedCoinId(coin.id)}
-                className={`cursor-pointer bg-gray-800/50 border text-white rounded-xl shadow-2xl transition-all duration-300 fade-in group ${
-                  selectedCoinId === coin.id 
-                    ? "ring-2 ring-cyan-500 bg-cyan-500/10 border-cyan-400/30 scale-105" 
-                    : "border-gray-700 hover:border-cyan-400/30 hover:bg-gray-700/50 hover:scale-105"
-                } ${
-                  isMobile ? "p-3 sm:p-4" : "p-4 sm:p-5"
-                }`}
-                style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
-              >
-                {/* Coin Image and Rank */}
-                <div className="flex flex-col items-center text-center">
-                  <div className="relative mb-3">
-                    <img
-                      src={coin.image}
-                      alt={coin.name}
-                      className={`${
-                        isMobile ? "w-10 h-10 sm:w-12 sm:h-12" : "w-12 h-12 sm:w-14 sm:h-14"
-                      } object-contain group-hover:scale-110 transition-transform duration-300`}
-                    />
-                    {/* Rank Badge */}
-                    <div className={`absolute -top-1 -right-1 ${
-                      index === 0 ? "bg-yellow-500" :
-                      index === 1 ? "bg-gray-500" :
-                      "bg-orange-500"
-                    } text-white rounded-full ${
-                      isMobile ? "w-4 h-4 text-xs" : "w-5 h-5 text-sm"
-                    } flex items-center justify-center font-bold shadow-lg`}>
-                      {index + 1}
+              <div>
+                <Skeleton width={40} height={12} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
+                <Skeleton width={60} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Coins Skeleton - Single column bento style */}
+        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+          <div className="space-y-1">
+            <Skeleton width={100} height={20} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-3 ml-1" />
+            <div className="grid grid-cols-1 gap-3">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className={`rounded-xl p-4 h-24 border ${TC.bgSkeletonItem}`}>
+                  <div className="flex items-center justify-between h-full">
+                    <div className="flex items-center gap-3">
+                      <Skeleton circle width={40} height={40} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                      <div>
+                        <Skeleton width={60} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
+                        <Skeleton width={40} height={12} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Skeleton width={80} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
+                      <Skeleton width={50} height={12} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
                     </div>
                   </div>
-                  
-                  {/* Coin Info */}
-                  <div className="w-full">
-                    <h3 className={`font-bold mb-1 ${
-                      isMobile ? "text-sm" : "text-base"
-                    } group-hover:text-cyan-300 transition-colors`}>
-                      {coin.symbol.toUpperCase()}
-                    </h3>
-                    
-                    <p className={`text-gray-300 ${
-                      isMobile ? "text-xs" : "text-sm"
-                    } mb-2 truncate`}>
-                      {coin.name}
-                    </p>
-                    
-                    <p className={`font-semibold ${
-                      isMobile ? "text-xs sm:text-sm" : "text-sm sm:text-base"
-                    } mb-2`}>
-                      ${Number(coin.current_price).toLocaleString("en-IN", { 
-                        maximumFractionDigits: coin.current_price < 1 ? 4 : 2 
-                      })}
-                    </p>
-                    
-                    {/* Price Change */}
-                    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "bg-green-500/20 text-green-400 border-green-500/30"
-                        : "bg-red-500/20 text-red-400 border-red-500/30"
-                    }`}>
-                      {coin.price_change_percentage_24h >= 0 ? "↗" : "↘"}
-                      {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
-                    </div>
-                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Profile sections for Medium screens */}
+        <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((_, i) => (
+            <div key={i} className="fade-in" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+              <div className={`rounded-xl p-6 h-48 border ${TC.bgSkeletonItem}`}>
+                <Skeleton height={24} width={120} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+                <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-2" count={3} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chart Skeleton - Visible on all screens */}
+        <div className="fade-in" style={{ animationDelay: "0.6s" }}>
+          <div className={`rounded-xl p-6 h-96 border ${TC.bgSkeletonItem}`}>
+            <Skeleton height={28} width={150} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+            <Skeleton height={280} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+          </div>
+        </div>
+
+        {/* Widgets Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((_, i) => (
+            <div key={i} className="fade-in" style={{ animationDelay: `${0.7 + i * 0.1}s` }}>
+              <div className={`rounded-xl p-6 h-64 border ${TC.bgSkeletonItem}`}>
+                <Skeleton height={24} width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+                <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} count={4} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* News Skeleton */}
+        <div className="fade-in" style={{ animationDelay: "1.0s" }}>
+          <div className={`rounded-xl p-6 h-64 border ${TC.bgSkeletonItem}`}>
+            <Skeleton height={28} width={120} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+            <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} count={5} />
+          </div>
+        </div>
+      </div>
+
+      {/* Large Screen Layout Skeleton */}
+      <div className="hidden xl:flex flex-col gap-6">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Sidebar Skeleton */}
+          <div className="col-span-3 flex flex-col gap-6">
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} className="fade-in" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                <div className={`rounded-xl p-6 h-48 border ${TC.bgSkeletonItem}`}>
+                  <Skeleton height={24} width={120} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+                  <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} count={3} />
                 </div>
               </div>
             ))}
-      </div>
+          </div>
 
-      {/* Market Stats Summary */}
-      {!loading && topCoins.length > 0 && (
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700 text-xs text-gray-400 fade-in" style={{ animationDelay: "0.6s" }}>
-          <span>Real-time prices</span>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-            <span>Live</span>
+          {/* Middle Section Skeleton */}
+          <div className="col-span-6 flex flex-col gap-6">
+            {/* Top Coins Skeleton */}
+            <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3].map((_, i) => (
+                  <div key={i} className={`rounded-xl p-6 h-32 border ${TC.bgSkeletonItem}`}>
+                    <Skeleton height={20} width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-3" />
+                    <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-2" />
+                    <Skeleton height={14} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Chart Skeleton */}
+            <div className="fade-in" style={{ animationDelay: "0.6s" }}>
+              <div className={`rounded-xl p-6 h-96 border ${TC.bgSkeletonItem}`}>
+                <Skeleton height={28} width={150} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+                <Skeleton height={280} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar Skeleton */}
+          <div className="col-span-3 flex flex-col gap-6">
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} className="fade-in" style={{ animationDelay: `${0.8 + i * 0.1}s` }}>
+                <div className={`rounded-xl p-6 h-48 border ${TC.bgSkeletonItem}`}>
+                  <Skeleton height={24} width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+                  <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} count={3} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      )}
+
+        {/* News Panel Skeleton */}
+        <div className="fade-in" style={{ animationDelay: "0.7s" }}>
+          <div className={`rounded-xl p-6 h-64 border ${TC.bgSkeletonItem}`}>
+            <Skeleton height={28} width={120} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-4" />
+            <Skeleton height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} count={5} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
+  if (loading && topCoins.length === 0) {
+    return renderDashboardSkeleton();
+  }
+
   return (
-    <div className="min-h-screen p-4 lg:p-6 fade-in" style={{ animationDelay: "0.1s" }}>
+    <div
+      className={`min-h-screen p-4 lg:p-6 fade-in ${isLight ? "text-gray-900" : "text-white"}`}
+      style={{ animationDelay: "0.1s" }}
+    >
       {/* Mobile & Medium Layout */}
-      <div className="xl:hidden flex flex-col gap-6">
-        
-        {/* Top Section: Profile, Portfolio, Recent Trades - Hide Recent Trades on small screens */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-            <Userdata showProfile={true} showPortfolio={false} showRecentTrades={false} />
-          </div>
-          
-          <div className="fade-in" style={{ animationDelay: "0.3s" }}>
-            <Userdata showProfile={false} showPortfolio={true} showRecentTrades={false} />
-          </div>
-          
-          {/* Recent Trades - Hidden on small screens, visible on medium and large */}
-          <div className="hidden sm:block fade-in" style={{ animationDelay: "0.4s" }}>
-            <Userdata showProfile={false} showPortfolio={false} showRecentTrades={true} />
-          </div>
+      <div className="xl:hidden flex flex-col gap-4">
+        {/* Compact Profile Section for Small Screens */}
+        <div className="sm:hidden fade-in" style={{ animationDelay: "0.2s" }}>
+          <CompactProfile />
         </div>
 
-        {/* Second Section: Top 3 coins */}
+        {/* Top Three Coins - Bento Grid Style */}
         <div className="fade-in" style={{ animationDelay: "0.5s" }}>
-          <TopCoinsGrid isMobile={true} />
+          <div className="space-y-1">
+            <h2 className={`text-lg font-bold mb-3 px-1 ${isLight ? "text-gray-900" : "text-white"}`}>Top Cryptos</h2>
+            <TopCoins
+              topCoins={topCoins}
+              selectedCoinId={selectedCoinId}
+              setSelectedCoinId={setSelectedCoinId}
+              isMobile={true}
+              liveData={liveData}
+              loading={loading}
+            />
+          </div>
         </div>
 
-        {/* Third Section: Chart */}
+        {/* Profile sections for Medium screens */}
+        <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+            <Userdata
+              showProfile={true}
+              showPortfolio={false}
+              showRecentTrades={false}
+            />
+          </div>
+          <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+            <Userdata
+              showProfile={false}
+              showPortfolio={true}
+              showRecentTrades={false}
+            />
+          </div>
+          <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+            <Userdata
+              showProfile={false}
+              showPortfolio={false}
+              showRecentTrades={true}
+            />
+          </div>
+        </div>
+
+        {/* Chart Section - Visible on all screens */}
         <div className="fade-in" style={{ animationDelay: "0.6s" }}>
           <ChartSection coinId={selectedCoinId} />
         </div>
 
-        {/* Fourth Section: Watchlist, Trending, Learning Hub */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Other Widgets */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="fade-in" style={{ animationDelay: "0.7s" }}>
             <WatchlistPreview />
           </div>
@@ -238,69 +431,79 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Fifth Section: News Panel */}
+        {/* News Panel */}
         <div className="fade-in" style={{ animationDelay: "1.0s" }}>
           <NewsPanel />
         </div>
       </div>
 
       {/* Large Screen Layout (xl: 1280px+) */}
-      <div className="hidden xl:grid grid-cols-12 gap-6">
-        {/* Left Sidebar - Profile, Portfolio, Recent Trades */}
-        <div className="col-span-3 flex flex-col gap-6">
-          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-            <Userdata showProfile={true} showPortfolio={false} showRecentTrades={false} />
+      <div className="hidden xl:flex flex-col gap-6">
+        <div className="grid grid-cols-12 gap-6 items-start">
+          {/* Left Sidebar - Profile, Portfolio, Recent Trades */}
+          <div className="col-span-3 flex flex-col gap-6">
+            <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+              <Userdata
+                showProfile={true}
+                showPortfolio={false}
+                showRecentTrades={false}
+              />
+            </div>
+            <div className="fade-in h-[380px]" style={{ animationDelay: "0.3s" }}>
+              <Userdata
+                showProfile={false}
+                showPortfolio={true}
+                showRecentTrades={false}
+              />
+            </div>
+            <div className="fade-in h-[280px]" style={{ animationDelay: "0.4s" }}>
+              <Userdata
+                showProfile={false}
+                showPortfolio={false}
+                showRecentTrades={true}
+              />
+            </div>
           </div>
-          <div className="fade-in" style={{ animationDelay: "0.3s" }}>
-            <Userdata showProfile={false} showPortfolio={true} showRecentTrades={false} />
+
+          {/* Middle Section - Top Coins, Chart */}
+          <div className="col-span-6 flex flex-col gap-6">
+            {/* Top Coins Section */}
+            <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+              <TopCoins
+                topCoins={topCoins}
+                selectedCoinId={selectedCoinId}
+                setSelectedCoinId={setSelectedCoinId}
+                isMobile={false}
+                liveData={liveData}
+                loading={loading}
+              />
+            </div>
+
+            {/* Chart Section */}
+            <div className="fade-in h-[620px]" style={{ animationDelay: "0.6s" }}>
+              <ChartSection coinId={selectedCoinId} />
+            </div>
           </div>
-          <div className="fade-in" style={{ animationDelay: "0.4s" }}>
-            <Userdata showProfile={false} showPortfolio={false} showRecentTrades={true} />
+
+          {/* Right Sidebar - Watchlist, Trending, Learning Hub */}
+          <div className="col-span-3 flex flex-col gap-6">
+            <div className="fade-in h-[280px]" style={{ animationDelay: "0.8s" }}>
+              <WatchlistPreview />
+            </div>
+            <div className="fade-in h-[280px]" style={{ animationDelay: "0.9s" }}>
+              <TrendingCoins />
+            </div>
+            <div className="fade-in h-[200px]" style={{ animationDelay: "1.0s" }}>
+              <LearningHub />
+            </div>
           </div>
         </div>
 
-        {/* Middle Section - Top Coins, Chart, and News */}
-        <div className="col-span-6 flex flex-col gap-6">
-          {/* Top Coins Section */}
-          <div className="fade-in" style={{ animationDelay: "0.5s" }}>
-            <TopCoinsGrid isMobile={false} />
-          </div>
-
-          {/* Chart Section */}
-          <div className="fade-in" style={{ animationDelay: "0.6s" }}>
-            <ChartSection coinId={selectedCoinId} />
-          </div>
-
-          {/* News Panel */}
-          <div className="fade-in" style={{ animationDelay: "0.7s" }}>
-            <NewsPanel />
-          </div>
-        </div>
-
-        {/* Right Sidebar - Watchlist, Trending, Learning Hub */}
-        <div className="col-span-3 flex flex-col gap-6">
-          <div className="fade-in" style={{ animationDelay: "0.8s" }}>
-            <WatchlistPreview />
-          </div>
-          <div className="fade-in" style={{ animationDelay: "0.9s" }}>
-            <TrendingCoins />
-          </div>
-          <div className="fade-in" style={{ animationDelay: "1.0s" }}>
-            <LearningHub />
-          </div>
+        {/* Bottom Section - News Panel */}
+        <div className="fade-in h-[300px]" style={{ animationDelay: "0.7s" }}>
+          <NewsPanel />
         </div>
       </div>
-
-      {/* Loading Overlay for Initial Load */}
-      {loading && (
-        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center fade-in">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">Loading Dashboard</h3>
-            <p className="text-gray-400">Fetching latest market data...</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

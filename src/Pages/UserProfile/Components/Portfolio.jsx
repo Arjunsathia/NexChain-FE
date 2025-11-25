@@ -1,14 +1,76 @@
-import React from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
 import { FaCoins, FaWallet, FaChartPie } from "react-icons/fa";
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
 function Portfolio() {
+  const isLight = useThemeCheck();
   const { balance } = useWalletContext();
   const { purchasedCoins = [], loading } = usePurchasedCoins() || { purchasedCoins: [], loading: false };
 
-  const portfolioData = React.useMemo(() => {
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+
+    bgCard: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    
+    // Header
+    bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
+    iconColor: isLight ? "text-blue-600" : "text-cyan-400",
+    headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
+
+    // Skeleton
+    bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
+
+    // Tooltip
+    bgTooltip: isLight ? "bg-white/90 border-gray-300" : "bg-gray-800/90 border-gray-700",
+    textTooltipValue: isLight ? "text-blue-600" : "text-cyan-400",
+
+    // Empty State
+    bgEmpty: isLight ? "border-dashed border-gray-400" : "border-dashed border-gray-600",
+    bgEmptyIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
+    textEmptyIcon: isLight ? "text-blue-600" : "text-cyan-400",
+    textEmptyTitle: isLight ? "text-gray-800" : "text-gray-300",
+    
+    // Stats Section
+    bgStatsSection: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/30 border-gray-600",
+    bgStatItem: isLight ? "bg-white border-gray-300" : "bg-gray-800/50 border-gray-600",
+    
+    // Holding List
+    bgHoldingItem: isLight ? "hover:bg-gray-200/50" : "hover:bg-gray-600/30",
+    textHoldingItemHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
+    
+    // Specific stat colors
+    textInvested: isLight ? "text-blue-600" : "text-cyan-400",
+    textCash: isLight ? "text-green-600" : "text-green-400",
+
+    // Pie Chart
+    strokeColor: isLight ? "#F3F4F6" : "#1F2937", // Light gray or Dark gray for cell stroke
+    
+  }), [isLight]);
+
+
+  const portfolioData = useMemo(() => {
     const portfolioMap = {};
     const coinsList = Array.isArray(purchasedCoins) ? purchasedCoins : [];
     
@@ -42,13 +104,14 @@ function Portfolio() {
         fullName: 'Cash Balance',
         totalValue: cashValue,
         quantity: cashValue,
-        color: '#10B981',
+        // Using dynamic colors for cash based on theme
+        color: isLight ? '#10B981' : '#10B981', 
         type: 'cash'
       });
     }
 
     return data;
-  }, [purchasedCoins, balance]);
+  }, [purchasedCoins, balance, isLight]);
 
   const totalPortfolioValue = portfolioData.reduce((sum, item) => sum + (Number(item.totalValue) || 0), 0);
   const investedValue = portfolioData.filter(item => item.type === 'crypto').reduce((sum, item) => sum + item.totalValue, 0);
@@ -66,17 +129,17 @@ function Portfolio() {
       const percentage = totalPortfolioValue > 0 ? ((data.totalValue / totalPortfolioValue) * 100).toFixed(1) : 0;
       
       return (
-        <div className="bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-lg p-3 shadow-xl">
-          <p className="font-semibold text-white text-sm mb-1">{data.fullName || data.name}</p>
-          <p className="text-cyan-400 font-bold">
+        <div className={`${TC.bgTooltip} rounded-lg p-3 shadow-xl border`}>
+          <p className={`font-semibold text-sm mb-1 ${TC.textPrimary}`}>{data.fullName || data.name}</p>
+          <p className={`font-bold ${TC.textTooltipValue}`}>
             ${data.totalValue.toLocaleString('en-IN', { 
               minimumFractionDigits: 2, 
               maximumFractionDigits: 2 
             })}
           </p>
-          <p className="text-gray-300 text-xs mt-1">{percentage}% of portfolio</p>
+          <p className={`text-xs mt-1 ${TC.textSecondary}`}>{percentage}% of portfolio</p>
           {data.type === 'crypto' && (
-            <p className="text-gray-400 text-xs mt-2">
+            <p className={`text-xs mt-2 ${TC.textSecondary}`}>
               Quantity: {data.quantity.toFixed(6)}
             </p>
           )}
@@ -88,21 +151,21 @@ function Portfolio() {
 
   if (loading) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 h-full fade-in">
+      <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in`}>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-cyan-400/10 rounded-lg">
-            <FaChartPie className="text-cyan-400 text-lg" />
+          <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
+            <FaChartPie className={`${TC.iconColor} text-lg`} />
           </div>
-          <h2 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          <h2 className={`text-lg font-bold ${TC.headerGradient}`}>
             Portfolio
           </h2>
         </div>
         <div className="animate-pulse space-y-4">
-          <div className="h-40 bg-gray-700 rounded-xl mb-4"></div>
+          <div className={`h-40 ${TC.bgSkeleton} rounded-xl mb-4`}></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-700 rounded"></div>
-            <div className="h-4 bg-gray-700 rounded"></div>
-            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className={`h-4 ${TC.bgSkeleton} rounded`}></div>
+            <div className={`h-4 ${TC.bgSkeleton} rounded`}></div>
+            <div className={`h-4 ${TC.bgSkeleton} rounded`}></div>
           </div>
         </div>
       </div>
@@ -110,18 +173,18 @@ function Portfolio() {
   }
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 h-full fade-in">
+    <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4 fade-in">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-400/10 rounded-lg">
-            <FaChartPie className="text-cyan-400 text-lg" />
+          <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
+            <FaChartPie className={`${TC.iconColor} text-lg`} />
           </div>
           <div>
-            <h2 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <h2 className={`text-lg font-bold ${TC.headerGradient}`}>
               Portfolio
             </h2>
-            <p className="text-xs text-gray-400">
+            <p className={`text-xs ${TC.textSecondary}`}>
               ${totalPortfolioValue.toLocaleString('en-IN', { 
                 minimumFractionDigits: 2, 
                 maximumFractionDigits: 2 
@@ -132,12 +195,12 @@ function Portfolio() {
       </div>
       
       {portfolioData.length === 0 ? (
-        <div className="text-center py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-lg fade-in">
-          <div className="p-3 bg-cyan-400/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-            <FaChartPie className="text-xl text-cyan-400" />
+        <div className={`text-center py-8 flex flex-col items-center justify-center border-2 border-dashed rounded-lg fade-in ${TC.bgEmpty}`}>
+          <div className={`p-3 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 ${TC.bgEmptyIcon}`}>
+            <FaChartPie className={`text-xl ${TC.textEmptyIcon}`} />
           </div>
-          <p className="text-gray-300 text-base font-semibold mb-1">No portfolio data</p>
-          <p className="text-gray-500 text-sm">Start investing to see your portfolio</p>
+          <p className={`text-base font-semibold mb-1 ${TC.textEmptyTitle}`}>No portfolio data</p>
+          <p className={`text-sm ${TC.textTertiary}`}>Start investing to see your portfolio</p>
         </div>
       ) : (
         <>
@@ -160,7 +223,7 @@ function Portfolio() {
                     <Cell 
                       key={`cell-${index}`} 
                       fill={entry.color}
-                      stroke="#1F2937"
+                      stroke={TC.strokeColor}
                       strokeWidth={2}
                     />
                   ))}
@@ -171,13 +234,13 @@ function Portfolio() {
           </div>
 
           {/* Stats */}
-          <div className="space-y-4 p-4 rounded-lg border border-gray-600 bg-gray-700/30 fade-in">
+          <div className={`space-y-4 p-4 rounded-lg border ${TC.bgStatsSection} fade-in`}>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-gray-400">
-                <FaChartPie className="text-cyan-400" />
+              <div className={`flex items-center gap-2 ${TC.textSecondary}`}>
+                <FaChartPie className={TC.iconColor} />
                 <span className="text-sm font-semibold">Total Value</span>
               </div>
-              <span className="text-lg font-bold text-white">
+              <span className={`text-lg font-bold ${TC.textPrimary}`}>
                 ${totalPortfolioValue.toLocaleString('en-IN', { 
                   minimumFractionDigits: 2, 
                   maximumFractionDigits: 2 
@@ -186,12 +249,12 @@ function Portfolio() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg p-3 border border-gray-600 text-center bg-gray-800/50">
+              <div className={`rounded-lg p-3 border text-center ${TC.bgStatItem}`}>
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <FaCoins className="text-cyan-400 text-sm" />
-                  <span className="text-xs text-gray-400">Invested</span>
+                  <FaCoins className={TC.iconColor} />
+                  <span className={`text-xs ${TC.textSecondary}`}>Invested</span>
                 </div>
-                <div className="text-cyan-400 font-bold text-sm">
+                <div className={`font-bold text-sm ${TC.textInvested}`}>
                   ${investedValue.toLocaleString('en-IN', { 
                     minimumFractionDigits: 2, 
                     maximumFractionDigits: 2 
@@ -199,12 +262,12 @@ function Portfolio() {
                 </div>
               </div>
               
-              <div className="rounded-lg p-3 border border-gray-600 text-center bg-gray-800/50">
+              <div className={`rounded-lg p-3 border text-center ${TC.bgStatItem}`}>
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <FaWallet className="text-green-400 text-sm" />
-                  <span className="text-xs text-gray-400">Cash</span>
+                  <FaWallet className={TC.textCash} />
+                  <span className={`text-xs ${TC.textSecondary}`}>Cash</span>
                 </div>
-                <div className="text-green-400 font-bold text-sm">
+                <div className={`font-bold text-sm ${TC.textCash}`}>
                   ${cashValue.toLocaleString('en-IN', { 
                     minimumFractionDigits: 2, 
                     maximumFractionDigits: 2 
@@ -214,10 +277,10 @@ function Portfolio() {
             </div>
 
             {/* Holdings List */}
-            <div className="pt-3 border-t border-gray-600">
+            <div className={`pt-3 border-t ${TC.bgStatsSection.replace('bg-', 'border-').replace('/30', '')}`}>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-400 font-semibold">Holdings</span>
-                <span className="text-sm text-gray-400">
+                <span className={`text-sm font-semibold ${TC.textSecondary}`}>Holdings</span>
+                <span className={`text-sm ${TC.textSecondary}`}>
                   {portfolioData.filter(item => item.type === 'crypto').length} coins
                 </span>
               </div>
@@ -226,7 +289,7 @@ function Portfolio() {
                 {portfolioData.map((item, index) => (
                   <div 
                     key={index} 
-                    className="flex items-center justify-between py-2 px-2 group hover:bg-gray-600/30 rounded-lg transition-all duration-200 cursor-pointer fade-in"
+                    className={`flex items-center justify-between py-2 px-2 group rounded-lg transition-all duration-200 cursor-pointer fade-in ${TC.bgHoldingItem}`}
                     style={{ animationDelay: `${0.5 + index * 0.1}s` }}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -235,24 +298,24 @@ function Portfolio() {
                         style={{ backgroundColor: item.color }}
                       ></div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-white truncate group-hover:text-cyan-300 transition-colors">
+                        <p className={`text-sm font-medium truncate transition-colors ${TC.textPrimary} ${TC.textHoldingItemHover}`}>
                           {item.name}
                         </p>
                         {item.type === 'crypto' && (
-                          <p className="text-xs text-gray-400 truncate">
+                          <p className={`text-xs truncate ${TC.textSecondary}`}>
                             {item.quantity.toFixed(6)}
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+                      <p className={`text-sm font-bold transition-colors ${TC.textPrimary} ${TC.textHoldingItemHover}`}>
                         ${item.totalValue.toLocaleString('en-IN', { 
                           minimumFractionDigits: 2, 
                           maximumFractionDigits: 2 
                         })}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className={`text-xs ${TC.textSecondary}`}>
                         {totalPortfolioValue > 0 ? ((item.totalValue / totalPortfolioValue) * 100).toFixed(1) : 0}%
                       </p>
                     </div>

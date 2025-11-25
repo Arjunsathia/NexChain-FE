@@ -1,154 +1,307 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { getTrend, getTrendingCoinMarketData } from "@/api/coinApis";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaExclamationTriangle, FaFire, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-function TrendingCoins({ limit = 3 }) {
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
+function TrendingCoins() {
+  const isLight = useThemeCheck();
   const [trendingCoins, setTrendingCoins] = useState([]);
+  const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false); 
+  const [error, setError] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
+  const ws = useRef(null);
+
+  // 💡 Theme Classes Helper (UPDATED bgFooterButton and textRetry)
+  const TC = useMemo(() => ({
+    bgContainer: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textPricePositive: isLight ? "text-green-700" : "text-green-400",
+    textPriceNegative: isLight ? "text-red-700" : "text-red-400",
+    bgItem: isLight ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-orange-600/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-orange-400/30",
+    bgIcon: isLight ? "bg-orange-100" : "bg-orange-400/10",
+    bgRank: (index) => {
+        if (index === 0) return isLight ? "bg-yellow-100 text-yellow-700" : "bg-yellow-500/20 text-yellow-400";
+        if (index === 1) return isLight ? "bg-gray-200 text-gray-700" : "bg-gray-500/20 text-gray-400";
+        return isLight ? "bg-orange-100 text-orange-700" : "bg-orange-500/20 text-orange-400";
+    },
+    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+
+    // START CHANGE: Enhance hover background, border, and text
+    bgFooterButton: isLight 
+      ? "bg-gray-200 border-gray-300 hover:bg-orange-100/70 hover:border-orange-600" // Light: Light orange background with solid orange border
+      : "bg-gray-700/50 border-gray-600 hover:bg-orange-900/40 hover:border-orange-400", // Dark: Dark orange transparent background with solid orange border
+    
+    // Base text color (applied directly to buttons)
+    textAccent: isLight ? "text-orange-600" : "text-orange-400", 
+    // Hover text color (applied via group-hover or direct class)
+    textHoverAccent: isLight ? "group-hover:text-orange-700" : "group-hover:text-orange-300", 
+    
+    // Legacy textRetry class definition (kept for compatibility, though using textAccent/textHoverAccent is cleaner)
+    textRetry: isLight ? "text-orange-600" : "text-orange-400", 
+    
+    borderFooter: isLight ? "border-gray-300" : "border-gray-700",
+    // END CHANGE
+  }), [isLight]);
+
+
+  const fetchTrending = async () => {
+    try {
+      setError(false);
+      setLoading(true);
+      const trendData = await getTrend();
+      const idsArray = trendData.coins.map((coin) => coin.item.id);
+      const marketData = await getTrendingCoinMarketData(idsArray.slice(0, 10));
+      setTrendingCoins(marketData);
+    } catch (err) {
+      console.error("Trending Coins Error:", err.message);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTrending = async () => {
-      try {
-        setError(false);
-        const trendData = await getTrend();
-        const idsArray = trendData.coins.map((coin) => coin.item.id);
-        const marketData = await getTrendingCoinMarketData(idsArray.slice(0, limit));
-        setTrendingCoins(marketData);
-      } catch (err) {
-        console.error("Trending Coins Error:", err.message);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTrending();
-  }, [limit]);
+  }, []);
+
+  useEffect(() => {
+    if (trendingCoins.length === 0) return;
+
+    const symbols = trendingCoins
+      .map(coin => {
+        const symbolMap = {
+          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt", tron: "trxusdt",
+        };
+        return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
+      })
+      .filter(Boolean);
+
+    if (symbols.length === 0) return;
+
+    const streams = symbols.join("/");
+
+    try {
+      ws.current = new WebSocket(
+        `wss://stream.binance.com:9443/stream?streams=${streams}`
+      );
+
+      ws.current.onopen = () => { console.log("WebSocket connected for trending coins live prices"); };
+
+      ws.current.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.stream && message.data) {
+          const symbol = message.stream.replace("@ticker", "");
+          const coinData = message.data;
+
+          const symbolToCoinId = {
+            btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple", adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot", maticusdt: "matic-network", ltcusdt: "litecoin", linkusdt: "chainlink", xlmusdt: "stellar", atomusdt: "cosmos", xmusdt: "monero", etcusdt: "ethereum-classic", bchusdt: "bitcoin-cash", filusdt: "filecoin", thetausdt: "theta", vetusdt: "vechain",
+          };
+
+          const coinId = symbolToCoinId[symbol];
+          if (coinId) {
+            setLivePrices((prev) => ({
+              ...prev,
+              [coinId]: {
+                current_price: parseFloat(coinData.c),
+                price_change_percentage_24h: parseFloat(coinData.P),
+                price_change_24h: parseFloat(coinData.p),
+              },
+            }));
+          }
+        }
+      };
+
+      ws.current.onerror = (error) => { console.error("Trending coins WebSocket error:", error); };
+      ws.current.onclose = () => { console.log("Trending coins WebSocket disconnected"); };
+    } catch (error) { console.error("Trending coins WebSocket setup failed:", error); }
+
+    return () => {
+      if (ws.current) ws.current.close();
+    };
+  }, [trendingCoins]);
+
+  const coinsWithLiveData = useMemo(() => {
+    return trendingCoins.map((coin) => {
+      const livePriceData = livePrices[coin.id];
+      if (livePriceData) {
+        return {
+          ...coin,
+          current_price: livePriceData.current_price,
+          price_change_percentage_24h: livePriceData.price_change_percentage_24h,
+          hasLiveData: true,
+        };
+      }
+      return {
+        ...coin,
+        hasLiveData: false,
+      };
+    });
+  }, [trendingCoins, livePrices]);
+
+  // Show only first 5 coins unless showAll is true
+  const displayedCoins = useMemo(() => {
+    return showAll ? coinsWithLiveData : coinsWithLiveData.slice(0, 5);
+  }, [coinsWithLiveData, showAll]);
 
   const handleCoinClick = (coin) => {
     navigate(`/coin/coin-details/${coin.id}`);
   };
 
   const handleRetry = () => {
-    setLoading(true);
-    setError(false);
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    fetchTrending();
+  };
+
+  const toggleShowAll = () => {
+    setShowAll(!showAll);
   };
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 shadow-2xl rounded-xl p-5 h-full flex flex-col fade-in" style={{ animationDelay: "0.1s" }}>
+    <div className={`rounded-xl p-4 h-full flex flex-col fade-in border ${TC.bgContainer}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-orange-400/10 rounded-lg">
-            <FaFire className="text-orange-400 text-base" />
+      <div className="flex items-center justify-between mb-3 fade-in">
+        <div className="flex items-center gap-2">
+          <div className={`p-1.5 rounded-lg ${TC.bgIcon}`}>
+            <FaFire className={isLight ? "text-orange-600 text-sm" : "text-orange-400 text-sm"} />
           </div>
-          <div>
-            <h2 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-              Trending
-            </h2>
-            <p className="text-xs text-gray-400">
-              Most popular coins
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-400">
-          <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse"></div>
-          Live
+          <h2 className="text-base font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            Trending
+          </h2>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1">
+      <div className="flex-1 min-h-0">
         {loading && (
-          <div className="space-y-3">
-            {Array.from({ length: limit }).map((_, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 fade-in" style={{ animationDelay: `${0.3 + idx * 0.1}s` }}>
-                <div className="flex items-center gap-3 flex-1">
-                  <Skeleton circle width={36} height={36} baseColor="#2d3748" highlightColor="#374151" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton width={60} height={14} baseColor="#2d3748" highlightColor="#374151" />
-                    <Skeleton width={80} height={12} baseColor="#2d3748" highlightColor="#374151" />
+          <div className="space-y-2 h-full overflow-y-auto scrollbar-hide">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} className="flex items-center justify-between p-2 fade-in">
+                <div className="flex items-center gap-2 flex-1">
+                  <Skeleton
+                    circle
+                    width={28}
+                    height={28}
+                    baseColor={TC.skeletonBase}
+                    highlightColor={TC.skeletonHighlight}
+                  />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton
+                      width={50}
+                      height={12}
+                      baseColor={TC.skeletonBase}
+                      highlightColor={TC.skeletonHighlight}
+                    />
+                    <Skeleton
+                      width={40}
+                      height={10}
+                      baseColor={TC.skeletonBase}
+                      highlightColor={TC.skeletonHighlight}
+                    />
                   </div>
                 </div>
-                <Skeleton width={55} height={14} baseColor="#2d3748" highlightColor="#374151" />
+                <Skeleton
+                  width={45}
+                  height={12}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
               </div>
             ))}
           </div>
         )}
 
-        {!loading && (error || trendingCoins.length === 0) && (
-          <div className="text-center py-6 flex flex-col items-center justify-center gap-3 h-full fade-in" style={{ animationDelay: "0.3s" }}>
-            <div className="p-3 bg-yellow-500/10 rounded-full">
-              <FaExclamationTriangle className="text-lg text-yellow-500" />
+        {!loading && (error || coinsWithLiveData.length === 0) && (
+          <div className="text-center py-4 flex flex-col items-center justify-center gap-2 h-full fade-in">
+            <div className={`p-2 rounded-full ${isLight ? "bg-yellow-100" : "bg-yellow-500/10"}`}>
+              <FaExclamationTriangle className={isLight ? "text-yellow-600 text-base" : "text-yellow-500 text-base"} />
             </div>
-            <p className="text-gray-400 text-sm">
-              {error ? "Failed to load trending coins" : "No trending data"}
+            <p className={`${TC.textSecondary} text-xs`}>
+              {error ? "Failed to load trending" : "No trending data"}
             </p>
-            <button 
+            {/* Try Again Button (Applying new hover classes) */}
+            <button
               onClick={handleRetry}
-              className="text-cyan-400 hover:text-cyan-300 text-sm transition-all duration-200 bg-gray-700/50 hover:bg-gray-600/50 px-4 py-2 rounded-xl border border-gray-600 hover:border-cyan-400/30"
+              className={`text-xs transition-all duration-200 px-3 py-1.5 rounded-lg border mt-1 group ${TC.bgFooterButton} ${TC.textAccent} ${TC.textHoverAccent}`}
             >
               Try Again
             </button>
           </div>
         )}
 
-        {!loading && !error && trendingCoins.length > 0 && (
-          <div className="space-y-3">
-            {trendingCoins.map((coin, index) => (
-              <div 
-                key={coin.id} 
-                className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl border border-gray-600 hover:bg-gray-700/50 hover:border-orange-400/30 transition-all duration-200 cursor-pointer group fade-in"
-                style={{ animationDelay: `${0.3 + index * 0.1}s` }}
+        {!loading && !error && coinsWithLiveData.length > 0 && (
+          <div className="h-full overflow-y-auto scrollbar-hide space-y-1.5">
+            {displayedCoins.map((coin, index) => (
+              <div
+                key={coin.id}
+                className={`flex items-center justify-between p-2 rounded-lg border hover:border-orange-400/30 transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
                 onClick={() => handleCoinClick(coin)}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <img
                     src={coin.image}
                     alt={coin.name}
-                    className="w-9 h-9 rounded-full group-hover:scale-110 transition-transform duration-200 shadow-lg"
+                    className="w-7 h-7 rounded-full group-hover:scale-110 transition-transform duration-200"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-white text-sm group-hover:text-orange-300 transition-colors truncate">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className={`font-semibold text-xs transition-colors truncate ${TC.textPrimary} ${isLight ? "group-hover:text-orange-600" : "group-hover:text-orange-300"}`}>
                         {coin.symbol.toUpperCase()}
                       </span>
                       {index < 3 && (
-                        <span className={`text-xs px-2 py-1 rounded-full font-bold ${
-                          index === 0 ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" :
-                          index === 1 ? "bg-gray-500/20 text-gray-400 border border-gray-500/30" :
-                          "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                        }`}>
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${TC.bgRank(index)}`}
+                        >
                           #{index + 1}
                         </span>
                       )}
                     </div>
-                    <span className="text-gray-400 text-xs block truncate">
+                    <span className={`${TC.textSecondary} text-xs block truncate`}>
                       {coin.name}
                     </span>
                   </div>
                 </div>
 
-                <div className="text-right">
+                <div className="text-right min-w-[60px]">
                   <span
-                    className={`font-bold text-sm ${
+                    className={`font-bold text-xs ${
                       coin.price_change_percentage_24h > 0
-                        ? "text-green-400"
-                        : "text-red-400"
+                        ? TC.textPricePositive
+                        : TC.textPriceNegative
                     }`}
                   >
-                    {coin.price_change_percentage_24h > 0 ? "+" : ""}{coin.price_change_percentage_24h?.toFixed(1)}%
+                    {coin.price_change_percentage_24h > 0 ? "+" : ""}
+                    {coin.price_change_percentage_24h?.toFixed(1)}%
                   </span>
-                  <div className="text-gray-300 text-xs mt-1 font-medium">
-                    ${coin.current_price?.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+                  <div className={`${TC.textSecondary} text-xs mt-0.5 font-medium`}>
+                    $
+                    {coin.current_price?.toLocaleString("en-IN", {
+                      minimumFractionDigits:
+                        coin.current_price < 1 ? 4 : 2,
+                      maximumFractionDigits:
+                        coin.current_price < 1 ? 6 : 2,
+                    })}
                   </div>
                 </div>
               </div>
@@ -158,18 +311,49 @@ function TrendingCoins({ limit = 3 }) {
       </div>
 
       {/* Footer */}
-      {!loading && !error && trendingCoins.length > 0 && (
-        <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-700 text-sm text-gray-400 fade-in" style={{ animationDelay: "0.6s" }}>
-          <span>Top {trendingCoins.length} trending</span>
+      {!loading && !error && coinsWithLiveData.length > 0 && (
+        <div className={`flex items-center justify-between pt-2 mt-2 border-t fade-in ${TC.borderFooter}`}>
+          <div className="flex items-center gap-2">
+            <span className={`${TC.textSecondary} text-xs`}>
+              {showAll ? `All ${coinsWithLiveData.length}` : `Top 5`} trending
+            </span>
+            
+            {/* Show Less/More Button (Applying new hover classes) */}
+            <button
+              onClick={toggleShowAll}
+              className={`lg:hidden text-xs font-medium py-1 px-2 rounded border transition-all duration-200 group ${TC.bgFooterButton} ${TC.textAccent} ${TC.textHoverAccent}`}
+            >
+              {showAll ? "Show Less" : "Show More"}
+            </button>
+          </div>
+
+          {/* Explore Button (Applying new hover classes) */}
           <button
-            onClick={() => navigate('/cryptolist')}
-            className="text-orange-400 hover:text-orange-300 transition-all duration-200 flex items-center gap-1 text-sm"
+            onClick={() => navigate("/cryptolist")}
+            className={`flex items-center gap-1 text-xs font-semibold py-1.5 px-3 rounded-lg border transition-all duration-200 group ${TC.bgFooterButton} ${TC.textAccent} ${TC.textHoverAccent}`}
           >
             Explore
-            <FaArrowRight className="text-xs" />
+            <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
         </div>
       )}
+
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        @media (max-width: 1024px) {
+          .overflow-y-auto {
+            max-height: 300px;
+            overflow-y: auto;
+          }
+        }
+      `}</style>
     </div>
   );
 }

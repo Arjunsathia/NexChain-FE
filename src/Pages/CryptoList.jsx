@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
@@ -10,11 +10,41 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
 import TradeModal from "./UserProfile/Components/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
+
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
 
 function CryptoList() {
+  const isLight = useThemeCheck();
   const [globalData, setGlobalData] = useState({});
   const [loading, setLoading] = useState(true);
   const { purchasedCoins } = usePurchasedCoins();
+
+  // START CHANGE: State for controlled main component fade-in
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 100); // Small delay to ensure CSS classes load
+    return () => clearTimeout(timer);
+  }, []);
+  // END CHANGE
 
   // Trade Modal state at the top level
   const [tradeModal, setTradeModal] = useState({
@@ -22,6 +52,36 @@ function CryptoList() {
     coin: null,
     type: "buy",
   });
+
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    // General text colors
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    
+    // Backgrounds
+    bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
+    bgCard: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md border-b border-gray-200" : "bg-gray-900/80 backdrop-blur-md border-b border-gray-800",
+    
+    // Accents
+    accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
+    textAccent: isLight ? "text-blue-600" : "text-cyan-400",
+    
+    // Skeleton Loaders
+    skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
+    
+    // Pill Colors
+    bgPillPositive: isLight ? "bg-green-100 text-green-700 border-green-200" : "bg-green-500/10 text-green-400 border-green-500/20",
+    bgPillNegative: isLight ? "bg-red-100 text-red-700 border-red-200" : "bg-red-500/10 text-red-400 border-red-500/20",
+    
+    // Icons
+    iconBg: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",
+    
+  }), [isLight]);
+
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -57,171 +117,132 @@ function CryptoList() {
     });
   }, []);
 
+  // Determine pill classes based on value
+  const getPillClasses = (value) => {
+    return value < 0 ? TC.bgPillNegative : TC.bgPillPositive;
+  };
+
   return (
-    <div className="min-h-screen text-white p-4 lg:p-6 relative">
-      <div className="max-w-7xl mx-auto">
-        {/* Market Stats Grid */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 py-5 fade-in"
-          style={{ animationDelay: "0.1s" }}
-        >
-          {/* Left: Market Stats */}
-          <div className="flex flex-col gap-4 lg:gap-6">
-            {/* Market Cap Card */}
-            <div
-              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-2xl fade-in"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <p
-                    className="text-gray-400 text-sm mb-3 fade-in"
-                    style={{ animationDelay: "0.3s" }}
-                  >
-                    {loading ? (
-                      <Skeleton
-                        width={80}
-                        baseColor="#2c303a"
-                        highlightColor="#3a3f4d"
-                      />
-                    ) : (
-                      "Total Market Cap"
-                    )}
-                  </p>
-                  <h2
-                    className="text-2xl lg:text-3xl font-bold text-white mb-3 fade-in truncate"
-                    style={{ animationDelay: "0.3s" }}
-                  >
-                    {loading ? (
-                      <Skeleton
-                        width={160}
-                        height={32}
-                        baseColor="#2c303a"
-                        highlightColor="#3a3f4d"
-                      />
-                    ) : (
-                      `$${formatNumberWithCommas(
-                        globalData?.total_market_cap?.usd
-                      )}`
-                    )}
-                  </h2>
-                  {!loading && (
-                    <div
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold fade-in ${
-                        globalData?.market_cap_change_percentage_24h_usd < 0
-                          ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                          : "bg-green-500/20 text-green-400 border border-green-500/30"
-                      }`}
-                      style={{ animationDelay: "0.4s" }}
-                    >
-                      {globalData?.market_cap_change_percentage_24h_usd < 0
-                        ? "▼"
-                        : "▲"}{" "}
-                      {Math.abs(
-                        globalData?.market_cap_change_percentage_24h_usd
-                      ).toFixed(2)}
-                      %
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-shrink-0 self-center fade-in" style={{ animationDelay: "0.5s" }}>
-                  {loading ? (
-                    <Skeleton
-                      width={80}
-                      height={50}
-                      baseColor="#2c303a"
-                      highlightColor="#3a3f4d"
-                    />
-                  ) : (
-                    <SparklineGraph />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 24h Volume Card */}
-            <div
-              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-2xl fade-in"
-              style={{ animationDelay: "0.3s" }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <p
-                    className="text-gray-400 text-sm mb-3 fade-in"
-                    style={{ animationDelay: "0.4s" }}
-                  >
-                    {loading ? (
-                      <Skeleton
-                        width={100}
-                        baseColor="#2c303a"
-                        highlightColor="#3a3f4d"
-                      />
-                    ) : (
-                      "24h Trading Volume"
-                    )}
-                  </p>
-                  <h2
-                    className="text-2xl lg:text-3xl font-bold text-white truncate fade-in"
-                    style={{ animationDelay: "0.4s" }}
-                  >
-                    {loading ? (
-                      <Skeleton
-                        width={180}
-                        height={32}
-                        baseColor="#2c303a"
-                        highlightColor="#3a3f4d"
-                      />
-                    ) : (
-                      `$${formatNumberWithCommas(globalData?.total_volume?.usd)}`
-                    )}
-                  </h2>
-                  {!loading && (
-                    <div className="text-cyan-400 text-sm font-medium fade-in" style={{ animationDelay: "0.5s" }}>
-                      Global cryptocurrency volume
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-shrink-0 self-center fade-in" style={{ animationDelay: "0.6s" }}>
-                  {loading ? (
-                    <Skeleton
-                      width={80}
-                      height={50}
-                      baseColor="#2c303a"
-                      highlightColor="#3a3f4d"
-                    />
-                  ) : (
-                    <SparklineGraph />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Middle: Trending Coins */}
-          <div className="fade-in" style={{ animationDelay: "0.4s" }}>
-            <TrendingCoins />
-          </div>
-
-          {/* Right: Top Gainers */}
-          <div className="fade-in" style={{ animationDelay: "0.5s" }}>
-            <TopGainers />
-          </div>
+    // Applied transition to the main wrapper using isMounted state
+    <div className={`min-h-screen ${TC.textPrimary} transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+      
+      {/* 1. Header Section */}
+     <div 
+  // This header already uses its own animation classes and will fade in with the main content
+  className={`
+    sticky top-2 z-40 
+    max-w-7xl mx-auto 
+    rounded-xl shadow-md
+    ${TC.bgHeader} 
+    transition-colors duration-300
+    p-0 
+  `}
+>
+  <div className="px-4 lg:px-6 py-4">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg ${TC.iconBg}`}>
+          <FaLayerGroup className="text-lg" />
         </div>
-
-        {/* Coin Table - Pass the trade handler */}
-        <div className="fade-in" style={{ animationDelay: "0.6s" }}>
-          <CoinTable onTrade={handleTrade} />
-        </div>
-
-        {/* News Section */}
-        <div className="fade-in" style={{ animationDelay: "0.7s" }}>
-          <NewsSection />
+        <div>
+          <h1 className="text-xl font-bold leading-none">Market Overview</h1>
+          <p className={`text-xs mt-1 ${TC.textSecondary}`}>Global Crypto Metrics & Trends</p>
         </div>
       </div>
+      
+      {/* Quick Global Stats (Visible on Desktop) */}
+      <div className="hidden md:flex items-center gap-6 text-sm">
+        <div className="flex flex-col items-end">
+          <span className={TC.textTertiary}>Market Cap</span>
+          <span className="font-semibold">
+            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_market_cap?.usd)}`}
+          </span>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className={TC.textTertiary}>24h Volume</span>
+          <span className="font-semibold">
+            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_volume?.usd)}`}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-      {/* Trade Modal - Rendered at the top level */}
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-8">
+        
+        {/* 2. Bento Grid Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          
+          {/* Global Market Card (Large) - Added 'fade-in' class */}
+          <div className={`lg:col-span-4 rounded-2xl p-6 border transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in`} style={{ transitionDelay: '0.1s' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className={`p-2 rounded-lg ${isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400"}`}>
+                  <FaGlobeAmericas />
+                </div>
+                <h3 className="font-bold">Global Market</h3>
+              </div>
+              {!loading && (
+                <span className={`text-xs font-bold px-2 py-1 rounded-full border ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)}`}>
+                  {globalData?.market_cap_change_percentage_24h_usd >= 0 ? "+" : ""}
+                  {globalData?.market_cap_change_percentage_24h_usd?.toFixed(2)}%
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <p className={`text-sm mb-1 ${TC.textTertiary}`}>Total Market Cap</p>
+                <h2 className="text-3xl font-bold tracking-tight">
+                  {loading ? <Skeleton width={180} height={36} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_market_cap?.usd)}`}
+                </h2>
+              </div>
+              
+              <div className="h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                 {/* Decorative Sparkline Placeholder or Real Graph */}
+                 {loading ? <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : <SparklineGraph />}
+              </div>
+
+              <div className="pt-4 border-t border-gray-200/10 flex justify-between items-center text-sm">
+                 <span className={TC.textSecondary}>24h Volume</span>
+                 <span className={`font-mono font-semibold ${TC.textPrimary}`}>
+                    {loading ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_volume?.usd)}`}
+                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Trending Coins (Medium) - Added 'fade-in' class */}
+          <div className="lg:col-span-4 flex flex-col h-full fade-in" style={{ transitionDelay: '0.2s' }}>
+             <TrendingCoins />
+          </div>
+
+          {/* Top Gainers (Medium) - Added 'fade-in' class */}
+          <div className="lg:col-span-4 flex flex-col h-full fade-in" style={{ transitionDelay: '0.3s' }}>
+             <TopGainers />
+          </div>
+        </div>
+
+        {/* 3. Main Coin List Section - Added 'fade-in' class */}
+        <div className="space-y-4 fade-in" style={{ transitionDelay: '0.4s' }}>
+          <div className={`rounded-2xl border overflow-hidden transition-all duration-300 p-6 ${TC.bgCard}`}>
+             <CoinTable onTrade={handleTrade} />
+          </div>
+        </div>
+
+        {/* 4. News Section - Added 'fade-in' class */}
+        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ transitionDelay: '0.5s' }}>
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+            <FaFire className="text-orange-500" />
+            Latest Crypto News
+          </h2>
+          <NewsSection />
+        </div>
+
+      </div>
+
+      {/* Trade Modal */}
       <TradeModal
         show={tradeModal.show}
         onClose={handleCloseModal}

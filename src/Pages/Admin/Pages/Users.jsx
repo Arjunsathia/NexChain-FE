@@ -1,5 +1,5 @@
 import { deleteById, getData } from "@/api/axiosConfig";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import {
   FaEye,
   FaPlus,
@@ -22,14 +22,35 @@ import UserForm from "../Components/Users/UserForm";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+  const [isLight, setIsLight] = useState(
+    !document.documentElement.classList.contains("dark")
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isLight;
+};
+
+
 function Users() {
+  const isLight = useThemeCheck();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [showForm, setShowForm] = useState({
-    show: false,
-    id: "",
-  });
+  const [showForm, setShowForm] = useState({ show: false, id: "" });
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -39,6 +60,39 @@ function Users() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // 💡 Theme Classes Helper (FIXED for consistent dark/translucent look)
+  const TC = useMemo(() => ({
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    
+    // Backgrounds & Borders
+    bgContainer: isLight ? "bg-white/90 border-gray-300" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgItem: isLight ? "bg-white/80 border-gray-300 hover:border-cyan-600/50" : "bg-gradient-to-br from-gray-800/50 to-gray-800/30 border-gray-700 hover:border-cyan-400/50",
+    bgTableHead: isLight ? "bg-gray-100/90 border-gray-300 text-gray-600" : "bg-gray-800/50",
+    borderDivide: isLight ? "divide-gray-300" : "divide-gray-700",
+    bgInput: isLight ? "bg-white border-gray-300 text-gray-800 placeholder-gray-500" : "bg-gray-800/50 border-gray-600 text-white placeholder-gray-400",
+    
+    // Buttons
+    btnPrimary: "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25",
+    btnSecondary: isLight ? "border-gray-400 text-gray-700 hover:bg-gray-100" : "border-gray-600 text-gray-300 hover:bg-gray-700/50",
+    btnAction: isLight ? "bg-gray-200 hover:bg-cyan-600 text-cyan-600 hover:text-white border-gray-300 hover:border-cyan-600" : "bg-gray-700/50 hover:bg-cyan-600 text-cyan-400 hover:text-white border-gray-600 hover:border-cyan-500",
+    btnDelete: isLight ? "bg-gray-200 hover:bg-red-600 text-red-600 hover:text-white border-gray-300 hover:border-red-600" : "bg-gray-700/50 hover:bg-red-600 text-red-400 hover:text-white border-gray-600 hover:border-red-500",
+    
+    // Modals
+    bgModal: isLight ? "bg-white/90 border-gray-300 shadow-2xl" : "bg-gray-800/90 backdrop-blur-sm border-gray-700",
+    bgModalItem: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/50 border-gray-600",
+    
+    // PL Colors
+    textPLPositive: isLight ? "text-green-700" : "text-green-400",
+    textPLNegative: isLight ? "text-red-700" : "text-red-400",
+
+    // Pill backgrounds
+    bgPillRed: isLight ? "bg-red-100/50 border-red-300" : "bg-red-500/20 border-red-500/30",
+    bgPillYellow: isLight ? "bg-yellow-100/50 border-yellow-300" : "bg-yellow-500/20 border-yellow-500/30",
+  }), [isLight]);
+
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -122,12 +176,13 @@ function Users() {
       toast.success("User deleted successfully!", {
         icon: "✅",
         style: {
-          background: "#111827",
-          color: "#22c55e",
+          background: isLight ? "#FFFFFF" : "#111827",
+          color: isLight ? "#16A34A" : "#22c55e",
           fontWeight: "600",
           fontSize: "14px",
           padding: "12px 16px",
           borderRadius: "8px",
+          boxShadow: isLight ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "0 4px 6px -1px rgba(0, 0, 0, 0.4)",
         },
       });
       fetchData();
@@ -253,9 +308,9 @@ function Users() {
         key="prev"
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-gray-600 bg-gray-800/50 text-gray-300 
+        className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border ${TC.btnSecondary}
                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700/50 transition-all duration-200 
-                   text-xs sm:text-sm"
+                   text-xs sm:text-sm`}
       >
         Previous
       </button>
@@ -270,8 +325,8 @@ function Users() {
           className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border transition-all duration-200 text-xs sm:text-sm
             ${
               currentPage === page
-                ? "bg-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/25"
-                : "border-gray-600 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
+                ? TC.btnPaginationActive
+                : TC.btnSecondary
             }`}
         >
           {page}
@@ -285,9 +340,9 @@ function Users() {
         key="next"
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-gray-600 bg-gray-800/50 text-gray-300 
+        className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border ${TC.btnSecondary}
                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700/50 transition-all duration-200 
-                   text-xs sm:text-sm"
+                   text-xs sm:text-sm`}
       >
         Next
       </button>
@@ -307,7 +362,7 @@ function Users() {
 </h1>
 
 
-            <p className="text-xs sm:text-sm text-gray-400 mt-1 truncate">
+            <p className={`text-xs sm:text-sm mt-1 truncate ${TC.textSecondary}`}>
               Manage platform users and permissions
             </p>
           </div>
@@ -320,20 +375,19 @@ function Users() {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-800/50 border border-gray-600 rounded-lg py-2 px-3 
-                         text-white placeholder-gray-400 text-xs sm:text-sm focus:outline-none 
+                className={`w-full rounded-lg py-2 px-3 
+                         text-xs sm:text-sm focus:outline-none 
                          focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 
-                         pr-9"
+                         pr-9 ${TC.bgInput} ${TC.textPrimary}`}
               />
-              <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+              <FaSearch className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-xs ${TC.textSecondary}`} />
             </div>
           </div>
 
           <button
-            className="w-full sm:w-auto bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 
-              text-white font-medium py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all duration-300 
+            className={`w-full sm:w-auto font-medium py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all duration-300 
               shadow-lg hover:shadow-cyan-500/25 transform hover:scale-105 flex items-center justify-center gap-2
-              text-xs sm:text-sm border border-cyan-500/30 hover:border-cyan-400/50 fade-in order-1 sm:order-none"
+              text-xs sm:text-sm border border-cyan-500/30 hover:border-cyan-400/50 fade-in order-1 sm:order-none ${TC.btnPrimary}`}
             onClick={() => setShowForm({ show: true, id: "" })}
           >
             <FaPlus className="text-xs sm:text-sm" />
@@ -343,7 +397,7 @@ function Users() {
 
         {/* Content Section */}
         {Loading ? (
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in">
+          <div className={`rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in ${TC.bgContainer}`}>
             <div className="flex justify-center items-center gap-2 sm:gap-3 text-cyan-400">
               <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
               <span className="text-xs sm:text-sm lg:text-base">
@@ -352,48 +406,47 @@ function Users() {
             </div>
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in">
-            <div className="text-gray-400 text-sm sm:text-base lg:text-lg">
+          <div className={`rounded-xl p-4 sm:p-6 lg:p-8 text-center fade-in ${TC.bgContainer}`}>
+            <div className={`text-sm sm:text-base lg:text-lg ${TC.textSecondary}`}>
               {searchTerm
                 ? "No users found matching your search"
                 : "No users found"}
             </div>
             <button
-              className="mt-3 sm:mt-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 
-                         text-white font-medium py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 w-full sm:w-auto 
+              className={`mt-3 sm:mt-4 font-medium py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 w-full sm:w-auto 
                          text-xs sm:text-sm shadow-lg hover:shadow-cyan-500/25 transform hover:scale-105
-                         border border-cyan-500/30 hover:border-cyan-400/50 fade-in"
+                         border border-cyan-500/30 hover:border-cyan-400/50 fade-in ${TC.btnPrimary}`}
               onClick={() => setShowForm({ show: true, id: "" })}
             >
               Create First User
             </button>
           </div>
         ) : (
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden fade-in">
+          <div className={`rounded-xl overflow-hidden fade-in border ${TC.bgContainer}`}>
             {/* Mobile/Tablet Card View - Shows up to xl breakpoint */}
             <div className="xl:hidden space-y-2 sm:space-y-3 p-2 sm:p-3 lg:p-4">
               {currentItems.map((user, index) => (
                 <div
                   key={user.id}
-                  className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-gray-700
-                    transition-all duration-300 ease-out hover:bg-gray-800/50 hover:border-cyan-400/50 fade-in"
+                  className={`rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border 
+                    transition-all duration-300 ease-out hover:border-cyan-400/50 fade-in ${TC.bgItem}`}
                   style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                 >
                   <div className="flex justify-between items-start mb-2 sm:mb-3">
                     <div className="flex-1 min-w-0 pr-2 sm:pr-3">
-                      <h3 className="text-white font-semibold text-sm sm:text-base lg:text-lg truncate">
+                      <h3 className={`font-semibold text-sm sm:text-base lg:text-lg truncate ${TC.textPrimary}`}>
                         {user.name}
                       </h3>
                       <p className="text-cyan-400 text-xs sm:text-sm break-all truncate">
                         {user.email}
                       </p>
                       {user.phone && (
-                        <p className="text-gray-400 text-xs sm:text-sm mt-1 truncate">
+                        <p className={`text-xs sm:text-sm mt-1 truncate ${TC.textSecondary}`}>
                           {user.phone}
                         </p>
                       )}
                     </div>
-                    <span className="text-gray-500 text-xs sm:text-sm flex-shrink-0">
+                    <span className={`text-xs sm:text-sm flex-shrink-0 ${TC.textTertiary}`}>
                       #{startIndex + index + 1}
                     </span>
                   </div>
@@ -401,11 +454,9 @@ function Users() {
                   {/* Responsive button layout - Only View and Delete */}
                   <div className="grid grid-cols-2 gap-1 sm:gap-2">
                     <button
-                      className="bg-gray-700/50 hover:bg-cyan-600 text-cyan-400 hover:text-white 
-                                rounded-lg p-1.5 sm:p-2 transition-all duration-200 
+                      className={`rounded-lg p-1.5 sm:p-2 transition-all duration-200 
                                 flex flex-col items-center justify-center gap-1
-                                border border-gray-600 hover:border-cyan-500
-                                shadow-sm hover:shadow-cyan-500/25 transform hover:scale-105"
+                                border shadow-sm hover:shadow-cyan-500/25 transform hover:scale-105 ${TC.btnAction}`}
                       onClick={() => handleViewUser(user)}
                     >
                       <FaEye className="text-xs sm:text-sm lg:text-base" />
@@ -414,11 +465,9 @@ function Users() {
 
                     <button
                       onClick={() => handleDeleteClick(user)}
-                      className="bg-gray-700/50 hover:bg-red-600 text-red-400 hover:text-white 
-                                rounded-lg p-1.5 sm:p-2 transition-all duration-200 
+                      className={`rounded-lg p-1.5 sm:p-2 transition-all duration-200 
                                 flex flex-col items-center justify-center gap-1
-                                border border-gray-600 hover:border-red-500
-                                shadow-sm hover:shadow-red-500/25 transform hover:scale-105"
+                                border shadow-sm hover:shadow-red-500/25 transform hover:scale-105 ${TC.btnDelete}`}
                     >
                       <MdDeleteForever className="text-xs sm:text-sm lg:text-base" />
                       <span className="text-xs">Delete</span>
@@ -431,8 +480,8 @@ function Users() {
             {/* Desktop Table View - Only shows on xl and above */}
             <div className="hidden xl:block overflow-x-auto">
               <table className="w-full table-auto text-left">
-                <thead className="text-gray-400 text-sm bg-gray-800/50">
-                  <tr className="border-b border-gray-700">
+                <thead className={TC.bgTableHead}>
+                  <tr className={`border-b ${TC.borderDivide}`}>
                     <th className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6 font-semibold uppercase tracking-wider text-xs lg:text-sm">
                       #
                     </th>
@@ -450,36 +499,33 @@ function Users() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-sm xl:text-base divide-y divide-gray-700">
+                <tbody className={`text-sm xl:text-base divide-y ${TC.borderDivide}`}>
                   {currentItems.map((user, index) => (
                     <tr
                       key={user.id}
                       className="transition-all duration-300 ease-out hover:bg-gray-800/40 fade-in"
                       style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                     >
-                      <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6 text-gray-300 font-medium text-xs lg:text-sm">
+                      <td className={`py-3 lg:py-4 px-3 lg:px-4 xl:px-6 font-medium text-xs lg:text-sm ${TC.textSecondary}`}>
                         {startIndex + index + 1}
                       </td>
                       <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6">
-                        <div className="text-white font-medium text-sm lg:text-base">
+                        <div className={`${TC.textPrimary} font-medium text-sm lg:text-base`}>
                           {user.name}
                         </div>
                       </td>
-                      <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6 text-gray-300 text-sm lg:text-base">
+                      <td className={`py-3 lg:py-4 px-3 lg:px-4 xl:px-6 text-sm lg:text-base ${TC.textSecondary}`}>
                         {user.email}
                       </td>
-                      <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6 text-gray-300 text-sm lg:text-base">
+                      <td className={`py-3 lg:py-4 px-3 lg:px-4 xl:px-6 text-sm lg:text-base ${TC.textSecondary}`}>
                         {user.phone || "N/A"}
                       </td>
                       <td className="py-3 lg:py-4 px-3 lg:px-4 xl:px-6">
                         <div className="flex items-center justify-end gap-1 lg:gap-2">
                           <button
-                            className="
-                              bg-gray-700/50 hover:bg-cyan-600 text-cyan-400 hover:text-white 
-                              rounded-lg lg:rounded-xl p-2 lg:p-2.5 xl:p-3 transition-all duration-200 
-                              hover:shadow-cyan-500/25 transform hover:scale-105 border border-gray-600 hover:border-cyan-500
-                              flex items-center gap-1 lg:gap-1.5 xl:gap-2 group text-xs lg:text-sm
-                            "
+                            className={`rounded-lg lg:rounded-xl p-2 lg:p-2.5 xl:p-3 transition-all duration-200 
+                              hover:shadow-cyan-500/25 transform hover:scale-105 border 
+                              flex items-center gap-1 lg:gap-1.5 xl:gap-2 group text-xs lg:text-sm ${TC.btnAction}`}
                             onClick={() => handleViewUser(user)}
                             title="View User Details"
                           >
@@ -489,12 +535,9 @@ function Users() {
 
                           <button
                             onClick={() => handleDeleteClick(user)}
-                            className="
-                              bg-gray-700/50 hover:bg-red-600 text-red-400 hover:text-white 
-                              rounded-lg lg:rounded-xl p-2 lg:p-2.5 xl:p-3 transition-all duration-200 
-                              hover:shadow-red-500/25 transform hover:scale-105 border border-gray-600 hover:border-red-500
-                              flex items-center gap-1 lg:gap-1.5 xl:gap-2 group text-xs lg:text-sm
-                            "
+                            className={`rounded-lg lg:rounded-xl p-2 lg:p-2.5 xl:p-3 transition-all duration-200 
+                              hover:shadow-red-500/25 transform hover:scale-105 border 
+                              flex items-center gap-1 lg:gap-1.5 xl:gap-2 group text-xs lg:text-sm ${TC.btnDelete}`}
                             title="Delete User"
                           >
                             <MdDeleteForever className="text-xs lg:text-sm group-hover:scale-110 transition-transform" />
@@ -510,9 +553,9 @@ function Users() {
 
             {/* Pagination Section */}
             {totalPages > 1 && (
-              <div className="border-t border-gray-700 bg-gray-800/50 px-4 py-3 sm:px-6 fade-in">
+              <div className={`border-t ${TC.borderDivide} ${TC.bgTableHead} px-4 py-3 sm:px-6 fade-in`}>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div className="text-xs sm:text-sm text-gray-400">
+                  <div className={`text-xs sm:text-sm ${TC.textSecondary}`}>
                     Showing {startIndex + 1} to{" "}
                     {Math.min(startIndex + itemsPerPage, filteredData.length)}{" "}
                     of {filteredData.length} results
@@ -531,7 +574,7 @@ function Users() {
             )}
 
             {/* Table Footer */}
-            <div className="bg-gray-800/50 px-2 sm:px-3 lg:px-4 xl:px-6 py-2 sm:py-3 lg:py-4 border-t border-gray-700 fade-in">
+            <div className={`px-2 sm:px-3 lg:px-4 xl:px-6 py-2 sm:py-3 lg:py-4 border-t ${TC.borderDivide} ${TC.bgTableHead} fade-in`}>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-400">
                 <span>
                   Showing {currentItems.length} of {filteredData.length} user
@@ -558,7 +601,7 @@ function Users() {
       {/* User View Modal */}
       {showViewModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-          <div className="bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className={`rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${TC.bgModal}`}>
             {modalLoading ? (
               <div className="flex justify-center items-center py-12">
                 <div className="flex flex-col items-center gap-3">
@@ -571,13 +614,13 @@ function Users() {
             ) : selectedUser ? (
               <>
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                <div className={`flex items-center justify-between p-6 border-b ${TC.borderDivide}`}>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                       {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">
+                      <h2 className={`text-2xl font-bold ${TC.textPrimary}`}>
                         {selectedUser.name}
                       </h2>
                       <p className="text-cyan-400 text-sm">
@@ -587,7 +630,7 @@ function Users() {
                   </div>
                   <button
                     onClick={closeViewModal}
-                    className="p-2 hover:bg-gray-700 rounded-lg transition-all duration-200 text-gray-400 hover:text-white"
+                    className={`p-2 rounded-lg transition-all duration-200 ${TC.textSecondary} hover:bg-gray-700 hover:text-white`}
                   >
                     <FaTimes className="text-xl" />
                   </button>
@@ -597,37 +640,37 @@ function Users() {
                 <div className="p-6 space-y-6">
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div className={`flex items-center gap-3 p-3 rounded-lg border ${TC.bgModalItem}`}>
                       <div className="p-2 bg-cyan-500/20 rounded-lg">
                         <FaEnvelope className="text-cyan-400 text-lg" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-400">Email</p>
-                        <p className="text-white font-medium">
+                        <p className={`text-sm ${TC.textSecondary}`}>Email</p>
+                        <p className={`font-medium ${TC.textPrimary}`}>
                           {selectedUser.email}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div className={`flex items-center gap-3 p-3 rounded-lg border ${TC.bgModalItem}`}>
                       <div className="p-2 bg-green-500/20 rounded-lg">
                         <FaPhone className="text-green-400 text-lg" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-400">Phone</p>
-                        <p className="text-white font-medium">
+                        <p className={`text-sm ${TC.textSecondary}`}>Phone</p>
+                        <p className={`font-medium ${TC.textPrimary}`}>
                           {selectedUser.phone || "Not provided"}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div className={`flex items-center gap-3 p-3 rounded-lg border ${TC.bgModalItem}`}>
                       <div className="p-2 bg-purple-500/20 rounded-lg">
                         <FaCalendar className="text-purple-400 text-lg" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-400">Joined</p>
-                        <p className="text-white font-medium">
+                        <p className={`text-sm ${TC.textSecondary}`}>Joined</p>
+                        <p className={`font-medium ${TC.textPrimary}`}>
                           {selectedUser.createdAt
                             ? new Date(
                                 selectedUser.createdAt
@@ -637,12 +680,12 @@ function Users() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div className={`flex items-center gap-3 p-3 rounded-lg border ${TC.bgModalItem}`}>
                       <div className="p-2 bg-blue-500/20 rounded-lg">
                         <FaUser className="text-blue-400 text-lg" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-400">Status</p>
+                        <p className={`text-sm ${TC.textSecondary}`}>Status</p>
                         <p className="text-green-400 font-medium">Active</p>
                       </div>
                     </div>
@@ -650,7 +693,7 @@ function Users() {
 
                   {/* User Statistics with Holdings Data */}
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${TC.textPrimary}`}>
                       <FaChartLine className="text-cyan-400" />
                       User Statistics & Holdings
                     </h3>
@@ -690,7 +733,7 @@ function Users() {
                         return stats.map((stat, index) => (
                           <div
                             key={index}
-                            className="text-center p-4 bg-gray-700/30 rounded-lg border border-gray-600"
+                            className={`text-center p-4 rounded-lg border ${TC.bgCardContent}`}
                           >
                             <div
                               className={`p-2 ${stat.bg} rounded-lg inline-flex mb-2`}
@@ -702,7 +745,7 @@ function Users() {
                             >
                               {stat.value}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className={`text-xs ${TC.textSecondary}`}>
                               {stat.label}
                             </p>
                           </div>
@@ -712,20 +755,20 @@ function Users() {
                   </div>
 
                   {/* Holdings Details */}
-                  <div className="bg-gray-700/30 rounded-lg border border-gray-600 p-4">
-                    <h4 className="text-white font-semibold mb-3">
+                  <div className={`rounded-lg border p-4 ${TC.bgModalItem}`}>
+                    <h4 className={`font-semibold mb-3 ${TC.textPrimary}`}>
                       Investment Details
                     </h4>
-                    <div className="space-y-2 text-sm">
+                    <div className={`space-y-2 text-sm ${TC.textSecondary}`}>
                       {(() => {
                         const userStats = getUserStats(selectedUser);
                         return (
                           <>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">
+                              <span className={TC.textSecondary}>
                                 Total Coins Held:
                               </span>
-                              <span className="text-white font-medium">
+                              <span className={TC.textPrimary + " font-medium"}>
                                 {userStats.totalCoinsHeld.toLocaleString(
                                   "en-IN",
                                   { maximumFractionDigits: 2 }
@@ -733,30 +776,30 @@ function Users() {
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">
+                              <span className={TC.textSecondary}>
                                 Total Invested:
                               </span>
-                              <span className="text-white font-medium">
+                              <span className={TC.textPrimary + " font-medium"}>
                                 {formatCurrency(userStats.totalInvested)}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">
+                              <span className={TC.textSecondary}>
                                 Current Value:
                               </span>
-                              <span className="text-white font-medium">
+                              <span className={TC.textPrimary + " font-medium"}>
                                 {formatCurrency(userStats.portfolioValue)}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">
+                              <span className={TC.textSecondary}>
                                 Profit/Loss:
                               </span>
                               <span
                                 className={`font-medium ${
                                   userStats.profitLoss >= 0
-                                    ? "text-green-400"
-                                    : "text-red-400"
+                                    ? TC.textPLPositive
+                                    : TC.textPLNegative
                                 }`}
                               >
                                 <div className="flex items-center gap-1">
@@ -780,10 +823,10 @@ function Users() {
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">
+                              <span className={TC.textSecondary}>
                                 Total Trades:
                               </span>
-                              <span className="text-white font-medium">
+                              <span className={TC.textPrimary + " font-medium"}>
                                 {userStats.totalTrades}
                               </span>
                             </div>
@@ -794,30 +837,30 @@ function Users() {
                   </div>
 
                   {/* Additional Information */}
-                  <div className="bg-gray-700/30 rounded-lg border border-gray-600 p-4">
-                    <h4 className="text-white font-semibold mb-3">
+                  <div className={`rounded-lg border p-4 ${TC.bgModalItem}`}>
+                    <h4 className={`font-semibold mb-3 ${TC.textPrimary}`}>
                       Additional Information
                     </h4>
-                    <div className="space-y-2 text-sm">
+                    <div className={`space-y-2 text-sm ${TC.textSecondary}`}>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Account Type:</span>
+                        <span className={TC.textSecondary}>Account Type:</span>
                         <span className="text-cyan-400 font-medium">
                           {selectedUser.role || "Standard User"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Last Active:</span>
-                        <span className="text-white font-medium">Recently</span>
+                        <span className={TC.textSecondary}>Last Active:</span>
+                        <span className={TC.textPrimary + " font-medium"}>Recently</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Modal Footer */}
-                <div className="flex justify-end gap-3 p-6 border-t border-gray-700">
+                <div className={`flex justify-end gap-3 p-6 border-t ${TC.borderDivide}`}>
                   <button
                     onClick={closeViewModal}
-                    className="px-6 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-all duration-200 font-medium"
+                    className={`px-6 py-2.5 border rounded-lg transition-all duration-200 font-medium ${TC.btnSecondary}`}
                   >
                     Close
                   </button>
@@ -826,7 +869,7 @@ function Users() {
                       closeViewModal();
                       navigate("/user-profile/" + selectedUser.id);
                     }}
-                    className="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-cyan-500/25"
+                    className={`px-6 py-2.5 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-cyan-500/25 ${TC.btnPrimary}`}
                   >
                     Full Profile
                   </button>
@@ -854,15 +897,15 @@ function Users() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && userToDelete && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-          <div className="bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-2xl max-w-md w-full">
+          <div className={`rounded-2xl max-w-md w-full ${TC.bgModal}`}>
             {/* Modal Header */}
-            <div className="flex items-center gap-4 p-6 border-b border-gray-700">
+            <div className={`flex items-center gap-4 p-6 border-b ${TC.borderDivide}`}>
               <div className="p-3 bg-red-500/20 rounded-full">
                 <FaTrash className="text-red-400 text-xl" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Delete User</h2>
-                <p className="text-gray-400 text-sm">
+                <h2 className={`text-xl font-bold ${TC.textPrimary}`}>Delete User</h2>
+                <p className={`text-sm ${TC.textSecondary}`}>
                   This action cannot be undone
                 </p>
               </div>
@@ -870,28 +913,28 @@ function Users() {
 
             {/* Modal Body */}
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+              <div className={`flex items-center gap-3 mb-4 p-3 rounded-lg border ${TC.bgPillRed}`}>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center text-white font-bold">
                   {userToDelete.name?.charAt(0)?.toUpperCase() || "U"}
                 </div>
                 <div>
-                  <p className="text-white font-semibold">
+                  <p className={`font-semibold ${TC.textPrimary}`}>
                     {userToDelete.name}
                   </p>
-                  <p className="text-gray-400 text-sm">{userToDelete.email}</p>
+                  <p className={`text-sm ${TC.textSecondary}`}>{userToDelete.email}</p>
                 </div>
               </div>
 
-              <p className="text-gray-300 text-sm">
+              <p className={`text-sm ${TC.textSecondary}`}>
                 Are you sure you want to delete{" "}
-                <span className="text-white font-semibold">
+                <span className={`font-semibold ${TC.textPrimary}`}>
                   {userToDelete.name}
                 </span>
                 ? This will permanently remove their account and all associated
                 data from the system.
               </p>
 
-              <div className="mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+              <div className={`mt-4 p-3 rounded-lg border ${TC.bgPillYellow}`}>
                 <p className="text-yellow-400 text-sm font-medium">
                   ⚠️ Warning: This action is irreversible. All user data will be
                   lost.
@@ -900,17 +943,17 @@ function Users() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-700">
+            <div className={`flex justify-end gap-3 p-6 border-t ${TC.borderDivide}`}>
               <button
                 onClick={handleDeleteCancel}
-                className="px-6 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-all duration-200 font-medium"
+                className={`px-6 py-2.5 border rounded-lg transition-all duration-200 font-medium ${TC.btnSecondary}`}
                 disabled={Loading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-500 hover:to-red-600 transition-all duration-200 font-medium shadow-lg hover:shadow-red-500/25 flex items-center gap-2"
+                className={`px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-500 hover:to-red-600 transition-all duration-200 font-medium shadow-lg hover:shadow-red-500/25 flex items-center gap-2`}
                 disabled={Loading}
               >
                 {Loading ? (
@@ -928,7 +971,7 @@ function Users() {
             </div>
           </div>
         </div>
-      )}
+      )} 
     </>
   );
 }

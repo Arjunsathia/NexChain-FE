@@ -1,0 +1,421 @@
+/* ============================================
+   NEXCHAIN - CENTRALIZED THEME UTILITIES
+   ============================================ */
+
+/* ============================================
+   1. CARD STYLES
+   ============================================ */
+
+/* Base Card - Light Mode */
+.nc-card-light {
+  @apply bg-white border-gray-200 shadow-sm;
+}
+
+/* Base Card - Dark Mode */
+.nc-card-dark {
+  @apply bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl;
+}
+
+/* Card with hover effect */
+.nc-card-hover {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
+
+/* Rounded card variants */
+.nc-card-rounded {
+  @apply rounded-xl;
+}
+
+.nc-card-rounded-lg {
+  @apply rounded-2xl;
+}
+
+/* ============================================
+   2. TEXT STYLES
+   ============================================ */
+
+/* Primary Text */
+.nc-text-primary-light {
+  @apply text-gray-900;
+}
+
+.nc-text-primary-dark {
+  @apply text-white;
+}
+
+/* Secondary Text */
+.nc-text-secondary-light {
+  @apply text-gray-600;
+}
+
+.nc-text-secondary-dark {
+  @apply text-gray-400;
+}
+
+/* Tertiary Text */
+.nc-text-tertiary-light {
+  @apply text-gray-500;
+}
+
+.nc-text-tertiary-dark {
+  @apply text-gray-500;
+}
+
+/* Gradient Text */
+.nc-text-gradient {
+  @apply bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent;
+}
+
+/* ============================================
+   3. BUTTON STYLES
+   ============================================ */
+
+/* Primary Button - Light */
+.nc-btn-primary-light {
+  @apply bg-cyan-600 text-white hover:bg-cyan-700 border-cyan-600;
+}
+
+/* Primary Button - Dark */
+.nc-btn-primary-dark {
+  @apply bg-cyan-600 text-white hover:bg-cyan-700 border-cyan-600;
+}
+
+/* Secondary Button - Light */
+.nc-btn-secondary-light {
+  @apply bg-gray-200 text-gray-900 hover:bg-gray-300 border-gray-300;
+}
+
+/* Secondary Button - Dark */
+.nc-btn-secondary-dark {
+  @apply bg-gray-700 text-white hover:bg-gray-600 border-gray-600;
+}
+
+/* Button Base */
+.nc-btn-base {
+  @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200 border;
+}
+
+/* Icon Button */
+.nc-btn-icon {
+  @apply p-2 rounded-lg transition-all duration-200;
+}
+
+/* ============================================
+   4. ICON BACKGROUNDS
+   ============================================ */
+
+.nc-icon-bg-light {
+  @apply bg-cyan-100 text-cyan-600;
+}
+
+.nc-icon-bg-dark {
+  @apply bg-cyan-400/10 text-cyan-400;
+}
+
+.nc-icon-bg-blue-light {
+  @apply bg-blue-50 text-blue-600;
+}
+
+.nc-icon-bg-blue-dark {
+  @apply bg-blue-500/10 text-blue-400;
+}
+
+/* ============================================
+   5. INPUT STYLES
+   ============================================ */
+
+.nc-input-light {
+  @apply bg-gray-100 text-gray-900 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500;
+}
+
+.nc-input-dark {
+  @apply bg-gray-800 text-white border-gray-700 focus:border-cyan-400 focus:ring-cyan-400;
+}
+
+.nc-input-base {
+  @apply px-4 py-2 rounded-lg border outline-none transition-all duration-200;
+}
+
+/* ============================================
+   6. BADGE/PILL STYLES
+   ============================================ */
+
+/* Positive (Green) */
+.nc-badge-positive-light {
+  @apply bg-green-100 text-green-700 border-green-300;
+}
+
+.nc-badge-positive-dark {
+  @apply bg-green-500/10 text-green-400 border-green-500/30;
+}
+
+/* Negative (Red) */
+.nc-badge-negative-light {
+  @apply bg-red-100 text-red-700 border-red-300;
+}
+
+.nc-badge-negative-dark {
+  @apply bg-red-500/10 text-red-400 border-red-500/30;
+}
+
+/* Neutral */
+.nc-badge-neutral-light {
+  @apply bg-gray-100 text-gray-700 border-gray-300;
+}
+
+.nc-badge-neutral-dark {
+  @apply bg-gray-700 text-gray-300 border-gray-600;
+}
+
+/* Badge Base */
+.nc-badge-base {
+  @apply px-2 py-1 rounded-full text-xs font-semibold border;
+}
+
+/* ============================================
+   7. SKELETON LOADERS
+   ============================================ */
+
+.nc-skeleton-light {
+  background-color: #e5e7eb;
+}
+
+.nc-skeleton-dark {
+  background-color: #2c303a;
+}
+
+.nc-skeleton-highlight-light {
+  background-color: #f3f4f6;
+}
+
+.nc-skeleton-highlight-dark {
+  background-color: #3a3f4d;
+}
+
+/* ============================================
+   8. BORDER STYLES
+   ============================================ */
+
+.nc-border-light {
+  @apply border-gray-300;
+}
+
+.nc-border-dark {
+  @apply border-gray-700;
+}
+
+.nc-border-light-subtle {
+  @apply border-gray-200;
+}
+
+.nc-border-dark-subtle {
+  @apply border-gray-700/50;
+}
+
+/* ============================================
+   9. HOVER EFFECTS
+   ============================================ */
+
+.nc-hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.nc-hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+.nc-hover-scale-sm {
+  @apply transition-transform duration-200 hover:scale-[1.02];
+}
+
+/* ============================================
+   10. CONTAINER STYLES
+   ============================================ */
+
+.nc-container-light {
+  @apply bg-white/80 backdrop-blur-md border-gray-200;
+}
+
+.nc-container-dark {
+  @apply bg-gray-900/80 backdrop-blur-md border-gray-800;
+}
+
+/* ============================================
+   11. PROFIT/LOSS COLORS
+   ============================================ */
+
+.nc-profit-text-light {
+  @apply text-green-700;
+}
+
+.nc-profit-text-dark {
+  @apply text-green-400;
+}
+
+.nc-loss-text-light {
+  @apply text-red-700;
+}
+
+.nc-loss-text-dark {
+  @apply text-red-400;
+}
+
+/* ============================================
+   12. HEADER STYLES
+   ============================================ */
+
+.nc-header-sticky {
+  @apply sticky top-0 z-40 transition-colors duration-300;
+}
+
+.nc-header-light {
+  @apply bg-white/80 backdrop-blur-md border-b border-gray-200;
+}
+
+.nc-header-dark {
+  @apply bg-gray-900/80 backdrop-blur-md border-b border-gray-800;
+}
+
+/* ============================================
+   13. EMPTY STATE STYLES
+   ============================================ */
+
+.nc-empty-state-light {
+  @apply bg-gray-100/70 border-gray-300 border-dashed;
+}
+
+.nc-empty-state-dark {
+  @apply bg-gray-700/30 border-gray-600 border-dashed;
+}
+
+/* ============================================
+   14. SEARCH BAR STYLES
+   ============================================ */
+
+.nc-search-light {
+  @apply bg-gray-100 text-gray-900;
+}
+
+.nc-search-dark {
+  @apply bg-gray-800 text-white;
+}
+
+/* ============================================
+   15. ANIMATION UTILITIES
+   ============================================ */
+
+.nc-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nc-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   16. RESPONSIVE PADDING
+   ============================================ */
+
+.nc-padding-responsive {
+  @apply p-4 lg:p-6;
+}
+
+.nc-padding-card {
+  @apply p-4 sm:p-6;
+}
+
+/* ============================================
+   17. GRID LAYOUTS
+   ============================================ */
+
+.nc-grid-stats {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4;
+}
+
+.nc-grid-2col {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6;
+}
+
+.nc-grid-3col {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+}
+
+/* ============================================
+   18. CHART STYLES
+   ============================================ */
+
+.nc-chart-grid-light {
+  stroke: #e5e7eb;
+}
+
+.nc-chart-grid-dark {
+  stroke: #374151;
+}
+
+.nc-chart-axis-light {
+  stroke: #6b7280;
+}
+
+.nc-chart-axis-dark {
+  stroke: #9ca3af;
+}
+
+/* ============================================
+   19. SCROLLBAR STYLES
+   ============================================ */
+
+.nc-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.nc-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   20. UTILITY CLASSES
+   ============================================ */
+
+.nc-transition-all {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.nc-shadow-light {
+  @apply shadow-sm;
+}
+
+.nc-shadow-dark {
+  @apply shadow-xl;
+}
+
+/* Glassmorphism effect */
+.nc-glass-light {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+.nc-glass-dark {
+  @apply bg-gray-900/80 backdrop-blur-md;
+}

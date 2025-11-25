@@ -1,15 +1,41 @@
 import { getTrend, getTrendingCoinMarketData } from "@/api/coinApis";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+// Assuming useThemeCheck is available in this scope or imported
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = React.useState(!document.documentElement.classList.contains('dark'));
+    React.useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+    return isLight;
+};
+
 function TrendingCoins() {
+  const isLight = useThemeCheck();
   const [loading, setLoading] = useState(false);
   const [coins, setCoins] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  const TC = useMemo(() => ({
+    bgContainer: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textAccentGreen: isLight ? "text-green-600" : "text-green-400",
+    textAccentRed: isLight ? "text-red-600" : "text-red-500",
+    textHover: isLight ? "hover:text-cyan-600" : "hover:text-cyan-400",
+    borderList: isLight ? "border-gray-300" : "border-gray-700",
+    textError: isLight ? "text-gray-600" : "text-gray-400",
+    skeletonBase: isLight ? "#e5e7eb" : "#2c313c",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#3a404c",
+  }), [isLight]);
 
   const fetchTrendingCoins = useCallback(async () => {
     setLoading(true);
@@ -38,8 +64,8 @@ function TrendingCoins() {
   }, [fetchTrendingCoins]);
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-2xl fade-in" style={{ animationDelay: "0.1s" }}>
-      <h2 className="text-lg font-semibold text-white mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
+    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer}`} style={{ animationDelay: "0.1s" }}>
+      <h2 className={`text-lg font-semibold mb-4 ${TC.textPrimary} fade-in`} style={{ animationDelay: "0.2s" }}>
         🔥 Trending Coins
       </h2>
 
@@ -56,21 +82,21 @@ function TrendingCoins() {
                 <Skeleton
                   width={150}
                   height={18}
-                  baseColor="#2c313c"
-                  highlightColor="#3a404c"
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
                 />
                 <Skeleton
                   width={100}
                   height={18}
-                  baseColor="#2c313c"
-                  highlightColor="#3a404c"
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
                 />
               </li>
             ))}
         </ul>
       ) : error || coins.length === 0 ? (
-        <div className="text-center text-gray-400 mt-4 flex flex-col items-center justify-center gap-2 fade-in" style={{ animationDelay: "0.3s" }}>
-          <FaExclamationTriangle className="text-3xl text-gray-500" />
+        <div className={`text-center mt-4 flex flex-col items-center justify-center gap-2 fade-in ${TC.textError}`} style={{ animationDelay: "0.3s" }}>
+          <FaExclamationTriangle className="text-3xl" />
           <p className="text-sm">{error || "No trending coins found."}</p>
         </div>
       ) : (
@@ -78,11 +104,11 @@ function TrendingCoins() {
           {coins.map((coin, index) => (
             <li
               key={coin.id}
-              className="flex justify-between items-center text-sm text-white border-b border-gray-700 last:border-b-0 pb-2 fade-in"
+              className={`flex justify-between items-center text-sm ${TC.textPrimary} border-b ${TC.borderList} last:border-b-0 pb-2 fade-in`}
               style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
             >
               <span
-                className="flex items-center gap-2 cursor-pointer hover:text-cyan-400 transition-colors"
+                className={`flex items-center gap-2 cursor-pointer ${TC.textHover} transition-colors`}
                 onClick={() => navigate(`/coin/${coin.id}`)}
               >
                 <img
@@ -96,8 +122,8 @@ function TrendingCoins() {
               <span
                 className={
                   coin.price_change_percentage_1h_in_currency < 0
-                    ? "text-red-500 font-semibold"
-                    : "text-green-400 font-semibold"
+                    ? `${TC.textAccentRed} font-semibold`
+                    : `${TC.textAccentGreen} font-semibold`
                 }
               >
                 ${coin.current_price.toLocaleString()} (

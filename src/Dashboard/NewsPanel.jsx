@@ -1,7 +1,53 @@
-import React from 'react'
+import React, { useMemo, useState, useEffect } from 'react';
 import { FaNewspaper, FaArrowRight } from "react-icons/fa";
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
 function NewsPanel() {
+  const isLight = useThemeCheck();
+  
+  // 💡 Theme Classes Helper (UPDATED to use light cyan for hover)
+  const TC = useMemo(() => ({
+    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    bgIcon: isLight ? "p-1.5 bg-purple-100 rounded-lg" : "p-1.5 bg-purple-400/10 rounded-lg",
+    iconColor: isLight ? "text-purple-600" : "text-purple-400",
+    
+    // News Items
+    bgItem: isLight ? "bg-gray-100/70 hover:bg-gray-200/90 border-gray-300 hover:border-cyan-600" : "bg-gray-700/30 hover:bg-gray-700/50 border-purple-500 hover:border-cyan-500",
+    textSource: isLight ? "text-cyan-600" : "text-cyan-400",
+    textTime: isLight ? "text-gray-500" : "text-gray-400",
+    
+    // Footer Button (Changed to Light Cyan Hover)
+    bgFooterButton: isLight 
+      ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500" // Light: Light cyan background with cyan border
+      : "bg-gray-700/30 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400", // Dark: Darker cyan transparent background with cyan border
+    borderFooter: isLight ? "border-gray-300" : "border-gray-700",
+
+    // Text color adjustments for better contrast on hover
+    textFooterButton: isLight ? "text-cyan-600" : "text-cyan-400", // Base color
+    textHoverAccent: isLight 
+      ? "group-hover:text-cyan-700" // Light: Darker cyan text on hover
+      : "group-hover:text-cyan-300", // Dark: Lighter cyan text on hover
+  }), [isLight]);
+
   const newsItems = [
     {
       title: "Bitcoin ETF Approval Boosts Market Confidence",
@@ -17,48 +63,81 @@ function NewsPanel() {
       title: "Major Exchange Announces Zero Trading Fees Campaign",
       source: "Finance Times",
       time: "1 day ago"
+    },
+    {
+      title: "Solana Network Achieves Record Transaction Speed",
+      source: "Tech Crypto",
+      time: "3 hours ago"
+    },
+    {
+      title: "Regulatory Framework Update for Digital Assets",
+      source: "Crypto Policy",
+      time: "6 hours ago"
+    },
+    {
+      title: "DeFi Protocol Reaches $1B Total Value Locked",
+      source: "DeFi News",
+      time: "8 hours ago"
     }
   ];
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 shadow-2xl rounded-xl p-5 fade-in" style={{ animationDelay: "0.1s" }}>
-      <div className="flex items-center justify-between mb-5 fade-in" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-400/10 rounded-lg">
-            <FaNewspaper className="text-purple-400 text-base" />
+    <div className={`rounded-xl p-4 h-full flex flex-col fade-in border ${TC.bgContainer}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 fade-in">
+        <div className="flex items-center gap-2">
+          <div className={TC.bgIcon}>
+            <FaNewspaper className={TC.iconColor + " text-sm"} />
           </div>
-          <h2 className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-base font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
             Crypto News
           </h2>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-400">
-          <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></div>
-          Live
+      </div>
+      
+      {/* Scrollable News List */}
+      <div className="flex-1 min-h-0">
+        <div className="h-full overflow-y-auto scrollbar-hide grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {newsItems.map((news, index) => (
+            <div 
+              key={index} 
+              className={`border-l-2 pl-3 py-2 rounded-r-lg transition-all duration-200 cursor-pointer group fade-in flex flex-col justify-between h-full ${TC.bgItem} ${isLight ? "border-purple-600" : "border-purple-500"}`}
+            >
+              <h3 className={`font-semibold text-xs mb-1.5 transition-colors line-clamp-2 leading-tight ${TC.textPrimary} ${isLight ? "group-hover:text-cyan-700" : "group-hover:text-cyan-300"}`}>
+                {news.title}
+              </h3>
+              <div className="flex justify-between items-center text-xs mt-auto">
+                <span className={`text-xs ${TC.textSource}`}>{news.source}</span>
+                <span className={`text-xs ${TC.textTime}`}>{news.time}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
       
-      <ul className="space-y-4">
-        {newsItems.map((news, index) => (
-          <li 
-            key={index} 
-            className="border-l-4 border-purple-500 pl-4 py-3 bg-gray-700/30 rounded-r-xl hover:bg-gray-700/50 hover:border-cyan-500 transition-all duration-200 cursor-pointer group fade-in"
-            style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
-          >
-            <h3 className="text-white font-semibold text-sm mb-2 group-hover:text-cyan-300 transition-colors line-clamp-2">
-              {news.title}
-            </h3>
-            <div className="flex justify-between items-center text-xs text-gray-400">
-              <span className="text-cyan-400">{news.source}</span>
-              <span>{news.time}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
-      
-      <button className="w-full mt-5 text-cyan-400 hover:text-cyan-300 text-sm font-semibold py-3 bg-gray-700/30 border border-gray-600 hover:border-cyan-500 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 group fade-in" style={{ animationDelay: "0.6s" }}>
+      {/* Footer (Button with light cyan hover) */}
+      <button 
+        className={`
+          w-full mt-3 text-xs font-semibold py-2 rounded-lg transition-all duration-200 
+          flex items-center justify-center gap-1 group fade-in border 
+          ${TC.bgFooterButton} 
+          ${TC.textFooterButton}
+          ${TC.textHoverAccent} 
+        `}
+      >
         View All News
-        <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform duration-200" />
+        <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-transform duration-200" />
       </button>
+
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

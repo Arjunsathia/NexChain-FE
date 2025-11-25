@@ -1,13 +1,33 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { FaStar, FaRegStar, FaSearch, FaExchangeAlt } from "react-icons/fa";
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
-import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useNavigate } from "react-router-dom";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { toast } from "react-toastify";
+import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 
-// Enhanced sparkline chart with color based on price change (same as Market Insight)
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    // Default to checking the document element class list
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        // Observe changes to the 'class' attribute of the root HTML element
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
+
+// Enhanced sparkline chart with color based on price change
 function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
   if (!data || data.length === 0) return <div className="w-24 h-6" />;
 
@@ -40,30 +60,67 @@ function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
 }
 
 function CoinTable({ onTrade }) {
+  const isLight = useThemeCheck(); // 💡 Theme check hook
   const { user } = useUserContext();
-  const { coins, coinsLoading } = useCoinContext();
-  const { purchasedCoins } = usePurchasedCoins();
+  const { coins: initialCoins, coinsLoading } = useCoinContext();
+  const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
+  const [coins, setCoins] = useState(initialCoins);
   const [watchlist, setWatchlist] = useState([]);
-  const [, setWatchlistData] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
   const navigate = useNavigate();
+
+  // WebSocket ref
+  const ws = useRef(null);
+  const coinsRef = useRef(coins);
 
   // Search and Pagination state
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Fetch watchlist data
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-700" : "text-gray-300",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
+    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl",
+    bgCard: isLight ? "bg-white border-gray-300 hover:bg-gray-100/50" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 hover:bg-gray-700/50",
+    bgLoading: isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 text-cyan-400",
+    bgTableHeader: isLight ? "border-b border-gray-300 bg-gray-100 text-gray-600" : "border-b border-gray-700 bg-gray-900/50 text-gray-400",
+    bgTableFooter: isLight ? "bg-gray-100 border-t border-gray-300" : "bg-gray-900/50 border-t border-gray-700",
+    tableDivide: isLight ? "divide-gray-200" : "divide-gray-700",
+    inputBg: isLight ? "bg-white border-gray-300 text-gray-800 placeholder-gray-500" : "bg-gray-800 border-gray-700 text-white placeholder-gray-400",
+    btnPagination: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300" : "bg-gray-700 text-gray-300 hover:bg-gray-600",
+    btnPaginationActive: isLight ? "bg-cyan-600 text-white shadow-md" : "bg-cyan-600 text-white shadow-lg",
+    bgPillPositive: isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400",
+    bgPillNegative: isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400",
+    bgSubCard: isLight ? "bg-gray-100/70" : "bg-gray-700/30",
+    starDefault: isLight ? "text-gray-400 hover:text-yellow-600" : "text-gray-500 hover:text-yellow-400",
+    starFilled: isLight ? "text-yellow-600" : "text-yellow-400",
+  }), [isLight]);
+
+  // Update ref when coins change
+  useEffect(() => {
+    coinsRef.current = coins;
+  }, [coins]);
+
+  // Initialize coins from context
+  useEffect(() => {
+    if (initialCoins.length > 0) {
+      setCoins(initialCoins.slice(0, 100)); // Limit to 100 coins for WebSocket
+    }
+  }, [initialCoins]);
+
+  // Fetch watchlist data from backend
   const fetchWatchlist = useCallback(async () => {
     if (!user?.id) return;
 
     setLoadingWatchlist(true);
     try {
       const res = await getData("/watchlist", { user_id: user.id });
-      setWatchlistData(res || []);
       // Extract coin IDs for quick lookup
-      const watchlistIds = (res || []).map(item => item.id);
+      const watchlistIds = (res || []).map(item => item.id || item.coin_id || item.id);
       setWatchlist(watchlistIds);
     } catch (err) {
       console.error("Failed to fetch watchlist data", err);
@@ -75,6 +132,168 @@ function CoinTable({ onTrade }) {
   useEffect(() => {
     fetchWatchlist();
   }, [fetchWatchlist]);
+
+  useEffect(() => {
+    if (coins.length === 0) return;
+
+    const symbols = coins
+      .slice(0, 100)
+      .map(coin => {
+        const symbolMap = {
+          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", "stellar": "xlmusdt", "cosmos": "atomusdt", "monero": "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", "filecoin": "filusdt", "theta": "thetausdt", "vechain": "vetusdt", "tron": "trxusdt"
+        };
+        return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
+      })
+      .filter(Boolean)
+      .join('/');
+
+    if (!symbols) return;
+
+    try {
+      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${symbols}`);
+
+      ws.current.onopen = () => { console.log('WebSocket connected for live prices'); };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.stream && data.data) {
+          const symbol = data.stream.replace('@ticker', '');
+          const coinData = data.data;
+          
+          const symbolToCoinId = {
+            "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vechain": "vetusdt", "tron": "trxusdt"
+          };
+
+          const coinId = symbolToCoinId[symbol];
+          if (coinId) {
+            setCoins(prevCoins => 
+              prevCoins.map(coin => {
+                if (coin.id === coinId) {
+                  return {
+                    ...coin,
+                    current_price: parseFloat(coinData.c),
+                    price_change_percentage_24h: parseFloat(coinData.P),
+                    price_change_24h: parseFloat(coinData.p),
+                    total_volume: parseFloat(coinData.v) * parseFloat(coinData.c),
+                    market_cap: parseFloat(coinData.c) * (coin.market_cap / coin.current_price || 1)
+                  };
+                }
+                return coin;
+              })
+            );
+          }
+        }
+      };
+
+      ws.current.onerror = (error) => { console.error('WebSocket error:', error); };
+      ws.current.onclose = () => { console.log('WebSocket disconnected for live prices'); };
+
+    } catch (error) {
+      console.error('WebSocket setup failed:', error);
+    }
+
+    return () => {
+      if (ws.current) { ws.current.close(); }
+    };
+  }, [coins]);
+
+  // Watchlist toggle function with backend API
+  const toggleWishlist = useCallback(async (coinId, coinData) => {
+    if (!user?.id) {
+      toast.error("Please login to manage watchlist");
+      return;
+    }
+
+    const isCurrentlyInWatchlist = watchlist.includes(coinId);
+    
+    // Optimistic update
+    setWatchlist(prev =>
+      isCurrentlyInWatchlist
+        ? prev.filter(id => id !== coinId)
+        : [...prev, coinId]
+    );
+
+    const postData = {
+      user_id: user.id,
+      id: coinData?.id,
+      image: coinData?.image,
+      symbol: coinData?.symbol,
+      current_price: coinData?.current_price,
+      price_change_percentage_1h_in_currency: coinData?.price_change_percentage_1h_in_currency,
+      price_change_percentage_24h_in_currency: coinData?.price_change_percentage_24h_in_currency,
+      price_change_percentage_24h: coinData?.price_change_percentage_24h,
+      price_change_percentage_7d_in_currency: coinData?.price_change_percentage_7d_in_currency,
+      market_cap: coinData?.market_cap,
+      total_volume: coinData?.total_volume,
+      sparkline_in_7d: { price: coinData?.sparkline_in_7d?.price },
+    };
+
+    setSubmitting(true);
+    try {
+      if (isCurrentlyInWatchlist) {
+        // Remove from watchlist
+        await deleteWatchList("/watchlist/remove", {
+          id: coinId,
+          user_id: user.id,
+        });
+        toast.success("Coin removed from watchlist!", {
+          icon: "✅",
+          // 💡 Adjust toast styles for dual mode
+          style: {
+            background: isLight ? "#FFFFFF" : "#111827",
+            color: isLight ? "#16A34A" : "#22c55e",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+          },
+        });
+      } else {
+        // Add to watchlist
+        await postForm("/watchlist/add", postData);
+        toast.success("Coin added to watchlist!", {
+          icon: "⭐",
+          // 💡 Adjust toast styles for dual mode
+          style: {
+            background: isLight ? "#FFFFFF" : "#111827",
+            color: isLight ? "#FACC15" : "#eab308",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+          },
+        });
+      }
+      // Refresh watchlist data
+      await fetchWatchlist();
+    } catch (err) {
+      console.error("Watchlist operation failed:", err);
+      // Revert optimistic update on error
+      setWatchlist(prev =>
+        isCurrentlyInWatchlist
+          ? [...prev, coinId]
+          : prev.filter(id => id !== coinId)
+      );
+      toast.error("Operation failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [watchlist, user?.id, fetchWatchlist, isLight]);
+
+  // Enhanced handleTrade function that refreshes purchased coins
+  const handleTrade = useCallback(async (coin) => {
+    onTrade(coin);
+    // Refresh purchased coins after trade to get latest holdings data
+    if (refreshPurchasedCoins) {
+      try {
+        await refreshPurchasedCoins();
+      } catch (error) {
+        console.error("Failed to refresh purchased coins:", error);
+      }
+    }
+  }, [onTrade, refreshPurchasedCoins]);
 
   // Filter coins based on search term
   const filteredCoins = useMemo(() => {
@@ -103,81 +322,6 @@ function CoinTable({ onTrade }) {
     });
   }, [filteredCoins, watchlist, purchasedCoins]);
 
-  const toggleWishlist = useCallback(async (coinId, data) => {
-    const isCurrentlyInWatchlist = watchlist.includes(coinId);
-    
-    // Optimistic update
-    setWatchlist(prev =>
-      isCurrentlyInWatchlist
-        ? prev.filter(id => id !== coinId)
-        : [...prev, coinId]
-    );
-
-    const postData = {
-      user_id: user?.id,
-      id: data?.id,
-      image: data?.image,
-      symbol: data?.symbol,
-      current_price: data?.current_price,
-      price_change_percentage_1h_in_currency: data?.price_change_percentage_1h_in_currency,
-      price_change_percentage_24h_in_currency: data?.price_change_percentage_24h_in_currency,
-      price_change_percentage_24h: data?.price_change_percentage_24h,
-      price_change_percentage_7d_in_currency: data?.price_change_percentage_7d_in_currency,
-      market_cap: data?.market_cap,
-      total_volume: data?.total_volume,
-      sparkline_in_7d: { price: data?.sparkline_in_7d?.price },
-    };
-
-    setSubmitting(true);
-    try {
-      if (isCurrentlyInWatchlist) {
-        // Remove from watchlist
-        await deleteWatchList("/watchlist/remove", {
-          id: coinId,
-          user_id: user?.id,
-        });
-        toast.success("Coin removed from watchlist!", {
-          icon: "✅",
-          style: {
-            background: "#111827",
-            color: "#22c55e",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-          },
-        });
-      } else {
-        // Add to watchlist
-        await postForm("/watchlist/add", postData);
-        toast.success("Coin added to watchlist!", {
-          icon: "⭐",
-          style: {
-            background: "#111827",
-            color: "#eab308",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-          },
-        });
-      }
-      // Refresh watchlist data
-      await fetchWatchlist();
-    } catch (err) {
-      console.error("Watchlist operation failed:", err);
-      // Revert optimistic update on error
-      setWatchlist(prev =>
-        isCurrentlyInWatchlist
-          ? [...prev, coinId]
-          : prev.filter(id => id !== coinId)
-      );
-      toast.error("Operation failed. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  }, [watchlist, user?.id, fetchWatchlist]);
-
   const formatCurrency = useCallback((value) => {
     if (!value) return "$0";
     
@@ -188,11 +332,6 @@ function CoinTable({ onTrade }) {
       value.toLocaleString("en-IN")
     );
   }, []);
-
-  // Handle trade button click
-  const handleTrade = useCallback((coin) => {
-    onTrade(coin);
-  }, [onTrade]);
 
   // Memoized pagination calculations using enhanced coins
   const { paginatedCoins, totalPages } = useMemo(() => {
@@ -236,8 +375,8 @@ function CoinTable({ onTrade }) {
           onClick={() => handlePageClick(page)}
           className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 fade-in ${
             currentPage === page
-              ? "bg-cyan-600 text-white shadow-lg"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              ? TC.btnPaginationActive
+              : TC.btnPagination
           }`}
           style={{ animationDelay: `${0.8 + index * 0.05}s` }}
         >
@@ -245,12 +384,12 @@ function CoinTable({ onTrade }) {
         </button>
       );
     });
-  }, [totalPages, currentPage]);
+  }, [totalPages, currentPage, TC]);
 
   if (coinsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8 text-center fade-in">
+        <div className={`rounded-xl p-8 text-center fade-in ${TC.bgLoading}`}>
           <div className="flex justify-center items-center gap-3 text-cyan-400">
             <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
             <span className="text-base">Loading coins...</span>
@@ -261,7 +400,7 @@ function CoinTable({ onTrade }) {
   }
 
   return (
-    <div className="min-h-screen text-white p-3 sm:p-4 lg:p-6">
+    <div className={`w-full ${TC.textPrimary}`}>
       <main className="max-w-7xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="fade-in" style={{ animationDelay: "0.1s" }}>
@@ -280,13 +419,13 @@ function CoinTable({ onTrade }) {
                   placeholder="Search coins by name or symbol..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-10 pr-10 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all duration-200"
+                  className={`w-full border rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all duration-200 ${TC.inputBg}`}
                 />
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} text-sm`} />
                 {searchTerm && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white text-lg transition-colors"
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} hover:${TC.textPrimary} text-lg transition-colors`}
                   >
                     ×
                   </button>
@@ -295,7 +434,7 @@ function CoinTable({ onTrade }) {
             </div>
           </div>
           {searchTerm && (
-            <div className="text-sm text-gray-400 mb-4 fade-in" style={{ animationDelay: "0.4s" }}>
+            <div className={`text-sm mb-4 fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.4s" }}>
               Found {enhancedCoins.length} coin{enhancedCoins.length !== 1 ? 's' : ''} matching "{searchTerm}"
             </div>
           )}
@@ -308,7 +447,7 @@ function CoinTable({ onTrade }) {
               <div
                 key={coin.id}
                 onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 cursor-pointer hover:bg-gray-700/50 hover:border-cyan-500/50 transition-all duration-300 group fade-in"
+                className={`rounded-xl p-4 cursor-pointer transition-all duration-300 group fade-in border ${TC.bgCard}`}
                 style={{ animationDelay: `${0.5 + index * 0.1}s` }}
               >
                 {/* Header with Star and Name */}
@@ -325,18 +464,18 @@ function CoinTable({ onTrade }) {
                       {submitting || loadingWatchlist ? (
                         <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                       ) : coin.isInWatchlist ? (
-                        <FaStar className="text-yellow-400 text-xl hover:scale-110 transition-transform" />
+                        <FaStar className={`${TC.starFilled} text-xl hover:scale-110 transition-transform`} />
                       ) : (
-                        <FaRegStar className="text-gray-500 hover:text-yellow-400 transition-colors text-xl" />
+                        <FaRegStar className={`${TC.starDefault} transition-colors text-xl`} />
                       )}
                     </button>
                     <img src={coin.image} alt={coin.name} className="w-10 h-10 flex-shrink-0 rounded-full group-hover:scale-110 transition-transform duration-300" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-white font-semibold text-base truncate group-hover:text-cyan-400 transition-colors">{coin.name}</div>
-                      <div className="text-gray-400 text-sm uppercase">{coin.symbol.toUpperCase()}</div>
+                      <div className={`font-semibold text-base truncate transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}>{coin.name}</div>
+                      <div className={`text-sm uppercase ${TC.textTertiary}`}>{coin.symbol.toUpperCase()}</div>
                       {/* Show holdings badge if user has this coin */}
                       {coin.userHolding && (
-                        <div className="text-xs text-green-400 bg-green-400/20 px-2 py-0.5 rounded-full mt-1 inline-block">
+                        <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
                           Holding:{" "}
                           {coin.userHolding.totalQuantity?.toFixed(6) ||
                             coin.userHolding.quantity?.toFixed(6)}{" "}
@@ -346,7 +485,7 @@ function CoinTable({ onTrade }) {
                     </div>
                   </div>
                   <div className={`font-semibold text-sm px-2 py-1 rounded-lg ${
-                    coin.price_change_percentage_24h < 0 ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
+                    coin.price_change_percentage_24h < 0 ? TC.bgPillNegative : TC.bgPillPositive
                   }`}>
                     {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
                   </div>
@@ -354,7 +493,7 @@ function CoinTable({ onTrade }) {
 
                 {/* Price and Chart */}
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-white font-bold text-xl">
+                  <div className={`font-bold text-xl ${TC.textPrimary}`}>
                     ${coin.current_price?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) || "0"}
                   </div>
                   <div className="w-20 h-10">
@@ -369,13 +508,13 @@ function CoinTable({ onTrade }) {
 
                 {/* Market Cap and Volume */}
                 <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                  <div className="bg-gray-700/30 p-2 rounded-lg">
-                    <div className="text-gray-400 text-xs mb-1">Market Cap</div>
-                    <div className="text-gray-200 font-medium">{formatCurrency(coin.market_cap)}</div>
+                  <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
+                    <div className={`text-xs mb-1 ${TC.textTertiary}`}>Market Cap</div>
+                    <div className={`font-medium ${TC.textSecondary}`}>{formatCurrency(coin.market_cap)}</div>
                   </div>
-                  <div className="bg-gray-700/30 p-2 rounded-lg">
-                    <div className="text-gray-400 text-xs mb-1">Volume</div>
-                    <div className="text-gray-200 font-medium">{formatCurrency(coin.total_volume)}</div>
+                  <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
+                    <div className={`text-xs mb-1 ${TC.textTertiary}`}>Volume</div>
+                    <div className={`font-medium ${TC.textSecondary}`}>{formatCurrency(coin.total_volume)}</div>
                   </div>
                 </div>
 
@@ -394,7 +533,7 @@ function CoinTable({ onTrade }) {
               </div>
             ))
           ) : (
-            <div className="text-center py-12 text-gray-400 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl fade-in" style={{ animationDelay: "0.5s" }}>
+            <div className={`text-center py-12 border rounded-xl fade-in ${TC.bgContainer} ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
               <div className="text-5xl mb-3">🔍</div>
               No coins found matching "{searchTerm}"
             </div>
@@ -403,9 +542,9 @@ function CoinTable({ onTrade }) {
 
         {/* Desktop Table View */}
         <div className="hidden lg:block fade-in" style={{ animationDelay: "0.4s" }}>
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+          <div className={`rounded-xl overflow-hidden shadow-2xl border ${TC.bgContainer}`}>
             {paginatedCoins.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 fade-in" style={{ animationDelay: "0.5s" }}>
+              <div className={`p-12 text-center fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
                 <div className="text-6xl mb-4">🔍</div>
                 <div className="text-xl">
                   No coins found matching "{searchTerm}"
@@ -415,39 +554,39 @@ function CoinTable({ onTrade }) {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-700 bg-gray-900/50 fade-in" style={{ animationDelay: "0.5s" }}>
-                      <th className="py-4 px-6 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <tr className={`fade-in ${TC.bgTableHeader}`} style={{ animationDelay: "0.5s" }}>
+                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
                         ★
                       </th>
-                      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-left text-xs font-semibold uppercase tracking-wider">
                         Coin
                       </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
                         Price
                       </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
                         24h %
                       </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
                         Market Cap
                       </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
                         Volume
                       </th>
-                      <th className="py-4 px-6 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
                         Trend
                       </th>
-                      <th className="py-4 px-6 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
                         Trade
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
+                  <tbody className={`divide-y ${TC.tableDivide}`}>
                     {paginatedCoins.map((coin, index) => (
                       <tr
                         key={coin.id}
                         onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-                        className="hover:bg-gray-700/30 cursor-pointer transition-all duration-200 group fade-in"
+                        className={`hover:bg-gray-700/30 cursor-pointer transition-all duration-200 group fade-in ${isLight ? "hover:bg-gray-50/50" : "hover:bg-gray-700/30"}`}
                         style={{ animationDelay: `${0.6 + index * 0.05}s` }}
                       >
                         {/* Star */}
@@ -461,9 +600,9 @@ function CoinTable({ onTrade }) {
                             {submitting || loadingWatchlist ? (
                               <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                             ) : coin.isInWatchlist ? (
-                              <FaStar className="text-yellow-400 hover:scale-110 transition-transform" />
+                              <FaStar className={`${TC.starFilled} hover:scale-110 transition-transform`} />
                             ) : (
-                              <FaRegStar className="text-gray-500 hover:text-yellow-400 transition-colors" />
+                              <FaRegStar className={`${TC.starDefault} transition-colors`} />
                             )}
                           </button>
                         </td>
@@ -473,15 +612,15 @@ function CoinTable({ onTrade }) {
                           <div className="flex items-center gap-3 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.03}s` }}>
                             <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300" />
                             <div className="min-w-0 flex-1">
-                              <div className="text-base font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                              <div className={`text-base font-semibold transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}>
                                 {coin.name}
                               </div>
-                              <div className="text-sm text-gray-400 uppercase">
+                              <div className={`text-sm uppercase ${TC.textTertiary}`}>
                                 {coin.symbol.toUpperCase()}
                               </div>
                               {/* Show holdings badge if user has this coin */}
                               {coin.userHolding && (
-                                <div className="text-xs text-green-400 bg-green-400/20 px-2 py-0.5 rounded-full mt-1 inline-block">
+                                <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
                                   Holding:{" "}
                                   {coin.userHolding.totalQuantity?.toFixed(6) ||
                                     coin.userHolding.quantity?.toFixed(6)}{" "}
@@ -493,34 +632,34 @@ function CoinTable({ onTrade }) {
                         </td>
 
                         {/* Price */}
-                        <td className="py-4 px-6 text-right fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.04}s` }}>
-                          <div className="text-base font-semibold text-white">
+                        <td className={`py-4 px-6 text-right fade-in ${TC.textPrimary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.04}s` }}>
+                          <div className="text-base font-semibold">
                             ${coin.current_price?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 6 }) || "0"}
                           </div>
                         </td>
 
                         {/* 24H Change */}
                         <td className={`py-4 px-6 text-right font-semibold fade-in ${
-                          coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"
+                          coin.price_change_percentage_24h < 0 ? "text-red-600" : "text-green-600"
                         }`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.05}s` }}>
                           {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
                         </td>
 
                         {/* Market Cap */}
-                        <td className="py-4 px-6 text-right fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.06}s` }}>
-                          <div className="text-sm text-gray-300">
+                        <td className={`py-4 px-6 text-right fade-in ${TC.textSecondary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.06}s` }}>
+                          <div className="text-sm">
                             {formatCurrency(coin.market_cap)}
                           </div>
                         </td>
 
                         {/* Volume */}
-                        <td className="py-4 px-6 text-right fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.07}s` }}>
-                          <div className="text-sm text-gray-300">
+                        <td className={`py-4 px-6 text-right fade-in ${TC.textSecondary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.07}s` }}>
+                          <div className="text-sm">
                             {formatCurrency(coin.total_volume)}
                           </div>
                         </td>
 
-                        {/* Chart - Same as Market Insight */}
+                        {/* Chart */}
                         <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.08}s` }}>
                           <div className="flex justify-center">
                             <Sparkline 
@@ -553,8 +692,8 @@ function CoinTable({ onTrade }) {
 
             {/* Table Footer */}
             {paginatedCoins.length > 0 && (
-              <div className="bg-gray-900/50 px-6 py-4 border-t border-gray-700 fade-in" style={{ animationDelay: "0.7s" }}>
-                <div className="flex justify-between items-center text-sm text-gray-400">
+              <div className={`px-6 py-4 fade-in ${TC.bgTableFooter}`} style={{ animationDelay: "0.7s" }}>
+                <div className={`flex justify-between items-center text-sm ${TC.textTertiary}`}>
                   <span>
                     Showing {paginatedCoins.length} of {enhancedCoins.length} coins
                   </span>
@@ -570,12 +709,12 @@ function CoinTable({ onTrade }) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex flex-col items-center gap-4 pt-6 pb-6 fade-in" style={{ animationDelay: "0.8s" }}>
+          <div className={`flex flex-col items-center gap-4 pt-6 pb-6 fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.8s" }}>
             <div className="flex justify-center items-center gap-2">
               <button
                 onClick={handlePrev}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-700 rounded-lg text-sm hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in"
+                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${TC.btnPagination}`}
                 style={{ animationDelay: "0.85s" }}
               >
                 Prev
@@ -584,13 +723,13 @@ function CoinTable({ onTrade }) {
               <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-700 rounded-lg text-sm hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in"
+                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${TC.btnPagination}`}
                 style={{ animationDelay: "0.9s" }}
               >
                 Next
               </button>
             </div>
-            <div className="text-sm text-gray-400 fade-in" style={{ animationDelay: "0.95s" }}>
+            <div className="text-sm fade-in" style={{ animationDelay: "0.95s" }}>
               Page {currentPage} of {totalPages}
             </div>
           </div>

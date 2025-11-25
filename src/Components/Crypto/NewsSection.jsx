@@ -1,4 +1,17 @@
-import React from "react";
+import React, { useMemo } from "react";
+
+// Assuming useThemeCheck is available in this scope or imported
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = React.useState(!document.documentElement.classList.contains('dark'));
+    React.useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+    return isLight;
+};
 
 const sampleNews = [
   {
@@ -32,16 +45,22 @@ const sampleNews = [
 ];
 
 function NewsSection() {
+  const isLight = useThemeCheck();
+
+  const TC = useMemo(() => ({
+    bgCard: isLight ? "bg-white border-gray-300 shadow-lg hover:border-cyan-600/50" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl hover:border-cyan-400/30",
+    textTitle: isLight ? "text-gray-900" : "text-white",
+    textTime: isLight ? "text-gray-500" : "text-gray-500",
+    btnMore: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-md" : "bg-gray-700 text-white hover:bg-gray-600 shadow-md",
+  }), [isLight]);
+
   return (
     <div className="mt-10 fade-in" style={{ animationDelay: "0.1s" }}>
-      <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 fade-in" style={{ animationDelay: "0.2s" }}>
-        Latest Crypto News
-      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {sampleNews.map((news, index) => (
           <div
             key={news.id}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden shadow-2xl hover:border-cyan-400/30 transition-all duration-300 group cursor-pointer fade-in"
+            className={`rounded-xl overflow-hidden border transition-all duration-300 group cursor-pointer fade-in ${TC.bgCard}`}
             style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
           >
             <img
@@ -50,10 +69,10 @@ function NewsSection() {
               className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="p-4 space-y-2">
-              <h3 className="font-semibold text-sm text-white group-hover:text-cyan-400 transition-colors">{news.title}</h3>
+              <h3 className={`font-semibold text-sm group-hover:text-cyan-600 transition-colors ${TC.textTitle}`}>{news.title}</h3>
               <div className="flex items-center justify-between text-xs">
-                <p className="text-cyan-400">{news.source}</p>
-                <p className="text-gray-500">{news.time}</p>
+                <p className={isLight ? "text-cyan-600" : "text-cyan-400"}>{news.source}</p>
+                <p className={TC.textTime}>{news.time}</p>
               </div>
             </div>
           </div>
@@ -61,7 +80,7 @@ function NewsSection() {
       </div>
 
       <div className="flex justify-center mt-6 fade-in" style={{ animationDelay: "0.7s" }}>
-        <button className="bg-gray-700 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+        <button className={`text-sm px-5 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${TC.btnMore}`}>
           See More News
         </button>
       </div>

@@ -1,31 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Star,
   ChevronRight,
   TrendingUp,
   BookOpen,
-  Zap,
-  ArrowDown,
-  Sparkles,
-  Rocket,
   Target,
-  Users,
-  Award,
-  Clock,
+  Activity,
+  DollarSign,
+  TrendingDown,
   BarChart3,
   Bitcoin,
   Coins,
   Circle,
-  Activity,
-  DollarSign,
-  TrendingDown,
+  Users,
+  ArrowDown,
 } from "lucide-react";
 import Lottie from "lottie-react";
 import cryptoAnim from "../assets/cryptobitcoin.json";
 import crypto from "../assets/Cryptocurrency.json";
-// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
 
 const testimonials = [
   {
@@ -130,9 +141,9 @@ const testimonials = [
   },
 ];
 
-const TestimonialCard = ({ testimonial }) => {
+const TestimonialCard = ({ testimonial, TC }) => {
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-cyan-500/20 rounded-2xl p-5 hover:border-cyan-400 transition-all duration-300 group hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/20 min-w-[300px] flex-shrink-0">
+    <div className={`${TC.bgTestimonial} rounded-2xl p-5 transition-all duration-300 group hover:scale-105 min-w-[300px] flex-shrink-0`}>
       <div className="flex gap-1 mb-3">
         {[...Array(5)].map((_, i) => (
           <Star
@@ -140,30 +151,30 @@ const TestimonialCard = ({ testimonial }) => {
             className={`w-4 h-4 transition-all duration-300 ${
               i < testimonial.rating
                 ? "text-yellow-400 fill-yellow-400 group-hover:scale-110"
-                : "text-gray-600"
+                : TC.textStarInactive
             }`}
             style={{ transitionDelay: `${i * 50}ms` }}
           />
         ))}
       </div>
 
-      <p className="text-gray-200 text-sm leading-relaxed mb-3 line-clamp-3 group-hover:text-white transition-colors duration-300">
+      <p className={`text-sm leading-relaxed mb-3 line-clamp-3 transition-colors duration-300 ${TC.textMessage}`}>
         "{testimonial.message}"
       </p>
 
-      <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+      <div className={`flex items-center justify-between pt-3 border-t ${TC.borderDivider}`}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
             {testimonial.avatar}
           </div>
           <div>
-            <p className="text-white text-sm font-semibold">
+            <p className={`text-sm font-semibold ${TC.textPrimary}`}>
               {testimonial.name}
             </p>
-            <p className="text-cyan-400 text-xs">{testimonial.timestamp}</p>
+            <p className={`text-xs ${TC.textTimestamp}`}>{testimonial.timestamp}</p>
           </div>
         </div>
-        <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs font-medium">
+        <div className={`${TC.bgVerified} px-2 py-1 rounded-full text-xs font-medium`}>
           Verified
         </div>
       </div>
@@ -171,48 +182,46 @@ const TestimonialCard = ({ testimonial }) => {
   );
 };
 
-const TestimonialCarousel = () => {
-  const duplicatedTestimonials = [
-    ...testimonials,
-    ...testimonials,
-  ];
+const TestimonialCarousel = ({ TC }) => {
+  const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials], []);
 
   return (
+    // Responsive container for carousel rows
     <div className="w-full overflow-hidden">
       {/* Top Row - Left to Right */}
-      <div className="relative py-4">
+      <div className="py-4">
         <motion.div
           className="flex gap-6"
           animate={{
-            x: [0, -1800],
+            x: [0, -2800], // Increased travel distance for smoother loop
           }}
           transition={{
             x: {
               repeat: Infinity,
               repeatType: "loop",
-              duration: 40,
+              duration: 50,
               ease: "linear",
             },
           }}
         >
           {duplicatedTestimonials.map((testimonial, index) => (
-            <TestimonialCard key={`top-${index}`} testimonial={testimonial} />
+            <TestimonialCard key={`top-${index}`} testimonial={testimonial} TC={TC} />
           ))}
         </motion.div>
       </div>
 
       {/* Bottom Row - Right to Left */}
-      <div className="relative py-4">
+      <div className="py-4">
         <motion.div
           className="flex gap-6"
           animate={{
-            x: [-1800, 0],
+            x: [-2800, 0], // Increased travel distance for smoother loop
           }}
           transition={{
             x: {
               repeat: Infinity,
               repeatType: "loop",
-              duration: 40,
+              duration: 50,
               ease: "linear",
             },
           }}
@@ -221,6 +230,7 @@ const TestimonialCarousel = () => {
             <TestimonialCard
               key={`bottom-${index}`}
               testimonial={testimonial}
+              TC={TC}
             />
           ))}
         </motion.div>
@@ -230,16 +240,129 @@ const TestimonialCarousel = () => {
 };
 
 export default function Landing() {
+  const isLight = useThemeCheck();
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
 
-  const [livePrices] = useState({
+  // 💡 Theme Classes Helper
+  const TC = useMemo(() => ({
+    // General
+    bgPage: isLight ? "bg-white text-gray-900" : "bg-gradient-to-br from-black via-[#0b182d] to-black text-white",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    textHeroGradient: "bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600",
+    
+    // Buttons
+    btnPrimary: "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/50",
+    btnSecondary: isLight ? "border-2 border-blue-500 hover:bg-blue-500/20 text-blue-600" : "border-2 border-cyan-500 hover:bg-cyan-500/20 text-cyan-400",
+
+    // Features Section
+    bgFeatureCard: isLight ? "bg-gray-100 border-gray-300 hover:border-blue-400 hover:shadow-blue-500/10" : "bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-cyan-400 hover:shadow-cyan-500/10",
+    
+    // Coin Cards (Market Overview)
+    bgCoinCard: isLight ? "bg-gray-100 border-gray-300" : "bg-gradient-to-br from-gray-900 to-gray-800",
+    bgCoinLive: isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400",
+    textPriceMain: isLight ? "text-blue-600" : "text-amber-400",
+    textPriceSecondary: isLight ? "text-purple-600" : "text-purple-400",
+    textPriceTertiary: isLight ? "text-pink-600" : "text-pink-400",
+    textPriceSmall: isLight ? "text-blue-600" : "text-cyan-400",
+    textCoinSymbol: isLight ? "text-gray-500" : "text-gray-400",
+
+    // Testimonials
+    bgTestimonial: isLight ? "bg-gray-50 border-gray-300 hover:border-blue-400 hover:shadow-blue-500/10" : "bg-gradient-to-br from-gray-900 to-gray-800 border border-cyan-500/20 hover:border-cyan-400 hover:shadow-cyan-500/20",
+    textMessage: isLight ? "text-gray-700 group-hover:text-gray-900" : "text-gray-200 group-hover:text-white",
+    textStarInactive: isLight ? "text-gray-400" : "text-gray-600",
+    borderDivider: isLight ? "border-gray-300" : "border-gray-700",
+    textTimestamp: isLight ? "text-blue-600" : "text-cyan-400",
+    bgVerified: isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400",
+    
+    // CTA
+    bgCTA: isLight ? "bg-blue-100/50 border-blue-500/30" : "bg-gradient-to-r from-cyan-600/20 to-purple-600/20 border-cyan-500/30",
+    
+    // Price Change Colors (Used via helper function)
+    textGreen: isLight ? "text-green-700" : "text-green-400",
+    textRed: isLight ? "text-red-700" : "text-red-400",
+    
+  }), [isLight]);
+
+
+  const [livePrices, setLivePrices] = useState({
     bitcoin: { price: 64213, change: 2.34 },
     ethereum: { price: 3480, change: 1.56 },
     solana: { price: 145.56, change: -0.89 },
     cardano: { price: 0.48, change: 3.21 },
     dogecoin: { price: 0.12, change: -2.15 },
   });
+
+  const ws = useRef(null);
+
+  // WebSocket setup for live price updates (Logic remains unchanged)
+  useEffect(() => {
+    const symbols = [
+      "btcusdt@ticker",
+      "ethusdt@ticker", 
+      "solusdt@ticker",
+      "adausdt@ticker",
+      "dogeusdt@ticker"
+    ];
+    const streams = symbols.join('/');
+
+    try {
+      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+      ws.current.onopen = () => {
+        console.log('WebSocket connected for landing page live prices');
+      };
+
+      ws.current.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.stream && message.data) {
+          const symbol = message.stream.replace('@ticker', '');
+          const coinData = message.data;
+          
+          const symbolToCoinId = {
+            "btcusdt": "bitcoin",
+            "ethusdt": "ethereum",
+            "solusdt": "solana",
+            "adausdt": "cardano",
+            "dogeusdt": "dogecoin"
+          };
+
+          const coinId = symbolToCoinId[symbol];
+          if (coinId) {
+            const currentPrice = parseFloat(coinData.c);
+            const priceChangePercent = parseFloat(coinData.P);
+            
+            setLivePrices(prev => ({
+              ...prev,
+              [coinId]: {
+                price: currentPrice,
+                change: priceChangePercent,
+                lastUpdate: Date.now()
+              }
+            }));
+          }
+        }
+      };
+
+      ws.current.onerror = (error) => {
+        console.error('Landing page WebSocket error:', error);
+      };
+
+      ws.current.onclose = () => {
+        console.log('Landing page WebSocket disconnected');
+      };
+
+    } catch (error) {
+      console.error('Landing page WebSocket setup failed:', error);
+    }
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, []);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 60 },
@@ -262,30 +385,6 @@ export default function Landing() {
       },
     },
   };
-
-  // const slideFromRight = {
-  //   hidden: { opacity: 0, x: 200 },
-  //   visible: {
-  //     opacity: 1,
-  //     x: 0,
-  //     transition: {
-  //       duration: 0.8,
-  //       ease: "easeOut",
-  //     },
-  //   },
-  // };
-
-  // const slideFromLeft = {
-  //   hidden: { opacity: 0, x: -200 },
-  //   visible: {
-  //     opacity: 1,
-  //     x: 0,
-  //     transition: {
-  //       duration: 0.8,
-  //       ease: "easeOut",
-  //     },
-  //   },
-  // };
 
   const cardVariants = {
     hidden: { opacity: 0, x: 100 },
@@ -323,7 +422,7 @@ export default function Landing() {
   };
 
   const getChangeColor = (change) => {
-    return change >= 0 ? "text-green-400" : "text-red-400";
+    return change >= 0 ? TC.textGreen : TC.textRed;
   };
 
   const getChangeIcon = (change) => {
@@ -341,7 +440,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-black via-[#0b182d] to-black text-white min-h-screen overflow-hidden">
+    <div className={`min-h-screen overflow-hidden ${TC.bgPage}`}>
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden">
         <div className="absolute inset-0 "></div>
@@ -361,7 +460,7 @@ export default function Landing() {
                   loop
                   className="w-full h-full"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/20 to-transparent"></div>
+                <div className={`absolute inset-0 ${isLight ? 'bg-gradient-to-r from-transparent via-white/50 to-transparent' : 'bg-gradient-to-r from-transparent via-black/20 to-transparent'}`}></div>
               </div>
             </motion.div>
 
@@ -373,21 +472,14 @@ export default function Landing() {
               className="text-center lg:text-left space-y-8 order-2 lg:order-2"
             >
               <motion.div variants={fadeInUp} className="space-y-4">
-                {/* <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-full mb-4">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
-                  <span className="text-cyan-400 text-sm font-semibold">
-                    THE FUTURE OF CRYPTO TRADING
-                  </span>
-                </div> */}
-
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                   Welcome to{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                  <span className={`text-transparent bg-clip-text ${TC.textHeroGradient}`}>
                     NexChain
                   </span>
                 </h1>
 
-                <p className="text-xl text-gray-300 max-w-2xl">
+                <p className={`text-xl max-w-2xl ${TC.textSecondary}`}>
                   Track, Trade & Master Crypto — All in one powerful platform
                   designed for modern traders.
                 </p>
@@ -397,32 +489,23 @@ export default function Landing() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <button
                     onClick={() => navigate("/auth")}
-                    className="group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 rounded-2xl font-semibold shadow-2xl shadow-cyan-500/30 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3"
+                    className={`group px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-110 flex items-center justify-center gap-3 relative overflow-hidden ${TC.btnPrimary}`}
                   >
-                    <span>Start Trading Now</span>
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                    <span className="relative">Start Trading Now</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300 relative" />
                   </button>
 
                   <button
                     onClick={() =>
                       navigate(isLoggedIn ? "/learning" : "/public-learning")
                     }
-                    className="group border-2 border-cyan-500 bg-cyan-500/5 hover:bg-cyan-500/10 text-cyan-400 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3"
+                    className={`group px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-110 flex items-center justify-center gap-3 relative overflow-hidden ${TC.btnSecondary} ${isLight ? "glass-effect-light" : "glass-effect"}`}
                   >
-                    <span>Explore Learning Hub</span>
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                    <span className="relative">Explore Learning Hub</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300 relative" />
                   </button>
-                </div>
-
-                <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-sm text-gray-400">
-                  {/* <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-cyan-400" />
-                    <span>98% Success Rate</span>
-                  </div> */}
-                  {/* <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-cyan-400" />
-                    <span>24/7 Real-time Data</span>
-                  </div> */}
                 </div>
               </motion.div>
             </motion.div>
@@ -437,7 +520,7 @@ export default function Landing() {
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer hidden lg:flex"
           onClick={scrollToFeatures}
         >
-          <div className="flex flex-col items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
+          <div className={`flex flex-col items-center gap-2 transition-colors duration-300 ${isLight ? "text-blue-600 hover:text-blue-500" : "text-cyan-400 hover:text-cyan-300"}`}>
             <span className="text-sm font-medium">Discover Features</span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
@@ -463,7 +546,7 @@ export default function Landing() {
                 Why Choose NexChain?
               </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            <p className={`text-xl max-w-3xl mx-auto ${TC.textSecondary}`}>
               Everything you need to succeed in cryptocurrency trading, packed
               into one intuitive platform
             </p>
@@ -505,16 +588,16 @@ export default function Landing() {
                 viewport={{ once: true }}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-3xl p-8 hover:border-cyan-400 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/10 h-full">
+                <div className={`rounded-3xl p-8 transition-all duration-500 hover:scale-105 h-full ${TC.bgFeatureCard}`}>
                   <div
-                    className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 text-white`}
                   >
                     {feature.icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">
+                  <h3 className={`text-2xl font-bold mb-4 ${TC.textPrimary}`}>
                     {feature.title}
                   </h3>
-                  <p className="text-gray-400 text-lg leading-relaxed">
+                  <p className={`text-lg leading-relaxed ${TC.textSecondary}`}>
                     {feature.description}
                   </p>
                 </div>
@@ -533,9 +616,9 @@ export default function Landing() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-full mb-4">
-              <Activity className="w-4 h-4 text-cyan-400" />
-              <span className="text-cyan-400 text-sm font-semibold">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${isLight ? "bg-blue-100 border-blue-500/30 text-blue-600" : "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"}`}>
+              <Activity className="w-4 h-4" />
+              <span className="text-sm font-semibold">
                 LIVE MARKET
               </span>
             </div>
@@ -544,7 +627,7 @@ export default function Landing() {
                 Market Overview
               </span>
             </h2>
-            <p className="text-xl text-gray-400">
+            <p className={`text-xl ${TC.textSecondary}`}>
               Real-time cryptocurrency prices and trends
             </p>
           </motion.div>
@@ -559,7 +642,7 @@ export default function Landing() {
                 whileInView="visible"
                 variants={coinCardVariants}
                 viewport={{ once: true }}
-                className="bg-gradient-to-br from-gray-900 to-gray-800 border border-amber-500/30 rounded-3xl p-8 hover:border-amber-400 transition-all duration-500 hover:scale-105 group w-full max-w-md"
+                className={`rounded-3xl p-8 transition-all duration-500 hover:scale-105 group w-full max-w-md ${TC.bgCoinCard} ${isLight ? "border-amber-500/60 shadow-lg" : "border-amber-500/30"}`}
               >
                 <div className="flex items-center gap-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -567,14 +650,14 @@ export default function Landing() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-2xl font-bold text-white">Bitcoin</h3>
-                      <span className="text-gray-400 text-sm">BTC</span>
-                      <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs font-medium">
+                      <h3 className={`text-2xl font-bold ${TC.textPrimary}`}>Bitcoin</h3>
+                      <span className={TC.textCoinSymbol}>BTC</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${TC.bgCoinLive}`}>
                         Live
                       </span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="text-3xl font-bold text-amber-400">
+                      <p className={`text-3xl font-bold ${TC.textPriceMain}`}>
                         {formatPrice(livePrices.bitcoin.price)}
                       </p>
                       <span
@@ -599,7 +682,7 @@ export default function Landing() {
                   whileInView="visible"
                   variants={coinCardVariants}
                   viewport={{ once: true }}
-                  className="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-6 hover:border-purple-400 transition-all duration-500 hover:scale-105 group flex-1"
+                  className={`rounded-2xl p-6 transition-all duration-500 hover:scale-105 group flex-1 ${TC.bgCoinCard} ${isLight ? "border-purple-500/60 shadow-md" : "border-purple-500/30"}`}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -607,12 +690,12 @@ export default function Landing() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className={`text-xl font-bold ${TC.textPrimary}`}>
                           Ethereum
                         </h3>
-                        <span className="text-gray-400 text-xs">ETH</span>
+                        <span className={TC.textCoinSymbol}>ETH</span>
                       </div>
-                      <p className="text-2xl font-bold text-purple-400 mb-1">
+                      <p className={`text-2xl font-bold mb-1 ${TC.textPriceSecondary}`}>
                         {formatPrice(livePrices.ethereum.price)}
                       </p>
                       <span
@@ -634,7 +717,7 @@ export default function Landing() {
                   whileInView="visible"
                   variants={coinCardVariants}
                   viewport={{ once: true }}
-                  className="bg-gradient-to-br from-gray-900 to-gray-800 border border-pink-500/30 rounded-2xl p-6 hover:border-pink-400 transition-all duration-500 hover:scale-105 group flex-1"
+                  className={`rounded-2xl p-6 transition-all duration-500 hover:scale-105 group flex-1 ${TC.bgCoinCard} ${isLight ? "border-pink-500/60 shadow-md" : "border-pink-500/30"}`}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -642,10 +725,10 @@ export default function Landing() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-xl font-bold text-white">Solana</h3>
-                        <span className="text-gray-400 text-xs">SOL</span>
+                        <h3 className={`text-xl font-bold ${TC.textPrimary}`}>Solana</h3>
+                        <span className={TC.textCoinSymbol}>SOL</span>
                       </div>
-                      <p className="text-2xl font-bold text-pink-400 mb-1">
+                      <p className={`text-2xl font-bold mb-1 ${TC.textPriceTertiary}`}>
                         {formatPrice(livePrices.solana.price)}
                       </p>
                       <span
@@ -687,7 +770,7 @@ export default function Landing() {
                     whileInView="visible"
                     variants={coinCardVariants}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-600 rounded-xl p-4 hover:border-cyan-400 transition-all duration-500 hover:scale-105 group flex-1 max-w-[200px]"
+                    className={`rounded-xl p-4 transition-all duration-500 hover:scale-105 group flex-1 max-w-[200px] ${TC.bgCoinCard} ${isLight ? "border-gray-500 shadow-sm" : "border-gray-600"}`}
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -697,14 +780,14 @@ export default function Landing() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1 mb-1">
-                          <h3 className="text-sm font-bold text-white">
+                          <h3 className={`text-sm font-bold ${TC.textPrimary}`}>
                             {crypto.name}
                           </h3>
-                          <span className="text-gray-400 text-xs">
+                          <span className={TC.textCoinSymbol}>
                             {crypto.symbol}
                           </span>
                         </div>
-                        <p className="text-lg font-bold text-cyan-400 mb-1">
+                        <p className={`text-lg font-bold mb-1 ${TC.textPriceSmall}`}>
                           {formatPrice(livePrices[crypto.coin].price)}
                         </p>
                         <span
@@ -750,9 +833,9 @@ export default function Landing() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-full mb-4">
-              <Users className="w-4 h-4 text-cyan-400" />
-              <span className="text-cyan-400 text-sm font-semibold">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${isLight ? "bg-blue-100 border-blue-500/30 text-blue-600" : "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"}`}>
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-semibold">
                 COMMUNITY LOVE
               </span>
             </div>
@@ -761,12 +844,13 @@ export default function Landing() {
                 What Our Traders Say
               </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Join thousands of successful traders who trust NexChain for their cryptocurrency journey
+            <p className={`text-xl max-w-3xl mx-auto ${TC.textSecondary}`}>
+              Join thousands of successful traders who trust NexChain for their
+              cryptocurrency journey
             </p>
           </motion.div>
 
-          <TestimonialCarousel />
+          <TestimonialCarousel TC={TC} />
         </div>
       </section>
 
@@ -778,26 +862,26 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-r from-cyan-600/20 to-purple-600/20 border border-cyan-500/30 rounded-3xl p-12 text-center relative overflow-hidden"
+            className={`rounded-3xl p-12 text-center relative overflow-hidden ${TC.bgCTA}`}
           >
             {/* Background Effects */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5"></div>
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl"></div>
-
+            <div className={`absolute inset-0 ${isLight ? "bg-blue-500/5" : "bg-gradient-to-r from-cyan-500/5 to-purple-500/5"}`}></div>
+            <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl ${isLight ? "bg-blue-500/10" : "bg-cyan-500/10"}`}></div>
+            <div className={`absolute -bottom-24 -left-24 w-48 h-48 rounded-full blur-3xl ${isLight ? "bg-purple-500/10" : "bg-purple-500/10"}`}></div>
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className={`text-3xl md:text-4xl font-bold mb-4 group-hover:scale-105 transition-transform duration-300 ${TC.textPrimary}`}>
                 Ready to Start Your Crypto Journey?
               </h2>
-              <p className="text-lg text-gray-300 mb-8 max-w-md mx-auto">
+              <p className={`text-lg mb-8 max-w-md mx-auto ${TC.textSecondary}`}>
                 Join the smart traders who trust NexChain for their
                 cryptocurrency success
               </p>
               <button
                 onClick={() => navigate("/auth")}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 rounded-2xl font-semibold shadow-2xl shadow-cyan-500/30 transition-all duration-300 transform hover:scale-105"
+                className={`px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-110 relative overflow-hidden group/btn ${TC.btnPrimary}`}
               >
-                Get Started for Free
+                <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"></span>
+                <span className="relative">Get Started for Free</span>
               </button>
             </div>
           </motion.div>

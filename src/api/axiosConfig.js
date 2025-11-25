@@ -17,16 +17,11 @@ const api = axios.create({
 // Request Interceptor - FIXED TOKEN HANDLING
 api.interceptors.request.use(
   (config) => {
-    // Get token from NEXCHAIN_USER object
+    // Get token from NEXCHAIN_USER_TOKEN directly
     try {
-      const userData = localStorage.getItem("NEXCHAIN_USER");
-      if (userData) {
-        const user = JSON.parse(userData);
-        const token = user.token || user.accessToken;
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-          // console.log("Token added to request:", token.substring(0, 20) + "...");
-        }
+      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
       console.error("Error getting token from localStorage:", error);

@@ -19,7 +19,8 @@ import CoinDetailsPage from "@/Pages/CoinDetails/CoinDetailsPage";
 import PurchaseDetails from "@/Pages/PurchaseDetails";
 import CoinPageOutlet from "@/Pages/CoinDetails/CoinPageOutlet";
 import AdminFeedback from "@/Pages/Admin/Pages/AdminFeedback";
-import MarketInsights from "@/Pages/Admin/Pages/MarketInsights"; // ADD THIS IMPORT
+import MarketInsights from "@/Pages/Admin/Pages/MarketInsights";
+import AdminSettings from "@/Pages/Admin/Pages/AdminSettings";
 
 export default function AppRoutes() {
   return (
@@ -54,7 +55,8 @@ export default function AppRoutes() {
             <Route path="users" element={<Users />} />
             <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} />
             <Route path="feedback" element={<AdminFeedback />} />
-            <Route path="insights" element={<MarketInsights />} /> {/* ADD THIS ROUTE */}
+            <Route path="insights" element={<MarketInsights />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Route>
       </Route>
