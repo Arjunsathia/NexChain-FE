@@ -37,8 +37,8 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
-    borderHeader: isLight ? "border-gray-300" : "border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    borderHeader: isLight ? "border-gray-300/50" : "border-gray-700/50",
 
     // Header/Title
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
@@ -59,7 +59,7 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
     textTotal: isLight ? "text-gray-500" : "text-gray-400",
 
     // Spread Separator
-    bgSpread: isLight ? "bg-gray-100/50 border-gray-300" : "bg-gray-900/50 border-gray-700",
+    bgSpread: isLight ? "bg-gray-100/50 border-gray-300/50" : "bg-gray-900/50 border-gray-700/50",
     textSpreadValue: isLight ? "text-blue-600" : "text-cyan-400",
     
   }), [isLight]);

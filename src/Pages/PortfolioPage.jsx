@@ -170,21 +170,31 @@ const PortfolioPage = () => {
     });
   }, []);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className={`min-h-screen ${TC.textPrimary}`}>
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-8">
+    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-5 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+
+      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
         
         {/* 2. Summary Cards */}
-        <PortfolioHeader 
-          isLight={isLight} 
-          portfolioSummary={liveSummary} 
-          balance={balance} 
-          loading={portfolioLoading}
-          topPerformer={topPerformer}
-        />
+        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+          <PortfolioHeader 
+            isLight={isLight} 
+            portfolioSummary={liveSummary} 
+            balance={balance} 
+            loading={portfolioLoading}
+            topPerformer={topPerformer}
+          />
+        </div>
 
         {/* 3. Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="lg:col-span-2">
             <PerformanceChart 
               isLight={isLight} 
@@ -204,7 +214,7 @@ const PortfolioPage = () => {
         </div>
 
         {/* 4. Holdings Table */}
-        <div className="space-y-4">
+        <div className="space-y-4 fade-in" style={{ animationDelay: "0.3s" }}>
           <div className="flex items-center justify-between">
              <h2 className="text-2xl font-bold flex items-center gap-2">
                <FaChartLine className="text-cyan-500" />
@@ -219,8 +229,8 @@ const PortfolioPage = () => {
           />
         </div>
 
-        {/* 5. Recent Activity (Optional / Collapsible) */}
-        <div className="pt-8 border-t border-gray-200/10">
+        {/* 5. Recent Activity */}
+        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: "0.4s" }}>
            <TransactionHistory />
         </div>
 

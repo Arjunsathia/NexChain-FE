@@ -33,7 +33,9 @@ function InfoCards() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white border-gray-300 shadow-md" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
+    bgCard: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     
     textGreen: isLight ? "text-green-700" : "text-green-400",
@@ -161,7 +163,7 @@ function InfoCards() {
         return (
           <div
             key={idx}
-            className={`${TC.bgCard} rounded-xl p-4 transition-all duration-300 hover:scale-105 group cursor-pointer fade-in`}
+            className={`${TC.bgCard} rounded-xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 group cursor-pointer fade-in`}
             style={{ animationDelay: `${0.1 + idx * 0.1}s` }}
           >
             <div className="flex items-center justify-between mb-3">

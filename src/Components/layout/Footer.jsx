@@ -9,8 +9,12 @@ import {
   FaPaperPlane,
   FaCheckCircle,
 } from "react-icons/fa";
+import { X } from "lucide-react"; 
 import axios from "axios";
-import { toast } from "react-toastify"; // Added missing toast import
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
+import { postForm } from "@/api/axiosConfig";
+import useUserContext from "@/Context/UserContext/useUserContext";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
@@ -36,88 +40,126 @@ const api = axios.create({
 
 export default function Footer() {
   const isLight = useThemeCheck();
-  const [isMounted, setIsMounted] = useState(false);
+  const { user } = useUserContext();
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("suggestion");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // 💡 Theme Classes Helper - Updated Shadow Effect
+  // 💡 Advanced Theme Classes Helper (Black Shadow Applied)
   const TC = useMemo(() => ({
-    // Footer & Modal Base - 🚨 Shadow effect enhanced here 🚨
+    // Footer & Modal Base - Fluent Effect + Black Shadow
     bgFooter: isLight 
-      ? "bg-white/70 border-gray-300 shadow-2xl" 
-      : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl",
+      ? "bg-white/60 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgModal: isLight 
-      ? "bg-white/95 border-gray-300 shadow-2xl" 
-      : "bg-gray-800/95 backdrop-blur-sm border-gray-700 shadow-2xl",
+      ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/30 border-none" 
+      : "bg-gray-900/90 backdrop-blur-xl shadow-2xl shadow-black/80 border-none",
     
-    bgModalHeader: isLight ? "bg-gray-100/90 border-gray-300" : "bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700",
+    bgModalHeader: isLight 
+      ? "bg-gray-100/90 border-none" 
+      : "bg-gradient-to-r from-gray-800 to-gray-900 border-none",
     
     // Text Colors
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-700" : "text-gray-300",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Disclaimer Accent
-    textDisclaimerAccent: isLight ? "text-cyan-700" : "text-cyan-200",
-    borderDisclaimer: isLight ? "border-gray-300" : "border-gray-700",
+    // Disclaimer Accent (Matching Navbar's active color)
+    textDisclaimerAccent: isLight ? "text-blue-700" : "text-cyan-400",
+    borderDisclaimer: isLight ? "border-gray-300/50" : "border-gray-700/50",
     
-    // Social Buttons
-    bgSocial: isLight ? "bg-gray-100/70 border-gray-300 text-gray-500 hover:bg-gray-200" : "bg-gray-800/50 border-gray-700 text-gray-400 hover:bg-gray-700/50",
+    // Social Buttons - Added Ring for interactive effect
+    bgSocial: isLight 
+      ? "bg-white/70 text-gray-500 hover:bg-blue-50/70 ring-2 ring-transparent hover:ring-blue-500/50 shadow-sm" 
+      : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-cyan-400/50 shadow-sm",
     
     // Input/Textarea
-    inputBg: isLight ? "bg-gray-100/70 border-gray-300 text-gray-900 placeholder-gray-500" : "bg-gray-800/50 border-gray-700 text-white placeholder-gray-500",
+    inputBg: isLight ? "bg-gray-100/70 text-gray-900 placeholder-gray-500 border-none shadow-inner" : "bg-gray-800/50 text-white placeholder-gray-500 border-none shadow-inner",
     
-    // Feedback Buttons (Type)
-    bgBtnFeedbackActive: isLight ? "bg-cyan-100/50 border-cyan-600/50 text-cyan-700 shadow-md" : "bg-cyan-600/20 border-cyan-400/50 text-cyan-400 shadow-lg",
-    bgBtnFeedbackDefault: isLight ? "bg-gray-100/50 border-gray-300 text-gray-500 hover:border-cyan-600/30 hover:text-gray-700" : "bg-gray-800/50 border-gray-600 text-gray-400 hover:border-cyan-400/30 hover:text-white",
+    // Feedback Buttons (Type) - Uses Ring for active state
+    bgBtnFeedbackActive: isLight 
+      ? "bg-blue-100/50 text-blue-700 shadow-md ring-2 ring-blue-500/50 border-none" 
+      : "bg-cyan-600/20 text-cyan-400 shadow-lg ring-2 ring-cyan-400/50 border-none",
+    bgBtnFeedbackDefault: isLight 
+      ? "bg-gray-100/50 text-gray-500 hover:text-gray-700 border-none" 
+      : "bg-gray-800/50 text-gray-400 hover:text-white border-none",
     
     // Cancel Button
-    bgBtnCancel: isLight ? "bg-gray-100/70 text-gray-700 border-gray-300 hover:bg-gray-200" : "bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50",
-  }), [isLight]);
+    bgBtnCancel: isLight 
+      ? "bg-gray-100/70 text-gray-700 hover:bg-gray-200/90 ring-2 ring-transparent hover:ring-gray-400/50 border-none" 
+      : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-gray-400/50 border-none",
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+    // Primary Button (Cohesive Gradient)
+    bgPrimaryBtn: "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-cyan-500/25",
+
+  }), [isLight]);
 
   const handleSubmitFeedback = async (e) => {
     e.preventDefault();
-    if (!feedback.trim()) return;
+    if (!feedback.trim()) {
+      toast.warning("Please enter your feedback before submitting.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem("token");
-      
-      await api.post(
-        "/api/feedback",
-        {
-          type: feedbackType,
-          message: feedback,
-          userEmail: "", 
-          pageUrl: window.location.href,
-        },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
+      // Prepare feedback data
+      const feedbackData = {
+        type: feedbackType,
+        message: feedback.trim(),
+        userEmail: user?.email || "anonymous@nexchain.com",
+        userName: user?.name || "Anonymous User",
+        userId: user?.id || null,
+        pageUrl: window.location.href,
+        timestamp: new Date().toISOString(),
+        status: "new",
+        priority: "medium",
+      };
 
-      setShowSuccess(true);
+      // Submit feedback to database using axios directly
+      const response = await axios.post("http://localhost:5050/api/feedback", feedbackData);
       
-      setTimeout(() => {
-        setFeedback("");
-        setFeedbackType("suggestion");
-        setShowFeedback(false);
-        setShowSuccess(false);
-      }, 2000);
+      if (response.data && response.data.success) {
+        setShowSuccess(true);
+        toast.success("Thank you for your feedback! We appreciate it.", {
+          icon: "🎉",
+          style: {
+            background: isLight ? "#FFFFFF" : "#111827",
+            color: isLight ? "#16A34A" : "#22c55e",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+          },
+        });
+        
+        setTimeout(() => {
+          setFeedback("");
+          setFeedbackType("suggestion");
+          setShowFeedback(false);
+          setShowSuccess(false);
+        }, 2000);
+      } else {
+        throw new Error("Failed to submit feedback");
+      }
 
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      toast.error("Error submitting feedback. Please try again.");
+      toast.error("Error submitting feedback. Please try again.", {
+        icon: "❌",
+        style: {
+          background: isLight ? "#FFFFFF" : "#111827",
+          color: isLight ? "#DC2626" : "#EF4444",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+        },
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -134,22 +176,24 @@ export default function Footer() {
 
   return (
     <>
-      <footer
+      <motion.footer
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.2 }}
         className={`
-          ${TC.bgFooter} rounded-xl px-6 py-8 my-4 mx-4
-          transition-all duration-700 ease-out fade-in
-          ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+          ${TC.bgFooter} rounded-xl px-4 sm:px-6 py-8 my-4 mx-2 sm:mx-4
+          transition-all duration-700 ease-out
         `}
-        style={{ animationDelay: "0.1s" }}
       >
         <div className="max-w-7xl mx-auto">
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Disclaimer Section */}
-            <div className="lg:col-span-2">
-              <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+          {/* Main Content: Disclaimer & Links */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+            
+            {/* Column 1-3: Disclaimer Section */}
+            <div className="md:col-span-2 lg:col-span-3">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                 <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
                   Important Disclaimer
                 </h3>
                 <p className={`text-sm leading-relaxed ${TC.textSecondary}`}>
@@ -163,32 +207,46 @@ export default function Footer() {
                   educational content but does not offer financial or investment
                   advice.
                 </p>
-              </div>
+              </motion.div>
             </div>
 
-            {/* Quick Actions & Social */}
-            <div className="space-y-6">
+            {/* Column 4: Quick Actions */}
+            <div className="lg:col-span-1 space-y-4">
+                <h4
+                    className={`text-sm font-semibold mb-3 uppercase tracking-wider ${TC.textTertiary}`}
+                >
+                    Quick Links
+                </h4>
+                <div className={`space-y-1 text-sm ${TC.textSecondary}`}>
+                    <a href="/faq" className="block hover:text-cyan-400 transition-colors">FAQ</a>
+                    <a href="/terms" className="block hover:text-cyan-400 transition-colors">Terms of Service</a>
+                    <a href="/privacy" className="block hover:text-cyan-400 transition-colors">Privacy Policy</a>
+                    <a href="/careers" className="block hover:text-cyan-400 transition-colors">Careers</a>
+                </div>
+            </div>
+
+            {/* Column 5: Feedback & Social */}
+            <div className="lg:col-span-1 space-y-6">
+              
               {/* Feedback Trigger */}
-              <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
                 <button
                   onClick={() => setShowFeedback(true)}
-                  className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 fade-in"
-                  style={{ animationDelay: "0.35s" }}
+                  className={`w-full ${TC.bgPrimaryBtn} font-medium py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 ring-2 ring-transparent hover:ring-cyan-400/50`}
                 >
                   <FaPaperPlane className="text-sm" />
                   Share Feedback
                 </button>
-              </div>
+              </motion.div>
 
               {/* Social Links */}
-              <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
                 <h4
-                  className={`text-sm font-semibold mb-3 uppercase tracking-wide fade-in ${TC.textTertiary}`}
-                  style={{ animationDelay: "0.45s" }}
+                  className={`text-sm font-semibold mb-3 uppercase tracking-wider ${TC.textTertiary}`}
                 >
-                  Connect With Us
+                  Connect
                 </h4>
-                <div className="flex gap-4 justify-center lg:justify-start">
+                <div className="flex gap-4">
                   {[
                     {
                       icon: FaGithub,
@@ -209,243 +267,242 @@ export default function Footer() {
                     <a
                       key={index}
                       href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={`
-                        p-3 rounded-xl border transition-all duration-300
-                        ${TC.bgSocial} ${social.color} hover:border-cyan-600/50 hover:scale-110 fade-in
+                        p-3 rounded-xl transition-all duration-300
+                        ${TC.bgSocial} ${social.color} hover:scale-110
                       `}
                       aria-label={social.label}
-                      style={{ animationDelay: `${0.5 + index * 0.1}s` }}
                     >
                       <social.icon size={18} />
                     </a>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
 
-          {/* Bottom Section */}
+          {/* Bottom Section: Copyright & Status Indicators */}
           <div
-            className={`pt-6 border-t ${TC.borderDisclaimer} text-center fade-in`}
-            style={{ animationDelay: "0.6s" }}
+            className={`pt-6 ${TC.borderDisclaimer} text-center`}
           >
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div
-                className={`text-sm fade-in ${TC.textTertiary}`}
-                style={{ animationDelay: "0.65s" }}
+                className={`text-sm ${TC.textTertiary}`}
               >
                 © {new Date().getFullYear()} NexChain. All rights reserved.
               </div>
               <div
-                className={`flex items-center gap-4 text-xs fade-in ${TC.textTertiary}`}
-                style={{ animationDelay: "0.7s" }}
+                className={`flex items-center gap-4 text-xs ${TC.textTertiary}`}
               >
-                <span className="fade-in" style={{ animationDelay: "0.75s" }}>
+                <span className="opacity-90">
                   Secure
                 </span>
                 <div
-                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse fade-in"
-                  style={{ animationDelay: "0.8s" }}
+                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"
                 ></div>
-                <span className="fade-in" style={{ animationDelay: "0.85s" }}>
+                <span className="opacity-90">
                   Reliable
                 </span>
                 <div
-                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse fade-in"
-                  style={{ animationDelay: "0.9s" }}
+                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"
                 ></div>
-                <span className="fade-in" style={{ animationDelay: "0.95s" }}>
+                <span className="opacity-90">
                   Real-time
                 </span>
               </div>
             </div>
           </div>
         </div>
-      </footer>
+      </motion.footer>
 
       {/* Feedback Modal */}
-      {showFeedback && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 fade-in"
-            onClick={closeModal}
-          />
+      <AnimatePresence> 
+        {showFeedback && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] transition-opacity duration-300"
+              onClick={closeModal}
+            />
 
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md fade-in">
-            <div className={`rounded-2xl ${TC.bgModal}`}>
-              
-              {/* Success State */}
-              {showSuccess ? (
-                <div className="p-8 text-center fade-in">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaCheckCircle className="text-3xl text-green-400" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
-                    Thank You!
-                  </h3>
-                  <p className={`mb-6 ${TC.textSecondary}`}>
-                    Your feedback has been received. We appreciate your input!
-                  </p>
-                  <div className="w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4"></div>
-                </div>
-              ) : (
-                /* Normal Form State */
-                <>
-                  {/* Header */}
-                  <div
-                    className={`px-6 py-4 border-b rounded-t-2xl fade-in ${TC.bgModalHeader}`}
-                    style={{ animationDelay: "0.1s" }}
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: "-50%", opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 200 }}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 z-[95] w-full max-w-md p-4"
+            >
+              <div className={`rounded-2xl ${TC.bgModal}`}>
+                
+                {/* Success State */}
+                {showSuccess ? (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="p-8 text-center"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg fade-in"
-                          style={{ animationDelay: "0.2s" }}
-                        >
-                          <FaPaperPlane className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
-                          <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                            Quick Feedback
-                          </h3>
-                          <p className={`text-sm ${TC.textTertiary}`}>
-                            Share your thoughts with us
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={closeModal}
-                        disabled={isSubmitting}
-                        className={`p-2 rounded-lg transition-all duration-200 fade-in disabled:opacity-50 disabled:cursor-not-allowed ${isLight ? "text-gray-500 hover:text-gray-900 hover:bg-gray-200" : "text-gray-400 hover:text-white hover:bg-gray-700"}`}
-                        style={{ animationDelay: "0.4s" }}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaCheckCircle className="text-3xl text-green-400" />
                     </div>
-                  </div>
-
-                  {/* Form */}
-                  <form onSubmit={handleSubmitFeedback} className="p-6 space-y-5">
-                    {/* Feedback Type */}
-                    <div className="fade-in" style={{ animationDelay: "0.5s" }}>
-                      <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
-                        Feedback Type
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          {
-                            type: "suggestion",
-                            icon: FaLightbulb,
-                            label: "Suggestion",
-                            color: isLight ? "text-yellow-600" : "text-yellow-400",
-                          },
-                          {
-                            type: "bug",
-                            icon: FaBug,
-                            label: "Bug Report",
-                            color: isLight ? "text-red-600" : "text-red-400",
-                          },
-                          {
-                            type: "praise",
-                            icon: FaStar,
-                            label: "Praise",
-                            color: isLight ? "text-cyan-600" : "text-cyan-400",
-                          },
-                        ].map((item, index) => (
-                          <button
-                            key={item.type}
-                            type="button"
-                            onClick={() => setFeedbackType(item.type)}
-                            disabled={isSubmitting}
-                            className={`
-                              p-3 rounded-xl border transition-all duration-200 flex flex-col items-center gap-2 fade-in
-                              ${
-                                feedbackType === item.type
-                                  ? TC.bgBtnFeedbackActive
-                                  : TC.bgBtnFeedbackDefault
-                              }
-                              ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
-                            `}
-                            style={{ animationDelay: `${0.6 + index * 0.1}s` }}
-                          >
-                            <item.icon className={item.color} />
-                            <span className="text-xs font-medium">
-                              {item.label}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Feedback Text */}
-                    <div className="fade-in" style={{ animationDelay: "0.8s" }}>
-                      <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
-                        Your Feedback
-                      </label>
-                      <textarea
-                        value={feedback}
-                        onChange={(e) => setFeedback(e.target.value)}
-                        placeholder="Tell us what's on your mind..."
-                        rows="4"
-                        className={`w-full rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 resize-none fade-in disabled:opacity-50 ${TC.inputBg}`}
-                        style={{ animationDelay: "0.85s" }}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    {/* Action Buttons */}
+                    <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
+                      Feedback Sent!
+                    </h3>
+                    <p className={`mb-6 ${TC.textSecondary}`}>
+                      We appreciate your input.
+                    </p>
+                    <div className="w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4"></div>
+                  </motion.div>
+                ) : (
+                  /* Normal Form State */
+                  <motion.div key="form">
+                    {/* Header */}
                     <div
-                      className="flex gap-3 pt-2 fade-in"
-                      style={{ animationDelay: "0.9s" }}
+                      className={`px-6 py-4 rounded-t-2xl ${TC.bgModalHeader}`}
                     >
-                      <button
-                        type="button"
-                        onClick={closeModal}
-                        disabled={isSubmitting}
-                        className={`flex-1 px-4 py-3 rounded-xl transition-all duration-200 fade-in disabled:opacity-50 disabled:cursor-not-allowed ${TC.bgBtnCancel}`}
-                        style={{ animationDelay: "0.95s" }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!feedback.trim() || isSubmitting}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 fade-in"
-                        style={{ animationDelay: "1s" }}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <FaPaperPlane className="text-sm" />
-                            Send Feedback
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg"
+                          >
+                            <FaPaperPlane className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                              Quick Feedback
+                            </h3>
+                            <p className={`text-sm ${TC.textTertiary}`}>
+                              Share your thoughts with us
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={closeModal}
+                          disabled={isSubmitting}
+                          className={`transition-all duration-200 p-1 rounded-lg hover:rotate-90 transform group disabled:opacity-50 disabled:cursor-not-allowed ${isLight ? "text-gray-500 hover:text-red-600 hover:bg-red-100" : "text-gray-400 hover:text-white hover:bg-red-500/20"}`}
+                        >
+                          <X className="text-lg group-hover:scale-110 transition-transform" />
+                        </button>
+                      </div>
                     </div>
-                  </form>
-                </>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmitFeedback} className="p-6 space-y-5">
+                      {/* Feedback Type */}
+                      <div>
+                        <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
+                          Feedback Type
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            {
+                              type: "suggestion",
+                              icon: FaLightbulb,
+                              label: "Suggestion",
+                              color: isLight ? "text-yellow-600" : "text-yellow-400",
+                            },
+                            {
+                              type: "bug",
+                              icon: FaBug,
+                              label: "Bug Report",
+                              color: isLight ? "text-red-600" : "text-red-400",
+                            },
+                            {
+                              type: "praise",
+                              icon: FaStar,
+                              label: "Praise",
+                              color: isLight ? "text-cyan-600" : "text-cyan-400",
+                            },
+                          ].map((item) => (
+                            <motion.button
+                              key={item.type}
+                              type="button"
+                              onClick={() => setFeedbackType(item.type)}
+                              disabled={isSubmitting}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`
+                                p-3 rounded-xl transition-all duration-200 flex flex-col items-center gap-2
+                                ${
+                                  feedbackType === item.type
+                                    ? TC.bgBtnFeedbackActive
+                                    : TC.bgBtnFeedbackDefault
+                                }
+                                ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
+                              `}
+                            >
+                              <item.icon className={item.color} />
+                              <span className="text-xs font-medium">
+                                {item.label}
+                              </span>
+                            </motion.button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Feedback Text */}
+                      <div>
+                        <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
+                          Your Feedback
+                        </label>
+                        <textarea
+                          value={feedback}
+                          onChange={(e) => setFeedback(e.target.value)}
+                          placeholder="Tell us what's on your mind..."
+                          rows="4"
+                          className={`w-full rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 resize-none disabled:opacity-50 ${TC.inputBg}`}
+                          required
+                          disabled={isSubmitting}
+                        />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div
+                        className="flex gap-3 pt-2"
+                      >
+                        <motion.button
+                          type="button"
+                          onClick={closeModal}
+                          disabled={isSubmitting}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`flex-1 px-4 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${TC.bgBtnCancel}`}
+                        >
+                          Cancel
+                        </motion.button>
+                        <motion.button
+                          type="submit"
+                          disabled={!feedback.trim() || isSubmitting}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`flex-1 px-4 py-3 ${TC.bgPrimaryBtn} rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <FaPaperPlane className="text-sm" />
+                              Send Feedback
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

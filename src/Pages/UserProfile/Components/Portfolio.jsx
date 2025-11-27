@@ -32,7 +32,7 @@ function Portfolio() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
     // Header
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
@@ -43,7 +43,7 @@ function Portfolio() {
     bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
 
     // Tooltip
-    bgTooltip: isLight ? "bg-white/90 border-gray-300" : "bg-gray-800/90 border-gray-700",
+    bgTooltip: isLight ? "bg-white/90 shadow-lg border-none" : "bg-gray-800/90 shadow-lg border-none",
     textTooltipValue: isLight ? "text-blue-600" : "text-cyan-400",
 
     // Empty State
@@ -53,8 +53,8 @@ function Portfolio() {
     textEmptyTitle: isLight ? "text-gray-800" : "text-gray-300",
     
     // Stats Section
-    bgStatsSection: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/30 border-gray-600",
-    bgStatItem: isLight ? "bg-white border-gray-300" : "bg-gray-800/50 border-gray-600",
+    bgStatsSection: isLight ? "bg-gray-100/70 border-none" : "bg-gray-700/30 border-none",
+    bgStatItem: isLight ? "bg-white border-none shadow-sm" : "bg-gray-800/50 border-none shadow-inner",
     
     // Holding List
     bgHoldingItem: isLight ? "hover:bg-gray-200/50" : "hover:bg-gray-600/30",
@@ -129,7 +129,7 @@ function Portfolio() {
       const percentage = totalPortfolioValue > 0 ? ((data.totalValue / totalPortfolioValue) * 100).toFixed(1) : 0;
       
       return (
-        <div className={`${TC.bgTooltip} rounded-lg p-3 shadow-xl border`}>
+        <div className={`${TC.bgTooltip} rounded-lg p-3 shadow-xl`}>
           <p className={`font-semibold text-sm mb-1 ${TC.textPrimary}`}>{data.fullName || data.name}</p>
           <p className={`font-bold ${TC.textTooltipValue}`}>
             ${data.totalValue.toLocaleString('en-IN', { 
@@ -173,7 +173,7 @@ function Portfolio() {
   }
 
   return (
-    <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in`}>
+    <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in transition-all duration-300`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4 fade-in">
         <div className="flex items-center gap-3">
@@ -234,7 +234,7 @@ function Portfolio() {
           </div>
 
           {/* Stats */}
-          <div className={`space-y-4 p-4 rounded-lg border ${TC.bgStatsSection} fade-in`}>
+          <div className={`space-y-4 p-4 rounded-lg ${TC.bgStatsSection} fade-in`}>
             <div className="flex items-center justify-between">
               <div className={`flex items-center gap-2 ${TC.textSecondary}`}>
                 <FaChartPie className={TC.iconColor} />
@@ -249,7 +249,7 @@ function Portfolio() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className={`rounded-lg p-3 border text-center ${TC.bgStatItem}`}>
+              <div className={`rounded-lg p-3 text-center ${TC.bgStatItem}`}>
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <FaCoins className={TC.iconColor} />
                   <span className={`text-xs ${TC.textSecondary}`}>Invested</span>
@@ -262,7 +262,7 @@ function Portfolio() {
                 </div>
               </div>
               
-              <div className={`rounded-lg p-3 border text-center ${TC.bgStatItem}`}>
+              <div className={`rounded-lg p-3 text-center ${TC.bgStatItem}`}>
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <FaWallet className={TC.textCash} />
                   <span className={`text-xs ${TC.textSecondary}`}>Cash</span>

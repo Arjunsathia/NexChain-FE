@@ -5,46 +5,65 @@ import { FaChartLine, FaChartBar } from "react-icons/fa";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains("dark"));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains("dark"));
+    });
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
-        return () => observer.disconnect();
-    }, []);
+    return () => observer.disconnect();
+  }, []);
 
-    return isLight;
+  return isLight;
 };
 
 function ChartSection({ coinId }) {
   const isLight = useThemeCheck();
-  const [chartType, setChartType] = useState("line"); 
+  const [chartType, setChartType] = useState("line");
   const [timeframe, setTimeframe] = useState("7d");
   const [chartData, setChartData] = useState([]);
   const [, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 💡 Theme Classes Helper
-  const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-300",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
-    bgButtonDefault: isLight ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200/80" : "text-gray-300 hover:text-white hover:bg-gray-600",
-    bgControls: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/50 border-gray-600",
-    bgToggleDefault: isLight ? "bg-gray-100/70 hover:bg-gray-200/80 border-gray-300" : "bg-gray-700/50 hover:bg-gray-600/50 border-gray-600",
-    chartTheme: isLight ? "light" : "dark",
-    chartGridColor: isLight ? "#E5E7EB" : "#374151",
-    chartAxisColor: isLight ? "#6B7280" : "#9CA3AF",
-    chartLineColor: isLight ? "#0284C7" : "#06B6D4",
-    chartCandleUp: isLight ? "#059669" : "#10B981",
-    chartCandleDown: isLight ? "#DC2626" : "#EF4444",
-  }), [isLight]);
+  // 💡 Theme Classes Helper (updated container style, no border)
+  const TC = useMemo(
+    () => ({
+      // Container – unified with other widgets, no border
+      bgContainer: isLight
+        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
 
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-600" : "text-gray-300",
+      textTertiary: isLight ? "text-gray-500" : "text-gray-400",
+
+      bgButtonDefault: isLight
+        ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200/80"
+        : "text-gray-300 hover:text-white hover:bg-gray-600",
+
+      bgControls: isLight
+        ? "bg-gray-100/70 border-gray-300"
+        : "bg-gray-700/50 border-gray-600",
+
+      bgToggleDefault: isLight
+        ? "bg-gray-100/70 hover:bg-gray-200/80 border-gray-300"
+        : "bg-gray-700/50 hover:bg-gray-600/50 border-gray-600",
+
+      chartTheme: isLight ? "light" : "dark",
+      chartGridColor: isLight ? "#E5E7EB" : "#374151",
+      chartAxisColor: isLight ? "#6B7280" : "#9CA3AF",
+      chartLineColor: isLight ? "#0284C7" : "#06B6D4",
+      chartCandleUp: isLight ? "#059669" : "#10B981",
+      chartCandleDown: isLight ? "#DC2626" : "#EF4444",
+    }),
+    [isLight]
+  );
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,24 +71,24 @@ function ChartSection({ coinId }) {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const timeOptions = [
     { label: "24H", value: "24h" },
     { label: "7D", value: "7d" },
-    { label: "1M", value: "1m" }
+    { label: "1M", value: "1m" },
   ];
 
   useEffect(() => {
     if (coinId) {
       fetchChartData(timeframe, chartType, coinId);
     }
-  }, [timeframe, chartType, coinId, isLight]); // Rerun chart fetch/setup on theme change
+  }, [timeframe, chartType, coinId, isLight]); // rerun on theme change so Apex picks new colors
 
-  const fetchChartData = async (range, type, coinId) => {
+  const fetchChartData = async (range, type, coinIdParam) => {
     setLoading(true);
     try {
       const daysMap = {
@@ -81,7 +100,7 @@ function ChartSection({ coinId }) {
 
       if (type === "candlestick") {
         const response = await axios.get(
-          `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc`,
+          `https://api.coingecko.com/api/v3/coins/${coinIdParam}/ohlc`,
           {
             params: {
               vs_currency: "usd",
@@ -89,16 +108,14 @@ function ChartSection({ coinId }) {
             },
           }
         );
-        const formatted = response.data.map(
-          ([timestamp, open, high, low, close]) => ({
-            x: new Date(timestamp),
-            y: [open, high, low, close],
-          })
-        );
+        const formatted = response.data.map(([timestamp, open, high, low, close]) => ({
+          x: new Date(timestamp),
+          y: [open, high, low, close],
+        }));
         setChartData(formatted);
       } else {
         const priceRes = await axios.get(
-          `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
+          `https://api.coingecko.com/api/v3/coins/${coinIdParam}/market_chart`,
           {
             params: {
               vs_currency: "usd",
@@ -128,32 +145,32 @@ function ChartSection({ coinId }) {
       background: "transparent",
       toolbar: { show: false },
       zoom: { enabled: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 800 }
+      animations: { enabled: true, easing: "easeinout", speed: 800 },
     },
     xaxis: {
       type: "datetime",
-      labels: { 
-        style: { colors: [TC.chartAxisColor], fontSize: '11px' },
-        datetimeFormatter: { hour: 'HH:mm', day: 'MMM dd' }
+      labels: {
+        style: { colors: [TC.chartAxisColor], fontSize: "11px" },
+        datetimeFormatter: { hour: "HH:mm", day: "MMM dd" },
       },
       axisBorder: { show: false },
-      axisTicks: { show: false }
+      axisTicks: { show: false },
     },
     yaxis: {
       tooltip: { enabled: true },
       labels: {
         formatter: (val) => `$${val.toLocaleString()}`,
-        style: { colors: [TC.chartAxisColor], fontSize: '11px' },
+        style: { colors: [TC.chartAxisColor], fontSize: "11px" },
       },
     },
     tooltip: {
       x: { format: "MMM dd, HH:mm" },
-      theme: TC.chartTheme, // Set tooltip theme
+      theme: TC.chartTheme,
     },
-    grid: { 
-      borderColor: TC.chartGridColor, // Themed grid color
+    grid: {
+      borderColor: TC.chartGridColor,
       strokeDashArray: 3,
-      padding: { top: 0, right: 0, bottom: 0, left: 0 }
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
     },
     stroke: {
       curve: "smooth",
@@ -168,9 +185,9 @@ function ChartSection({ coinId }) {
         stops: [0, 100],
       },
     },
-    colors: [TC.chartLineColor], // Themed line color
+    colors: [TC.chartLineColor],
     dataLabels: { enabled: false },
-    legend: { show: false }
+    legend: { show: false },
   };
 
   // 💡 Chart options for candlestick chart (Dynamically themed)
@@ -180,60 +197,73 @@ function ChartSection({ coinId }) {
       background: "transparent",
       toolbar: { show: false },
       zoom: { enabled: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 800 }
+      animations: { enabled: true, easing: "easeinout", speed: 800 },
     },
     xaxis: {
       type: "datetime",
-      labels: { 
-        style: { colors: [TC.chartAxisColor], fontSize: '11px' },
-        datetimeFormatter: { hour: 'HH:mm', day: 'MMM dd' }
+      labels: {
+        style: { colors: [TC.chartAxisColor], fontSize: "11px" },
+        datetimeFormatter: { hour: "HH:mm", day: "MMM dd" },
       },
       axisBorder: { show: false },
-      axisTicks: { show: false }
+      axisTicks: { show: false },
     },
     yaxis: {
       tooltip: { enabled: true },
       labels: {
         formatter: (val) => `$${val.toLocaleString()}`,
-        style: { colors: [TC.chartAxisColor], fontSize: '11px' },
+        style: { colors: [TC.chartAxisColor], fontSize: "11px" },
       },
     },
     tooltip: {
       x: { format: "MMM dd, HH:mm" },
-      theme: TC.chartTheme, // Set tooltip theme
+      theme: TC.chartTheme,
     },
-    grid: { 
-      borderColor: TC.chartGridColor, // Themed grid color
+    grid: {
+      borderColor: TC.chartGridColor,
       strokeDashArray: 3,
-      padding: { top: 0, right: 0, bottom: 0, left: 0 }
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
     },
     plotOptions: {
       candlestick: {
         colors: {
-          upward: TC.chartCandleUp, // Themed upward color
-          downward: TC.chartCandleDown // Themed downward color
-        }
-      }
+          upward: TC.chartCandleUp,
+          downward: TC.chartCandleDown,
+        },
+      },
     },
     dataLabels: { enabled: false },
-    legend: { show: false }
+    legend: { show: false },
   };
 
-  const chartOptions = chartType === "line" ? lineChartOptions : candlestickChartOptions;
+  const chartOptions =
+    chartType === "line" ? lineChartOptions : candlestickChartOptions;
 
   return (
-    <div className={`rounded-xl p-4 fade-in h-full flex flex-col border ${TC.bgContainer} ${TC.textPrimary}`}>
+    <div
+      className={`rounded-xl p-4 fade-in h-full flex flex-col ${TC.bgContainer} ${TC.textPrimary}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 fade-in">
         <div className="flex items-center gap-2">
-          <div className={isLight ? "p-1.5 bg-cyan-100 rounded-lg" : "p-1.5 bg-cyan-400/10 rounded-lg"}>
-            {chartType === "line" ? <FaChartLine className="text-cyan-400 text-sm" /> : <FaChartBar className="text-cyan-400 text-sm" />}
+          <div
+            className={
+              isLight
+                ? "p-1.5 bg-cyan-100 rounded-lg"
+                : "p-1.5 bg-cyan-400/10 rounded-lg"
+            }
+          >
+            {chartType === "line" ? (
+              <FaChartLine className="text-cyan-400 text-sm" />
+            ) : (
+              <FaChartBar className="text-cyan-400 text-sm" />
+            )}
           </div>
           <h2 className="text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent capitalize">
             {coinId} Chart
           </h2>
         </div>
-        
+
         {/* Controls */}
         <div className="flex items-center gap-2 fade-in">
           {/* Timeframe Buttons */}
@@ -243,8 +273,8 @@ function ChartSection({ coinId }) {
                 key={t.value}
                 onClick={() => setTimeframe(t.value)}
                 className={`px-2 py-1 rounded text-xs font-semibold transition-all duration-200 ${
-                  timeframe === t.value 
-                    ? "bg-cyan-600 text-white" 
+                  timeframe === t.value
+                    ? "bg-cyan-600 text-white"
                     : TC.bgButtonDefault
                 }`}
               >
@@ -252,7 +282,7 @@ function ChartSection({ coinId }) {
               </button>
             ))}
           </div>
-          
+
           {/* Chart Type Toggle */}
           <button
             onClick={() =>
@@ -261,7 +291,11 @@ function ChartSection({ coinId }) {
             className={`p-2 text-cyan-400 rounded-lg text-xs transition-all duration-200 border hover:border-cyan-500 ${TC.bgToggleDefault}`}
             title={chartType === "line" ? "Switch to Candlestick" : "Switch to Line"}
           >
-            {chartType === "line" ? <FaChartBar className="text-xs" /> : <FaChartLine className="text-xs" />}
+            {chartType === "line" ? (
+              <FaChartBar className="text-xs" />
+            ) : (
+              <FaChartLine className="text-xs" />
+            )}
           </button>
         </div>
       </div>
@@ -276,15 +310,20 @@ function ChartSection({ coinId }) {
             </div>
           </div>
         ) : chartData.length > 0 ? (
-          // 💡 ApexCharts rendering uses dynamic options
           <ApexCharts
             type={chartType}
-            series={chartType === "candlestick" ? [{ data: chartData }] : [{ name: "Price", data: chartData }]}
+            series={
+              chartType === "candlestick"
+                ? [{ data: chartData }]
+                : [{ name: "Price", data: chartData }]
+            }
             options={chartOptions}
             height="100%"
           />
         ) : (
-          <div className={`flex items-center justify-center h-full ${TC.textTertiary}`}>
+          <div
+            className={`flex items-center justify-center h-full ${TC.textTertiary}`}
+          >
             <div className="text-center">
               <div className="text-2xl mb-2">📊</div>
               <p className="text-xs">No chart data</p>

@@ -27,54 +27,57 @@ export default function Navbar({ isDark, toggleDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // 💡 Theme Classes Helper
+  // 💡 Theme Classes Helper - BORDER ADDED (Subtle/Themed)
   const TC = useMemo(() => ({
-    // Base/Container Styles
+    // Border Class (Removed)
+    borderThemed: "border-none",
+    
+    // Base/Container Styles 
     bgNavbar: isDarkMode
-      ? "bg-gray-800/50 border border-gray-700 shadow-2xl"
-      : "bg-white/90 border border-gray-300 shadow-xl",
+      ? "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20"
+      : "bg-white/80 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12)]",
     textBase: isDarkMode ? "text-gray-300" : "text-gray-700",
     
-    // Hover/Interactive - Updated without borders
+    // Hover/Interactive
     hoverBg: isDarkMode 
-      ? "hover:bg-gray-700/60 hover:shadow-lg" 
+      ? "hover:bg-gray-700/60 hover:shadow-lg hover:shadow-cyan-500/10" 
       : "hover:bg-gray-100/80 hover:shadow-md",
     
     // Icons & Mobile Toggle
     iconBase: isDarkMode ? "text-gray-300" : "text-gray-700",
     iconHover: isDarkMode ? "hover:text-cyan-400" : "hover:text-blue-600",
-    borderToggle: isDarkMode ? "border-gray-600" : "border-gray-300",
-
+    borderToggle: "", 
+    
     // Logo/Brand
     brandGradient: isDarkMode ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-blue-600 to-cyan-700",
     
-    // Active Navigation Item - Updated without borders
-    activeBg: isDarkMode ? "bg-cyan-600/20 shadow-lg" : "bg-blue-100/70 shadow-md",
+    // Active Navigation Item
+    activeBg: isDarkMode ? "bg-cyan-600/20 shadow-lg shadow-cyan-500/20" : "bg-blue-100/70 shadow-md",
     activeText: isDarkMode ? "text-cyan-400" : "text-blue-700",
     
     // Profile Button
     bgProfile: isDarkMode ? "from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700" : "from-blue-700 to-cyan-800 hover:from-blue-600 hover:to-cyan-700",
-    borderProfile: isDarkMode ? "border-cyan-400/30" : "border-blue-700/50",
+    borderProfile: "", 
 
     // Mobile Menu Drawer
-    bgDrawer: isDarkMode ? "bg-gray-900/95 border-r border-gray-700" : "bg-white/95 border-r border-gray-300",
+    bgDrawer: isDarkMode ? "bg-gray-900/95 backdrop-blur-xl shadow-2xl border-none" : "bg-white/95 backdrop-blur-xl shadow-2xl border-none",
     
     // Mobile User Card
-    bgMobileCard: isDarkMode ? "bg-gray-800/50 border border-gray-700" : "bg-gray-100/50 border border-gray-300",
+    bgMobileCard: isDarkMode ? "bg-gray-800/50 shadow-inner" : "bg-gray-100/50 shadow-inner",
     textMobileRole: isDarkMode ? "text-cyan-400" : "text-blue-600",
     textMobileName: isDarkMode ? "text-white" : "text-gray-900",
     textMobileEmail: isDarkMode ? "text-gray-400" : "text-gray-600",
     
-    // Mobile Nav Item - Updated without borders
+    // Mobile Nav Item
     bgMobileNavHover: isDarkMode 
-      ? "hover:bg-gray-700/60 hover:text-white hover:shadow-lg" 
+      ? "hover:bg-gray-700/60 hover:text-white hover:shadow-lg hover:shadow-cyan-500/10" 
       : "hover:bg-gray-100/60 hover:text-blue-700 hover:shadow-md",
     textMobileNavInactive: isDarkMode ? "text-gray-300" : "text-gray-700",
 
     // Mobile Bottom Actions
     bgBottomAction: isDarkMode 
-      ? "bg-gray-800/50 border border-gray-600 hover:bg-gray-700/60 hover:shadow-lg text-white" 
-      : "bg-gray-100/50 border border-gray-300 hover:bg-gray-200/60 hover:shadow-md text-gray-800",
+      ? "bg-gray-800/50 hover:bg-gray-700/60 hover:shadow-lg text-white" 
+      : "bg-gray-100/50 hover:bg-gray-200/60 hover:shadow-md text-gray-800",
     
   }), [isDarkMode]);
 
@@ -118,6 +121,10 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     if (path === "/admin") {
       return location.pathname.startsWith("/admin");
     }
+    // Handle root path check for /dashboard
+    if (path === "/dashboard") {
+        return location.pathname.startsWith("/dashboard") || location.pathname === "/";
+    }
     return location.pathname.startsWith(path);
   };
 
@@ -130,7 +137,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     <>
       <nav
         className={`
-          ${TC.bgNavbar} rounded-xl px-4 sm:px-6 py-3 my-2 mx-2 sm:mx-4
+          ${TC.bgNavbar} ${TC.borderThemed} rounded-xl px-4 sm:px-6 py-3 my-2 mx-2 sm:mx-4
           flex items-center justify-between gap-3 relative transition-all duration-700 ease-out fade-in
           ${
             isMounted
@@ -146,13 +153,26 @@ export default function Navbar({ isDark, toggleDarkMode }) {
           <button
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMobileMenuOpen((s) => !s)}
-            className={`lg:hidden p-2 rounded-xl transition-all duration-300 border ${TC.borderToggle} ${TC.hoverBg} fade-in`}
+            className={`lg:hidden p-2 rounded-xl transition-all duration-300 ${TC.hoverBg} fade-in active:scale-90 flex flex-col justify-center items-center gap-1.5 w-10 h-10`}
           >
-            {isMobileMenuOpen ? (
-              <X size={18} className={`${TC.iconBase} ${TC.iconHover} transition-colors`} />
-            ) : (
-              <Menu size={18} className={`${TC.iconBase} ${TC.iconHover} transition-colors`} />
-            )}
+            <motion.span
+              initial={false}
+              animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={`w-5 h-0.5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-gray-700"}`}
+            />
+            <motion.span
+              initial={false}
+              animate={isMobileMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={`w-5 h-0.5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-gray-700"}`}
+            />
+            <motion.span
+              initial={false}
+              animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={`w-5 h-0.5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-gray-700"}`}
+            />
           </button>
 
           <button
@@ -196,15 +216,24 @@ export default function Navbar({ isDark, toggleDarkMode }) {
           {/* Dark mode toggle */}
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-xl transition-all duration-300 border ${TC.borderToggle} ${TC.hoverBg} flex-shrink-0 fade-in transform hover:scale-110`}
+            className={`
+              w-11 h-6 rounded-full p-0.5 flex items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50
+              ${isDarkMode ? "bg-gray-700 justify-end" : "bg-cyan-100 justify-start"}
+            `}
             title="Toggle Dark Mode"
             aria-pressed={isDarkMode}
           >
-            {isDarkMode ? (
-              <Sun size={18} className="text-yellow-400 hover:text-yellow-300 transition-colors" />
-            ) : (
-              <Moon size={18} className="text-gray-700 hover:text-blue-600 transition-colors" />
-            )}
+            <motion.div
+              layout
+              transition={{ type: "spring", stiffness: 700, damping: 30 }}
+              className="w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
+            >
+              {isDarkMode ? (
+                <Moon size={12} className="text-blue-600" />
+              ) : (
+                <Sun size={12} className="text-yellow-500" />
+              )}
+            </motion.div>
           </button>
 
           {/* Profile avatar */}
@@ -214,7 +243,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
             className={`
               w-9 h-9 rounded-xl bg-gradient-to-r ${TC.bgProfile} flex items-center justify-center
               font-bold text-white transition-all duration-300
-              shadow-lg hover:shadow-xl transform hover:scale-110 border ${TC.borderProfile} fade-in
+              shadow-lg hover:shadow-xl transform hover:scale-110 fade-in
             `}
           >
             {user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-white" />}
@@ -241,7 +270,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -320, opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className={`fixed left-0 top-0 h-full w-80 z-[60] lg:hidden shadow-2xl backdrop-blur-sm ${TC.bgDrawer}`}
+              className={`fixed left-0 top-0 h-full w-80 z-[60] lg:hidden shadow-2xl ${TC.bgDrawer} ${TC.borderThemed}`}
               role="dialog"
               aria-modal="true"
             >
@@ -257,7 +286,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     aria-label="Close menu"
-                    className={`p-2 rounded-xl transition-all duration-200 border ${TC.borderToggle} ${TC.hoverBg} transform hover:scale-110`}
+                    className={`p-2 rounded-xl transition-all duration-200 ${TC.hoverBg} transform hover:scale-110`}
                   >
                     <X size={18} className={`${TC.iconBase} ${TC.iconHover} transition-colors`} />
                   </button>
@@ -324,7 +353,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                       toggleDarkMode();
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`w-full p-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 ${TC.bgBottomAction} border transform hover:scale-105`}
+                    className={`w-full p-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 ${TC.bgBottomAction} transform hover:scale-105`}
                   >
                     {isDarkMode ? (
                       <Sun size={18} className="text-yellow-400" />

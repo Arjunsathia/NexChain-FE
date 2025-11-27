@@ -25,7 +25,7 @@ function App() {
             <WalletProvider>
               <PortfolioProvider>
                 <BrowserRouter>
-                  <div className="min-h-screen bg-[#0d1117] text-white">
+                  <div className="min-h-screen bg-background text-foreground">
                     <AppRoutes />
                   </div>
                 </BrowserRouter>

@@ -3,9 +3,27 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import MobileNavbar from "./Components/MobileNavbar";
 
+// Utility to check if light mode is active based on global class
+const useThemeCheck = () => {
+    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(!document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isLight;
+};
+
 function Admin() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+  const isLight = useThemeCheck();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -22,7 +40,7 @@ function Admin() {
   }, [isMobileMenuOpen]);
 
   return (
-    <div className="min-h-screen  text-white flex font-sans selection:bg-cyan-500/30">
+    <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}>
       {/* Show Sidebar only on desktop - Fixed position */}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">

@@ -7,6 +7,8 @@ import React, {
 } from "react";
 import { useParams } from "react-router-dom";
 import { getCoinById } from "@/api/coinApis";
+import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
+import { toast } from "react-toastify";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import {
   FaExternalLinkAlt,
@@ -17,6 +19,10 @@ import {
   FaCoins,
   FaArrowUp,
   FaArrowDown,
+  FaGlobe,
+  FaBook,
+  FaWallet,
+  FaTrophy,
 } from "react-icons/fa";
 import TradeModal from "../UserProfile/Components/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
@@ -24,22 +30,22 @@ import useCoinContext from "@/Context/CoinContext/useCoinContext";
 import TradingViewWidget from "@/Pages/CoinDetails/TradingViewWidget";
 import OrderBook from "@/Pages/CoinDetails/OrderBook";
 import TradeHistory from "@/Pages/CoinDetails/TradeHistory";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-// Utility to check if light mode is active based on global class
+// Utility to check if light mode is active
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
+  return isLight;
 };
 
 function CoinDetailsPage() {
@@ -47,73 +53,43 @@ function CoinDetailsPage() {
   const { coinId } = useParams();
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [wishlist, setWishlist] = useState(false);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
   const [livePrice, setLivePrice] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
   const ws = useRef(null);
 
   const { user } = useUserContext();
   const { purchasedCoins } = usePurchasedCoins();
   const { coins: liveCoins } = useCoinContext();
 
-  // 💡 Theme Classes Helper
+  // Theme Classes
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-    bgCard: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
-    bgItem: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-800/30 border-gray-700",
-    
-    // Header
-    coinRankBg: isLight ? "bg-blue-100 text-blue-600 border-blue-300" : "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    coinSymbolText: isLight ? "text-blue-600" : "text-cyan-400",
-    
-    // Holdings Badge
-    bgHoldings: isLight ? "bg-green-100 border-green-300 text-green-700" : "bg-green-500/20 border-green-500/30 text-green-400",
-
-    // Live Price Indicator
-    bgLive: isLight ? "bg-green-100 border-green-300 text-green-700" : "bg-green-400/10 border-green-400/20 text-green-400",
-
-    // Price Change Colors
-    textPositive: isLight ? "text-green-700" : "text-green-400",
-    textNegative: isLight ? "text-red-700" : "text-red-400",
-    
-    // Trade Button
-    btnTrade: "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25 transform hover:scale-105",
-
-    // Quick Links
-    bgLink: isLight ? "bg-gray-100 hover:bg-gray-200 border-gray-300 hover:border-blue-400" : "bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-cyan-500",
-    textLink: isLight ? "text-blue-600 hover:text-blue-500" : "text-cyan-400 hover:text-cyan-300",
-
-    // Skeleton
-    bgSkeletonItem: isLight ? "bg-gray-200/50" : "bg-gray-800/50",
-    bgSkeletonInner: isLight ? "bg-gray-300" : "bg-gray-700",
-
-    // Stat Icon Colors (Base colors remain similar for consistency, but the text changes)
-    statColors: {
-      cyan: { text: isLight ? "text-cyan-700" : "text-cyan-400", bg: isLight ? "bg-cyan-100" : "bg-cyan-500/20", border: isLight ? "border-cyan-300" : "border-cyan-500/30" },
-      purple: { text: isLight ? "text-purple-700" : "text-purple-400", bg: isLight ? "bg-purple-100" : "bg-purple-500/20", border: isLight ? "border-purple-300" : "border-purple-500/30" },
-      green: { text: isLight ? "text-green-700" : "text-green-400", bg: isLight ? "bg-green-100" : "bg-green-500/20", border: isLight ? "border-green-300" : "border-green-500/30" },
-      red: { text: isLight ? "text-red-700" : "text-red-400", bg: isLight ? "bg-red-100" : "bg-red-500/20", border: isLight ? "border-red-300" : "border-red-500/30" },
-      blue: { text: isLight ? "text-blue-700" : "text-blue-400", bg: isLight ? "bg-blue-100" : "bg-blue-500/20", border: isLight ? "border-blue-300" : "border-blue-500/30" },
-      yellow: { text: isLight ? "text-yellow-700" : "text-yellow-400", bg: isLight ? "bg-yellow-100" : "bg-yellow-500/20", border: isLight ? "border-yellow-300" : "border-yellow-500/30" },
-    }
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-xl shadow-lg border-none" : "bg-gray-900/80 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
 
+  // Mount animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Check if user has holdings of this coin
+  // Check if user has holdings
   const userHoldings = useMemo(() => {
     if (!coinId || !purchasedCoins || purchasedCoins.length === 0) return null;
-    return purchasedCoins.find(holding => 
-      holding.coin_id === coinId || holding.id === coinId
-    );
+    return purchasedCoins.find(holding => holding.coinId === coinId);
   }, [coinId, purchasedCoins]);
 
   const hasHoldings = useMemo(() => {
     return userHoldings && (userHoldings.totalQuantity > 0 || userHoldings.quantity > 0);
   }, [userHoldings]);
 
-  // Find the live coin data
+  // Find live coin data
   const liveCoin = useMemo(() => {
     return liveCoins.find(c => c.id === coinId);
   }, [liveCoins, coinId]);
@@ -121,26 +97,9 @@ function CoinDetailsPage() {
   // Get symbol for WebSocket
   const coinSymbol = useMemo(() => {
     const symbolMap = {
-      bitcoin: "btcusdt",
-      ethereum: "ethusdt",
-      binancecoin: "bnbusdt",
-      ripple: "xrpusdt",
-      cardano: "adausdt",
-      solana: "solusdt",
-      dogecoin: "dogeusdt",
-      polkadot: "dotusdt",
-      "matic-network": "maticusdt",
-      litecoin: "ltcusdt",
-      chainlink: "linkusdt",
-      stellar: "xlmusdt",
-      cosmos: "atomusdt",
-      monero: "xmrusdt",
-      "ethereum-classic": "etcusdt",
-      "bitcoin-cash": "bchusdt",
-      filecoin: "filusdt",
-      theta: "thetausdt",
-      vechain: "vetusdt",
-      tron: "trxusdt"
+      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
+      cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
+      "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt"
     };
     return symbolMap[coinId] || `${coin?.symbol}usdt`.toLowerCase();
   }, [coinId, coin]);
@@ -163,16 +122,30 @@ function CoinDetailsPage() {
       });
     };
 
-    ws.current.onerror = (error) => {
-      console.error('Price WebSocket error:', error);
-    };
-
     return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
+      if (ws.current) ws.current.close();
     };
   }, [coinSymbol]);
+
+  // Fetch watchlist status
+  const checkWatchlistStatus = useCallback(async () => {
+    if (!user?.id || !coinId) return;
+
+    setLoadingWatchlist(true);
+    try {
+      const res = await getData("/watchlist", { user_id: user.id });
+      const watchlistIds = (res || []).map(item => item.id || item.coin_id);
+      setIsInWatchlist(watchlistIds.includes(coinId));
+    } catch (err) {
+      console.error("Failed to fetch watchlist status", err);
+    } finally {
+      setLoadingWatchlist(false);
+    }
+  }, [user?.id, coinId]);
+
+  useEffect(() => {
+    checkWatchlistStatus();
+  }, [checkWatchlistStatus]);
 
   // Fetch coin details
   const fetchCoin = useCallback(async () => {
@@ -193,11 +166,7 @@ function CoinDetailsPage() {
     fetchCoin();
   }, [fetchCoin, coinId]);
 
-  const [tradeModal, setTradeModal] = useState({
-    show: false,
-    coin: null,
-    type: "buy",
-  });
+  const [tradeModal, setTradeModal] = useState({ show: false, coin: null, type: "buy" });
 
   const handleTrade = useCallback(() => {
     if (!coin || !user) {
@@ -214,49 +183,107 @@ function CoinDetailsPage() {
       id: coin.id
     };
 
-    setTradeModal({
-      show: true,
-      coin: tradeCoin,
-      type: "buy",
-    });
+    setTradeModal({ show: true, coin: tradeCoin, type: "buy" });
   }, [coin, user, liveCoin, livePrice]);
 
-  const toggleWishlist = useCallback(() => {
-    setWishlist((prev) => !prev);
-  }, []);
+  // Watchlist toggle with backend integration
+  const toggleWatchlist = useCallback(async () => {
+    if (!user?.id) {
+      toast.error("Please login to manage watchlist");
+      return;
+    }
+
+    if (!coin) return;
+
+    const wasInWatchlist = isInWatchlist;
+    
+    // Optimistic update
+    setIsInWatchlist(!wasInWatchlist);
+
+    const postData = {
+      user_id: user.id,
+      id: coin.id,
+      image: coin.image?.large || coin.image?.small,
+      symbol: coin.symbol,
+      name: coin.name,
+      current_price: livePrice?.price || coin.market_data?.current_price?.usd,
+      price_change_percentage_24h: livePrice?.change24h || coin.market_data?.price_change_percentage_24h,
+      market_cap: coin.market_data?.market_cap?.usd,
+      total_volume: livePrice?.volume24h || coin.market_data?.total_volume?.usd,
+      sparkline_in_7d: { price: [] },
+    };
+
+    setLoadingWatchlist(true);
+    try {
+      if (wasInWatchlist) {
+        // Remove from watchlist
+        await deleteWatchList("/watchlist/remove", {
+          id: coinId,
+          user_id: user.id,
+        });
+        toast.success("Removed from watchlist!", {
+          icon: "✅",
+          style: {
+            background: isLight ? "#FFFFFF" : "#111827",
+            color: isLight ? "#16A34A" : "#22c55e",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+          },
+        });
+      } else {
+        // Add to watchlist
+        await postForm("/watchlist/add", postData);
+        toast.success("Added to watchlist!", {
+          icon: "⭐",
+          style: {
+            background: isLight ? "#FFFFFF" : "#111827",
+            color: isLight ? "#FACC15" : "#eab308",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+          },
+        });
+      }
+      // Refresh watchlist status
+      await checkWatchlistStatus();
+    } catch (err) {
+      console.error("Watchlist operation failed:", err);
+      // Revert optimistic update on error
+      setIsInWatchlist(wasInWatchlist);
+      toast.error("Operation failed. Please try again.");
+    } finally {
+      setLoadingWatchlist(false);
+    }
+  }, [isInWatchlist, user?.id, coin, coinId, livePrice, isLight, checkWatchlistStatus]);
 
   const formatCurrency = useCallback((value) => {
-    if (value === null || value === undefined || isNaN(Number(value)))
-      return "$0";
+    if (value === null || value === undefined || isNaN(Number(value))) return "$0";
     const num = Number(value);
     return "$" + num.toLocaleString("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 6
+      maximumFractionDigits: num < 1 ? 6 : 2
     });
   }, []);
 
   const formatNumber = useCallback((value) => {
-    if (value === null || value === undefined || isNaN(Number(value)))
-      return "0";
-    const num = Number(value);
-    return num.toLocaleString('en-US');
+    if (value === null || value === undefined || isNaN(Number(value))) return "0";
+    return Number(value).toLocaleString('en-US');
   }, []);
 
   if (loading || !coin) {
     return (
-      <div className={`min-h-screen p-4 sm:p-6 fade-in ${isLight ? "bg-gray-50" : "bg-gray-900"}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className={`${TC.bgSkeletonInner} h-8 w-32 rounded animate-pulse mb-6`}></div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className={`h-64 ${TC.bgSkeletonItem} rounded-xl animate-pulse`}></div>
-              <div className={`h-96 ${TC.bgSkeletonItem} rounded-xl animate-pulse`}></div>
+      <div className={`min-h-screen ${TC.textPrimary} transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className={`rounded-2xl ${TC.bgCard} p-6`}>
+              <Skeleton height={200} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="1rem" />
             </div>
-            <div className="space-y-6">
-              <div className={`h-96 ${TC.bgSkeletonItem} rounded-xl animate-pulse`}></div>
-              <div className={`h-96 ${TC.bgSkeletonItem} rounded-xl animate-pulse`}></div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -264,187 +291,154 @@ function CoinDetailsPage() {
 
   const currentPrice = livePrice?.price || coin.market_data?.current_price?.usd || 0;
   const priceChange24h = livePrice?.change24h || coin.market_data?.price_change_percentage_24h || 0;
-  const priceChangeColor = priceChange24h >= 0 ? TC.textPositive : TC.textNegative;
+  const isPositive = priceChange24h >= 0;
 
   return (
     <>
-      <div className={`min-h-screen p-4 sm:p-6 fade-in`}>
-        <div className="max-w-7xl mx-auto">
-
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Coin Header */}
-              <div
-                className={`${TC.bgCard} rounded-xl p-6 fade-in`}
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={coin.image?.large}
-                      alt={coin.name}
-                      className={`w-16 h-16 rounded-full border ${isLight ? "border-gray-400" : "border-gray-600"}`}
-                    />
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <h1 className={`text-3xl font-bold ${TC.textPrimary}`}>
-                          {coin.name}
-                        </h1>
-                        <span className={`text-base uppercase px-3 py-1 rounded border ${TC.coinRankBg}`}>
-                          {coin.symbol}
-                        </span>
-                      </div>
-                      <p className={`${TC.textSecondary} text-sm`}>
-                        Rank #{coin.market_cap_rank || "N/A"}
-                      </p>
-                      {hasHoldings && (
-                        <div className={`text-xs px-2 py-1 rounded-full mt-2 inline-block border ${TC.bgHoldings}`}>
-                          🪙 In your portfolio
-                        </div>
-                      )}
-                    </div>
+      <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+        
+        {/* Sticky Header */}
+        <div className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-2xl mb-6 ${TC.bgHeader} transition-colors duration-300`}>
+          <div className="px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <img
+                  src={coin.image?.large}
+                  alt={coin.name}
+                  className="w-10 h-10 md:w-14 md:h-14 rounded-full shadow-md"
+                />
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-lg md:text-2xl font-bold leading-none">{coin.name}</h1>
+                    <span className={`text-xs md:text-sm uppercase px-2 py-1 rounded-lg ${isLight ? "bg-cyan-100 text-cyan-700" : "bg-cyan-500/20 text-cyan-400"}`}>
+                      {coin.symbol}
+                    </span>
+                    <button
+                      onClick={toggleWatchlist}
+                      disabled={loadingWatchlist}
+                      className={`text-lg md:text-xl transition-transform ${loadingWatchlist ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'} ${isInWatchlist ? 'text-yellow-400' : 'text-gray-400'}`}>
+                      {isInWatchlist ? <FaStar /> : <FaRegStar />}
+                    </button>
                   </div>
-                  <button
-                    onClick={toggleWishlist}
-                    className="text-2xl text-yellow-400 hover:scale-110 transition-transform"
-                  >
-                    {wishlist ? <FaStar /> : <FaRegStar />}
-                  </button>
+                  <p className={`text-xs mt-1 ${TC.textSecondary}`}>
+                    Rank #{coin.market_cap_rank || "N/A"}
+                  </p>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-4 mb-6">
-                  <h2 className={`text-4xl font-bold ${TC.textPrimary}`}>
-                    ${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </h2>
-                  <span className={`text-lg font-semibold ${priceChangeColor} flex items-center gap-1`}>
-                    {priceChange24h >= 0 ? <FaArrowUp className="text-sm" /> : <FaArrowDown className="text-sm" />}
-                    {priceChange24h >= 0 ? "+" : ""}
-                    {priceChange24h.toFixed(2)}%
-                  </span>
-                  {livePrice && (
-                    <div className={`flex items-center gap-2 text-xs px-2 py-1 rounded-full border ${TC.bgLive}`}>
-                      <div className={`w-1.5 h-1.5 ${isLight ? "bg-green-700" : "bg-green-400"} rounded-full`}></div>
-                      <span className="font-semibold">Live</span>
-                    </div>
-                  )}
+              <div className="flex items-center gap-6">
+                <div className="text-right hidden sm:block">
+                  <div className="text-2xl font-bold">${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  <div className={`text-sm font-semibold flex items-center justify-end gap-1 ${isPositive ? "text-green-400" : "text-red-400"}`}>
+                    {isPositive ? <FaArrowUp className="text-xs" /> : <FaArrowDown className="text-xs" />}
+                    {isPositive ? "+" : ""}{priceChange24h.toFixed(2)}%
+                  </div>
                 </div>
-
-                {/* Market Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[
-                    {
-                      label: "Market Cap",
-                      value: formatCurrency(coin.market_data?.market_cap?.usd),
-                      icon: FaChartLine,
-                      color: "cyan",
-                    },
-                    {
-                      label: "24h Volume",
-                      value: formatCurrency(livePrice?.volume24h || coin.market_data?.total_volume?.usd),
-                      icon: FaCoins,
-                      color: "purple",
-                    },
-                    {
-                      label: "24h High",
-                      value: formatCurrency(livePrice?.high24h || coin.market_data?.high_24h?.usd),
-                      icon: FaArrowUp,
-                      color: "green",
-                    },
-                    {
-                      label: "24h Low",
-                      value: formatCurrency(livePrice?.low24h || coin.market_data?.low_24h?.usd),
-                      icon: FaArrowDown,
-                      color: "red",
-                    },
-                    {
-                      label: "Circulating Supply",
-                      value: `${formatNumber(coin.market_data?.circulating_supply)} ${coin.symbol?.toUpperCase()}`,
-                      icon: FaCoins,
-                      color: "blue",
-                    },
-                    {
-                      label: "All Time High",
-                      value: formatCurrency(coin.market_data?.ath?.usd),
-                      icon: FaArrowUp,
-                      color: "yellow",
-                    },
-                  ].map((stat, index) => {
-                      const colors = TC.statColors[stat.color] || TC.statColors.cyan;
-                      return (
-                        <div
-                          key={index}
-                          className={`flex flex-col gap-2 p-3 rounded-lg border ${TC.bgItem} fade-in`}
-                          style={{ animationDelay: `${0.3 + index * 0.05}s` }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className={`p-1.5 rounded-lg border ${colors.bg} ${colors.border}`}>
-                              <stat.icon className={`text-xs ${colors.text}`} />
-                            </div>
-                            <span className={`${TC.textSecondary} text-xs`}>{stat.label}</span>
-                          </div>
-                          <span className={`${TC.textPrimary} font-semibold text-sm`}>{stat.value}</span>
-                        </div>
-                      );
-                  })}
-                </div>
-
-                {/* Trade Button */}
+                
                 <button
                   onClick={handleTrade}
-                  className={`w-full mt-6 py-3 rounded-lg font-semibold transition-all duration-200 ${TC.btnTrade} flex items-center justify-center gap-2`}
-                >
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:scale-105 hover:shadow-cyan-500/25">
                   <FaExchangeAlt />
-                  Trade {coin.symbol?.toUpperCase()}
+                  Trade
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* TradingView Chart */}
-              <div
-                className={`${TC.bgCard} rounded-xl overflow-hidden fade-in`}
-                style={{ animationDelay: "0.4s", height: "600px" }}
-              >
-                <TradingViewWidget symbol={coin.symbol?.toUpperCase() + "USD"} theme={isLight ? 'light' : 'dark'} />
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
+          
+          {/* Holdings Badge - Moved to top */}
+          {hasHoldings && (
+            <div className={`rounded-2xl px-4 py-3 fade-in ${isLight ? "bg-green-50" : "bg-green-500/10"}`} style={{ animationDelay: "0.1s" }}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isLight ? "bg-green-100" : "bg-green-500/20"}`}>
+                  <FaWallet className={`text-base ${isLight ? "text-green-600" : "text-green-400"}`} />
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold ${isLight ? "text-green-900" : "text-green-400"}`}>You own this asset</p>
+                  <p className={`text-xs truncate ${isLight ? "text-green-700" : "text-green-500"}`}>
+                    {(userHoldings.totalQuantity || userHoldings.quantity || 0).toFixed(6)} {coin.symbol?.toUpperCase()}
+                  </p>
+                </div>
               </div>
             </div>
+          )}
+          
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in" style={{ animationDelay: "0.2s" }}>
+            {[
+              { label: "Market Cap", value: formatCurrency(coin.market_data?.market_cap?.usd), icon: FaChartLine, color: "cyan" },
+              { label: "24h Volume", value: formatCurrency(livePrice?.volume24h || coin.market_data?.total_volume?.usd), icon: FaCoins, color: "purple" },
+              { label: "24h High", value: formatCurrency(livePrice?.high24h || coin.market_data?.high_24h?.usd), icon: FaArrowUp, color: "green" },
+              { label: "24h Low", value: formatCurrency(livePrice?.low24h || coin.market_data?.low_24h?.usd), icon: FaArrowDown, color: "red" },
+            ].map((stat, i) => (
+              <div key={i} className={`rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg ${
+                    stat.color === 'cyan' ? (isLight ? "bg-cyan-50 text-cyan-600" : "bg-cyan-500/10 text-cyan-400") :
+                    stat.color === 'purple' ? (isLight ? "bg-purple-50 text-purple-600" : "bg-purple-500/10 text-purple-400") :
+                    stat.color === 'green' ? (isLight ? "bg-green-50 text-green-600" : "bg-green-500/10 text-green-400") :
+                    (isLight ? "bg-red-50 text-red-600" : "bg-red-500/10 text-red-400")
+                  }`}>
+                    <stat.icon className="text-lg" />
+                  </div>
+                </div>
+                <p className={`text-sm sm:text-lg md:text-xl font-bold truncate ${TC.textPrimary}`}>{stat.value}</p>
+                <p className={`text-xs mt-1 ${TC.textSecondary}`}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
 
-            {/* Right Column - Order Book & Trade History */}
-            <div className="space-y-4">
-              {/* Order Book */}
-              <div
-                className="fade-in"
-                style={{ animationDelay: "0.5s", height: "450px" }}
-              >
-                {/* These external widgets need internal theme handling if possible */}
-                <OrderBook symbol={coinSymbol} /> 
+          {/* Main Content Grid */}
+          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+            
+            {/* Left Column - Chart */}
+            <div className="contents lg:block lg:col-span-8 lg:space-y-6">
+              {/* TradingView Chart */}
+              <div className={`order-1 rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`} style={{ animationDelay: "0.3s" }}>
+                <TradingViewWidget symbol={coin.symbol?.toUpperCase() + "USD"} theme={isLight ? 'light' : 'dark'} />
               </div>
 
-              {/* Trade History */}
-              <div
-                className="fade-in"
-                style={{ animationDelay: "0.6s", height: "450px" }}
-              >
-                <TradeHistory symbol={coinSymbol} />
+              {/* Additional Stats */}
+              <div className={`order-4 rounded-2xl p-6 fade-in ${TC.bgCard}`} style={{ animationDelay: "0.4s" }}>
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <FaTrophy className="text-yellow-500" />
+                  Additional Statistics
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    { label: "Circulating Supply", value: `${formatNumber(coin.market_data?.circulating_supply)} ${coin.symbol?.toUpperCase()}` },
+                    { label: "Total Supply", value: `${formatNumber(coin.market_data?.total_supply)} ${coin.symbol?.toUpperCase()}` },
+                    { label: "All Time High", value: formatCurrency(coin.market_data?.ath?.usd) },
+                    { label: "ATH Date", value: new Date(coin.market_data?.ath_date?.usd).toLocaleDateString() },
+                    { label: "All Time Low", value: formatCurrency(coin.market_data?.atl?.usd) },
+                    { label: "ATL Date", value: new Date(coin.market_data?.atl_date?.usd).toLocaleDateString() },
+                  ].map((stat, i) => (
+                    <div key={i} className={`p-3 rounded-lg ${isLight ? "bg-gray-50" : "bg-gray-700/30"}`}>
+                      <p className={`text-xs mb-1 ${TC.textSecondary}`}>{stat.label}</p>
+                      <p className={`text-xs sm:text-sm font-semibold truncate ${TC.textPrimary}`}>{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Links - Compact */}
-              <div
-                className={`${TC.bgCard} rounded-xl p-3 fade-in`}
-                style={{ animationDelay: "0.7s" }}
-              >
-                <h3 className={`text-sm font-semibold mb-2 ${TC.coinSymbolText}`}>
+              {/* Quick Links */}
+              <div className={`order-5 rounded-2xl p-6 fade-in ${TC.bgCard}`} style={{ animationDelay: "0.5s" }}>
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <FaGlobe className="text-blue-500" />
                   Quick Links
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {coin.links?.homepage?.[0] && (
                     <a
                       href={coin.links.homepage[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex items-center gap-1 transition-colors px-2 py-1 rounded text-xs border ${TC.bgLink} ${TC.textLink}`}
-                    >
-                      <FaExternalLinkAlt className="text-xs" />
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        isLight ? "bg-gray-100 text-blue-600 hover:bg-blue-50" : "bg-gray-700 text-cyan-400 hover:bg-gray-600"
+                      }`}>
+                      <FaExternalLinkAlt className="text-sm" />
                       Website
                     </a>
                   )}
@@ -453,9 +447,10 @@ function CoinDetailsPage() {
                       href={coin.links.blockchain_site[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex items-center gap-1 transition-colors px-2 py-1 rounded text-xs border ${TC.bgLink} ${TC.textLink}`}
-                    >
-                      <FaExternalLinkAlt className="text-xs" />
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        isLight ? "bg-gray-100 text-blue-600 hover:bg-blue-50" : "bg-gray-700 text-cyan-400 hover:bg-gray-600"
+                      }`}>
+                      <FaExternalLinkAlt className="text-sm" />
                       Explorer
                     </a>
                   )}
@@ -464,13 +459,24 @@ function CoinDetailsPage() {
                       href={coin.links.official_forum_url[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex items-center gap-1 transition-colors px-2 py-1 rounded text-xs border ${TC.bgLink} ${TC.textLink}`}
-                    >
-                      <FaExternalLinkAlt className="text-xs" />
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        isLight ? "bg-gray-100 text-blue-600 hover:bg-blue-50" : "bg-gray-700 text-cyan-400 hover:bg-gray-600"
+                      }`}>
+                      <FaBook className="text-sm" />
                       Forum
                     </a>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* Right Column - Order Book & Trade History */}
+            <div className="contents lg:block lg:col-span-4 lg:space-y-6">
+              <div className="fade-in order-2 h-[350px] md:h-[450px]" style={{ animationDelay: "0.6s" }}>
+                <OrderBook symbol={coinSymbol} />
+              </div>
+              <div className="fade-in order-3 h-[350px] md:h-[450px]" style={{ animationDelay: "0.7s" }}>
+                <TradeHistory symbol={coinSymbol} />
               </div>
             </div>
           </div>

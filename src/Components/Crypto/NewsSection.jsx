@@ -48,7 +48,9 @@ function NewsSection() {
   const isLight = useThemeCheck();
 
   const TC = useMemo(() => ({
-    bgCard: isLight ? "bg-white border-gray-300 shadow-lg hover:border-cyan-600/50" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl hover:border-cyan-400/30",
+    bgCard: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     textTitle: isLight ? "text-gray-900" : "text-white",
     textTime: isLight ? "text-gray-500" : "text-gray-500",
     btnMore: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-md" : "bg-gray-700 text-white hover:bg-gray-600 shadow-md",
@@ -60,7 +62,7 @@ function NewsSection() {
         {sampleNews.map((news, index) => (
           <div
             key={news.id}
-            className={`rounded-xl overflow-hidden border transition-all duration-300 group cursor-pointer fade-in ${TC.bgCard}`}
+            className={`rounded-xl overflow-hidden transition-all duration-300 group cursor-pointer fade-in ${TC.bgCard}`}
             style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
           >
             <img

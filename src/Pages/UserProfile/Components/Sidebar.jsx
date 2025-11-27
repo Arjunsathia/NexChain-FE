@@ -10,6 +10,8 @@ import {
   FaStar,
   FaChevronRight,
   FaChartLine,
+  FaSignOutAlt,
+  FaCog
 } from "react-icons/fa";
 import { logout } from "@/api/axiosConfig";
 import useUserContext from '@/Context/UserContext/useUserContext';
@@ -34,7 +36,63 @@ const useThemeCheck = () => {
     return isLight;
 };
 
-export default function Sidebar({ isLogoutLoading }) {
+// Logout Confirmation Modal
+const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
+      <div className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl transform transition-all scale-100 ${
+        isLight ? "bg-white" : "bg-gray-800 border border-gray-700"
+      }`}>
+        <div className="text-center">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+            isLight ? "bg-red-100" : "bg-red-500/20"
+          }`}>
+            <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-600" : "text-red-400"}`} />
+          </div>
+          
+          <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
+            Sign Out?
+          </h3>
+          
+          <p className={`text-sm mb-6 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
+            Are you sure you want to sign out of your account?
+          </p>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
+                isLight 
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isLoading}
+              className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Signing Out...</span>
+                </>
+              ) : (
+                "Sign Out"
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const navigate = useNavigate();
@@ -44,44 +102,39 @@ export default function Sidebar({ isLogoutLoading }) {
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
   const { watchlist } = useWatchlist() || { watchlist: [] };
 
-  // 💡 Theme Classes Helper
+  // 💡 Theme Classes Helper - Matches Admin Sidebar
   const TC = useMemo(() => ({
     // Text Colors
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-    // Backgrounds & Borders
-    bgSidebar: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-900/90 backdrop-blur-xl border-gray-700/50 shadow-2xl shadow-black/20",
-    bgMobileWrapper: isLight ? "bg-white border-gray-300 shadow-md" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
+    // Backgrounds & Borders
+    bgSidebar: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    bgMobile: isLight ? "bg-white shadow-md border-none" : "bg-gray-800/90 backdrop-blur-md border-none",
+
     // Header Colors
-    headerIconBg: "bg-gradient-to-r from-purple-600 to-blue-600",
-    headerTitle: isLight ? "text-blue-700" : "text-cyan-400",
+    headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
+    headerTitle: isLight ? "text-gray-900" : "text-white",
 
     // Menu Item Base
-    menuItemBase: isLight ? "text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:border-l-4 hover:border-gray-400" : "text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-l-4 hover:border-gray-500",
+    menuItemBase: isLight 
+      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
+      : "text-gray-400 hover:bg-white/5 hover:text-white",
 
     // Menu Item Active
-    menuItemActive: isLight ? "bg-blue-100 text-blue-700 border-l-4 border-blue-600 shadow-md" : "bg-cyan-600/20 text-cyan-400 border-l-4 border-cyan-400 shadow-lg",
+    menuItemActive: isLight 
+      ? "bg-blue-50 text-blue-700 shadow-sm" 
+      : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
     
-    // Icon Colors
+    // Icons
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
-    iconHover: isLight ? "group-hover:text-blue-500" : "group-hover:text-cyan-300",
+    iconInactive: isLight ? "text-gray-400" : "text-gray-500",
     
-    // Chevron Colors
-    chevronActive: isLight ? "text-blue-600" : "text-cyan-400",
-    chevronInactive: isLight ? "text-gray-400" : "text-gray-400",
-
-    // Stat Section
-    bgStatSection: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/30 border-gray-600",
+    // Stats
+    bgStatCard: isLight ? "bg-gray-50 border-none" : "bg-gray-900/50 border-none",
+    bgStatItem: isLight ? "bg-white border-none shadow-sm" : "bg-black/20 border-none shadow-inner",
     
-    // Stat Item
-    bgStatItem: isLight ? "bg-white border-gray-300" : "bg-gray-800/50 border-gray-600",
-    bgStatItemDesktop: isLight ? "bg-gray-200/50 group-hover:bg-gray-300/80" : "bg-gray-600/50 group-hover:bg-gray-600/30",
-    statItemHover: isLight ? "hover:bg-gray-100" : "hover:bg-gray-600/30",
-
-    // Logout Button
+    // Logout
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
     
   }), [isLight]);
@@ -94,20 +147,21 @@ export default function Sidebar({ isLogoutLoading }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      localStorage.removeItem("NEXCHAIN_USER_TOKEN");
-      localStorage.removeItem("NEXCHAIN_USER");
-      navigate("/auth");
-    } catch (error) {
-      console.error("Error While Logout", error);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    if (onLogout) {
+      onLogout();
     }
   };
 
   const menus = [
-    { name: "Profile Settings", path: "/user/profile", icon: FaUser },
-    { name: "Email Preferences", path: "/user/email", icon: FaEnvelope },
+    { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
+    { name: "Settings", path: "/user/settings", icon: FaCog },
     { name: "API Keys", path: "/user/api", icon: FaCode },
     { name: "Support", path: "/user/support", icon: FaCommentDots },
   ];
@@ -134,27 +188,27 @@ export default function Sidebar({ isLogoutLoading }) {
 
   const stats = [
     { 
-      label: "Wallet Balance", 
-      value: `$${(Number(balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 
-      color: isLight ? "text-green-700" : "text-green-400", 
+      label: "Balance", 
+      value: `$${(Number(balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`, 
+      color: "text-green-400", 
       icon: FaWallet 
     },
     { 
-      label: "Coins Owned", 
+      label: "Coins", 
       value: totalCoins.toString(), 
-      color: isLight ? "text-cyan-700" : "text-cyan-400", 
+      color: "text-cyan-400", 
       icon: FaCoins 
     },
     { 
-      label: "Portfolio Value", 
-      value: `$${currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 
-      color: isLight ? "text-purple-700" : "text-purple-400", 
+      label: "Portfolio", 
+      value: `$${currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`, 
+      color: "text-purple-400", 
       icon: FaChartLine 
     },
     { 
       label: "Watchlist", 
       value: ((watchlist && watchlist.length) || 0).toString(), 
-      color: isLight ? "text-amber-700" : "text-amber-400", 
+      color: "text-amber-400", 
       icon: FaStar 
     }
   ];
@@ -162,210 +216,155 @@ export default function Sidebar({ isLogoutLoading }) {
   return (
     <>
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        .fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
+        .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
 
-      {/* Mobile & Tablet Version */}
-      <div className={`w-full lg:hidden ${TC.bgMobileWrapper} rounded-xl fade-in`}>
+      {/* Mobile Version */}
+      <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${TC.headerIconBg} flex items-center justify-center ${TC.textPrimary} font-bold shadow-lg flex-shrink-0`}>
-              <span className="text-base sm:text-lg">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+          <div className="flex items-center gap-3 mb-6">
+            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20`}>
+              <span className="text-white font-bold">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className={`text-base sm:text-lg font-bold ${TC.headerTitle} truncate`}>{user?.name || 'User'}</h2>
-              <p className={`text-xs sm:text-sm ${TC.textSecondary} truncate`}>Personal Account</p>
+            <div>
+              <h2 className={`text-lg font-bold ${TC.headerTitle}`}>{user?.name || 'User'}</h2>
+              <p className={`text-xs ${TC.textSecondary}`}>Personal Account</p>
             </div>
           </div>
-
-          {/* Navigation Menu */}
-          <nav className="mb-4">
-            <ul className="space-y-1">
-              {menus.map((item, index) => (
-                <li key={index}>
-                  <Link
-                    to={item.path}
-                    className={`
-                      flex items-center justify-between p-2.5 sm:p-3 rounded-lg transition-all duration-300 group
-                      ${isActive(item.path) 
-                        ? TC.menuItemActive
-                        : TC.menuItemBase
-                      }
-                    `}
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                      <item.icon 
-                        className={`
-                          text-sm sm:text-base transition-transform duration-300 flex-shrink-0
-                          ${isActive(item.path) 
-                            ? `${TC.iconActive} scale-110`
-                            : `${TC.iconHover}`
-                          }
-                        `}
-                      />
-                      <span className={`font-medium text-xs sm:text-sm truncate ${isActive(item.path) ? "" : TC.textPrimary}`}>{item.name}</span>
-                    </div>
-                    <FaChevronRight 
-                      className={`
-                        text-xs transition-all duration-300 flex-shrink-0
-                        ${isActive(item.path) 
-                          ? `${TC.chevronActive} opacity-100 translate-x-0` 
-                          : `${TC.chevronInactive} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0`
-                        }
-                      `}
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          
+          <nav className="space-y-1">
+            {menus.map((item, index) => (
+              <Link
+                key={index}
+                to={item.path}
+                className={`
+                  flex items-center justify-between p-3 rounded-lg transition-all duration-200
+                  ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon className={isActive(item.path) ? TC.iconActive : TC.iconInactive} />
+                  <span className="font-medium text-sm">{item.name}</span>
+                </div>
+                {isActive(item.path) && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_cyan]"></div>}
+              </Link>
+            ))}
           </nav>
 
-          {/* Portfolio Stats Section */}
-          <div className={`mb-4 p-3 rounded-lg border ${TC.bgStatSection}`}>
-            <h3 className={`text-xs font-semibold ${TC.textSecondary} mb-3 uppercase tracking-wide`}>
-              Portfolio Stats
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {stats.map((stat, index) => (
-                <div key={index} className={`flex flex-col items-center gap-1.5 p-2 rounded border ${TC.bgStatItem}`}>
-                  <stat.icon className={`text-base sm:text-lg ${stat.color}`} />
-                  <div className="text-center w-full">
-                    <div className={`text-xs sm:text-sm font-semibold ${stat.color} truncate`}>
-                      {stat.value}
-                    </div>
-                    <div className={`text-xs ${TC.textSecondary} truncate`}>{stat.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Mobile Logout */}
+          <div className="mt-4 pt-4 border-t border-gray-200/10">
+            <button
+              className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
+              onClick={handleLogoutClick}
+              disabled={isLogoutLoading}
+            >
+              {isLogoutLoading ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Logging out...</span>
+                </>
+              ) : (
+                <>
+                  <FaSignOutAlt /> Logout
+                </>
+              )}
+            </button>
           </div>
-
-          {/* Logout Button */}
-          <button
-            className={`w-full py-2.5 sm:py-3 px-4 rounded-lg font-medium transition-all duration-200 ${TC.btnLogout} text-xs sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-            onClick={handleLogout}
-            disabled={isLogoutLoading}
-          >
-            {isLogoutLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Logging out...</span>
-              </>
-            ) : (
-              "Logout"
-            )}
-          </button>
         </div>
       </div>
 
       {/* Desktop Sidebar */}
-      <aside 
+      <aside
         className={`
-          hidden lg:flex flex-col w-full rounded-2xl p-5
-          transition-all duration-700 ease-out transform h-full overflow-y-auto custom-scrollbar
+          hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
+          transition-all duration-500 ease-out sticky top-4
           ${TC.bgSidebar}
-          ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}
-          ${TC.textPrimary}
+          ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
         `}
       >
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-12 h-12 rounded-full ${TC.headerIconBg} flex items-center justify-center ${TC.textPrimary} font-bold text-lg shadow-lg flex-shrink-0`}>
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className={`text-xl font-bold ${TC.headerTitle} truncate`}>{user?.name || 'User'}</h2>
-              <p className={`text-sm ${TC.textSecondary} truncate`}>Personal Account</p>
-            </div>
+        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
+          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
+            <span className="text-white font-bold text-xl">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+          </div>
+          <div className="min-w-0">
+            <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight truncate`}>{user?.name || 'User'}</h2>
+            <p className={`text-xs ${TC.textSecondary} font-medium`}>Personal Account</p>
           </div>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="mb-6">
-          <ul className="space-y-2">
-            {menus.map((item, index) => (
-              <li key={index}>
-                <Link
-                  to={item.path}
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
+          {menus.map((item, index) => (
+            <Link
+              key={index}
+              to={item.path}
+              className={`
+                group flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 relative overflow-hidden
+                ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
+                slide-in
+              `}
+              style={{ animationDelay: `${0.15 + index * 0.05}s` }}
+            >
+              <div className="flex items-center gap-3.5 relative z-10">
+                <item.icon 
                   className={`
-                    flex items-center justify-between p-3 rounded-lg transition-all duration-300 group
-                    ${isActive(item.path) 
-                      ? TC.menuItemActive
-                      : TC.menuItemBase
-                    }
-                  `}
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <item.icon 
-                      className={`
-                        text-lg transition-transform duration-300 flex-shrink-0
-                        ${isActive(item.path) 
-                          ? `${TC.iconActive} scale-110`
-                          : `${TC.iconHover}`
-                        }
-                      `}
-                    />
-                    <span className={`font-medium truncate ${isActive(item.path) ? "" : TC.textPrimary}`}>{item.name}</span>
-                  </div>
-                  <FaChevronRight 
-                    className={`
-                      text-xs transition-all duration-300 flex-shrink-0
-                      ${isActive(item.path) 
-                        ? `${TC.chevronActive} opacity-100 translate-x-0` 
-                        : `${TC.chevronInactive} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0`
-                      }
-                    `}
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    text-lg transition-transform duration-300 
+                    ${isActive(item.path) ? `${TC.iconActive} scale-110` : `${TC.iconInactive} group-hover:scale-110 group-hover:text-gray-300`}
+                  `} 
+                />
+                <span className={`font-medium tracking-wide ${isActive(item.path) ? "font-semibold" : ""}`}>
+                  {item.name}
+                </span>
+              </div>
+              
+              {/* Active Indicator */}
+              {isActive(item.path) && (
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
+                </div>
+              )}
+              
+              {/* Hover Glow Effect */}
+              {!isActive(item.path) && (
+                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              )}
+            </Link>
+          ))}
         </nav>
 
-        {/* Portfolio Stats Section */}
-        <div className={`mb-6 p-4 rounded-lg border ${TC.bgStatSection}`}>
-          <h3 className={`text-xs font-semibold ${TC.textSecondary} mb-3 uppercase tracking-wide`}>
-            Portfolio Overview
-          </h3>
-          <div className="space-y-3">
-            {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className={`flex items-center justify-between p-2 group rounded transition-colors duration-200 ${TC.statItemHover}`}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`p-2 rounded-lg ${TC.bgStatItemDesktop} transition-transform duration-200 flex-shrink-0`}>
-                    <stat.icon className={`text-sm ${stat.color}`} />
-                  </div>
-                  <span className={`text-sm ${TC.textSecondary} truncate`}>{stat.label}</span>
+        {/* Bottom Stats Card */}
+        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>Portfolio</span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {stats.map((stat, i) => (
+              <div key={i} className={`${TC.bgStatItem} rounded-lg p-2.5`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <stat.icon className={`text-xs ${stat.color}`} />
+                  <span className={`text-[10px] ${TC.textSecondary} truncate`}>{stat.label}</span>
                 </div>
-                <span className={`text-sm font-semibold ${stat.color} flex-shrink-0 ml-2`}>
-                  {stat.value}
-                </span>
+                <span className={`text-sm font-bold ${TC.textPrimary} truncate`}>{stat.value}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Logout Button */}
-        <div className="mt-auto">
+        <div className="mt-4 slide-in" style={{ animationDelay: '0.6s' }}>
           <button
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}
-            onClick={handleLogout}
+            className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}
+            onClick={handleLogoutClick}
             disabled={isLogoutLoading}
           >
             {isLogoutLoading ? (
@@ -374,11 +373,21 @@ export default function Sidebar({ isLogoutLoading }) {
                 <span>Logging out...</span>
               </>
             ) : (
-              "Logout"
+              <>
+                <FaSignOutAlt /> Logout
+              </>
             )}
           </button>
         </div>
       </aside>
+
+      <LogoutConfirmationModal 
+        show={showLogoutModal} 
+        onClose={() => setShowLogoutModal(false)} 
+        onConfirm={confirmLogout} 
+        isLight={isLight} 
+        isLoading={isLogoutLoading} 
+      />
     </>
   );
 }

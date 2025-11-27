@@ -8,7 +8,6 @@ import {
   FaNewspaper,
   FaCommentAlt,
   FaCog,
-  FaChevronRight,
   FaUserShield,
 } from "react-icons/fa";
 
@@ -34,48 +33,42 @@ function Sidebar() {
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
 
-  // 💡 Theme Classes Helper
+  // 💡 Theme Classes Helper - Matches User Dashboard
   const TC = useMemo(() => ({
     // Text Colors
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
     // Backgrounds & Borders
-    bgSidebar: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-900/90 backdrop-blur-xl border-gray-700/50 shadow-2xl shadow-black/20",
-    
-    // Mobile Wrapper
-    bgMobile: isLight ? "bg-white border-gray-300 shadow-md" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgSidebar: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgMobile: isLight 
+      ? "bg-white shadow-md" 
+      : "bg-gray-800/90 backdrop-blur-md",
 
     // Header Colors
-    headerIconBg: "bg-gradient-to-r from-purple-600 to-blue-600",
-    headerTitle: isLight ? "text-blue-700" : "text-cyan-400",
+    headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
+    headerTitle: isLight ? "text-gray-900" : "text-white",
 
     // Menu Item Base
-    menuItemBase: isLight ? "text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:border-l-4 hover:border-gray-400" : "text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-l-4 hover:border-gray-500",
+    menuItemBase: isLight 
+      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
+      : "text-gray-400 hover:bg-white/5 hover:text-white",
 
     // Menu Item Active
-    menuItemActive: isLight ? "bg-blue-100 text-blue-700 border-l-4 border-blue-600 shadow-md" : "bg-cyan-600/20 text-cyan-400 border-l-4 border-cyan-400 shadow-lg",
+    menuItemActive: isLight 
+      ? "bg-blue-50 text-blue-700 shadow-sm" 
+      : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
     
-    // Stat Section
-    bgStatSection: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/30 border-gray-600",
-    statSectionTitle: isLight ? "text-gray-600" : "text-gray-400",
-
-    // Stat Item (Mobile)
-    bgStatItemMobile: isLight ? "bg-white border-gray-300" : "bg-gray-800/50 border-gray-600",
-    
-    // Stat Item (Desktop)
-    bgStatItemDesktop: isLight ? "bg-gray-200/50 group-hover:bg-gray-300/80" : "bg-gray-600/50 group-hover:bg-gray-600/30",
-    statItemHover: isLight ? "hover:bg-gray-100" : "hover:bg-gray-600/30",
-    
-    // Icon Colors
+    // Icons
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
-    iconHover: isLight ? "group-hover:text-blue-500" : "group-hover:text-cyan-300",
+    iconInactive: isLight ? "text-gray-400" : "text-gray-500",
     
-    // Chevron Colors
-    chevronActive: isLight ? "text-blue-600" : "text-cyan-400",
-    chevronInactive: isLight ? "text-gray-400" : "text-gray-400",
-
+    // Stats
+    bgStatCard: isLight ? "bg-gray-50" : "bg-gray-900/50",
+    bgStatItem: isLight ? "bg-white shadow-sm" : "bg-black/20",
+    
   }), [isLight]);
 
   useEffect(() => {
@@ -88,11 +81,7 @@ function Sidebar() {
   const menus = [
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
     { name: "Users", path: "/admin/users", icon: FaUsers },
-    {
-      name: "Cryptocurrencies",
-      path: "/admin/cryptocurrencies",
-      icon: FaCoins,
-    },
+    { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
     { name: "Market Insights", path: "/admin/insights", icon: FaChartBar },
     { name: "News Management", path: "/admin/news", icon: FaNewspaper },
     { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
@@ -107,224 +96,132 @@ function Sidebar() {
   };
 
   const adminStats = [
-    {
-      label: "Online Users",
-      value: "1.2K",
-      color: isLight ? "text-green-700" : "text-green-400",
-      icon: FaUsers,
-    },
-    {
-      label: "Active Trades",
-      value: "247",
-      color: isLight ? "text-cyan-700" : "text-cyan-400",
-      icon: FaChartLine,
-    },
-    {
-      label: "Reports",
-      value: "12",
-      color: isLight ? "text-amber-700" : "text-amber-400",
-      icon: FaCommentAlt,
-    },
+    { label: "Online Users", value: "1.2K", color: "text-green-400", icon: FaUsers },
+    { label: "Active Trades", value: "247", color: "text-cyan-400", icon: FaChartLine },
   ];
 
   return (
     <>
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        .fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
+        .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
 
-      {/* Mobile & Tablet Version */}
-      <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl fade-in`}>
+      {/* Mobile Version */}
+      <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${TC.headerIconBg} flex items-center justify-center shadow-lg flex-shrink-0`}>
-              <FaUserShield className="text-white text-base sm:text-lg" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20`}>
+              <FaUserShield className="text-white text-lg" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className={`text-base sm:text-lg font-bold ${TC.headerTitle} truncate`}>
-                Admin Panel
-              </h2>
-              <p className={`text-xs sm:text-sm ${TC.textSecondary} truncate`}>
-                Platform Management
-              </p>
+            <div>
+              <h2 className={`text-lg font-bold ${TC.headerTitle}`}>Admin Panel</h2>
+              <p className={`text-xs ${TC.textSecondary}`}>Platform Management</p>
             </div>
           </div>
-
-          {/* Navigation Menu */}
-          <nav className="mb-4">
-            <ul className="space-y-1">
-              {menus.map((item, index) => (
-                <li key={index}>
-                  <Link
-                    to={item.path}
-                    className={`
-                      flex items-center justify-between p-2.5 sm:p-3 rounded-lg transition-all duration-300 group
-                      ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
-                    `}
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                      <item.icon
-                        className={`
-                          text-sm sm:text-base transition-transform duration-300 flex-shrink-0
-                          ${
-                            isActive(item.path)
-                              ? `${TC.iconActive} scale-110`
-                              : `${TC.iconHover}`
-                          }
-                        `}
-                      />
-                      <span className={`font-medium text-xs sm:text-sm truncate ${isActive(item.path) ? "" : TC.textPrimary}`}>
-                        {item.name}
-                      </span>
-                    </div>
-                    <FaChevronRight
-                      className={`
-                        text-xs transition-all duration-300 flex-shrink-0
-                        ${
-                          isActive(item.path)
-                            ? `${TC.chevronActive} opacity-100 translate-x-0`
-                            : `${TC.chevronInactive} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0`
-                        }
-                      `}
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Admin Stats Section (Mobile) */}
-          <div className={`p-3 rounded-lg border ${TC.bgStatSection}`}>
-            <h3 className={`text-xs font-semibold mb-3 uppercase tracking-wide ${TC.statSectionTitle}`}>
-              System Stats
-            </h3>
-            <div className="grid grid-cols-3 gap-2">
-              {adminStats.map((stat, index) => (
-                <div
-                  key={index}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded border ${TC.bgStatItemMobile}`}
-                >
-                  <stat.icon className={`text-base sm:text-lg ${stat.color}`} />
-                  <div className="text-center w-full">
-                    <div className={`text-xs sm:text-sm font-semibold ${stat.color} truncate`}>
-                      {stat.value}
-                    </div>
-                    <div className={`text-xs ${TC.textSecondary} truncate`}>
-                      {stat.label}
-                    </div>
-                  </div>
+          
+          <nav className="space-y-1">
+            {menus.map((item, index) => (
+              <Link
+                key={index}
+                to={item.path}
+                className={`
+                  flex items-center justify-between p-3 rounded-lg transition-all duration-200
+                  ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon className={isActive(item.path) ? TC.iconActive : TC.iconInactive} />
+                  <span className="font-medium text-sm">{item.name}</span>
                 </div>
-              ))}
-            </div>
-          </div>
+                {isActive(item.path) && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_cyan]"></div>}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
 
       {/* Desktop Sidebar */}
       <aside
         className={`
-          hidden lg:flex flex-col w-64 rounded-2xl p-5
-          transition-all duration-700 ease-out transform h-full overflow-y-auto custom-scrollbar
+          hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
+          transition-all duration-500 ease-out sticky top-4
           ${TC.bgSidebar}
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
-          ${TC.textPrimary}
         `}
       >
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-12 h-12 rounded-full ${TC.headerIconBg} flex items-center justify-center shadow-lg flex-shrink-0`}>
-              <FaUserShield className="text-white text-xl" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className={`text-xl font-bold ${TC.headerTitle} truncate`}>
-                Admin Panel
-              </h2>
-              <p className={`text-sm ${TC.textSecondary} truncate`}>
-                Platform Management
-              </p>
-            </div>
+        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
+          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
+            <FaUserShield className="text-white text-xl" />
+          </div>
+          <div>
+            <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight`}>Admin Panel</h2>
+            <p className={`text-xs ${TC.textSecondary} font-medium`}>v2.4.0 • Stable</p>
           </div>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="mb-6">
-          <ul className="space-y-2">
-            {menus.map((item, index) => (
-              <li key={index}>
-                <Link
-                  to={item.path}
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
+          {menus.map((item, index) => (
+            <Link
+              key={index}
+              to={item.path}
+              className={`
+                group flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 relative overflow-hidden
+                ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
+                slide-in
+              `}
+              style={{ animationDelay: `${0.15 + index * 0.05}s` }}
+            >
+              <div className="flex items-center gap-3.5 relative z-10">
+                <item.icon 
                   className={`
-                    flex items-center justify-between p-3 rounded-lg transition-all duration-300 group
-                    ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
-                  `}
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <item.icon
-                      className={`
-                        text-lg transition-transform duration-300 flex-shrink-0
-                        ${
-                          isActive(item.path)
-                            ? `${TC.iconActive} scale-110`
-                            : `${TC.iconHover}`
-                        }
-                      `}
-                    />
-                    <span className={`font-medium truncate ${isActive(item.path) ? "" : TC.textPrimary}`}>
-                      {item.name}
-                    </span>
-                  </div>
-                  <FaChevronRight
-                    className={`
-                      text-xs transition-all duration-300 flex-shrink-0
-                      ${
-                        isActive(item.path)
-                          ? `${TC.chevronActive} opacity-100 translate-x-0`
-                          : `${TC.chevronInactive} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0`
-                      }
-                    `}
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    text-lg transition-transform duration-300 
+                    ${isActive(item.path) ? `${TC.iconActive} scale-110` : `${TC.iconInactive} group-hover:scale-110 group-hover:text-gray-300`}
+                  `} 
+                />
+                <span className={`font-medium tracking-wide ${isActive(item.path) ? "font-semibold" : ""}`}>
+                  {item.name}
+                </span>
+              </div>
+              
+              {/* Active Indicator */}
+              {isActive(item.path) && (
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
+                </div>
+              )}
+              
+              {/* Hover Glow Effect */}
+              {!isActive(item.path) && (
+                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              )}
+            </Link>
+          ))}
         </nav>
 
-        {/* Admin Stats Section (Desktop) */}
-        <div className={`p-4 rounded-lg border ${TC.bgStatSection}`}>
-          <h3 className={`text-xs font-semibold mb-3 uppercase tracking-wide ${TC.statSectionTitle}`}>
-            System Overview
-          </h3>
-          <div className="space-y-3">
-            {adminStats.map((stat, index) => (
-              <div
-                key={index}
-                className={`flex items-center justify-between p-2 group rounded transition-colors duration-200 ${TC.statItemHover}`}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`p-2 rounded-lg ${TC.bgStatItemDesktop} transition-transform duration-200 flex-shrink-0`}>
-                    <stat.icon className={`text-sm ${stat.color}`} />
-                  </div>
-                  <span className={`text-sm ${TC.textSecondary} truncate`}>
-                    {stat.label}
-                  </span>
+        {/* Bottom Stats Card */}
+        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>System Status</span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {adminStats.map((stat, i) => (
+              <div key={i} className={`${TC.bgStatItem} rounded-lg p-2.5`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <stat.icon className={`text-xs ${stat.color}`} />
+                  <span className={`text-[10px] ${TC.textSecondary}`}>{stat.label}</span>
                 </div>
-                <span className={`text-sm font-semibold ${stat.color} flex-shrink-0 ml-2`}>
-                  {stat.value}
-                </span>
+                <span className={`text-sm font-bold ${TC.textPrimary}`}>{stat.value}</span>
               </div>
             ))}
           </div>

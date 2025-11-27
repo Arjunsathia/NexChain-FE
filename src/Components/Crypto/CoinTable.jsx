@@ -84,8 +84,12 @@ function CoinTable({ onTrade }) {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-700" : "text-gray-300",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400",
-    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl",
-    bgCard: isLight ? "bg-white border-gray-300 hover:bg-gray-100/50" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 hover:bg-gray-700/50",
+    bgContainer: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgCard: isLight 
+      ? "bg-white hover:bg-gray-100/50 shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl hover:bg-gray-700/50 shadow-xl shadow-black/20",
     bgLoading: isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 text-cyan-400",
     bgTableHeader: isLight ? "border-b border-gray-300 bg-gray-100 text-gray-600" : "border-b border-gray-700 bg-gray-900/50 text-gray-400",
     bgTableFooter: isLight ? "bg-gray-100 border-t border-gray-300" : "bg-gray-900/50 border-t border-gray-700",
@@ -447,7 +451,7 @@ function CoinTable({ onTrade }) {
               <div
                 key={coin.id}
                 onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-                className={`rounded-xl p-4 cursor-pointer transition-all duration-300 group fade-in border ${TC.bgCard}`}
+                className={`rounded-xl p-4 cursor-pointer transition-all duration-300 group fade-in ${TC.bgCard}`}
                 style={{ animationDelay: `${0.5 + index * 0.1}s` }}
               >
                 {/* Header with Star and Name */}
@@ -533,7 +537,7 @@ function CoinTable({ onTrade }) {
               </div>
             ))
           ) : (
-            <div className={`text-center py-12 border rounded-xl fade-in ${TC.bgContainer} ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
+            <div className={`text-center py-12 rounded-xl fade-in ${TC.bgContainer} ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
               <div className="text-5xl mb-3">🔍</div>
               No coins found matching "{searchTerm}"
             </div>
@@ -542,7 +546,7 @@ function CoinTable({ onTrade }) {
 
         {/* Desktop Table View */}
         <div className="hidden lg:block fade-in" style={{ animationDelay: "0.4s" }}>
-          <div className={`rounded-xl overflow-hidden shadow-2xl border ${TC.bgContainer}`}>
+          <div className={`rounded-xl overflow-hidden shadow-2xl ${TC.bgContainer}`}>
             {paginatedCoins.length === 0 ? (
               <div className={`p-12 text-center fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
                 <div className="text-6xl mb-4">🔍</div>

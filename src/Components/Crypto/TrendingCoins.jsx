@@ -26,7 +26,9 @@ function TrendingCoins() {
   const navigate = useNavigate();
 
   const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
+    bgContainer: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textAccentGreen: isLight ? "text-green-600" : "text-green-400",
     textAccentRed: isLight ? "text-red-600" : "text-red-500",

@@ -1,50 +1,79 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import UserLineChart from "@/Pages/Admin/Components/Dashboard/LineChart";
 import { getData } from "@/api/axiosConfig";
+import axios from "axios";
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import {
+  FaUsers,
+  FaCoins,
+  FaChartLine,
+  FaStar,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaServer,
+  FaBolt,
+} from "react-icons/fa";
 
-/** Theme detection hook */
+// Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
-  const isClient = typeof document !== "undefined";
-  const [isLight, setIsLight] = useState(
-    isClient ? !document.documentElement.classList.contains("dark") : false
-  );
+  const [isLight, setIsLight] = useState(() => {
+    try {
+      return !document.documentElement.classList.contains("dark");
+    } catch (e) {
+      // document may be undefined during SSR; default to light
+      return true;
+    }
+  });
+
   useEffect(() => {
-    if (!isClient) return;
-    const update = () => setIsLight(!document.documentElement.classList.contains("dark"));
-    const obs = new MutationObserver(update);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    const update = () =>
+      setIsLight(!document.documentElement.classList.contains("dark"));
+
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    // Also ensure we set the correct value on mount
     update();
-    return () => obs.disconnect();
-  }, [isClient]);
+
+    return () => observer.disconnect();
+  }, []);
+
   return isLight;
 };
 
 function AdminDashboard() {
-  const isLight = useThemeCheck();
+  const navigate = useNavigate(); // ✅ FIX: add navigate
   const { coins } = useCoinContext() ?? { coins: [] };
+  const isLight = useThemeCheck();
 
+  // Premium Theme Classes - Matches User Dashboard
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-      bgCard: isLight ? "bg-white border border-gray-200" : "bg-gray-800/50 backdrop-blur-sm border border-gray-700",
-      btnAction: isLight ? "bg-white/90 border border-gray-200 hover:bg-gray-50" : "bg-gradient-to-br from-gray-800/50 to-gray-800/30 border border-gray-700 hover:bg-gray-800/40",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
+
+      bgCard: isLight
+        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+      bgStatsCard: isLight
+        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25 border-none",
+      bgItem: isLight ? "bg-gray-50" : "bg-white/5",
+
+      cardHover: isLight ? "hover:shadow-blue-500/10" : "hover:shadow-cyan-500/10",
+
+      // heading gradient (keeps cyan→blue like your other Dashboard)
+      headerGradient: "from-cyan-400 to-blue-500",
     }),
     [isLight]
   );
 
-  // top cards: keep scale hover
-  const topCardClass = `${TC.bgCard} rounded-xl p-4 shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer`;
-
-  // other section cards: NO scale hover
-  const sectionCardClass = `${TC.bgCard} rounded-xl p-4 sm:p-6 shadow-xl`;
-
-  // small row hover for items (Latest Users rows)
-  const rowHover = "transition-all duration-150 hover:-translate-y-0.5";
-
-  // state
+  // State
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -69,20 +98,39 @@ function AdminDashboard() {
 
     const fetchReports = async () => {
       try {
-        const res = await getData("/reports");
-        const reportsData = res?.data ?? res ?? [];
-        if (mounted) setReports(Array.isArray(reportsData) ? reportsData : []);
+        // Fetch feedback from the backend using axios directly
+        const res = await axios.get("http://localhost:5050/api/feedback");
+        const feedbackData = res?.data?.data ?? res?.data ?? [];
+
+        // Filter and transform feedback into reports format
+        const reportsFromFeedback = Array.isArray(feedbackData)
+          ? feedbackData
+              .filter((fb) => fb.type === "bug" || fb.type === "issue") // Only show bugs/issues
+              .map((fb) => {
+                const message = fb.message || "";
+                const trimmedTitle =
+                  message.length > 0
+                    ? message.length > 60
+                      ? `${message.substring(0, 60)}...`
+                      : message
+                    : "No title";
+
+                return {
+                  id: fb._id || fb.id,
+                  type: fb.type || "bug",
+                  title: trimmedTitle,
+                  status: fb.status || "new",
+                  createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
+                };
+              })
+              .slice(0, 4) // Show only latest 4
+          : [];
+
+        if (mounted) setReports(reportsFromFeedback);
       } catch (err) {
-        console.error("Failed to fetch reports:", err);
-        // Generate dynamic mock data based on current time
-        const now = Date.now();
-        const mockReports = [
-          { id: 1, type: "bug", title: "Bug in trade execution flow", status: "open", createdAt: new Date(now - Math.random() * 3600000).toISOString() },
-          { id: 2, type: "feature", title: "Feature request: Add SOL", status: "review", createdAt: new Date(now - 86400000 - Math.random() * 3600000).toISOString() },
-          { id: 3, type: "data", title: "Inaccurate price data", status: "in-progress", createdAt: new Date(now - 172800000).toISOString() },
-          { id: 4, type: "ui", title: "Mobile responsive issues", status: "open", createdAt: new Date(now - 259200000).toISOString() },
-        ];
-        if (mounted) setReports(mockReports);
+        console.error("Failed to fetch feedback reports:", err);
+        // Fallback to empty array instead of mock data
+        if (mounted) setReports([]);
       }
     };
 
@@ -92,14 +140,32 @@ function AdminDashboard() {
         const activityData = res?.data ?? res ?? [];
         if (mounted) setRecentActivity(Array.isArray(activityData) ? activityData : []);
       } catch (err) {
-        console.error("Failed to fetch activity:", err);
-        // Generate dynamic activity with varying timestamps
         const now = Date.now();
         const mockActivity = [
-          { type: "user_registered", message: `New user registered: User${Math.floor(Math.random() * 1000)}`, timestamp: new Date(now - 120000).toISOString(), colorClass: isLight ? "text-green-700" : "text-green-400" },
-          { type: "trade_completed", message: `Trade completed: ${Math.floor(Math.random() * 10)} BTC`, timestamp: new Date(now - 300000).toISOString(), colorClass: isLight ? "text-blue-700" : "text-blue-400" },
-          { type: "watchlist_added", message: "Watchlist updated", timestamp: new Date(now - 600000).toISOString(), colorClass: isLight ? "text-yellow-700" : "text-yellow-400" },
-          { type: "report_submitted", message: "New feedback received", timestamp: new Date(now - 900000).toISOString(), colorClass: isLight ? "text-purple-700" : "text-purple-400" },
+          {
+            type: "user_registered",
+            message: `New user registered: User${Math.floor(Math.random() * 1000)}`,
+            timestamp: new Date(now - 120000).toISOString(),
+            colorClass: "text-green-400",
+          },
+          {
+            type: "trade_completed",
+            message: `Trade completed: ${Math.floor(Math.random() * 10)} BTC`,
+            timestamp: new Date(now - 300000).toISOString(),
+            colorClass: "text-blue-400",
+          },
+          {
+            type: "watchlist_added",
+            message: "Watchlist updated",
+            timestamp: new Date(now - 600000).toISOString(),
+            colorClass: "text-yellow-400",
+          },
+          {
+            type: "report_submitted",
+            message: "New feedback received",
+            timestamp: new Date(now - 900000).toISOString(),
+            colorClass: "text-purple-400",
+          },
         ];
         if (mounted) setRecentActivity(mockActivity);
       }
@@ -114,14 +180,13 @@ function AdminDashboard() {
         console.error("Failed to fetch admin data:", err);
       } finally {
         setIsLoading(false);
+        // small delay so the fade/slide animation looks smooth like your User Dashboard
         setTimeout(() => mounted && setContentLoaded(true), 300);
       }
     };
 
-    // Initial load
     load();
 
-    // Poll for updates every 30 seconds
     pollInterval = setInterval(() => {
       if (mounted) {
         fetchUsers();
@@ -130,499 +195,460 @@ function AdminDashboard() {
       }
     }, 30000);
 
-    return () => { 
+    return () => {
       mounted = false;
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [isLight]);
+  }, []);
 
   const adminStats = useMemo(() => {
     const totalUsers = users.length;
     const totalCoins = Array.isArray(coins) ? coins.length : 0;
-    const totalTrades = users.reduce((total, u) => total + (u.purchasedCoins?.length || 0), 0);
-    const totalWatchlistItems = users.reduce((total, u) => total + (u.watchlist?.length || 0), 0);
+    const totalTrades = users.reduce(
+      (total, u) => total + (u.purchasedCoins?.length || 0),
+      0
+    );
+    const totalWatchlistItems = users.reduce(
+      (total, u) => total + (u.watchlist?.length || 0),
+      0
+    );
     return { totalUsers, totalCoins, totalTrades, totalWatchlistItems };
   }, [users, coins]);
 
-  // latest 4 users (same as original)
   const latestUsers = useMemo(() => {
     return [...users]
-      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-      .slice(0, 4)
-      .map(u => ({
+      .sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      )
+      .slice(0, 10)
+      .map((u) => ({
         id: u._id || u.id,
         name: u.name || "Unknown",
         email: u.email || "No email",
         role: u.role || "user",
-        joinDate: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "Unknown"
+        joinDate: u.createdAt
+          ? new Date(u.createdAt).toLocaleDateString()
+          : "Unknown",
       }));
   }, [users]);
 
-  const minutesAgo = (iso) => Math.max(0, Math.floor((Date.now() - new Date(iso)) / 60000));
-
-  // Quick Actions handlers
   const handleQuickAction = (action) => {
-    switch (action) {
-      case "addCoin":
-        console.log("Add New Coin action triggered");
-        break;
-      case "viewUsers":
-        console.log("View All Users action triggered");
-        break;
-      case "systemSettings":
-        console.log("System Settings action triggered");
-        break;
-      case "generateReport":
-        console.log("Generate Report action triggered");
-        break;
-      default:
-        console.log("Unknown action:", action);
-    }
+    console.log(`${action} triggered`);
   };
 
-  if (isLoading) {
-    return (
-      <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 min-h-screen text-white">
-        <div className="space-y-4 sm:space-y-6">
-          {/* Stat Cards Skeleton */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {[...Array(4)].map((_, i) => (
+  return (
+    <div
+      className={`
+        flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}
+        transition-all duration-500 ease-in-out
+        rounded-3xl
+      `}
+    >
+      {/* Header Section (always visible) */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1
+            className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}
+          >
+            Dashboard Overview
+          </h1>
+          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
+            Real-time platform monitoring and management
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {isLoading && (
+            <div className="flex items-center text-sm text-gray-300">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Loading...
+            </div>
+          )}
+          <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+            System Operational
+          </span>
+        </div>
+      </div>
+
+      {/* Content block with the same animation effect as your Dashboard */}
+      <div
+        className={`transition-all duration-500 ease-in-out ${
+          contentLoaded && !isLoading
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
+        }`}
+      >
+        {/* Stat Cards / Skeleton (shown in the same place) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+          {isLoading ? (
+            // skeleton cards
+            [...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 shadow-xl"
-              >
-                <div className="animate-pulse">
-                  <div className="h-3 sm:h-4 bg-gray-700 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 sm:h-6 bg-gray-700 rounded w-3/4"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Chart Skeleton */}
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 shadow-xl">
-            <div className="animate-pulse">
-              <div className="h-4 sm:h-6 bg-gray-700 rounded w-1/4 mb-3 sm:mb-4"></div>
-              <div className="h-32 sm:h-48 bg-gray-700 rounded-lg"></div>
-            </div>
-          </div>
-
-          {/* Reports & Users Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 shadow-xl">
-              <div className="animate-pulse">
-                <div className="h-4 sm:h-6 bg-gray-700 rounded w-1/3 mb-3 sm:mb-4"></div>
-                <div className="space-y-2 sm:space-y-3">
-                  {[...Array(3)].map((_, i) => (
+                className={`${TC.bgCard} h-32 rounded-xl animate-pulse`}
+              />
+            ))
+          ) : (
+            // real stat cards - Styled like User Dashboard
+            [
+              {
+                label: "Total Users",
+                value: adminStats.totalUsers,
+                icon: FaUsers,
+                color: "from-blue-500 to-cyan-400",
+              },
+              {
+                label: "Total Coins",
+                value: adminStats.totalCoins,
+                icon: FaCoins,
+                color: "from-cyan-500 to-teal-400",
+              },
+              {
+                label: "Total Trades",
+                value: adminStats.totalTrades,
+                icon: FaChartLine,
+                color: "from-purple-500 to-violet-400",
+              },
+              {
+                label: "Watchlist Items",
+                value: adminStats.totalWatchlistItems,
+                icon: FaStar,
+                color: "from-amber-500 to-yellow-400",
+              },
+            ].map((stat, i) => {
+              const StatIcon = stat.icon;
+              return (
+                <div
+                  key={i}
+                  className={`
+                  ${TC.bgStatsCard} rounded-xl p-4 
+                  transition-all duration-300 ease-in-out 
+                  transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 will-change-transform
+                  cursor-pointer
+                `}
+                >
+                  <div className="flex items-center justify-between mb-3">
                     <div
-                      key={i}
-                      className="h-3 sm:h-4 bg-gray-700 rounded"
-                    ></div>
-                  ))}
+                      className={`p-2 bg-gradient-to-r ${stat.color} rounded-lg shadow-lg`}
+                    >
+                      <StatIcon className="text-white text-base" />
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
+                    >
+                      +2.4%
+                    </span>
+                  </div>
+
+                  <p
+                    className={`text-lg font-bold mb-1 transition-colors ${TC.textPrimary} group-hover:text-blue-500`}
+                  >
+                    {stat.value ?? 0}
+                  </p>
+
+                  <p className={`text-sm font-medium ${TC.textSecondary}`}>
+                    {stat.label}
+                  </p>
                 </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-4">
+          {/* Chart */}
+          <div className={`lg:col-span-2 ${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2
+                className={`text-base sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
+              >
+                <FaChartLine className="text-cyan-400 text-sm sm:text-base" />{" "}
+                User Growth
+              </h2>
+            </div>
+
+            {isLoading ? (
+              // chart skeleton
+              <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/30 rounded" />
+            ) : (
+              <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
+                <UserLineChart users={users} />
+              </div>
+            )}
+          </div>
+
+          {/* Quick Actions & Health */}
+          <div className="space-y-4 lg:space-y-6">
+            <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+              <h3
+                className={`text-base sm:text-lg font-bold ${TC.textPrimary} mb-3 sm:mb-4 flex items-center gap-2`}
+              >
+                <FaServer className="text-green-400 text-sm sm:text-base" />{" "}
+                Platform Health
+              </h3>
+              <div className="space-y-2 sm:space-y-3">
+                {isLoading ? (
+                  <>
+                    <div
+                      className={`h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+                    />
+                    <div
+                      className={`h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+                    />
+                    <div
+                      className={`h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+                    />
+                  </>
+                ) : (
+                  [
+                    {
+                      label: "API Latency",
+                      value: "24ms",
+                      icon: FaBolt,
+                      color: "text-yellow-400",
+                    },
+                    {
+                      label: "Database",
+                      value: "Healthy",
+                      icon: FaCheckCircle,
+                      color: "text-green-400",
+                    },
+                    {
+                      label: "Error Rate",
+                      value: "0.01%",
+                      icon: FaExclamationTriangle,
+                      color: "text-red-400",
+                    },
+                  ].map((item, i) => {
+                    const ItemIcon = item.icon;
+                    return (
+                      <div
+                        key={i}
+                        className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-colors`}
+                      >
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <ItemIcon
+                            className={`text-xs sm:text-sm ${item.color}`}
+                          />
+                          <span
+                            className={`text-xs sm:text-sm ${TC.textSecondary}`}
+                          >
+                            {item.label}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-xs sm:text-sm font-mono font-semibold ${TC.textPrimary}`}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 shadow-xl">
-              <div className="animate-pulse">
-                <div className="h-4 sm:h-6 bg-gray-700 rounded w-1/3 mb-3 sm:mb-4"></div>
-                <div className="space-y-2 sm:space-y-3">
+
+            <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+              <h3
+                className={`text-base sm:text-lg font-bold ${TC.textPrimary} mb-3 sm:mb-4 flex items-center gap-2`}
+              >
+                <FaBolt className="text-amber-400 text-sm sm:text-base" /> Quick
+                Actions
+              </h3>
+              {isLoading ? (
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[...Array(4)].map((_, i) => (
                     <div
                       key={i}
-                      className="h-3 sm:h-4 bg-gray-700 rounded"
-                    ></div>
+                      className="h-10 rounded-xl animate-pulse bg-gray-700/30"
+                    />
                   ))}
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  {[
+                    { label: "Add Coin", action: "addCoin" },
+                    { label: "Users", action: "viewUsers" },
+                    { label: "Settings", action: "systemSettings" },
+                    { label: "Reports", action: "generateReport" },
+                  ].map((action, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleQuickAction(action.action)}
+                      className="p-2 sm:p-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs sm:text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-cyan-500/10"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </main>
-    );
-  }
 
-  return (
-    <main
-      className={`
-        flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 text-white
-        transition-all duration-500 ease-in-out
-        ${
-          contentLoaded
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4"
-        }
-      `}
-    >
-      {/* Header */}
-      <div className="mb-2 px-1 sm:px-2 text-center sm:text-left">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-t from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-          Admin Panel
-        </h1>
-
-        <p className={`text-gray-400 mt-1 sm:mt-2 text-xs sm:text-sm ${TC.textSecondary}`}>
-          Manage and oversee the platform activity
-        </p>
-      </div>
-
-      {/* Stat Cards */}
-      <div
-        className={`
-    grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 transition-all duration-600 ease-out
-    ${contentLoaded ? "opacity-100" : "opacity-0"}
-  `}
-      >
-        <div className={topCardClass}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg shadow-lg">
-              <span className="text-white text-base">👥</span>
+        {/* Bottom Grid: Reports & Users */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          {/* Reports */}
+          <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2
+                className={`text-base sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
+              >
+                <FaExclamationTriangle className="text-red-400 text-sm sm:text-base" />{" "}
+                Recent Reports
+              </h2>
+              <span
+                className={`text-xs font-medium px-2 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
+              >
+                {reports.length} Total
+              </span>
             </div>
-          </div>
-
-          <p className={`text-lg font-bold ${TC.textPrimary} mb-1 group-hover:text-cyan-300 transition-colors`}>
-            {adminStats.totalUsers.toString()}
-          </p>
-
-          <p className={`text-sm ${TC.textSecondary} font-medium`}>Total Users</p>
-          <p className={`text-xs ${TC.textTertiary} mt-1`}>Registered users</p>
-        </div>
-
-        <div className={topCardClass}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-400 rounded-lg shadow-lg">
-              <span className="text-white text-base">🪙</span>
-            </div>
-          </div>
-
-          <p className={`text-lg font-bold ${TC.textPrimary} mb-1 group-hover:text-cyan-300 transition-colors`}>
-            {adminStats.totalCoins.toString()}
-          </p>
-
-          <p className={`text-sm ${TC.textSecondary} font-medium`}>Total Coins</p>
-          <p className={`text-xs ${TC.textTertiary} mt-1`}>
-            Available cryptocurrencies
-          </p>
-        </div>
-
-        <div className={topCardClass}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-400 rounded-lg shadow-lg">
-              <span className="text-white text-base">📊</span>
-            </div>
-          </div>
-
-          <p className={`text-lg font-bold ${TC.textPrimary} mb-1 group-hover:text-cyan-300 transition-colors`}>
-            {adminStats.totalTrades.toString()}
-          </p>
-
-          <p className={`text-sm ${TC.textSecondary} font-medium`}>Total Trades</p>
-          <p className={`text-xs ${TC.textTertiary} mt-1`}>Completed transactions</p>
-        </div>
-
-        <div className={topCardClass}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-lg shadow-lg">
-              <span className="text-white text-base">⭐</span>
-            </div>
-          </div>
-
-          <p className={`text-lg font-bold ${TC.textPrimary} mb-1 group-hover:text-cyan-300 transition-colors`}>
-            {adminStats.totalWatchlistItems.toString()}
-          </p>
-
-          <p className={`text-sm ${TC.textSecondary} font-medium`}>Watchlist Items</p>
-          <p className={`text-xs ${TC.textTertiary} mt-1`}>User watchlist entries</p>
-        </div>
-      </div>
-
-      {/* Line Chart */}
-      <div
-        className={`
-          ${sectionCardClass}
-          transition-all duration-700 ease-out
-          ${
-            contentLoaded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
-          }
-        `}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className={`text-lg sm:text-xl font-bold ${TC.textPrimary} flex items-center gap-2`}>
-            <div className="p-2 bg-cyan-400/10 rounded-lg">
-              <span className="text-cyan-400">📈</span>
-            </div>
-            User Growth
-          </h2>
-          <div className={`flex items-center gap-2 text-sm ${isLight ? "bg-green-100/60 border border-green-200 text-green-700" : "bg-green-400/10 border border-green-400/20 text-green-400"} px-3 py-1.5 rounded-full`}>
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="font-semibold">Live</span>
-          </div>
-        </div>
-        <UserLineChart users={users} />
-      </div>
-
-      {/* Reports & Latest Users */}
-      <div
-        className={`
-          grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 transition-all duration-800 ease-out
-          ${contentLoaded ? "opacity-100" : "opacity-0"}
-        `}
-      >
-        {/* Latest Reports */}
-        <div className={sectionCardClass}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-lg sm:text-xl font-bold ${TC.textPrimary} flex items-center gap-2`}>
-              <div className="p-2 bg-red-400/10 rounded-lg">
-                <span className="text-red-400">📝</span>
-              </div>
-              Latest Reports
-            </h2>
-            <span className={`text-xs font-bold ${isLight ? "text-gray-700 bg-gray-100" : "text-gray-300 bg-gray-700"} px-2 py-1 rounded-full`}>
-              {reports.length} {reports.length === 1 ? "Report" : "Reports"}
-            </span>
-          </div>
-          {reports.length === 0 ? (
-            <div className={`text-center py-8 border-2 border-dashed ${isLight ? "border-gray-200 bg-white/70" : "border-gray-700 bg-gray-800/20"} rounded-lg`}>
-              <div className="text-5xl mb-3">📝</div>
-              <p className={`text-base font-semibold mb-1 ${TC.textPrimary}`}>
-                No reports yet
-              </p>
-              <p className={`text-sm ${TC.textSecondary}`}>All systems operational</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {reports.slice(0, 4).map((report, index) => (
-                <div
-                  key={report.id}
-                  className={`
-                    p-3 ${isLight ? "bg-white/90 border-gray-200" : "bg-gradient-to-br from-gray-800/50 to-gray-800/30 border-gray-700"} rounded-lg border 
-                    hover:border-cyan-400/50 cursor-pointer transition-all duration-200 group
-                    ${
-                      contentLoaded
-                        ? "opacity-100 translate-x-0"
-                        : "opacity-0 -translate-x-4"
-                    }
-                  `}
-                  style={{ animationDelay: `${0.7 + index * 0.1}s` }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-bold ${TC.textPrimary} text-sm sm:text-base group-hover:text-cyan-300 transition-colors truncate`}>
+            <div className="space-y-2 sm:space-y-3">
+              {isLoading ? (
+                <>
+                  {[...Array(4)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`p-3 sm:p-4 rounded-xl ${TC.bgItem} animate-pulse`}
+                    />
+                  ))}
+                </>
+              ) : (
+                reports.slice(0, 4).map((report, i) => (
+                  <div
+                    key={report.id ?? i}
+                    className={`p-3 sm:p-4 rounded-xl ${TC.bgItem} transition-all duration-200 group`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h4
+                        className={`font-medium text-sm sm:text-base ${TC.textPrimary} transition-colors line-clamp-1`}
+                      >
                         {report.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                            report.status === "open"
-                              ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                              : report.status === "in-progress"
-                              ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                              : "bg-green-500/20 text-green-400 border border-green-500/30"
-                          }`}
+                      </h4>
+                      <span
+                        className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full whitespace-nowrap ml-2 ${
+                          report.status === "open"
+                            ? "bg-red-500/20 text-red-400"
+                            : "bg-yellow-500/20 text-yellow-400"
+                        }`}
+                      >
+                        {report.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span
+                        className={`text-xs ${TC.textSecondary} capitalize`}
+                      >
+                        {report.type}
+                      </span>
+                      <span className={`text-xs ${TC.textSecondary}`}>
+                        {report.createdAt
+                          ? new Date(report.createdAt).toLocaleDateString()
+                          : "Unknown"}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+              {!isLoading && reports.length === 0 && (
+                <div
+                  className={`text-center ${TC.textSecondary} py-8 text-sm`}
+                >
+                  No active reports
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Latest Users */}
+          <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2
+                className={`text-base sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
+              >
+                <FaUsers className="text-blue-400 text-sm sm:text-base" />{" "}
+                Newest Members
+              </h2>
+              <button
+                onClick={() => navigate("/admin/users")}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                View All
+              </button>
+            </div>
+            {/* Scrollable user list - max 10 users, hidden scrollbar */}
+            <div className="max-h-[400px] overflow-y-auto scrollbar-hide space-y-2 sm:space-y-3">
+              {isLoading ? (
+                <>
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} animate-pulse`}
+                    />
+                  ))}
+                </>
+              ) : (
+                latestUsers.map((user, i) => (
+                  <div
+                    key={user.id ?? i}
+                    className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200`}
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs sm:text-sm font-bold text-white shadow-lg flex-shrink-0">
+                        {(user.name || "U").charAt(0)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4
+                          className={`font-medium ${TC.textPrimary} text-xs sm:text-sm truncate`}
                         >
-                          {report.status}
-                        </span>
-                        <span className={`text-xs ${TC.textSecondary} capitalize ${isLight ? "bg-gray-100" : "bg-gray-700"} px-2 py-1 rounded-full`}>
-                          {report.type}
-                        </span>
+                          {user.name}
+                        </h4>
+                        <p
+                          className={`text-[10px] sm:text-xs ${TC.textSecondary} truncate`}
+                        >
+                          {user.email}
+                        </p>
                       </div>
                     </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <span
+                        className={`block text-xs font-medium ${TC.textSecondary}`}
+                      >
+                        {user.role}
+                      </span>
+                      <span
+                        className={`block text-[10px] ${TC.textTertiary}`}
+                      >
+                        {user.joinDate}
+                      </span>
+                    </div>
                   </div>
-                  <p className={`text-xs ${TC.textTertiary} mt-2`}>
-                    {new Date(report.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Latest Users */}
-        <div className={sectionCardClass}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-lg sm:text-xl font-bold ${TC.textPrimary} flex items-center gap-2`}>
-              <div className="p-2 bg-blue-400/10 rounded-lg">
-                <span className="text-blue-400">👥</span>
-              </div>
-              Latest Users
-            </h2>
-            <span className={`text-xs font-bold ${isLight ? "text-gray-700 bg-gray-100" : "text-gray-300 bg-gray-700"} px-2 py-1 rounded-full`}>
-              {latestUsers.length} users
-            </span>
-          </div>
-          {latestUsers.length === 0 ? (
-            <div className={`text-center py-8 border-2 border-dashed ${isLight ? "border-gray-200 bg-white/70" : "border-gray-700 bg-gray-800/20"} rounded-lg`}>
-              <div className="text-5xl mb-3">👥</div>
-              <p className={`text-base font-semibold mb-1 ${TC.textPrimary}`}>
-                No users yet
-              </p>
-              <p className={`text-sm ${TC.textSecondary}`}>Users will appear here</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {latestUsers.map((user, index) => (
+                ))
+              )}
+              {!isLoading && latestUsers.length === 0 && (
                 <div
-                  key={user.id}
-                  className={`
-                    flex items-center justify-between gap-3 p-3 rounded-lg border ${isLight ? "bg-white border-gray-200 hover:bg-gray-50" : "bg-gradient-to-br from-gray-800/50 to-gray-800/30 border-gray-700 hover:bg-gray-800/40"} 
-                    ${rowHover}
-                  `}
+                  className={`text-center ${TC.textSecondary} py-8 text-sm`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${isLight ? "bg-gradient-to-r from-purple-500 to-indigo-500" : "bg-gradient-to-r from-purple-600 to-indigo-600"}`}>
-                      {user.name?.charAt(0).toUpperCase() ?? "U"}
-                    </div>
-                    <div className="min-w-0">
-                      <div className={`font-semibold ${TC.textPrimary} truncate`}>{user.name}</div>
-                      <div className={`text-sm ${TC.textSecondary} truncate`}>{user.email}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    <div className={`text-xs font-semibold px-3 py-1 rounded-full ${user.role === "admin" ? (isLight ? "bg-purple-100 text-purple-700" : "bg-purple-400/20 text-purple-300") : (isLight ? "bg-cyan-100 text-cyan-700" : "bg-cyan-400/10 text-cyan-300")}`}>
-                      {user.role}
-                    </div>
-                    <div className={`text-xs ${TC.textSecondary}`}>{user.joinDate}</div>
-                  </div>
+                  No users found
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Additional Stats Section */}
-      <div
-        className={`
-          grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 transition-all duration-900 ease-out
-          ${
-            contentLoaded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
-          }
-        `}
-      >
-        {/* Platform Health */}
-        <div className={sectionCardClass}>
-          <h3 className={`text-lg font-bold ${TC.textPrimary} flex items-center gap-2 mb-4`}>
-            <div className="p-2 bg-green-400/10 rounded-lg">
-              <span className="text-green-400">💚</span>
-            </div>
-            Platform Health
-          </h3>
-          <div className="space-y-3">
-            {[
-              { label: "API Status", value: "Operational", status: "success" },
-              { label: "Database", value: "Healthy", status: "success" },
-              { label: "Server Load", value: "24%", status: "warning" },
-              { label: "Uptime", value: "99.9%", status: "success" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className={`flex justify-between items-center p-2 ${isLight ? "bg-white/90 border-gray-200" : "bg-gray-800/30 border-gray-700"} rounded-lg border ${rowHover}`}
-              >
-                <span className={`text-sm ${TC.textSecondary}`}>{item.label}</span>
-                <span
-                  className={`text-sm font-bold px-2 py-1 rounded-full ${
-                    item.status === "success"
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : item.status === "warning"
-                      ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                      : "bg-red-500/20 text-red-400 border border-red-500/30"
-                  }`}
-                >
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className={sectionCardClass}>
-          <h3 className={`text-lg font-bold ${TC.textPrimary} flex items-center gap-2 mb-4`}>
-            <div className="p-2 bg-purple-400/10 rounded-lg">
-              <span className="text-purple-400">⚡</span>
-            </div>
-            Quick Actions
-          </h3>
-          <div className="space-y-2">
-            {[
-              {
-                label: "Add New Coin",
-                action: () => handleQuickAction("addCoin"),
-                icon: "🪙",
-              },
-              {
-                label: "View All Users",
-                action: () => handleQuickAction("viewUsers"),
-                icon: "👥",
-              },
-              {
-                label: "System Settings",
-                action: () => handleQuickAction("systemSettings"),
-                icon: "⚙️",
-              },
-              {
-                label: "Generate Report",
-                action: () => handleQuickAction("generateReport"),
-                icon: "📊",
-              },
-            ].map((action, index) => (
-              <button
-                key={index}
-                onClick={action.action}
-                className={`w-full text-left p-3 ${TC.btnAction} rounded-lg transition-all duration-200 text-sm border group flex items-center gap-3 ${rowHover}`}
-              >
-                <span className="text-base">{action.icon}</span>
-                <span className={`font-medium ${TC.textPrimary} group-hover:text-cyan-300 transition-colors`}>
-                  {action.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity Summary */}
-        <div className={sectionCardClass}>
-          <h3 className={`text-lg font-bold ${TC.textPrimary} flex items-center gap-2 mb-4`}>
-            <div className="p-2 bg-yellow-400/10 rounded-lg">
-              <span className="text-yellow-400">🔔</span>
-            </div>
-            Recent Activity
-          </h3>
-          <div className="space-y-3">
-            {recentActivity.length === 0 ? (
-              <div className={`text-center py-8 border-2 border-dashed ${isLight ? "border-gray-200 bg-white/70" : "border-gray-700 bg-gray-800/20"} rounded-lg`}>
-                <div className="text-4xl mb-3">🔔</div>
-                <p className={`text-sm font-semibold mb-1 ${TC.textPrimary}`}>
-                  No recent activity
-                </p>
-                <p className={`text-xs ${TC.textSecondary}`}>
-                  Activity will appear here
-                </p>
-              </div>
-            ) : (
-              recentActivity.slice(0, 4).map((activity, index) => (
-                <div
-                  key={index}
-                  className={`p-3 ${isLight ? "bg-white/90 border-gray-200" : "bg-gradient-to-br from-gray-800/50 to-gray-800/30 border-gray-700"} rounded-lg border transition-all duration-200 hover:scale-105 ${activity.colorClass}`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className={`font-medium text-sm truncate flex-1 pr-2 ${TC.textPrimary}`}>
-                      {activity.message}
-                    </span>
-                    <span className={`text-xs ${TC.textSecondary} ${isLight ? "bg-gray-100" : "bg-gray-700"} px-2 py-1 rounded-full flex-shrink-0`}>
-                      {minutesAgo(activity.timestamp)} min ago
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
+            {/* NOTE: This <style> block will work in plain React as well */}
+            <style>{`
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

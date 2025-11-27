@@ -5,35 +5,46 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
-  const [isMounted, setIsMounted] = useState(false);
   const [timeRange, setTimeRange] = useState('7d');
 
-  // 💡 Theme Classes Helper
+  // 💡 Theme Classes Helper - aligned with Admin theme / Sidebar style
   const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
+    // Card Background (matches Admin/Sidebar look, no border here)
+    bgContainer: isLight
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    
+    // Text Colors
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    bgRangeButtonActive: isLight ? "bg-cyan-600 text-white" : "bg-cyan-600 text-white",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+
+    // Range Button Styling
+    bgRangeButtonActive: "bg-cyan-600 text-white",
     bgRangeButtonDefault: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-300",
     bgRangeContainer: isLight ? "bg-gray-100 border-gray-300" : "bg-gray-800 border-gray-700",
-    bgStatCard: isLight ? "bg-gray-50/50 border-gray-200" : "bg-gray-800/30 border-gray-700",
+    
+    // Stat Card Background (inner cards can keep subtle borders)
+    bgStatCard: isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/5",
+    
+    // P&L Pill Styling
     bgPillPositive: isLight ? "bg-green-100 border-green-300" : "bg-green-500/10 border-green-500/30",
     bgPillNegative: isLight ? "bg-red-100 border-red-300" : "bg-red-500/10 border-red-500/30",
     textPositive: isLight ? "text-green-700" : "text-green-400",
     textNegative: isLight ? "text-red-700" : "text-red-400",
-    chartStroke: isLight ? "#9CA3AF" : "#9CA3AF",
+    
+    // Chart Styling
+    chartStroke: "#9CA3AF",
     chartGrid: isLight ? "#e5e7eb" : "#374151",
-    tooltipBg: isLight ? "bg-white border-gray-300" : "bg-gray-800 border-gray-700",
+    
+    // Tooltip Styling
+    tooltipBg: isLight ? "bg-white border border-gray-300" : "bg-gray-800 border border-gray-700",
     tooltipTextPrimary: isLight ? "text-gray-900" : "text-white",
     tooltipTextSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    
+    // Skeleton Colors
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
   }), [isLight]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Calculate current metrics from props
   const currentMetrics = useMemo(() => {
@@ -56,15 +67,17 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
     const profitLossPercentage = totalInvestment > 0 ? (profitLoss / totalInvestment) * 100 : 0;
 
     return { 
-      currentValue: portfolioValue, totalInvestment, profitLoss, profitLossPercentage,
+      currentValue: portfolioValue,
+      totalInvestment,
+      profitLoss,
+      profitLossPercentage,
       investedValue: totalInvestment
     };
   }, [groupedHoldings, balance]);
 
-  // Generate performance data (Simulated for now as we don't have historical DB data)
+  // Generate performance data (simulated)
   const performanceData = useMemo(() => {
     const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
-    
     if (totalInvestment === 0) return [];
 
     const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
@@ -137,18 +150,27 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
     };
   }, [performanceData, timeRange]);
 
-  if (loading) return (
-    <div className={`rounded-2xl p-6 border ${TC.bgContainer}`}>
-      <Skeleton height={300} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div
+        className={`rounded-2xl p-6 ${TC.bgContainer}`}
+      >
+        <Skeleton height={300} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+      </div>
+    );
+  }
 
-  if (currentMetrics.totalInvestment === 0) return <EmptyState isMounted={isMounted} isLight={isLight} TC={TC} />;
+  if (currentMetrics.totalInvestment === 0) {
+    return <EmptyState isLight={isLight} TC={TC} />;
+  }
 
   return (
-    <div className={`rounded-2xl p-6 border transition-all duration-300 ${TC.bgContainer} ${
-      isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-    }`}>
+    <div
+      className={`
+        rounded-2xl p-4 sm:p-6
+        ${TC.bgContainer}
+      `}
+    >
       <Header 
         isLight={isLight}
         timeRange={timeRange} 
@@ -162,23 +184,32 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
         timeRange={timeRange}
         TC={TC}
       />
-      <Chart isLight={isLight} performanceData={performanceData} currentMetrics={currentMetrics} TC={TC} />
+      <Chart
+        isLight={isLight}
+        performanceData={performanceData}
+        currentMetrics={currentMetrics}
+        TC={TC}
+      />
     </div>
   );
 };
 
-const EmptyState = ({ isMounted, isLight, TC }) => {
+const EmptyState = ({ isLight, TC }) => {
   return (
-    <div className={`rounded-2xl p-6 border shadow-sm fade-in ${TC.bgContainer} ${
-      isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-    }`}>
+    <div
+      className={`
+        rounded-2xl p-6 fade-in
+        ${TC.bgContainer}
+        transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:-translate-y-1 will-change-transform
+      `}
+    >
       <div className="flex items-center justify-between mb-4">
-        <h2 className={`text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2`}>
+        <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
           <FaChartLine className="text-cyan-500" />
           Portfolio Performance
         </h2>
       </div>
-      <div className={`flex flex-col items-center justify-center py-12 fade-in ${TC.textSecondary}`}>
+      <div className={`flex flex-col items-center justify-center py-12 ${TC.textSecondary}`}>
         <div className="text-4xl mb-3">📊</div>
         <p className={`text-center text-base ${TC.textPrimary}`}>No investment data available</p>
         <p className={`text-sm mt-2 text-center ${TC.textSecondary}`}>Start investing to track your performance</p>
@@ -189,18 +220,22 @@ const EmptyState = ({ isMounted, isLight, TC }) => {
 
 const Header = ({ isLight, timeRange, setTimeRange, TC }) => {
   return (
-    <div className="flex items-center justify-between mb-6 fade-in">
+    <div className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-3">
-        <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
           <FaChartLine className="text-cyan-500" />
           Performance
         </h2>
       </div>
-      <div className={`flex rounded-lg p-1 border fade-in ${TC.bgRangeContainer}`} style={{ animationDelay: "0.1s" }}>
+      <div className={`flex rounded-xl p-1 border shadow-sm ${TC.bgRangeContainer}`}>
         {['7d', '30d', '90d'].map((range) => (
-          <button key={range} onClick={() => setTimeRange(range)} className={`px-3 py-1 text-sm rounded-md transition-all ${
-            timeRange === range ? TC.bgRangeButtonActive : TC.bgRangeButtonDefault
-          }`}>
+          <button
+            key={range}
+            onClick={() => setTimeRange(range)}
+            className={`px-3 py-1 text-xs sm:text-sm rounded-lg transition-all ${
+              timeRange === range ? TC.bgRangeButtonActive : TC.bgRangeButtonDefault
+            }`}
+          >
             {range}
           </button>
         ))}
@@ -210,28 +245,28 @@ const Header = ({ isLight, timeRange, setTimeRange, TC }) => {
 };
 
 const StatsGrid = ({ isLight, currentMetrics, periodReturns, timeRange, TC }) => {
-  const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
+  const { totalInvestment, profitLoss } = currentMetrics;
   
   return (
-    <div className="grid grid-cols-3 gap-4 mb-6 fade-in" style={{ animationDelay: "0.15s" }}>
-      <div className={`border rounded-xl p-4 fade-in ${TC.bgStatCard}`} style={{ animationDelay: "0.2s" }}>
+    <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className={`border rounded-xl p-3 sm:p-4 ${TC.bgStatCard}`}>
         <p className={`text-xs mb-1 ${TC.textSecondary}`}>Invested</p>
-        <p className={`text-lg font-bold ${TC.textPrimary}`}>
+        <p className={`text-base sm:text-lg font-bold ${TC.textPrimary}`}>
           ${totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </p>
       </div>
 
-      <div className={`border rounded-xl p-4 fade-in ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`} style={{ animationDelay: "0.25s" }}>
+      <div className={`border rounded-xl p-3 sm:p-4 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
         <p className={`text-xs mb-1 ${TC.textSecondary}`}>Total P&L</p>
-        <div className={`flex items-center gap-1 font-bold ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
+        <div className={`flex items-center gap-1 font-bold text-base sm:text-lg ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
           {profitLoss >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
           <span>${Math.abs(profitLoss).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
         </div>
       </div>
 
-      <div className={`border rounded-xl p-4 fade-in ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`} style={{ animationDelay: "0.3s" }}>
+      <div className={`border rounded-xl p-3 sm:p-4 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
         <p className={`text-xs mb-1 ${TC.textSecondary}`}>{timeRange} Return</p>
-        <div className={`flex items-center gap-1 font-bold ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
+        <div className={`flex items-center gap-1 font-bold text-base sm:text-lg ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
           {periodReturns[timeRange] >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
           <span>{Math.abs(periodReturns[timeRange]).toFixed(2)}%</span>
         </div>
@@ -246,7 +281,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
 
   if (!performanceData || performanceData.length === 0) {
     return (
-      <div className="h-64 fade-in flex items-center justify-center text-gray-400" style={{ animationDelay: "0.35s" }}>
+      <div className="h-64 flex items-center justify-center text-gray-400">
         <p className="text-sm">No performance data available</p>
       </div>
     );
@@ -255,16 +290,16 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const isPositive = data.profitLoss >= 0;
+      const rowPositive = data.profitLoss >= 0;
       
       return (
-        <div className={`rounded-lg p-3 shadow-lg min-w-[150px] fade-in ${TC.tooltipBg}`}>
+        <div className={`rounded-lg p-3 shadow-lg min-w-[150px] ${TC.tooltipBg}`}>
           <p className={`font-semibold text-sm mb-1 ${TC.tooltipTextPrimary}`}>{data.day || data.date}</p>
           <div className={`text-sm font-bold ${TC.tooltipTextPrimary}`}>
             ${data.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div className={`text-xs mt-1 ${isPositive ? TC.textPositive : TC.textNegative}`}>
-            {isPositive ? '+' : ''}{data.profitLossPercentage.toFixed(2)}%
+          <div className={`text-xs mt-1 ${rowPositive ? TC.textPositive : TC.textNegative}`}>
+            {rowPositive ? '+' : ''}{data.profitLossPercentage.toFixed(2)}%
           </div>
         </div>
       );
@@ -273,7 +308,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
   };
 
   return (
-    <div className="h-64 fade-in w-full" style={{ animationDelay: "0.35s" }}>
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={performanceData}>
           <defs>
@@ -298,7 +333,10 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
             axisLine={false}
             tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: TC.chartStroke, strokeWidth: 1, strokeDasharray: '3 3' }} />
+          <Tooltip 
+            content={<CustomTooltip />} 
+            cursor={{ stroke: TC.chartGrid, strokeWidth: 1, strokeDasharray: '3 3' }} 
+          />
           <Area 
             type="monotone" 
             dataKey="value" 

@@ -30,14 +30,14 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400", // Used for time
 
-    bgCard: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
-    borderHeader: isLight ? "border-gray-300" : "border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    borderHeader: isLight ? "border-gray-300/50" : "border-gray-700/50",
 
     // Header/Title
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
     
     // Live Indicator
-    bgLive: isLight ? "bg-green-100 border-green-300 text-green-700" : "bg-green-400/10 border-green-400/20 text-green-400",
+    bgLive: isLight ? "bg-green-100 border-none text-green-700" : "bg-green-400/10 border-none text-green-400",
     textLiveDot: isLight ? "bg-green-700" : "bg-green-400",
 
     // Trade Colors
@@ -135,7 +135,7 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
           <h3 className={`text-base font-bold ${TC.headerGradient}`}>
             Trade History
           </h3>
-          <div className={`flex items-center gap-2 text-xs px-2 py-0.5 rounded-full border ${TC.bgLive}`}>
+          <div className={`flex items-center gap-2 text-xs px-2 py-0.5 rounded-full ${TC.bgLive}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${TC.textLiveDot}`}></div>
             <span className="font-semibold">Live</span>
           </div>

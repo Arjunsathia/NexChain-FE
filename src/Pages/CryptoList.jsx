@@ -4,7 +4,7 @@ import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
 import TrendingCoins from "@/Components/Crypto/TrendingCoins";
-import { formatNumberWithCommas } from "@/Helpers/helper";
+import { formatNumberWithCommas } from "@/utils/helper";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
@@ -62,8 +62,10 @@ function CryptoList() {
     
     // Backgrounds
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
-    bgCard: isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-800/40 backdrop-blur-md border-gray-700/50 shadow-xl",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md border-b border-gray-200" : "bg-gray-900/80 backdrop-blur-md border-b border-gray-800",
+    bgCard: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
     
     // Accents
     accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
@@ -124,7 +126,7 @@ function CryptoList() {
 
   return (
     // Applied transition to the main wrapper using isMounted state
-    <div className={`min-h-screen ${TC.textPrimary} transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
       
       {/* 1. Header Section */}
      <div 
@@ -169,13 +171,13 @@ function CryptoList() {
   </div>
 </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-8 space-y-8">
         
         {/* 2. Bento Grid Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
           
           {/* Global Market Card (Large) - Added 'fade-in' class */}
-          <div className={`lg:col-span-4 rounded-2xl p-6 border transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in`} style={{ transitionDelay: '0.1s' }}>
+          <div className={`lg:col-span-4 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in`} style={{ transitionDelay: '0.1s' }}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400"}`}>
@@ -226,7 +228,7 @@ function CryptoList() {
 
         {/* 3. Main Coin List Section - Added 'fade-in' class */}
         <div className="space-y-4 fade-in" style={{ transitionDelay: '0.4s' }}>
-          <div className={`rounded-2xl border overflow-hidden transition-all duration-300 p-6 ${TC.bgCard}`}>
+          <div className={`rounded-2xl overflow-hidden transition-all duration-300 p-6 ${TC.bgCard}`}>
              <CoinTable onTrade={handleTrade} />
           </div>
         </div>

@@ -36,7 +36,7 @@ function Watchlist() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    bgCard: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
     // Header
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
@@ -47,7 +47,7 @@ function Watchlist() {
     bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
 
     // Activity Item
-    bgItem: isLight ? "bg-gray-100/70 border-gray-300 hover:bg-gray-100 hover:border-blue-400/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
+    bgItem: isLight ? "bg-gray-100/70 border-none hover:bg-gray-100 shadow-sm" : "bg-gray-700/30 border-none hover:bg-gray-700/50 shadow-inner",
     textItemHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
     
@@ -60,10 +60,10 @@ function Watchlist() {
     textErrorIcon: isLight ? "text-yellow-700" : "text-yellow-500",
     
     // Action Button
-    btnAction: isLight ? "text-blue-600 hover:text-blue-500 bg-gray-100 hover:bg-gray-200 border-gray-300 hover:border-blue-400/30" : "text-cyan-400 hover:text-cyan-300 bg-gray-700/50 hover:bg-gray-600/50 border-gray-600 hover:border-cyan-400/30",
+    btnAction: isLight ? "text-blue-600 hover:text-blue-500 bg-gray-100 hover:bg-gray-200 border-none shadow-sm" : "text-cyan-400 hover:text-cyan-300 bg-gray-700/50 hover:bg-gray-600/50 border-none shadow-inner",
     
     // Footer
-    borderFooter: isLight ? "border-gray-300" : "border-gray-700",
+    borderFooter: isLight ? "border-gray-300/50" : "border-gray-700/50",
     textFooterLink: isLight ? "text-blue-600 hover:text-blue-500" : "text-cyan-400 hover:text-cyan-300",
 
   }), [isLight]);
@@ -144,7 +144,7 @@ function Watchlist() {
             </p>
             <button 
               onClick={handleRetry}
-              className={`text-sm transition-all duration-200 px-4 py-2 rounded-lg border ${TC.btnAction}`}
+              className={`text-sm transition-all duration-200 px-4 py-2 rounded-lg ${TC.btnAction}`}
             >
               Try Again
             </button>
@@ -157,7 +157,7 @@ function Watchlist() {
             <p className={`${TC.textSecondary} text-sm`}>Your watchlist is empty</p>
             <button 
               onClick={() => navigate("/cryptolist")}
-              className={`text-sm transition-all duration-200 px-4 py-2 rounded-lg border ${TC.btnAction}`}
+              className={`text-sm transition-all duration-200 px-4 py-2 rounded-lg ${TC.btnAction}`}
             >
               Add Coins
             </button>
@@ -167,7 +167,7 @@ function Watchlist() {
             {displayCoins.map((coin, index) => (
               <div
                 key={coin.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
+                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
                 style={{ animationDelay: `${0.4 + index * 0.1}s` }}
                 onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
               >
@@ -201,7 +201,7 @@ function Watchlist() {
 
       {/* Footer */}
       {!loading && !error && displayCoins.length > 0 && totalCoins > 4 && (
-        <div className={`flex items-center justify-between pt-3 mt-3 border-t ${TC.borderFooter} text-sm ${TC.textSecondary} fade-in`}>
+        <div className={`flex items-center justify-between pt-3 mt-3 ${TC.borderFooter} text-sm ${TC.textSecondary} fade-in`}>
           <span>Showing 4 of {totalCoins}</span>
           <button
             onClick={() => navigate("/watchlist")}

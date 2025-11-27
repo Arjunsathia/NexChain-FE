@@ -29,7 +29,7 @@ function RecentActivity() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    bgCard: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
     // Header
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
@@ -40,12 +40,12 @@ function RecentActivity() {
     bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
 
     // Activity Item
-    bgItem: isLight ? "bg-gray-100/70 border-gray-300 hover:bg-gray-100 hover:border-blue-400/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
+    bgItem: isLight ? "bg-gray-100/70 border-none hover:bg-gray-100 shadow-sm" : "bg-gray-700/30 border-none hover:bg-gray-700/50 shadow-inner",
     textItemHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     
     // Status (Buy/Sell)
-    bgBuy: isLight ? "bg-green-100 text-green-700 border-green-300" : "bg-green-500/20 text-green-400 border-green-500/30",
-    bgSell: isLight ? "bg-red-100 text-red-700 border-red-300" : "bg-red-500/20 text-red-400 border-red-500/30",
+    bgBuy: isLight ? "bg-green-100 text-green-700 border-none" : "bg-green-500/20 text-green-400 border-none",
+    bgSell: isLight ? "bg-red-100 text-red-700 border-none" : "bg-red-500/20 text-red-400 border-none",
     
     textBuyValue: isLight ? "text-green-700" : "text-green-400",
     textSellValue: isLight ? "text-red-700" : "text-red-400",
@@ -171,7 +171,7 @@ function RecentActivity() {
             return (
               <div 
                 key={activity.id || idx} 
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 group cursor-pointer fade-in ${TC.bgItem}`}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer fade-in ${TC.bgItem}`}
                 style={{ animationDelay: `${0.3 + idx * 0.1}s` }}
               >
                 <div className="relative flex-shrink-0">
@@ -211,7 +211,7 @@ function RecentActivity() {
                     </div>
                   </div>
                   <div className="flex justify-between items-center mt-2">
-                    <span className={`text-xs px-2 py-1 rounded-full border ${statusClasses}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full ${statusClasses}`}>
                       {isBuy ? 'Bought' : 'Sold'}
                     </span>
                     <p className={`text-xs truncate ${TC.textTertiary}`}>

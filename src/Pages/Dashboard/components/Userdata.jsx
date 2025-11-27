@@ -1,5 +1,16 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { FaUser, FaChartLine, FaHistory, FaWallet, FaCoins, FaExchangeAlt, FaArrowRight, FaArrowUp, FaArrowDown, FaMoneyBillWave } from 'react-icons/fa';
+import {
+  FaUser,
+  FaChartLine,
+  FaHistory,
+  FaWallet,
+  FaCoins,
+  FaExchangeAlt,
+  FaArrowRight,
+  FaArrowUp,
+  FaArrowDown,
+  FaMoneyBillWave
+} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import useUserContext from '@/Context/UserContext/useUserContext';
 import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
@@ -8,19 +19,19 @@ import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains('dark'));
+    });
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-        return () => observer.disconnect();
-    }, []);
+    return () => observer.disconnect();
+  }, []);
 
-    return isLight;
+  return isLight;
 };
 
 function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades = true }) {
@@ -35,29 +46,55 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
   const ws = useRef(null);
   const livePricesRef = useRef({});
 
-  // 💡 Theme Classes Helper (UPDATED to include dedicated footer button classes)
+  // Fade-in mount effect
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 💡 Theme Classes Helper – aligned with other dashboard cards
   const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl",
+    // Main container (NO border, stronger white shadow)
+    bgContainer: isLight
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    bgItem: isLight ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
+
+    bgItem: isLight
+      ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30"
+      : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
+
     borderItem: isLight ? "border-gray-300" : "border-gray-700/50",
     bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-400/10",
     textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
+
     textWallet: isLight ? "text-green-700" : "text-green-400",
     bgWallet: isLight ? "bg-green-100" : "bg-green-400/10",
-    bgTradeIcon: (isBuy) => isBuy ? (isLight ? "bg-green-100/70 text-green-600" : "bg-green-500/20 text-green-400") : (isLight ? "bg-red-100/70 text-red-600" : "bg-red-500/20 text-red-400"),
+
+    bgTradeIcon: (isBuy) =>
+      isBuy
+        ? isLight
+          ? "bg-green-100/70 text-green-600"
+          : "bg-green-500/20 text-green-400"
+        : isLight
+        ? "bg-red-100/70 text-red-600"
+        : "bg-red-500/20 text-red-400",
+
     textPriceAccent: isLight ? "text-yellow-600/70" : "text-yellow-400/70",
     textDateAccent: isLight ? "text-cyan-600/70" : "text-cyan-400/70",
     textPLPositive: isLight ? "text-green-700" : "text-green-400",
     textPLNegative: isLight ? "text-red-700" : "text-red-400",
     bgPLPositive: isLight ? "bg-green-100/50" : "bg-green-500/20",
     bgPLNegative: isLight ? "bg-red-100/50" : "bg-red-500/20",
+
     bgLoading: isLight ? "bg-gray-200" : "bg-gray-700",
     bgEmpty: isLight ? "bg-gray-100/70 border-gray-300" : "bg-gray-700/30 border-gray-600",
     textEmpty: isLight ? "text-gray-500" : "text-gray-400",
 
-    // NEW: Dedicated button classes for proper hover effect (using cyan accent)
+    // Footer buttons
     bgFooterButton: isLight 
       ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500" 
       : "bg-gray-700/50 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400",
@@ -70,14 +107,18 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
   // Update ref when livePrices changes
   useEffect(() => { livePricesRef.current = livePrices; }, [livePrices]);
 
-  // WebSocket setup for live price updates (omitted body for brevity, assumes logic remains)
+  // WebSocket setup for live price updates
   useEffect(() => {
     if (groupedHoldings.length === 0) return;
 
     const symbols = groupedHoldings
       .map(coin => {
         const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", "stellar": "xlmusdt", "cosmos": "atomusdt", "monero": "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", "filecoin": "filusdt", "theta": "thetausdt", "vechain": "vetusdt", "tron": "trxusdt"
+          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
+          cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
+          "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", stellar: "xlmusdt",
+          cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt",
+          filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt", tron: "trxusdt"
         };
         return symbolMap[coin.coinId] ? `${symbolMap[coin.coinId]}@ticker` : null;
       })
@@ -90,7 +131,9 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
     try {
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
 
-      ws.current.onopen = () => { console.log('WebSocket connected for user data live prices'); };
+      ws.current.onopen = () => {
+        console.log('WebSocket connected for user data live prices');
+      };
 
       ws.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
@@ -99,7 +142,11 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
           const coinData = message.data;
           
           const symbolToCoinId = {
-            "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vetusdt": "vechain", "trxusdt": "tron"
+            btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple",
+            adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot",
+            maticusdt: "matic-network", ltcusdt: "litecoin", linkusdt: "chainlink",
+            xlmusdt: "stellar", atomusdt: "cosmos", xmusdt: "monero", etcusdt: "ethereum-classic",
+            bchusdt: "bitcoin-cash", filusdt: "filecoin", thetausdt: "theta", vetusdt: "vechain", trxusdt: "tron"
           };
 
           const coinId = symbolToCoinId[symbol];
@@ -107,20 +154,30 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
             setLivePrices(prev => ({
               ...prev,
               [coinId]: {
-                current_price: parseFloat(coinData.c), price_change_percentage_24h: parseFloat(coinData.P), price_change_24h: parseFloat(coinData.p),
+                current_price: parseFloat(coinData.c),
+                price_change_percentage_24h: parseFloat(coinData.P),
+                price_change_24h: parseFloat(coinData.p),
               }
             }));
           }
         }
       };
 
-      ws.current.onerror = (error) => { console.error('User data WebSocket error:', error); };
-      ws.current.onclose = () => { console.log('User data WebSocket disconnected'); };
+      ws.current.onerror = (error) => {
+        console.error('User data WebSocket error:', error);
+      };
+      ws.current.onclose = () => {
+        console.log('User data WebSocket disconnected');
+      };
 
-    } catch (error) { console.error('User data WebSocket setup failed:', error); }
+    } catch (error) {
+      console.error('User data WebSocket setup failed:', error);
+    }
 
     return () => {
-      if (ws.current) { ws.current.close(); }
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, [groupedHoldings]);
 
@@ -133,17 +190,27 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
         const currentValue = (coin.totalQuantity || 0) * currentPrice;
         const remainingInvestment = coin.remainingInvestment || 0;
         const profitLoss = currentValue - remainingInvestment;
-        const profitLossPercentage = remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
+        const profitLossPercentage =
+          remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
 
         return {
-          ...coin, currentPrice: currentPrice, priceChange24h: livePriceData.price_change_percentage_24h,
-          totalCurrentValue: currentValue, profitLoss: profitLoss, profitLossPercentage: profitLossPercentage, hasLiveData: true
+          ...coin,
+          currentPrice,
+          priceChange24h: livePriceData.price_change_percentage_24h,
+          totalCurrentValue: currentValue,
+          profitLoss,
+          profitLossPercentage,
+          hasLiveData: true,
         };
       }
       
       return {
-        ...coin, currentPrice: coin.currentPrice || coin.current_price, totalCurrentValue: coin.totalCurrentValue || 0,
-        profitLoss: coin.profitLoss || 0, profitLossPercentage: coin.profitLossPercentage || 0, hasLiveData: false
+        ...coin,
+        currentPrice: coin.currentPrice || coin.current_price,
+        totalCurrentValue: coin.totalCurrentValue || 0,
+        profitLoss: coin.profitLoss || 0,
+        profitLossPercentage: coin.profitLossPercentage || 0,
+        hasLiveData: false,
       };
     });
 
@@ -153,40 +220,57 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
         ...coin,
         currentValue: coin.totalCurrentValue || 0,
         profitLoss: coin.profitLoss || 0,
-        profitLossPercentage: coin.profitLossPercentage || 0
+        profitLossPercentage: coin.profitLossPercentage || 0,
       }));
   }, [groupedHoldings, livePrices]);
 
-  // Get recent transactions (last 4)
+  // Recent transactions (last 4)
   const recentTransactions = useMemo(() => {
     if (!transactionHistory) return [];
     return transactionHistory
-      .sort((a, b) => new Date(b.transactionDate || b.purchase_date) - new Date(a.transactionDate || a.purchase_date))
+      .sort(
+        (a, b) =>
+          new Date(b.transactionDate || b.purchase_date) -
+          new Date(a.transactionDate || a.purchase_date)
+      )
       .slice(0, 4);
   }, [transactionHistory]);
 
-  // Calculate portfolio summary with live data
+  // Portfolio summary with live data
   const livePortfolioSummary = useMemo(() => {
-    const totalCurrentValue = allCoins.reduce((sum, coin) => sum + (coin.totalCurrentValue || 0), 0);
-    const totalInvestment = allCoins.reduce((sum, coin) => sum + (coin.remainingInvestment || 0), 0);
+    const totalCurrentValue = allCoins.reduce(
+      (sum, coin) => sum + (coin.totalCurrentValue || 0),
+      0
+    );
+    const totalInvestment = allCoins.reduce(
+      (sum, coin) => sum + (coin.remainingInvestment || 0),
+      0
+    );
     const totalProfitLoss = totalCurrentValue - totalInvestment;
-    const totalProfitLossPercentage = totalInvestment > 0 ? (totalProfitLoss / totalInvestment) * 100 : 0;
+    const totalProfitLossPercentage =
+      totalInvestment > 0 ? (totalProfitLoss / totalInvestment) * 100 : 0;
 
     return {
-      totalCurrentValue, remainingInvestment: totalInvestment, totalProfitLoss,
-      totalProfitLossPercentage, hasLiveData: Object.keys(livePrices).length > 0
+      totalCurrentValue,
+      remainingInvestment: totalInvestment,
+      totalProfitLoss,
+      totalProfitLossPercentage,
+      hasLiveData: Object.keys(livePrices).length > 0,
     };
   }, [allCoins, livePrices]);
 
   const handleViewAllPortfolio = () => { navigate('/portfolio'); };
-  const handleViewAllTrades = () => { navigate('/trade-history'); };
+  const handleViewAllTrades = () => { navigate('/portfolio'); };
   const handleCoinClick = (coinId) => { navigate(`/coin/coin-details/${coinId}`); };
 
   const formatDateTime = (dateString) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
       });
     } catch {
       return 'Recent';
@@ -194,8 +278,14 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
   };
 
   return (
-    <div className={`rounded-xl p-4 h-full flex flex-col gap-4 fade-in border ${TC.bgContainer}`}>
-      
+    <div
+      className={`
+        rounded-xl p-4 h-full flex flex-col gap-4 fade-in
+        ${TC.bgContainer}
+        ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
+      `}
+      style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}
+    >
       {/* Compact Profile Section */}
       {showProfile && (
         <div className="fade-in">
@@ -273,7 +363,7 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
                   <div 
                     key={coin.coinId || coin.id} 
                     className={`flex items-center justify-between p-2 rounded-lg border hover:border-cyan-600/30 transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
-                    onClick={() => handleCoinClick(coin.coinId)}
+                    onClick={() => navigate('/portfolio')}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {coin.image ? (
@@ -283,7 +373,7 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
                           className={`w-8 h-8 rounded-lg border ${TC.borderItem} group-hover:scale-110 transition-transform duration-200`}
                         />
                       ) : (
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-xs flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-xs flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-200">
                           {coin.coinSymbol?.charAt(0)?.toUpperCase() || 'C'}
                         </div>
                       )}
@@ -321,14 +411,6 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
               {/* Portfolio Summary */}
               <div className={`pt-3 mt-2 border-t ${TC.borderItem} space-y-2 fade-in`}>
                 <div className={`flex justify-between items-center text-xs ${TC.textSecondary}`}>
-                  <span>Invested:</span>
-                  <span className={TC.textPrimary + " font-semibold"}>${livePortfolioSummary.remainingInvestment?.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                </div>
-                <div className={`flex justify-between items-center text-xs ${TC.textSecondary}`}>
-                  <span>Current:</span>
-                  <span className={TC.textPrimary + " font-semibold"}>${livePortfolioSummary.totalCurrentValue?.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                </div>
-                <div className={`flex justify-between items-center text-xs ${TC.textSecondary}`}>
                   <span>P&L:</span>
                   <div className="flex items-center gap-1">
                     <span className={`font-bold ${
@@ -348,7 +430,7 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
             </div>
           )}
 
-          {/* View All Portfolio Button (APPLYING NEW HOVER CLASSES) */}
+          {/* View All Portfolio Button */}
           <button 
             onClick={handleViewAllPortfolio}
             className={`
@@ -409,7 +491,7 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
                     <div 
                       key={transaction._id || `tx-${index}`}
                       className={`flex items-center gap-2 p-2 rounded-lg border hover:border-cyan-600/30 transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
-                      onClick={() => handleCoinClick(transaction.coinId || transaction.coin_id)}
+                      onClick={() => navigate('/portfolio')}
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         isBuy ? TC.bgTradeIcon(true) : TC.bgTradeIcon(false)
@@ -464,7 +546,7 @@ function Userdata({ showProfile = true, showPortfolio = true, showRecentTrades =
             </div>
           )}
 
-          {/* View All Trades Button (APPLYING NEW HOVER CLASSES) */}
+          {/* View All Trades Button */}
           <button 
             onClick={handleViewAllTrades}
             className={`

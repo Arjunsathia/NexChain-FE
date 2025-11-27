@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
 import MainLayout from "@/Components/layout/MainLayout";
-import Dashboard from "../Dashboard/Dashboard";
+import Dashboard from "../Pages/Dashboard/Dashboard";
 import CryptoList from "../Pages/CryptoList";
 import PortfolioPage from "@/Pages/PortfolioPage";
 import Watchlist from "@/Pages/Watchlist";
@@ -21,6 +21,9 @@ import CoinPageOutlet from "@/Pages/CoinDetails/CoinPageOutlet";
 import AdminFeedback from "@/Pages/Admin/Pages/AdminFeedback";
 import MarketInsights from "@/Pages/Admin/Pages/MarketInsights";
 import AdminSettings from "@/Pages/Admin/Pages/AdminSettings";
+import UserSettings from "@/Pages/UserProfile/Pages/Settings";
+
+import PublicLayout from "@/Components/layout/PublicLayout";
 
 export default function AppRoutes() {
   return (
@@ -28,13 +31,18 @@ export default function AppRoutes() {
       {/* Public Landing Page */}
       <Route element={<PublicRoute />}>
         <Route path="/" index element={<Landing />} />
-        <Route path="/public-learning" element={<LearningHub />} />
+        <Route element={<PublicLayout />}>
+          <Route path="/public-learning" element={<LearningHub />} />
+        </Route>
       </Route>
 
       {/* Auth/Public Routes */}
       <Route element={<AuthRoute />}>
         <Route path="/auth" element={<AuthPages />} />
       </Route>
+
+
+
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
@@ -49,6 +57,7 @@ export default function AppRoutes() {
             <Route path="purchase-details" element={<PurchaseDetails />} />
           </Route>
           <Route path="/user-profile/:userId" element={<UserDashboard />} />
+          <Route path="/user/settings" element={<UserSettings />} />
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />

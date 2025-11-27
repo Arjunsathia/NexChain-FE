@@ -29,12 +29,12 @@ function Highlights() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white border-gray-300 shadow-lg" : "bg-gray-800/50 backdrop-blur-sm border-gray-700",
+    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgIcon: isLight ? "bg-green-100" : "bg-green-500/10",
     iconColor: isLight ? "text-green-700" : "text-green-400",
     headerGradient: "bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent",
 
-    bgItem: isLight ? "bg-gray-100/70 border-gray-300 hover:bg-gray-100 hover:border-green-500/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-green-400/30",
+    bgItem: isLight ? "bg-gray-100/70 border-none hover:bg-gray-100 shadow-sm" : "bg-gray-700/30 border-none hover:bg-gray-700/50 shadow-inner",
     textItemHover: isLight ? "group-hover:text-green-700" : "group-hover:text-green-300",
     textValue: isLight ? "text-green-700" : "text-green-400",
     
@@ -72,7 +72,7 @@ function Highlights() {
         {topGainers.map((coin, index) => (
           <div
             key={coin?.id ?? coin?.symbol ?? index}
-            className={`flex items-center justify-between p-3 rounded-lg border ${TC.bgItem} transition-all duration-200 group cursor-pointer fade-in`}
+            className={`flex items-center justify-between p-3 rounded-lg ${TC.bgItem} transition-all duration-200 group cursor-pointer fade-in`}
             style={{ animationDelay: `${0.3 + index * 0.1}s` }}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">

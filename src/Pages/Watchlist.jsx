@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { FaBell, FaSearch, FaExchangeAlt } from "react-icons/fa";
+import { FaBell, FaSearch, FaExchangeAlt, FaStar, FaChartLine, FaFire, FaTrophy } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { deleteWatchList, getData } from "@/api/axiosConfig";
 import useUserContext from "@/Context/UserContext/useUserContext";
@@ -8,78 +8,27 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import TradeModal from "./UserProfile/Components/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-// Utility to check if light mode is active based on global class
+// Utility to check if light mode is active
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
+  return isLight;
 };
 
-// Remove Confirmation Modal Component (Dual Mode)
-function RemoveConfirmationModal({ show, onClose, onConfirm, coin }) {
-  const isLight = useThemeCheck();
-  if (!show) return null;
-
-  const bgClasses = isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800 border-gray-700 shadow-2xl";
-  const textClasses = isLight ? "text-gray-900" : "text-white";
-  const subTextClasses = isLight ? "text-gray-600" : "text-gray-300";
-  const cancelClasses = isLight ? "bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-300" : "bg-gray-700 hover:bg-gray-600 text-white border border-gray-600";
-
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
-      <div className={`rounded-xl p-6 max-w-md w-full mx-auto fade-in ${bgClasses}`}>
-        <div className="text-center">
-          {/* Warning Icon */}
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-100" : "bg-red-500/20"}`}>
-            <MdDeleteForever className={`text-2xl ${isLight ? "text-red-600" : "text-red-400"}`} />
-          </div>
-          
-          {/* Title */}
-          <h3 className={`text-lg font-bold mb-2 ${textClasses}`}>
-            Remove from Watchlist
-          </h3>
-          
-          {/* Message */}
-          <p className={`text-sm mb-6 ${subTextClasses}`}>
-            Are you sure you want to remove <span className={`font-semibold ${textClasses}`}>{coin?.name}</span> from your watchlist?
-          </p>
-          
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${cancelClasses}`}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
-            >
-              <MdDeleteForever className="text-base" />
-              Remove
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Sparkline (same as before)
-function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
-  if (!data || data.length === 0) return <div className="w-24 h-6" />;
+// Sparkline Component
+function Sparkline({ data = [], width = 100, height = 40, positive = true }) {
+  if (!data || data.length === 0) return <div className="w-24 h-10" />;
 
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -97,15 +46,76 @@ function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
   const color = positive ? "#10B981" : "#EF4444";
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="drop-shadow-sm">
+      <defs>
+        <linearGradient id={`gradient-${positive ? 'up' : 'down'}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polyline
+        fill={`url(#gradient-${positive ? 'up' : 'down'})`}
+        stroke={color}
+        strokeWidth="2"
+        points={`0,${height} ${points} ${width},${height}`}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <polyline
         fill="none"
         stroke={color}
         strokeWidth="2"
         points={points}
-        strokeOpacity="0.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+// Remove Confirmation Modal
+function RemoveConfirmationModal({ show, onClose, onConfirm, coin }) {
+  const isLight = useThemeCheck();
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
+      <div className={`rounded-2xl p-6 max-w-md w-full mx-auto fade-in shadow-2xl border ${
+        isLight ? "bg-white border-gray-200" : "bg-gray-800/90 backdrop-blur-md border-gray-700"
+      }`}>
+        <div className="text-center">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+            isLight ? "bg-red-100" : "bg-red-500/20"
+          }`}>
+            <MdDeleteForever className={`text-3xl ${isLight ? "text-red-600" : "text-red-400"}`} />
+          </div>
+          
+          <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
+            Remove from Watchlist?
+          </h3>
+          
+          <p className={`text-sm mb-6 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
+            Are you sure you want to remove <span className={`font-semibold ${isLight ? "text-gray-900" : "text-white"}`}>{coin?.name}</span> from your watchlist?
+          </p>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 border ${
+                isLight ? "bg-gray-100 text-gray-900 border-gray-200 hover:bg-gray-200" : "bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+              }`}>
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
+              <MdDeleteForever className="text-lg" />
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -114,11 +124,9 @@ const Watchlist = () => {
   const { user } = useUserContext();
   const { coins: liveCoins } = useCoinContext();
   const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
+  const navigate = useNavigate();
 
-  // ... (rest of the state and hooks remain the same)
-  const userFromLocalStorage = JSON.parse(
-    localStorage.getItem("NEXCHAIN_USER")
-  );
+  const userFromLocalStorage = JSON.parse(localStorage.getItem("NEXCHAIN_USER"));
   const userId = user?.id || userFromLocalStorage?.id;
 
   const [watchlistData, setWatchlistData] = useState([]);
@@ -126,24 +134,35 @@ const Watchlist = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [tradeModal, setTradeModal] = useState({
-    show: false,
-    coin: null,
-    type: "buy",
-  });
-  const [removeModal, setRemoveModal] = useState({
-    show: false,
-    coin: null,
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [tradeModal, setTradeModal] = useState({ show: false, coin: null, type: "buy" });
+  const [removeModal, setRemoveModal] = useState({ show: false, coin: null });
 
-  // WebSocket ref for live updates
   const ws = useRef(null);
   const livePricesRef = useRef({});
-
   const itemsPerPage = 10;
-  const navigate = useNavigate();
 
-  // ... (useEffects and useMemos remain the same: livePricesRef, mergedCoins, WebSocket logic, filteredCoins, pagination logic)
+  // Theme Classes
+  const TC = useMemo(() => ({
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+    bgCard: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgStatsCard: isLight
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
+    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+  }), [isLight]);
+
+  // Mount animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     livePricesRef.current = livePrices;
   }, [livePrices]);
@@ -154,16 +173,19 @@ const Watchlist = () => {
         const liveCoin = liveCoins.find((coin) => coin.id === item.id);
         const livePriceData = livePrices[item.id];
         
+        // Match user holdings - purchasedCoins uses 'coinId' field
+        const userHolding = purchasedCoins.find(
+          (pc) => pc.coinId === item.id
+        );
+
         const combinedCoin = {
           ...item,
           ...(liveCoin || {}),
           ...(livePriceData || {}),
-          userHolding: purchasedCoins.find(
-            (pc) => pc.coin_id === item.id || pc.id === item.id
-          ) || null,
+          userHolding: userHolding || null,
         };
 
-        if (livePriceData && livePriceData.current_price) {
+        if (livePriceData?.current_price) {
           combinedCoin.current_price = livePriceData.current_price;
           combinedCoin.price_change_percentage_24h = livePriceData.price_change_percentage_24h;
         }
@@ -173,55 +195,48 @@ const Watchlist = () => {
       .filter(Boolean);
   }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
 
+  // WebSocket for live prices
   useEffect(() => {
     if (watchlistData.length === 0) return;
 
+    const symbolMap = {
+      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", 
+      cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
+      "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt"
+    };
+
     const symbols = watchlistData
-      .map(coin => {
-        const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", "stellar": "xlmusdt", "cosmos": "atomusdt", "monero": "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", "filecoin": "filusdt", "theta": "thetausdt", "vechain": "vetusdt", "tron": "trxusdt"
-        };
-        return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
-      })
+      .map(coin => symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null)
       .filter(Boolean);
 
     if (symbols.length === 0) return;
-    const streams = symbols.join('/');
 
     try {
-      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
-      ws.current.onopen = () => { console.log('WebSocket connected for watchlist live prices'); };
+      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${symbols.join('/')}`);
+      
       ws.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
           const symbol = message.stream.replace('@ticker', '');
-          const coinData = message.data;
+          const coinId = Object.keys(symbolMap).find(key => symbolMap[key] === symbol);
           
-          const symbolToCoinId = { "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vetusdt": "vechain", "trxusdt": "tron" };
-
-          const coinId = symbolToCoinId[symbol.toLowerCase()]; // Ensure symbol is lowercase for map lookup
           if (coinId) {
             setLivePrices(prev => ({
               ...prev,
               [coinId]: {
-                current_price: parseFloat(coinData.c),
-                price_change_percentage_24h: parseFloat(coinData.P),
-                price_change_24h: parseFloat(coinData.p),
-                total_volume: parseFloat(coinData.v) * parseFloat(coinData.c),
-                market_cap: parseFloat(coinData.c) * (prev[coinId]?.market_cap / prev[coinId]?.current_price || 1000000000)
+                current_price: parseFloat(message.data.c),
+                price_change_percentage_24h: parseFloat(message.data.P),
               }
             }));
           }
         }
       };
-      ws.current.onerror = (error) => { console.error('Watchlist WebSocket error:', error); };
-      ws.current.onclose = () => { console.log('Watchlist WebSocket disconnected'); };
     } catch (error) {
-      console.error('Watchlist WebSocket setup failed:', error);
+      console.error('WebSocket setup failed:', error);
     }
 
     return () => {
-      if (ws.current) { ws.current.close(); }
+      if (ws.current) ws.current.close();
     };
   }, [watchlistData]);
 
@@ -241,7 +256,7 @@ const Watchlist = () => {
       currentPage * itemsPerPage
     );
     return { paginatedCoins, totalPages };
-  }, [filteredCoins, currentPage, itemsPerPage]);
+  }, [filteredCoins, currentPage]);
 
   const fetchData = useCallback(async () => {
     if (!userId) return;
@@ -262,41 +277,21 @@ const Watchlist = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleBellClick = useCallback((coin) => {
-    toast.info(`Price alert set for ${coin.name}`);
-  }, []);
-
-  const showRemoveConfirmation = useCallback((coin) => {
-    setRemoveModal({ show: true, coin: coin });
-  }, []);
-
   const handleRemoveConfirm = useCallback(async () => {
     if (!removeModal.coin || !userId) return;
     setLoading(true);
     try {
       await deleteWatchList("/watchlist/remove", { id: removeModal.coin?.id, user_id: userId });
-      toast.success("Coin removed from watchlist!", {
-        icon: "✅",
-        style: {
-          background: isLight ? "#FFFFFF" : "#111827",
-          color: isLight ? "#16A34A" : "#22c55e",
-          fontWeight: "600", fontSize: "14px", padding: "12px 16px", borderRadius: "8px",
-          boxShadow: isLight ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "0 4px 6px -1px rgba(0, 0, 0, 0.4)",
-        },
-      });
+      toast.success("Removed from watchlist!");
       fetchData();
     } catch (err) {
       console.error("Failed to remove from watchlist:", err);
-      toast.error("Failed to remove coin. Please try again.");
+      toast.error("Failed to remove coin");
     } finally {
       setLoading(false);
       setRemoveModal({ show: false, coin: null });
     }
-  }, [removeModal.coin, userId, fetchData, isLight]);
-
-  const handleRemoveCancel = useCallback(() => {
-    setRemoveModal({ show: false, coin: null });
-  }, []);
+  }, [removeModal.coin, userId, fetchData]);
 
   const handleTrade = useCallback((coin) => {
     setTradeModal({ show: true, coin, type: "buy" });
@@ -318,450 +313,366 @@ const Watchlist = () => {
     [navigate]
   );
 
-  const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  const handlePageClick = (page) => setCurrentPage(page);
+  // Stats calculation
+  const stats = useMemo(() => {
+    const totalValue = mergedCoins.reduce((sum, coin) => {
+      const holding = coin.userHolding;
+      if (holding) {
+        const qty = holding.totalQuantity || holding.quantity || 0;
+        return sum + (qty * (coin.current_price || 0));
+      }
+      return sum;
+    }, 0);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
+    const gainers = mergedCoins.filter(c => (c.price_change_percentage_24h || 0) > 0).length;
+    const losers = mergedCoins.filter(c => (c.price_change_percentage_24h || 0) < 0).length;
 
-  const clearSearch = () => {
-    setSearchTerm("");
-    setCurrentPage(1);
-  };
-
-  const formatCurrency = useCallback((value) => {
-    if (!value) return "$0";
-    return "$" + (
-      value >= 1e12 ? (value / 1e12).toFixed(1) + "T" :
-      value >= 1e9 ? (value / 1e9).toFixed(1) + "B" :
-      value >= 1e6 ? (value / 1e6).toFixed(1) + "M" :
-      value.toLocaleString("en-IN")
-    );
-  }, []);
-
-  const renderPaginationButtons = useMemo(() => {
-    const maxButtons = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-
-    if (endPage - startPage < maxButtons - 1) {
-      startPage = Math.max(1, endPage - maxButtons + 1);
-    }
-
-    const baseClass = isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300" : "bg-gray-700 text-gray-300 hover:bg-gray-600";
-    const activeClass = isLight ? "bg-cyan-600 text-white shadow-md" : "bg-cyan-600 text-white shadow-lg";
-
-    return [...Array(endPage - startPage + 1)].map((_, index) => {
-      const page = startPage + index;
-      return (
-        <button
-          key={page}
-          onClick={() => handlePageClick(page)}
-          className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 fade-in ${
-            currentPage === page ? activeClass : baseClass
-          }`}
-          style={{ animationDelay: `${0.8 + index * 0.05}s` }}
-        >
-          {page}
-        </button>
-      );
-    });
-  }, [totalPages, currentPage, isLight]);
-
-  // Dynamic Class Definitions based on theme
-  const containerClasses = isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-2xl";
-  const textClasses = isLight ? "text-gray-900" : "text-white";
-  const subTextClasses = isLight ? "text-gray-500" : "text-gray-400";
-  const hoverClasses = isLight ? "hover:bg-gray-100 cursor-pointer" : "hover:bg-gray-700/30 cursor-pointer";
-  const tableHeaderClasses = isLight ? "border-b border-gray-300 bg-gray-100 text-gray-600" : "border-b border-gray-700 bg-gray-900/50 text-gray-400";
-  const tableBodyDivide = isLight ? "divide-gray-200" : "divide-gray-700";
-  const searchBgClasses = isLight ? "bg-white border-gray-300 text-gray-800 placeholder-gray-500" : "bg-gray-800 border-gray-700 text-white placeholder-gray-400";
-  const livePriceClasses = isLight ? "text-green-600" : "text-green-400";
-  const loadingClasses = isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 border-gray-700 text-cyan-400";
-  
-  const iconButtonClasses = (hover) => isLight 
-    ? `bg-gray-200 flex items-center justify-center ${hover ? "hover:bg-yellow-500/20 hover:text-yellow-600" : ""}` 
-    : `bg-gray-700 flex items-center justify-center ${hover ? "hover:bg-yellow-500/20 hover:text-yellow-400" : ""}`;
+    return { total: mergedCoins.length, totalValue, gainers, losers };
+  }, [mergedCoins]);
 
   return (
     <>
-      <main className={`min-h-screen ${isLight ? "text-gray-800" : "text-white"} p-3 sm:p-4 lg:p-6`}>
-        <div className="max-w-7xl mx-auto space-y-4">
-          <Outlet />
+      <main className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+        <Outlet />
 
-          {/* Header Section */}
-          <div className="fade-in" style={{ animationDelay: "0.1s" }}>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-              <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  Watchlist
-                </h1>
-                <p className={`text-sm mt-1 ${subTextClasses}`}>
-                  Track your favorite cryptocurrencies
-                </p>
+        {/* Header */}
+        <div className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-2xl shadow-lg mb-6 ${TC.bgHeader} transition-colors duration-300`}>
+          <div className="px-4 lg:px-6 py-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl ${isLight ? "bg-yellow-50 text-yellow-600" : "bg-yellow-500/10 text-yellow-400"}`}>
+                  <FaStar className="text-xl" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold leading-none">My Watchlist</h1>
+                  <p className={`text-xs mt-1 ${TC.textSecondary}`}>
+                    Track your favorite cryptocurrencies
+                  </p>
+                </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative w-full sm:w-64 fade-in" style={{ animationDelay: "0.3s" }}>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search coins by name or symbol..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className={`w-full ${searchBgClasses} rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all duration-200 border`}
-                  />
-                  <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${subTextClasses} text-sm`} />
-                  {searchTerm && (
-                    <button
-                      onClick={clearSearch}
-                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${subTextClasses} hover:${isLight ? "text-gray-900" : "text-white"} text-lg transition-colors`}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
+              {/* Search */}
+              <div className="relative w-full md:w-64">
+                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textSecondary} text-sm`} />
+                <input
+                  type="text"
+                  placeholder="Search coins..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none transition-all duration-200 text-sm ${
+                    isLight ? "bg-gray-100 border-gray-200 text-gray-900 focus:border-cyan-500" : "bg-gray-800 border-gray-700 text-white focus:border-cyan-400"
+                  }`}
+                />
               </div>
             </div>
-            {searchTerm && (
-              <div className={`text-sm mb-4 fade-in ${subTextClasses}`} style={{ animationDelay: "0.4s" }}>
-                Found {filteredCoins.length} coin
-                {filteredCoins.length !== 1 ? "s" : ""} matching "{searchTerm}"
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in" style={{ animationDelay: "0.1s" }}>
+            {[
+              { label: "Total Coins", value: stats.total, icon: FaStar, color: "yellow" },
+              { label: "Portfolio Value", value: `$${stats.totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, icon: FaChartLine, color: "cyan" },
+              { label: "Gainers", value: stats.gainers, icon: FaTrophy, color: "green" },
+              { label: "Losers", value: stats.losers, icon: FaFire, color: "red" },
+            ].map((stat, i) => (
+              <div key={i} className={`
+                rounded-2xl p-5 sm:p-6 transition-all duration-300 ease-in-out 
+                transform hover:scale-[1.02] hover:-translate-y-1 will-change-transform
+                ${TC.bgStatsCard}
+              `}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg ${
+                    stat.color === 'yellow' ? (isLight ? "bg-yellow-50 text-yellow-600" : "bg-yellow-500/10 text-yellow-400") :
+                    stat.color === 'cyan' ? (isLight ? "bg-cyan-50 text-cyan-600" : "bg-cyan-500/10 text-cyan-400") :
+                    stat.color === 'green' ? (isLight ? "bg-green-50 text-green-600" : "bg-green-500/10 text-green-400") :
+                    (isLight ? "bg-red-50 text-red-600" : "bg-red-500/10 text-red-400")
+                  }`}>
+                    <stat.icon className="text-lg" />
+                  </div>
+                </div>
+                <p className={`text-2xl font-bold ${TC.textPrimary}`}>{stat.value}</p>
+                <p className={`text-xs mt-1 ${TC.textSecondary}`}>{stat.label}</p>
               </div>
-            )}
+            ))}
           </div>
 
-          {/* Mobile Card View */}
-          <div className="lg:hidden space-y-3">
-            {loading ? (
-              <div className={`backdrop-blur-sm rounded-xl p-8 text-center fade-in ${loadingClasses}`}>
-                <div className="flex justify-center items-center gap-3 text-cyan-400">
-                  <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-base">Loading watchlist...</span>
-                </div>
+          {/* Coins Table */}
+          {loading ? (
+            <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
+              <div className="p-8">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="mb-4">
+                    <Skeleton height={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="0.5rem" />
+                  </div>
+                ))}
               </div>
-            ) : paginatedCoins.length > 0 ? (
-              paginatedCoins.map((coin, index) => (
-                <div
-                  key={coin.id}
-                  onClick={() => handleCoinClick(coin)}
-                  className={`backdrop-blur-sm rounded-xl p-4 transition-all duration-300 group fade-in shadow-sm border ${isLight ? "bg-white border-gray-300 hover:bg-gray-100" : "bg-gray-800/50 border-gray-700 hover:bg-gray-700/50 hover:border-cyan-500/50"}`}
-                  style={{ animationDelay: `${0.5 + index * 0.1}s` }}
-                >
-                  {/* Header with Bell, Coin Info, and 24H Change */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleBellClick(coin);
-                        }}
-                        className={`flex-shrink-0 w-8 h-8 rounded-full transition-all duration-200 ${iconButtonClasses(true)}`}
-                        title="Set Alert"
-                      >
-                        <FaBell className="text-sm" />
-                      </button>
-                      <img
-                        src={coin.image}
-                        alt={coin.name}
-                        className="w-10 h-10 flex-shrink-0 rounded-full group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className={`font-semibold text-base truncate transition-colors ${textClasses} group-hover:text-cyan-400`}>
-                          {coin.name}
-                        </div>
-                        <div className={`text-sm uppercase ${subTextClasses}`}>
-                          {coin.symbol.toUpperCase()}
-                        </div>
-                        {/* Show holdings badge if user has this coin */}
-                        {coin.userHolding && (
-                          <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
-                            Holding:{" "}
-                            {coin.userHolding.totalQuantity?.toFixed(6) ||
-                              coin.userHolding.quantity?.toFixed(6)}{" "}
-                            {coin.symbol.toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div
-                      className={`font-semibold text-sm px-2 py-1 rounded-lg ${
-                        coin.price_change_percentage_24h < 0
-                          ? "bg-red-500/20 text-red-400"
-                          : "bg-green-500/20 text-green-400"
-                      }`}
-                    >
-                      {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
-                    </div>
-                  </div>
-
-                  {/* Price and Chart */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`font-bold text-xl ${textClasses}`}>
-                      $
-                      {coin.current_price?.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 4,
-                      }) || "0"}
-                    </div>
-                    <div className="w-20 h-10">
-                      <Sparkline 
-                        data={coin.sparkline_in_7d?.price || []} 
-                        width={80} 
-                        height={40}
-                        positive={coin.price_change_percentage_24h >= 0}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Performance Stats */}
-                  <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
-                    {[
-                      { value: coin.price_change_percentage_1h_in_currency, label: "1H" },
-                      { value: coin.price_change_percentage_24h_in_currency, label: "24H" },
-                      { value: coin.price_change_percentage_7d_in_currency, label: "7D" },
-                    ].map((stat, i) => (
-                      <div
-                        key={i}
-                        className={`text-center p-2 rounded ${
-                          stat.value < 0 ? (isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400")
-                            : (isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400")
-                        }`}
-                      >
-                        <div>{stat.label}</div>
-                        <div className="font-semibold">
-                          {stat.value?.toFixed(2)}%
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div
-                    className="flex gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTrade(coin);
-                      }}
-                      className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-lg flex items-center justify-center gap-2 fade-in"
-                      style={{ animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
-                    >
-                      <FaExchangeAlt className="text-sm" />
-                      Trade
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        showRemoveConfirmation(coin);
-                      }}
-                      className={`
-                        ${isLight ? "bg-gray-200 text-red-600" : "bg-gray-700/50 text-red-400"} 
-                        hover:bg-red-600 hover:text-white rounded-lg px-4 py-2.5 transition-all duration-200 flex items-center justify-center gap-2 text-sm font-medium fade-in
-                      `}
-                      style={{ animationDelay: `${0.5 + index * 0.1 + 0.06}s` }}
-                    >
-                      <MdDeleteForever className="text-base" />
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className={`text-center py-12 rounded-xl fade-in border ${subTextClasses} ${isLight ? "bg-white border-gray-300" : "bg-gray-800/50 border-gray-700"}`} style={{ animationDelay: "0.5s" }}>
-                <div className="text-5xl mb-3">⭐</div>
+            </div>
+          ) : paginatedCoins.length === 0 ? (
+            <div className={`text-center py-16 rounded-2xl ${TC.bgCard} fade-in`}>
+              <div className="text-6xl mb-4">⭐</div>
+              <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
                 {searchTerm ? `No coins found matching "${searchTerm}"` : "Your watchlist is empty"}
-                {!searchTerm && (
-                  <p className={`text-sm mt-2 ${subTextClasses}`}>
-                    Add coins to your watchlist to track them here
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Desktop Table View */}
-          <div className="hidden lg:block fade-in" style={{ animationDelay: "0.4s" }}>
-            <div className={`rounded-xl overflow-hidden shadow-2xl border ${containerClasses}`}>
-              {loading ? (
-                <div className="p-12 text-center">
-                  <div className={`flex justify-center items-center gap-3 ${livePriceClasses}`}>
-                    <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-base">Loading watchlist...</span>
-                  </div>
-                </div>
-              ) : paginatedCoins.length === 0 ? (
-                <div className={`p-12 text-center fade-in ${subTextClasses}`} style={{ animationDelay: "0.5s" }}>
-                  <div className="text-6xl mb-4">⭐</div>
-                  <div className="text-xl">
-                    {searchTerm ? `No coins found matching "${searchTerm}"` : "Your watchlist is empty"}
-                  </div>
-                  {!searchTerm && (
-                    <p className={`text-sm mt-2 ${subTextClasses}`}>
-                      Add coins to your watchlist to track them here
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className={`fade-in ${tableHeaderClasses}`} style={{ animationDelay: "0.5s" }}>
-                        {["Alert", "Coin", "Price", "24h %", "Market Cap", "Volume", "Trend", "Actions"].map((header) => (
-                          <th key={header} className={`py-4 px-6 text-${header === "Coin" ? "left" : "right"} text-xs font-semibold uppercase tracking-wider ${header === "Alert" || header === "Trend" || header === "Actions" ? "text-center" : ""}`}>
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className={`divide-y ${tableBodyDivide}`}>
-                      {paginatedCoins.map((coin, index) => (
-                        <tr
-                          key={coin.id}
-                          onClick={() => handleCoinClick(coin)}
-                          className={`${hoverClasses} transition-all duration-200 group fade-in`}
-                          style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                        >
-                          {/* Bell Icon */}
-                          <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => handleBellClick(coin)}
-                              className={`w-8 h-8 rounded-full transition-all duration-200 mx-auto fade-in ${iconButtonClasses(true)}`}
-                              style={{ animationDelay: `${0.6 + index * 0.05 + 0.02}s` }}
-                              title="Set Alert"
-                            >
-                              <FaBell className="text-sm" />
-                            </button>
-                          </td>
-
-                          {/* Coin Info */}
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.03}s` }}>
-                              <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300" />
-                              <div className="min-w-0 flex-1">
-                                <div className={`text-base font-semibold transition-colors ${textClasses} group-hover:text-cyan-400`}>{coin.name}</div>
-                                <div className={`text-sm uppercase ${subTextClasses}`}>{coin.symbol.toUpperCase()}</div>
-                                {coin.userHolding && (
-                                  <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
-                                    Holding: {coin.userHolding.totalQuantity?.toFixed(6) || coin.userHolding.quantity?.toFixed(6)} {coin.symbol.toUpperCase()}
-                                  </div>
-                                )}
+              </h3>
+              <p className={TC.textSecondary}>
+                {!searchTerm && "Add coins to your watchlist to track them here"}
+              </p>
+            </div>
+          ) : (
+            <>
+            <div className={`hidden md:block rounded-2xl overflow-hidden fade-in ${TC.bgCard}`} style={{ animationDelay: "0.2s" }}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className={`${isLight ? "bg-gray-50 border-b border-gray-200" : "bg-gray-900/50 border-b border-gray-700"}`}>
+                      <th className={`py-4 px-6 text-left text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        Coin
+                      </th>
+                      <th className={`py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        Price
+                      </th>
+                      <th className={`py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        24h Change
+                      </th>
+                      <th className={`py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        Market Cap
+                      </th>
+                      <th className={`py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        7d Trend
+                      </th>
+                      <th className={`py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        Holdings
+                      </th>
+                      <th className={`py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y ${isLight ? "divide-gray-200" : "divide-gray-700"}`}>
+                    {paginatedCoins.map((coin, index) => (
+                      <tr
+                        key={coin.id}
+                        onClick={() => handleCoinClick(coin)}
+                        className={`transition-all duration-200 cursor-pointer group fade-in ${
+                          isLight ? "hover:bg-gray-50" : "hover:bg-gray-700/30"
+                        }`}
+                        style={{ animationDelay: `${0.3 + index * 0.05}s` }}
+                      >
+                        {/* Coin Info */}
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={coin.image} 
+                              alt={coin.name} 
+                              className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300" 
+                            />
+                            <div className="min-w-0">
+                              <div className={`font-semibold text-base truncate group-hover:text-cyan-400 transition-colors ${TC.textPrimary}`}>
+                                {coin.name}
+                              </div>
+                              <div className={`text-sm uppercase ${TC.textSecondary}`}>
+                                {coin.symbol}
                               </div>
                             </div>
-                          </td>
+                          </div>
+                        </td>
 
-                          {/* Price */}
-                          <td className={`py-4 px-6 text-right fade-in ${textClasses}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.04}s` }}>
-                            <div className="text-base font-semibold">
-                              ${coin.current_price?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 6 }) || "0"}
+                        {/* Price */}
+                        <td className={`py-4 px-6 text-right ${TC.textPrimary}`}>
+                          <div className="font-semibold text-base">
+                            ${coin.current_price?.toLocaleString("en-IN", { 
+                              minimumFractionDigits: 2, 
+                              maximumFractionDigits: coin.current_price < 1 ? 6 : 2 
+                            }) || "0"}
+                          </div>
+                        </td>
+
+                        {/* 24h Change */}
+                        <td className="py-4 px-6 text-right">
+                          <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold text-sm ${
+                            (coin.price_change_percentage_24h || 0) >= 0
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-red-500/20 text-red-400"
+                          }`}>
+                            {(coin.price_change_percentage_24h || 0) >= 0 ? "↑" : "↓"}
+                            {Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}%
+                          </div>
+                        </td>
+
+                        {/* Market Cap */}
+                        <td className={`py-4 px-6 text-right font-medium ${TC.textSecondary}`}>
+                          ${(coin.market_cap || 0) >= 1e12 
+                            ? ((coin.market_cap || 0) / 1e12).toFixed(2) + "T"
+                            : (coin.market_cap || 0) >= 1e9 
+                            ? ((coin.market_cap || 0) / 1e9).toFixed(2) + "B"
+                            : (coin.market_cap || 0) >= 1e6 
+                            ? ((coin.market_cap || 0) / 1e6).toFixed(2) + "M"
+                            : (coin.market_cap || 0).toLocaleString("en-IN")}
+                        </td>
+
+                        {/* 7d Trend */}
+                        <td className="py-4 px-6">
+                          <div className="flex justify-center">
+                            <Sparkline 
+                              data={coin.sparkline_in_7d?.price || []} 
+                              width={120} 
+                              height={40}
+                              positive={(coin.price_change_percentage_24h || 0) >= 0}
+                            />
+                          </div>
+                        </td>
+
+                        {/* Holdings */}
+                        <td className="py-4 px-6 text-center">
+                          {coin.userHolding ? (
+                            <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                              isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400"
+                            }`}>
+                              {(coin.userHolding.totalQuantity || coin.userHolding.quantity || 0).toFixed(4)} {coin.symbol.toUpperCase()}
                             </div>
-                          </td>
+                          ) : (
+                            <span className={`text-sm ${TC.textSecondary}`}>—</span>
+                          )}
+                        </td>
 
-                          {/* 24H Change */}
-                          <td
-                            className={`py-4 px-6 text-right font-semibold fade-in ${coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"}`}
-                            style={{ animationDelay: `${0.6 + index * 0.05 + 0.05}s` }}
-                          >
-                            {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
-                          </td>
-
-                          {/* Market Cap */}
-                          <td className={`py-4 px-6 text-right fade-in ${subTextClasses}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.06}s` }}>
-                            <div className="font-medium">{formatCurrency(coin.market_cap)}</div>
-                          </td>
-
-                          {/* Volume */}
-                          <td className={`py-4 px-6 text-right fade-in ${subTextClasses}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.07}s` }}>
-                            <div className="font-medium">{formatCurrency(coin.total_volume)}</div>
-                          </td>
-
-                          {/* Chart */}
-                          <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.08}s` }}>
-                            <div className="flex justify-center">
-                              <Sparkline data={coin.sparkline_in_7d?.price || []} width={100} height={40} positive={coin.price_change_percentage_24h >= 0} />
-                            </div>
-                          </td>
-
-                          {/* Action Buttons */}
-                          <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.09}s` }}>
-                            <div className="flex justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                onClick={() => handleTrade(coin)}
-                                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105"
-                              >
-                                <FaExchangeAlt className="text-xs" />
-                                Trade
-                              </button>
-                              <button
-                                onClick={() => showRemoveConfirmation(coin)}
-                                className={`${isLight ? "bg-gray-200 text-red-600 hover:bg-red-600 hover:text-white" : "bg-gray-700/50 hover:bg-red-600 text-red-400 hover:text-white"} px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105`}
-                              >
-                                <MdDeleteForever className="text-base" />
-                                Remove
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                        {/* Actions */}
+                        <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleTrade(coin)}
+                              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-md"
+                            >
+                              <FaExchangeAlt className="text-xs" />
+                              Trade
+                            </button>
+                            <button
+                              onClick={() => setRemoveModal({ show: true, coin })}
+                              className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                                isLight ? "bg-gray-100 text-red-600 hover:bg-red-600 hover:text-white" : "bg-gray-700 text-red-400 hover:bg-red-600 hover:text-white"
+                              }`}
+                            >
+                              <MdDeleteForever className="text-lg" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               {/* Table Footer */}
-              {paginatedCoins.length > 0 && (
-                <div className={`px-6 py-4 border-t ${isLight ? "bg-gray-100 border-gray-300" : "bg-gray-900/50 border-gray-700"} fade-in`} style={{ animationDelay: "0.7s" }}>
-                  <div className={`flex justify-between items-center text-sm ${subTextClasses}`}>
-                    <span>Showing {paginatedCoins.length} of {filteredCoins.length} coins</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span>Live Data</span>
-                    </div>
+              <div className={`px-6 py-4 border-t ${isLight ? "bg-gray-50 border-gray-200" : "bg-gray-900/50 border-gray-700"}`}>
+                <div className={`flex justify-between items-center text-sm ${TC.textSecondary}`}>
+                  <span>Showing {paginatedCoins.length} of {filteredCoins.length} coins</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span>Live Data</span>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
+              {paginatedCoins.map((coin, index) => (
+                <div 
+                  key={coin.id}
+                  onClick={() => handleCoinClick(coin)}
+                  className={`rounded-2xl p-4 border ${TC.bgCard} ${isLight ? "border-gray-200" : "border-gray-700"} active:scale-[0.98] transition-transform`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full" />
+                      <div>
+                        <div className={`font-bold ${TC.textPrimary}`}>{coin.symbol.toUpperCase()}</div>
+                        <div className={`text-xs ${TC.textSecondary}`}>{coin.name}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`font-bold ${TC.textPrimary}`}>
+                        ${coin.current_price?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                      </div>
+                      <div className={`text-xs font-semibold ${
+                        (coin.price_change_percentage_24h || 0) >= 0 ? "text-green-500" : "text-red-500"
+                      }`}>
+                        {(coin.price_change_percentage_24h || 0) >= 0 ? "+" : ""}
+                        {coin.price_change_percentage_24h?.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-24">
+                       <Sparkline 
+                         data={coin.sparkline_in_7d?.price || []} 
+                         width={96} 
+                         height={32}
+                         positive={(coin.price_change_percentage_24h || 0) >= 0}
+                       />
+                    </div>
+                    <div className="text-right">
+                       <div className={`text-xs ${TC.textSecondary}`}>Market Cap</div>
+                       <div className={`text-xs font-medium ${TC.textPrimary}`}>
+                         ${(coin.market_cap / 1e9).toFixed(2)}B
+                       </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                     <button
+                       onClick={() => handleTrade(coin)}
+                       className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-transform hover:scale-105"
+                     >
+                       Trade
+                     </button>
+                     <button
+                       onClick={() => setRemoveModal({ show: true, coin })}
+                       className={`px-4 py-2 rounded-xl border ${isLight ? "border-red-200 text-red-600 bg-red-50" : "border-red-500/30 text-red-400 bg-red-500/10"} active:scale-95 transition-transform hover:scale-105 shadow-sm`}
+                     >
+                       <MdDeleteForever className="text-lg" />
+                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex flex-col items-center gap-4 pt-6 pb-6 fade-in" style={{ animationDelay: "0.8s" }}>
-              <div className="flex justify-center items-center gap-2">
-                <button
-                  onClick={handlePrev}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${isLight ? "bg-gray-200 hover:bg-gray-300 text-gray-800" : "bg-gray-700 hover:bg-gray-600 text-gray-300"}`}
-                  style={{ animationDelay: "0.85s" }}
-                >
-                  Prev
-                </button>
-                {renderPaginationButtons}
-                <button
-                  onClick={handleNext}
-                  disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${isLight ? "bg-gray-200 hover:bg-gray-300 text-gray-800" : "bg-gray-700 hover:bg-gray-600 text-gray-300"}`}
-                  style={{ animationDelay: "0.9s" }}
-                >
-                  Next
-                </button>
-              </div>
-              <div className={`text-sm fade-in ${subTextClasses}`} style={{ animationDelay: "0.95s" }}>
+            <div className="flex justify-center items-center gap-2 pt-4 fade-in">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
+                  isLight ? "bg-gray-200 text-gray-900 hover:bg-gray-300" : "bg-gray-700 text-white hover:bg-gray-600"
+                }`}>
+                Prev
+              </button>
+              <span className={TC.textSecondary}>
                 Page {currentPage} of {totalPages}
-              </div>
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
+                  isLight ? "bg-gray-200 text-gray-900 hover:bg-gray-300" : "bg-gray-700 text-white hover:bg-gray-600"
+                }`}>
+                Next
+              </button>
             </div>
           )}
         </div>
       </main>
 
-      {/* Remove Confirmation Modal */}
       <RemoveConfirmationModal
         show={removeModal.show}
-        onClose={handleRemoveCancel}
+        onClose={() => setRemoveModal({ show: false, coin: null })}
         onConfirm={handleRemoveConfirm}
         coin={removeModal.coin}
       />

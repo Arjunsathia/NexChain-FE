@@ -4,45 +4,57 @@ import { useNavigate } from "react-router-dom";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains('dark'));
+    });
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-        return () => observer.disconnect();
-    }, []);
+    return () => observer.disconnect();
+  }, []);
 
-    return isLight;
+  return isLight;
 };
 
 function LearningHub() {
   const isLight = useThemeCheck();
   const navigate = useNavigate();
-  
-  // 💡 Theme Classes Helper (UPDATED bgFooterButton)
+
+  // 💡 Theme Classes Helper (same coloring, unified container shadow, no border)
   const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
-    bgItem: isLight ? "bg-gray-100/50 border-gray-200 hover:bg-gray-100/80 hover:border-purple-600/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-purple-400/30",
+    // Container – unified with other widgets, no border
+    bgContainer: isLight
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+
+    // Item (kept exactly like your version)
+    bgItem: isLight
+      ? "bg-gray-100/50 border-gray-200 hover:bg-gray-100/80 hover:border-purple-600/30"
+      : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-purple-400/30",
+
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-500",
     textAccent: isLight ? "text-purple-600" : "text-purple-400",
     textAccentHover: isLight ? "group-hover:text-purple-700" : "group-hover:text-purple-300",
-    
-    // START CHANGE: Enhance hover background and border using the purple accent
-    bgFooterButton: isLight 
-      ? "bg-gray-200 border-gray-300 hover:bg-purple-100/60 hover:border-purple-600" // Light: Subtle purple background with solid purple border
-      : "bg-gray-700/50 border-gray-600 hover:bg-purple-900/40 hover:border-purple-400", // Dark: Darker purple background with solid purple border
-    // END CHANGE
-    
+
+    // Footer button (exactly your purple accent setup)
+    bgFooterButton: isLight
+      ? "bg-gray-200 border-gray-300 hover:bg-purple-100/60 hover:border-purple-600"
+      : "bg-gray-700/50 border-gray-600 hover:bg-purple-900/40 hover:border-purple-400",
+
     borderFooter: isLight ? "border-gray-300" : "border-gray-700",
-    // Icons
-    iconLink: isLight ? "text-gray-400 group-hover:opacity-100 hover:text-purple-600" : "text-gray-500",
-    iconRight: isLight ? "text-gray-500 group-hover:text-purple-600" : "text-gray-500 group-hover:text-purple-400",
-    bgIcon: isLight ? "bg-red-100/50" : "bg-red-500/10", // Default icon background
+
+    iconLink: isLight
+      ? "text-gray-400 group-hover:opacity-100 hover:text-purple-600"
+      : "text-gray-500",
+    iconRight: isLight
+      ? "text-gray-500 group-hover:text-purple-600"
+      : "text-gray-500 group-hover:text-purple-400",
+
+    bgIcon: isLight ? "bg-red-100/50" : "bg-red-500/10", // unchanged
   }), [isLight]);
 
   const learningItems = [
@@ -112,14 +124,14 @@ function LearningHub() {
 
   const handleTopicClick = (topic) => {
     if (topic.url) {
-      window.open(topic.url, '_blank', 'noopener,noreferrer');
+      window.open(topic.url, "_blank", "noopener,noreferrer");
     } else {
       navigate("/learning", { state: { selectedTopic: topic } });
     }
   };
 
   return (
-    <div className={`rounded-xl p-4 h-full flex flex-col fade-in border ${TC.bgContainer}`}>
+    <div className={`rounded-xl p-4 h-full flex flex-col fade-in ${TC.bgContainer}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3 fade-in">
         <div className="flex items-center gap-2">
@@ -140,11 +152,15 @@ function LearningHub() {
             return (
               <div 
                 key={index} 
-                className={`flex items-center justify-between p-2 rounded-lg border transition-all duration-200 group cursor-pointer fade-in ${TC.bgItem}`}
+                className={`
+                  flex items-center justify-between p-2 rounded-lg border
+                  transition-all duration-200 group cursor-pointer fade-in 
+                  ${TC.bgItem}
+                `}
                 onClick={() => handleTopicClick(item)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className={TC.bgIcon + " rounded-lg"}>
+                  <div className={`${TC.bgIcon} rounded-lg p-1.5`}>
                     <Icon className={isLight ? "text-red-600 text-sm" : "text-red-400 text-sm"} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -153,7 +169,12 @@ function LearningHub() {
                         {item.title}
                       </h3>
                       {/* External Link Icon */}
-                      <FaExternalLinkAlt className={`text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${TC.iconLink}`} />
+                      <FaExternalLinkAlt
+                        className={`
+                          text-xs opacity-0 group-hover:opacity-100 
+                          transition-opacity duration-200 ${TC.iconLink}
+                        `}
+                      />
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className={`text-xs px-1.5 py-0.5 rounded-full ${getLevelColor(item.level)}`}>
@@ -164,7 +185,12 @@ function LearningHub() {
                   </div>
                 </div>
                 {/* Arrow Icon */}
-                <FaArrowRight className={`text-xs group-hover:translate-x-0.5 transition-all duration-200 ${TC.iconRight}`} />
+                <FaArrowRight
+                  className={`
+                    text-xs group-hover:translate-x-0.5 
+                    transition-all duration-200 ${TC.iconRight}
+                  `}
+                />
               </div>
             );
           })}
@@ -176,12 +202,14 @@ function LearningHub() {
         <span className={`text-xs ${TC.textSecondary}`}>{learningItems.length} videos</span>
         <button 
           onClick={handleExploreClick}
-          // Added group class to allow children to use group-hover
-          className={`group flex items-center gap-1 text-xs font-semibold py-1.5 px-3 rounded-lg border transition-all duration-200 ${TC.textAccent} ${TC.bgFooterButton} ${TC.textAccentHover}`}
+          className={`
+            group flex items-center gap-1 text-xs font-semibold 
+            py-1.5 px-3 rounded-lg border transition-all duration-200 
+            ${TC.textAccent} ${TC.bgFooterButton} ${TC.textAccentHover}
+          `}
         >
           Explore
-          {/* Added group-hover transition for the icon */}
-          <FaArrowRight className={`text-xs group-hover:translate-x-0.5 transition-all duration-200`} />
+          <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-all duration-200" />
         </button>
       </div>
 

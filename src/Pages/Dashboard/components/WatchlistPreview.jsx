@@ -7,19 +7,22 @@ import { FaStar, FaExclamationTriangle, FaArrowRight } from "react-icons/fa";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains("dark"));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(!document.documentElement.classList.contains("dark"));
+    });
 
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
-        return () => observer.disconnect();
-    }, []);
+    return () => observer.disconnect();
+  }, []);
 
-    return isLight;
+  return isLight;
 };
 
 function WatchlistPreview() {
@@ -35,36 +38,55 @@ function WatchlistPreview() {
 
   const ws = useRef(null);
   const livePricesRef = useRef({});
-  
-  // 💡 Theme Classes Helper (UPDATED to include dedicated footer button classes)
-  const TC = useMemo(() => ({
-    bgContainer: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 shadow-xl",
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textPricePositive: isLight ? "text-green-700" : "text-green-400",
-    textPriceNegative: isLight ? "text-red-700" : "text-red-400",
-    bgItem: isLight ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30" : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
-    bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-500/10",
-    textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
-    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
-    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-    
-    // START CHANGE: Dedicated Footer Button Classes (using light cyan hover)
-    bgFooterButton: isLight 
-      ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500" // Light: Light cyan background with cyan border
-      : "bg-gray-700/50 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400", // Dark: Darker cyan transparent background with cyan border
-    
-    textFooterButton: isLight ? "text-cyan-600" : "text-cyan-400", // Base color
-    textHoverAccent: isLight 
-      ? "group-hover:text-cyan-700" // Light: Darker cyan text on hover
-      : "group-hover:text-cyan-300", // Dark: Lighter cyan text on hover
-    // END CHANGE
-    
-    borderFooter: isLight ? "border-gray-300" : "border-gray-700",
-  }), [isLight]);
 
+  // 🔁 Fade-in mount effect like other cards
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-  useEffect(() => { livePricesRef.current = livePrices; }, [livePrices]);
+  // 💡 Theme Classes Helper (aligned with other updated cards)
+  const TC = useMemo(
+    () => ({
+      // Main container: NO border, strong shadow in light, glass in dark
+      bgContainer: isLight
+        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+      textPricePositive: isLight ? "text-green-700" : "text-green-400",
+      textPriceNegative: isLight ? "text-red-700" : "text-red-400",
+
+      bgItem: isLight
+        ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30"
+        : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
+
+      bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-500/10",
+      textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
+
+      skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+
+      // Footer button styles (same pattern as other components)
+      bgFooterButton: isLight
+        ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500"
+        : "bg-gray-700/50 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400",
+
+      textFooterButton: isLight ? "text-cyan-600" : "text-cyan-400",
+      textHoverAccent: isLight
+        ? "group-hover:text-cyan-700"
+        : "group-hover:text-cyan-300",
+
+      borderFooter: isLight ? "border-gray-300" : "border-gray-700",
+    }),
+    [isLight]
+  );
+
+  useEffect(() => {
+    livePricesRef.current = livePrices;
+  }, [livePrices]);
 
   useEffect(() => {
     const fetchWatchlist = async () => {
@@ -90,7 +112,26 @@ function WatchlistPreview() {
     const symbols = watchlistData
       .map((coin) => {
         const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt", trxusdt: "trxusdt",
+          bitcoin: "btcusdt",
+          ethereum: "ethusdt",
+          binancecoin: "bnbusdt",
+          ripple: "xrpusdt",
+          cardano: "adausdt",
+          solana: "solusdt",
+          dogecoin: "dogeusdt",
+          polkadot: "dotusdt",
+          "matic-network": "maticusdt",
+          litecoin: "ltcusdt",
+          chainlink: "linkusdt",
+          stellar: "xlmusdt",
+          cosmos: "atomusdt",
+          monero: "xmusdt",
+          "ethereum-classic": "etcusdt",
+          "bitcoin-cash": "bchusdt",
+          filecoin: "filusdt",
+          theta: "thetausdt",
+          vechain: "vetusdt",
+          trxusdt: "trxusdt",
         };
         return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
       })
@@ -113,7 +154,26 @@ function WatchlistPreview() {
           const coinData = message.data;
 
           const symbolToCoinId = {
-            btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple", adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot", maticusdt: "matic-network", ltcusdt: "litecoin", linkusdt: "chainlink", xlmusdt: "stellar", atomusdt: "cosmos", xmusdt: "monero", etcusdt: "ethereum-classic", bchusdt: "bitcoin-cash", filusdt: "filecoin", thetausdt: "theta", vetusdt: "vechain", trxusdt: "tron",
+            btcusdt: "bitcoin",
+            ethusdt: "ethereum",
+            bnbusdt: "binancecoin",
+            xrpusdt: "ripple",
+            adausdt: "cardano",
+            solusdt: "solana",
+            dogeusdt: "dogecoin",
+            dotusdt: "polkadot",
+            maticusdt: "matic-network",
+            ltcusdt: "litecoin",
+            linkusdt: "chainlink",
+            xlmusdt: "stellar",
+            atomusdt: "cosmos",
+            xmusdt: "monero",
+            etcusdt: "ethereum-classic",
+            bchusdt: "bitcoin-cash",
+            filusdt: "filecoin",
+            thetausdt: "theta",
+            vetusdt: "vechain",
+            trxusdt: "tron",
           };
 
           const coinId = symbolToCoinId[symbol];
@@ -130,7 +190,9 @@ function WatchlistPreview() {
           }
         }
       };
-    } catch (err) { console.error("WS error:", err); }
+    } catch (err) {
+      console.error("WS error:", err);
+    }
 
     return () => {
       if (ws.current) ws.current.close();
@@ -147,9 +209,10 @@ function WatchlistPreview() {
   }, [watchlistData, livePrices]);
 
   // Show only first 5 coins unless showAll is true
-  const displayedCoins = useMemo(() => {
-    return showAll ? mergedCoins : mergedCoins.slice(0, 5);
-  }, [mergedCoins, showAll]);
+  const displayedCoins = useMemo(
+    () => (showAll ? mergedCoins : mergedCoins.slice(0, 5)),
+    [mergedCoins, showAll]
+  );
 
   const handleRetry = () => {
     setLoading(true);
@@ -162,7 +225,14 @@ function WatchlistPreview() {
   };
 
   return (
-    <div className={`rounded-xl p-4 h-full flex flex-col fade-in border ${TC.bgContainer}`}>
+    <div
+      className={`
+        rounded-xl p-4 h-full flex flex-col fade-in
+        ${TC.bgContainer}
+        ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
+      `}
+      style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3 fade-in">
         <div className="flex items-center gap-2">
@@ -215,14 +285,27 @@ function WatchlistPreview() {
           </div>
         ) : error ? (
           <div className="text-center py-4 flex flex-col items-center justify-center gap-2 h-full fade-in">
-            <div className={`p-2 rounded-full ${isLight ? "bg-yellow-100" : "bg-yellow-500/10"}`}>
-              <FaExclamationTriangle className={isLight ? "text-yellow-600 text-base" : "text-yellow-500 text-base"} />
+            <div
+              className={`p-2 rounded-full ${
+                isLight ? "bg-yellow-100" : "bg-yellow-500/10"
+              }`}
+            >
+              <FaExclamationTriangle
+                className={
+                  isLight
+                    ? "text-yellow-600 text-base"
+                    : "text-yellow-500 text-base"
+                }
+              />
             </div>
             <p className={`${TC.textSecondary} text-xs`}>Failed to load watchlist</p>
-            {/* Try Again Button (Applying new hover classes) */}
+            {/* Try Again Button */}
             <button
               onClick={handleRetry}
-              className={`text-xs transition-all duration-200 px-3 py-1.5 rounded-lg border mt-1 group ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}`}
+              className={`
+                text-xs transition-all duration-200 px-3 py-1.5 rounded-lg border mt-1 group
+                ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}
+              `}
             >
               Try Again
             </button>
@@ -233,10 +316,13 @@ function WatchlistPreview() {
               <FaStar className={TC.textIcon + " text-base"} />
             </div>
             <p className={`${TC.textSecondary} text-xs`}>Your watchlist is empty</p>
-            {/* Add Coins Button (Applying new hover classes) */}
+            {/* Add Coins Button */}
             <button
               onClick={() => navigate("/cryptolist")}
-              className={`text-xs transition-all duration-200 px-3 py-1.5 rounded-lg border mt-1 group ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}`}
+              className={`
+                text-xs transition-all duration-200 px-3 py-1.5 rounded-lg border mt-1 group
+                ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}
+              `}
             >
               Add Coins
             </button>
@@ -246,7 +332,11 @@ function WatchlistPreview() {
             {displayedCoins.map((coin) => (
               <div
                 key={coin.id}
-                className={`flex items-center justify-between p-2 rounded-lg border hover:border-cyan-400/30 transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
+                className={`
+                  flex items-center justify-between p-2 rounded-lg border
+                  hover:border-cyan-400/30 transition-all duration-200 cursor-pointer
+                  group fade-in ${TC.bgItem}
+                `}
                 onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -257,7 +347,13 @@ function WatchlistPreview() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`font-semibold text-xs transition-colors truncate ${TC.textPrimary} ${isLight ? "group-hover:text-cyan-600" : "group-hover:text-cyan-300"}`}>
+                      <span
+                        className={`
+                          font-semibold text-xs transition-colors truncate
+                          ${TC.textPrimary}
+                          ${isLight ? "group-hover:text-cyan-600" : "group-hover:text-cyan-300"}
+                        `}
+                      >
                         {coin.symbol.toUpperCase()}
                       </span>
                     </div>
@@ -293,25 +389,38 @@ function WatchlistPreview() {
 
       {/* Footer */}
       {!loading && !error && mergedCoins.length > 0 && (
-        <div className={`flex items-center justify-between pt-2 mt-2 border-t fade-in ${TC.borderFooter}`}>
+        <div
+          className={`
+            flex items-center justify-between pt-2 mt-2 border-t fade-in
+            ${TC.borderFooter}
+          `}
+        >
           <div className="flex items-center gap-2">
             <span className={`${TC.textSecondary} text-xs`}>
               {showAll ? `All ${mergedCoins.length}` : `Top 5`} coins
             </span>
-            
-            {/* Show Less/More Button (Applying new hover classes) */}
+
+            {/* Show Less/More Button */}
             <button
               onClick={toggleShowAll}
-              className={`lg:hidden text-xs font-medium py-1 px-2 rounded border transition-all duration-200 group ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}`}
+              className={`
+                lg:hidden text-xs font-medium py-1 px-2 rounded border
+                transition-all duration-200 group
+                ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}
+              `}
             >
               {showAll ? "Show Less" : "Show More"}
             </button>
           </div>
 
-          {/* Explore Button (Applying new hover classes) */}
+          {/* Explore Button */}
           <button
             onClick={() => navigate("/watchlist")}
-            className={`flex items-center gap-1 text-xs font-semibold py-1.5 px-3 rounded-lg border transition-all duration-200 group ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}`}
+            className={`
+              flex items-center gap-1 text-xs font-semibold py-1.5 px-3 rounded-lg border
+              transition-all duration-200 group
+              ${TC.bgFooterButton} ${TC.textFooterButton} ${TC.textHoverAccent}
+            `}
           >
             Explore
             <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-transform duration-200" />
@@ -327,7 +436,7 @@ function WatchlistPreview() {
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        
+
         @media (max-width: 1024px) {
           .overflow-y-auto {
             max-height: 300px;

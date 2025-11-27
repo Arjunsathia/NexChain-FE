@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
-  FaUser,
-  FaLock,
-  FaBell,
-  FaGlobe,
+  FaCog,
   FaShieldAlt,
+  FaBell,
+  FaKey,
   FaSave,
-  FaCamera,
-  FaMoon,
-  FaSun,
-  FaDesktop,
+  FaLock,
 } from "react-icons/fa";
 
 // Utility to check if light mode is active based on global class
@@ -29,202 +25,183 @@ const useThemeCheck = () => {
     return isLight;
 };
 
-
 const AdminSettings = () => {
   const isLight = useThemeCheck();
-  const [activeTab, setActiveTab] = useState("profile");
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
+  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
-  // 💡 Theme Classes Helper
+  useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => {
+      setLoading(false);
+      setTimeout(() => setContentLoaded(true), 300);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Theme Classes
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    bgContent: isLight ? "bg-white/70 border-gray-300 shadow-lg" : "bg-gray-800/30 backdrop-blur-xl border-gray-700/50 shadow-xl",
-    bgInput: isLight ? "bg-white border-gray-300 text-gray-900" : "bg-gray-900/50 border-gray-700 text-white",
-    borderBase: isLight ? "border-gray-300" : "border-gray-700",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    // Switch Toggle
-    bgSwitchOff: isLight ? "bg-gray-400" : "bg-gray-700",
-    bgSwitchOn: isLight ? "bg-cyan-600" : "bg-cyan-500",
+    bgCard: isLight 
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgInput: isLight ? "bg-white text-gray-900 shadow-sm" : "bg-gray-900/50 text-white shadow-inner",
+    bgItem: isLight ? "bg-gray-50" : "bg-white/5",
     
-    // Maintenance Mode
-    bgMaintenance: isLight ? "bg-red-100/50 border-red-300" : "bg-red-500/10 border-red-500/30",
-    textMaintenance: isLight ? "text-red-700" : "text-red-400",
-
-    // Theme Picker
-    bgThemeDefault: isLight ? "bg-gray-100/70 border-gray-300 text-gray-600 hover:bg-gray-200" : "bg-gray-900/50 border-gray-700 text-gray-400 hover:bg-gray-800",
-    bgThemeActive: isLight ? "bg-cyan-100/50 border-cyan-600 text-cyan-700" : "bg-cyan-500/10 border-cyan-500 text-cyan-400",
+    btnPrimary: isLight 
+      ? "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25" 
+      : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg hover:shadow-cyan-500/25",
+    
+    headerGradient: "from-cyan-400 to-blue-500",
   }), [isLight]);
 
-
-  // Mock Data
-  const [profile, setProfile] = useState({
-    firstName: "Arjun",
-    lastName: "Sathia",
-    email: "admin@nexchain.com",
-    role: "Super Admin",
-    bio: "Crypto enthusiast and platform manager.",
+  // Settings State
+  const [settings, setSettings] = useState({
+    platformName: "NexChain",
+    contactEmail: "contact@nexchain.com",
+    supportEmail: "support@nexchain.com",
   });
 
   const [security, setSecurity] = useState({
     twoFactor: true,
-    sessionTimeout: "30",
-    passwordExpiry: "90",
   });
 
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
     pushNotifications: false,
-    marketingEmails: false,
     securityAlerts: true,
   });
 
-  const [system, setSystem] = useState({
-    theme: "dark",
-    language: "en",
-    maintenanceMode: false,
+  const [apiSettings, setApiSettings] = useState({
+    apiKey: "••••••••••••••••",
+    rateLimitEnabled: true,
   });
 
   const handleSave = () => {
-    setLoading(true);
-    // Simulate API call
+    setIsSaving(true);
     setTimeout(() => {
-      setLoading(false);
-      // Show success toast (mock)
+      setIsSaving(false);
       alert("Settings saved successfully!");
     }, 1500);
   };
 
-  const tabs = [
-    { id: "profile", label: "Profile", icon: FaUser },
-    { id: "security", label: "Security", icon: FaShieldAlt },
-    { id: "notifications", label: "Notifications", icon: FaBell },
-    { id: "system", label: "System", icon: FaDesktop },
-  ];
-
   return (
-    <div className={`p-6 space-y-6 fade-in ${TC.textPrimary}`}>
+    <div className={`flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className={`text-3xl font-bold ${TC.textPrimary}`}>Settings</h1>
-          <p className={`mt-1 ${TC.textSecondary}`}>
-            Manage your account and platform preferences
+          <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
+            Settings
+          </h1>
+          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
+            Manage system configuration and preferences
           </p>
         </div>
         <button
           onClick={handleSave}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSaving}
+          className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg transition-all duration-200 hover:shadow-xl`}
         >
-          {loading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          {isSaving ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </>
           ) : (
-            <FaSave />
+            <>
+              <FaSave /> Save Changes
+            </>
           )}
-          <span>Save Changes</span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className={`flex overflow-x-auto pb-2 gap-2 border-b ${TC.borderBase} custom-scrollbar`}>
-        {tabs.map((tab) => (
+      <div className={`flex overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
+        {[
+          { id: "general", label: "General", icon: FaCog },
+          { id: "security", label: "Security", icon: FaShieldAlt },
+          { id: "notifications", label: "Notifications", icon: FaBell },
+          { id: "api", label: "API", icon: FaKey },
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-medium transition-all duration-300 whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap transition-all ${
               activeTab === tab.id
-                ? `${isLight ? "bg-gray-100/70 text-cyan-600 border-cyan-600" : "bg-gray-800/50 text-cyan-400 border-cyan-400"} border-b-2`
-                : `${TC.textSecondary} hover:${TC.textPrimary} ${isLight ? "hover:bg-gray-100/70" : "hover:bg-gray-800/30"}`
+                ? "bg-cyan-500/20 text-cyan-400"
+                : `${TC.textSecondary} hover:bg-gray-800/50`
             }`}
           >
-            <tab.icon
-              className={activeTab === tab.id ? (isLight ? "text-cyan-600" : "text-cyan-400") : "text-gray-500"}
-            />
-            {tab.label}
+            <tab.icon className="text-sm sm:text-base" /> {tab.label}
           </button>
         ))}
       </div>
 
-      {/* Content Area */}
-      <div className={`rounded-2xl p-6 md:p-8 min-h-[500px] ${TC.bgContent}`}>
-        {/* Profile Settings */}
-        {activeTab === "profile" && (
-          <div className="space-y-8 animate-fadeIn">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative group cursor-pointer">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 p-1">
-                    <div className={`w-full h-full rounded-full flex items-center justify-center overflow-hidden ${isLight ? "bg-white" : "bg-gray-900"}`}>
-                      <span className={`text-4xl font-bold ${TC.textPrimary}`}>
-                        {profile.firstName[0]}
-                        {profile.lastName[0]}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <FaCamera className="text-white text-2xl" />
-                  </div>
+      {/* Loading Skeleton */}
+      {loading ? (
+        <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
+          <div className="space-y-6">
+            <div className="h-8 w-48 bg-gray-700/30 rounded animate-pulse mb-6" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i}>
+                  <div className="h-4 w-32 bg-gray-700/30 rounded animate-pulse mb-2" />
+                  <div className="h-12 w-full bg-gray-700/30 rounded-xl animate-pulse" />
                 </div>
-                <div className="text-center">
-                  <h3 className={`text-lg font-semibold ${TC.textPrimary}`}>
-                    {profile.firstName} {profile.lastName}
-                  </h3>
-                  <p className={isLight ? "text-cyan-600 text-sm" : "text-cyan-400 text-sm"}>{profile.role}</p>
-                </div>
-              </div>
-
-              {/* Form Fields */}
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
-                    First Name
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Content */
+        <div 
+          className={`transition-all duration-500 ease-in-out ${
+            contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
+            {/* General Settings */}
+        {activeTab === "general" && (
+          <div className="space-y-4 sm:space-y-6">
+            <div>
+              <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}>General Settings</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
+                    Platform Name
                   </label>
                   <input
                     type="text"
-                    value={profile.firstName}
-                    onChange={(e) =>
-                      setProfile({ ...profile, firstName: e.target.value })
-                    }
-                    className={`w-full border rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
+                    value={settings.platformName}
+                    onChange={(e) => setSettings({ ...settings, platformName: e.target.value })}
+                    className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={profile.lastName}
-                    onChange={(e) =>
-                      setProfile({ ...profile, lastName: e.target.value })
-                    }
-                    className={`w-full border rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
-                    Email Address
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
+                    Contact Email
                   </label>
                   <input
                     type="email"
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile({ ...profile, email: e.target.value })
-                    }
-                    className={`w-full border rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
+                    value={settings.contactEmail}
+                    onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                    className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>Bio</label>
-                  <textarea
-                    value={profile.bio}
-                    onChange={(e) =>
-                      setProfile({ ...profile, bio: e.target.value })
-                    }
-                    rows="4"
-                    className={`w-full border rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all resize-none ${TC.bgInput}`}
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
+                    Support Email
+                  </label>
+                  <input
+                    type="email"
+                    value={settings.supportEmail}
+                    onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                    className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
                   />
                 </div>
               </div>
@@ -234,23 +211,23 @@ const AdminSettings = () => {
 
         {/* Security Settings */}
         {activeTab === "security" && (
-          <div className="space-y-8 animate-fadeIn max-w-3xl">
-            <div className="space-y-6">
-              <h3 className={`text-xl font-semibold border-b ${TC.borderBase} pb-4 ${TC.textPrimary}`}>
-                Authentication
+          <div className="space-y-4 sm:space-y-6">
+            <div>
+              <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}>
+                Security Settings
               </h3>
               
-              <div className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgInput.replace("bg-", "bg-").replace("border-", "border-")}`}>
-                <div className="flex items-center gap-4">
-                  <div className={isLight ? "p-3 bg-cyan-100 rounded-lg text-cyan-600" : "p-3 bg-cyan-500/10 rounded-lg text-cyan-400"}>
-                    <FaShieldAlt className="text-xl" />
+              <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl ${TC.bgItem} gap-3 sm:gap-4 mb-4`}>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-cyan-500/10 rounded-lg text-cyan-500">
+                    <FaShieldAlt className="text-base sm:text-xl" />
                   </div>
                   <div>
-                    <h4 className={`font-medium ${TC.textPrimary}`}>
+                    <h4 className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}>
                       Two-Factor Authentication
                     </h4>
-                    <p className={`text-sm ${TC.textSecondary}`}>
-                      Add an extra layer of security to your account
+                    <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
+                      Add an extra layer of security
                     </p>
                   </div>
                 </div>
@@ -263,64 +240,36 @@ const AdminSettings = () => {
                     }
                     className="sr-only peer"
                   />
-                  <div className={`w-11 h-6 ${TC.bgSwitchOff} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:${TC.bgSwitchOn}`}></div>
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                 </label>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
                     Current Password
                   </label>
                   <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FaLock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
                     <input
                       type="password"
                       placeholder="••••••••"
-                      className={`w-full border rounded-xl pl-10 pr-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
+                      className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 border ${TC.bgInput}`}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
                     New Password
                   </label>
                   <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FaLock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
                     <input
                       type="password"
                       placeholder="••••••••"
-                      className={`w-full border rounded-xl pl-10 pr-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
+                      className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 border ${TC.bgInput}`}
                     />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-6">
-              <h3 className={`text-xl font-semibold border-b ${TC.borderBase} pb-4 ${TC.textPrimary}`}>
-                Session Management
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
-                    Session Timeout (minutes)
-                  </label>
-                  <select
-                    value={security.sessionTimeout}
-                    onChange={(e) =>
-                      setSecurity({
-                        ...security,
-                        sessionTimeout: e.target.value,
-                      })
-                    }
-                    className={`w-full border rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
-                  >
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="120">2 hours</option>
-                  </select>
                 </div>
               </div>
             </div>
@@ -329,125 +278,86 @@ const AdminSettings = () => {
 
         {/* Notifications Settings */}
         {activeTab === "notifications" && (
-          <div className="space-y-8 animate-fadeIn max-w-3xl">
-            <div className="space-y-4">
-              {[
-                { id: "emailAlerts", label: "Email Alerts", desc: "Receive emails about your account activity" },
-                { id: "pushNotifications", label: "Push Notifications", desc: "Receive push notifications on your device" },
-                { id: "marketingEmails", label: "Marketing Emails", desc: "Receive emails about new features and offers" },
-                { id: "securityAlerts", label: "Security Alerts", desc: "Get notified about suspicious login attempts" },
-              ].map((item) => (
-                <div
-                  key={item.id}
-                  className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgInput.replace("bg-", "bg-").replace("border-", "border-")} hover:border-gray-500 transition-colors`}
-                >
+          <div className="space-y-4 sm:space-y-6">
+            <div>
+              <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}>
+                Notification Preferences
+              </h3>
+              <div className="space-y-3 sm:space-y-4">
+                {[
+                  { key: "emailAlerts", label: "Email Alerts", description: "Receive important updates via email" },
+                  { key: "pushNotifications", label: "Push Notifications", description: "Get real-time push notifications" },
+                  { key: "securityAlerts", label: "Security Alerts", description: "Critical security notifications" },
+                ].map((item) => (
+                  <div key={item.key} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl ${TC.bgItem} gap-3 sm:gap-4`}>
+                    <div>
+                      <h4 className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}>{item.label}</h4>
+                      <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>{item.description}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={notifications[item.key]}
+                        onChange={(e) =>
+                          setNotifications({ ...notifications, [item.key]: e.target.checked })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* API Settings */}
+        {activeTab === "api" && (
+          <div className="space-y-4 sm:space-y-6">
+            <div>
+              <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}>API Configuration</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <label className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}>
+                    API Key
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={apiSettings.apiKey}
+                      readOnly
+                      className={`flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none ${TC.bgInput}`}
+                    />
+                    <button className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium ${TC.btnPrimary}`}>
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+                <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl ${TC.bgItem} gap-3 sm:gap-4`}>
                   <div>
-                    <h4 className={`font-medium ${TC.textPrimary}`}>{item.label}</h4>
-                    <p className={`text-sm ${TC.textSecondary}`}>{item.desc}</p>
+                    <h4 className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}>Rate Limiting</h4>
+                    <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>Enable API rate limiting</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={notifications[item.id]}
+                      checked={apiSettings.rateLimitEnabled}
                       onChange={(e) =>
-                        setNotifications({
-                          ...notifications,
-                          [item.id]: e.target.checked,
-                        })
+                        setApiSettings({ ...apiSettings, rateLimitEnabled: e.target.checked })
                       }
                       className="sr-only peer"
                     />
-                    <div className={`w-11 h-6 ${TC.bgSwitchOff} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:${TC.bgSwitchOn}`}></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                   </label>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* System Settings */}
-        {activeTab === "system" && (
-          <div className="space-y-8 animate-fadeIn max-w-3xl">
-            <div className="space-y-6">
-              <h3 className={`text-xl font-semibold border-b ${TC.borderBase} pb-4 ${TC.textPrimary}`}>
-                Appearance & Localization
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>Theme</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: "light", icon: FaSun, label: "Light" },
-                      { id: "dark", icon: FaMoon, label: "Dark" },
-                      { id: "system", icon: FaDesktop, label: "System" },
-                    ].map((theme) => (
-                      <button
-                        key={theme.id}
-                        onClick={() => setSystem({ ...system, theme: theme.id })}
-                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
-                          system.theme === theme.id
-                            ? TC.bgThemeActive
-                            : TC.bgThemeDefault
-                        }`}
-                      >
-                        <theme.icon />
-                        <span className="text-xs font-medium">{theme.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className={`text-sm font-medium ${TC.textSecondary}`}>
-                    Language
-                  </label>
-                  <div className="relative">
-                    <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                    <select
-                      value={system.language}
-                      onChange={(e) =>
-                        setSystem({ ...system, language: e.target.value })
-                      }
-                      className={`w-full border rounded-xl pl-10 pr-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all ${TC.bgInput}`}
-                    >
-                      <option value="en">English (US)</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-6">
-              <h3 className={`text-xl font-semibold border-b ${TC.borderBase} pb-4 ${TC.textPrimary}`}>
-                Maintenance
-              </h3>
-              <div className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgMaintenance}`}>
-                <div>
-                  <h4 className={`font-medium ${TC.textMaintenance}`}>Maintenance Mode</h4>
-                  <p className={`text-sm ${TC.textSecondary}`}>
-                    Enable to prevent users from accessing the platform
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={system.maintenanceMode}
-                    onChange={(e) =>
-                      setSystem({ ...system, maintenanceMode: e.target.checked })
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className={`w-11 h-6 ${TC.bgSwitchOff} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500`}></div>
-                </label>
               </div>
             </div>
           </div>
         )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

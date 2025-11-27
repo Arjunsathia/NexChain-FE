@@ -45,39 +45,49 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
   // 💡 Theme Classes Helper - Defined once and memoized
   const TC = useMemo(() => ({
     // Modal Colors
-    bgBackdrop: isLight ? "bg-gray-900/40" : "bg-gray-900/80",
-    bgPanel: isLight ? "bg-white border-gray-300 shadow-2xl" : "bg-transparent border border-gray-700 shadow-2xl",
+    bgBackdrop: "bg-black/60 backdrop-blur-sm", // Unified darker backdrop for focus
+    bgPanel: isLight 
+      ? "bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)]" 
+      : "bg-[#0f172a]/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
     
     // Header
-    bgHeader: isLight ? "bg-gray-50 border-gray-300" : "bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700",
-    titleText: isLight ? "text-blue-600" : "text-cyan-400",
-    subtitleText: isLight ? "text-gray-500" : "text-gray-400",
+    bgHeader: isLight 
+      ? "bg-gradient-to-r from-gray-50/80 to-white/80 border-b border-gray-100" 
+      : "bg-gradient-to-r from-slate-900/50 to-slate-800/50 border-b border-white/5",
+    titleText: isLight ? "text-slate-800" : "text-slate-100",
+    subtitleText: isLight ? "text-slate-500" : "text-slate-400",
     
     // Close Button
-    btnClose: isLight ? "text-gray-500 hover:text-gray-900 hover:bg-gray-200" : "text-gray-400 hover:text-white hover:bg-gray-700",
+    btnClose: isLight 
+      ? "text-slate-400 hover:text-slate-700 hover:bg-slate-100" 
+      : "text-slate-500 hover:text-slate-200 hover:bg-white/10",
 
     // Form Content
-    labelText: isLight ? "text-gray-700" : "text-gray-300",
+    labelText: isLight ? "text-slate-700 font-medium" : "text-slate-300 font-medium",
     
     // Input/Select Base
-    inputBg: isLight ? "bg-white text-gray-900 border-gray-400 placeholder-gray-500" : "bg-transparent text-white border-gray-700",
-    inputFocus: "focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500",
-    iconColor: isLight ? "text-gray-500" : "text-gray-400",
+    inputBg: isLight 
+      ? "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 hover:border-cyan-400" 
+      : "bg-slate-900/50 border-white/10 text-slate-100 placeholder:text-slate-600 hover:border-cyan-500/50",
+    inputFocus: "focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all duration-200",
+    iconColor: isLight ? "text-slate-400" : "text-slate-500",
     
-    // Select Options (Needs to override parent bg)
-    optionBg: isLight ? "bg-white text-gray-900" : "bg-gray-800 text-white",
+    // Select Options
+    optionBg: isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100",
 
     // Loading State
-    loadingText: isLight ? "text-blue-600" : "text-cyan-400",
+    loadingText: isLight ? "text-cyan-600" : "text-cyan-400",
     
     // Action Buttons
-    btnCancel: isLight ? "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300 hover:border-gray-400" : "bg-transparent text-gray-300 hover:text-white border-gray-600 hover:border-gray-500 hover:bg-gray-700/50",
-    btnSubmit: "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white",
+    btnCancel: isLight 
+      ? "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300" 
+      : "bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white hover:border-white/20",
+    btnSubmit: "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 border border-transparent",
 
-    // Toast Styles (Adjusted for theme)
-    toastSuccess: isLight ? { background: "#fff", color: "#16a34a", border: "1px solid #d1d5db" } : { background: "#111827", color: "#22c55e", border: "1px solid #374151" },
-    toastWarning: isLight ? { background: "#fff", color: "#f59e0b", border: "1px solid #d1d5db" } : { background: "#111827", color: "#f59e0b", border: "1px solid #374151" },
-    toastError: isLight ? { background: "#fff", color: "#ef4444", border: "1px solid #d1d5db" } : { background: "#111827", color: "#ef4444", border: "1px solid #374151" },
+    // Toast Styles
+    toastSuccess: isLight ? { background: "#fff", color: "#10b981", border: "1px solid #e2e8f0" } : { background: "#1e293b", color: "#34d399", border: "1px solid #334155" },
+    toastWarning: isLight ? { background: "#fff", color: "#f59e0b", border: "1px solid #e2e8f0" } : { background: "#1e293b", color: "#fbbf24", border: "1px solid #334155" },
+    toastError: isLight ? { background: "#fff", color: "#ef4444", border: "1px solid #e2e8f0" } : { background: "#1e293b", color: "#f87171", border: "1px solid #334155" },
 
   }), [isLight]);
 
@@ -191,7 +201,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
             <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${TC.bgHeader}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 flex items-center justify-center">
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
                   <div>
@@ -212,11 +222,11 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className={`p-4 sm:p-6 space-y-4 sm:space-y-6 ${isLight ? "bg-white" : "bg-gray-800/90"}`}>
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {loading ? (
                 <div className="flex justify-center items-center py-8 sm:py-12">
                   <div className={`flex items-center gap-2 sm:gap-3 ${TC.loadingText} text-sm sm:text-base`}>
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
                     Loading user data...
                   </div>
                 </div>
@@ -354,7 +364,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
               )}
 
               {/* Action Buttons */}
-              <div className={`flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${isLight ? "border-gray-300" : "border-gray-700"}`}>
+              <div className={`flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${isLight ? "border-gray-100" : "border-white/5"}`}>
                 <Button
                   type="button"
                   onClick={handleModalClose}

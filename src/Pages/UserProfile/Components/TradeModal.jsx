@@ -58,25 +58,36 @@ function TradeModal({
   // 💡 Theme classes derived from isLight
   const TC = useMemo(() => ({
     // General
-    bgModal: isLight ? "bg-white border-gray-300 shadow-xl" : "bg-gray-900 border-gray-700 shadow-xl",
-    bgCard: isLight ? "bg-gray-50/70 border-gray-300" : "bg-gray-800/50 border-gray-600",
+    bgModal: isLight 
+      ? "bg-white/95 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]" 
+      : "bg-[#0B0E14]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
+    bgCard: isLight 
+      ? "bg-white/60 border border-gray-200 shadow-sm backdrop-blur-sm" 
+      : "bg-gray-800/40 border border-white/5 shadow-inner backdrop-blur-sm",
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-700" : "text-gray-300",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
+    textSecondary: isLight ? "text-gray-600" : "text-gray-300",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    
     // Inputs
-    inputBg: isLight ? "bg-white border-gray-300 text-gray-900 placeholder-gray-400" : "bg-gray-800 border-gray-600 text-white placeholder-gray-500",
+    inputBg: isLight 
+      ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-gray-900 placeholder-gray-400 shadow-inner" 
+      : "bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-white placeholder-gray-600 shadow-inner",
+    
     // TABS
-    bgTabBase: isLight ? "bg-gray-100" : "bg-gray-800/50",
-    borderTab: isLight ? "border-gray-300" : "border-gray-700",
+    bgTabBase: isLight ? "bg-gray-50/80 backdrop-blur-sm" : "bg-gray-900/50 backdrop-blur-sm",
+    borderTab: isLight ? "border-gray-200" : "border-gray-800",
+    
     // Header/Active Accent BG
-    bgCyanAccent: isLight ? "bg-cyan-100/50 border-cyan-500/80" : "bg-cyan-900/20 border-cyan-500/50",
-    bgGreenAccent: isLight ? "bg-green-100/50 border-green-500/80" : "bg-green-900/20 border-green-500/50",
-    bgRedAccent: isLight ? "bg-red-100/50 border-red-500/80" : "bg-red-900/20 border-red-500/50",
+    bgCyanAccent: isLight ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100" : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
+    bgGreenAccent: isLight ? "bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100" : "bg-gradient-to-r from-emerald-900/20 to-green-900/20 border-b border-emerald-500/20",
+    bgRedAccent: isLight ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100" : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
+    
     // Pills (P&L)
-    bgGreenPill: isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-300",
-    bgRedPill: isLight ? "bg-red-100 text-red-700" : "bg-red-500/20 text-red-300",
+    bgGreenPill: isLight ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+    bgRedPill: isLight ? "bg-red-100 text-red-700 border border-red-200" : "bg-red-500/20 text-red-400 border border-red-500/30",
+    
     // Hover
-    hoverBorder: isLight ? "hover:border-cyan-600/50" : "hover:border-cyan-500/50",
+    hoverBorder: isLight ? "hover:border-cyan-400 transition-colors duration-300" : "hover:border-cyan-500/50 transition-colors duration-300",
   }), [isLight]);
   
   const userHoldings = useMemo(() => {
@@ -617,9 +628,9 @@ function TradeModal({
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
           {/* Holdings Summary */}
           {shouldShowHoldingsInfo && holdingsSummary && (
-            <div className={`mb-4 p-4 rounded-lg border glow-fade transition-all duration-300 ${
+            <div className={`mb-4 p-5 rounded-xl glow-fade transition-all duration-300 ${
               activeTab === "details" 
-                ? "bg-cyan-500/10 border-cyan-500/30" 
+                ? "bg-cyan-500/5 border border-cyan-500/20 shadow-lg shadow-cyan-500/5" 
                 : `${TC.bgCard}`
             }`}>
               <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${isLight ? "text-cyan-700" : "text-cyan-400"}`}>
@@ -774,7 +785,7 @@ function TradeModal({
               </div>
 
               {/* Trading Details */}
-              <div className={`p-3 rounded-lg border space-y-3 glow-fade transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`} style={{animationDelay: "400ms"}}>
+              <div className={`p-4 rounded-xl space-y-3 glow-fade transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`} style={{animationDelay: "400ms"}}>
                 <h4 className={`text-sm font-bold mb-2 flex items-center gap-2 ${TC.textSecondary}`}>
                   <FaExchangeAlt className="text-cyan-600 animate-pulse" />
                   Transaction Details
@@ -837,15 +848,15 @@ function TradeModal({
                   parseFloat(coinAmount) <= 0 ||
                   isSubmitting
                 }
-                className={`w-full py-2 px-4 font-bold text-sm rounded-lg 
+                className={`w-full py-3.5 px-4 font-bold text-sm rounded-xl 
                             transition-all duration-300 
                             disabled:opacity-50 disabled:cursor-not-allowed 
                             flex items-center justify-center gap-2 
-                            hover:scale-105 group glow-fade shadow-md
+                            hover:scale-[1.02] active:scale-[0.98] group glow-fade shadow-lg hover:shadow-xl
                             ${
                               isBuyOperation
-                                ? "bg-green-600 hover:bg-green-700 text-white"
-                                : "bg-red-600 hover:bg-red-700 text-white"
+                                ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                                : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-red-500/30 hover:shadow-red-500/50"
                             }`}
                 style={{ animationDelay: "500ms" }}
               >
