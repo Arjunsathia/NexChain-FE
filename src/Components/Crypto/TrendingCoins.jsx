@@ -66,13 +66,13 @@ function TrendingCoins() {
   }, [fetchTrendingCoins]);
 
   return (
-    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer}`} style={{ animationDelay: "0.1s" }}>
+    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
       <h2 className={`text-lg font-semibold mb-4 ${TC.textPrimary} fade-in`} style={{ animationDelay: "0.2s" }}>
         🔥 Trending Coins
       </h2>
 
       {loading ? (
-        <ul className="space-y-3">
+        <ul className="flex-1 flex flex-col justify-between">
           {Array(5)
             .fill(0)
             .map((_, index) => (
@@ -102,7 +102,7 @@ function TrendingCoins() {
           <p className="text-sm">{error || "No trending coins found."}</p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="flex-1 flex flex-col justify-between">
           {coins.map((coin, index) => (
             <li
               key={coin.id}

@@ -56,11 +56,11 @@ function TopGainers() {
   }, []);
 
   return (
-    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer}`} style={{ animationDelay: "0.1s" }}>
+    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
       <h2 className={`text-lg font-semibold mb-4 ${TC.textPrimary} fade-in`} style={{ animationDelay: "0.2s" }}>📈 Top Gainers</h2>
 
       {loading ? (
-        <ul className="space-y-3">
+        <ul className="flex-1 flex flex-col justify-between">
           {Array.from({ length: 5 }).map((_, index) => (
             <li
               key={index}
@@ -83,7 +83,7 @@ function TopGainers() {
           ))}
         </ul>
       ) : gainers.length > 0 ? (
-        <ul className={`space-y-3 ${TC.textPrimary}`}>
+        <ul className={`flex-1 flex flex-col justify-between ${TC.textPrimary}`}>
           {gainers.map((coin, index) => (
             <li
               key={coin.id}

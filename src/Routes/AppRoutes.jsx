@@ -2,28 +2,28 @@ import { Routes, Route } from "react-router-dom";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
 import MainLayout from "@/Components/layout/MainLayout";
-import Dashboard from "../Pages/Dashboard/Dashboard";
+import Dashboard from "../Pages/Dashboard";
 import CryptoList from "../Pages/CryptoList";
 import PortfolioPage from "@/Pages/PortfolioPage";
 import Watchlist from "@/Pages/Watchlist";
 import LearningHub from "@/Pages/LearningHub";
 import Admin from "@/Pages/Admin/Admin";
-import AdminDashboard from "@/Pages/Admin/Pages/AdminDashboard";
-import Users from "@/Pages/Admin/Pages/Users";
-import AdminCryptocurrencies from "@/Pages/Admin/Pages/AdminCryptocurrencies";
-import UserDashboard from "@/Pages/UserProfile/Pages/UserDashboard";
+import AdminDashboard from "@/Pages/Admin/Dashboard";
+import Users from "@/Pages/Admin/Users";
+import AdminCryptocurrencies from "@/Pages/Admin/Cryptocurrencies";
+import UserDashboard from "@/Pages/UserProfile/UserDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRoute from "./AuthRoute";
 import PublicRoute from "./PublicRoute";
 import CoinDetailsPage from "@/Pages/CoinDetails/CoinDetailsPage";
-import PurchaseDetails from "@/Pages/PurchaseDetails";
 import CoinPageOutlet from "@/Pages/CoinDetails/CoinPageOutlet";
-import AdminFeedback from "@/Pages/Admin/Pages/AdminFeedback";
-import MarketInsights from "@/Pages/Admin/Pages/MarketInsights";
-import AdminSettings from "@/Pages/Admin/Pages/AdminSettings";
-import UserSettings from "@/Pages/UserProfile/Pages/Settings";
+import AdminFeedback from "@/Pages/Admin/Feedback";
+import MarketInsights from "@/Pages/Admin/MarketInsights";
+import AdminSettings from "@/Pages/Admin/Settings";
+import UserSettings from "@/Pages/UserProfile/Settings";
 
 import PublicLayout from "@/Components/layout/PublicLayout";
+import User from "@/Pages/UserProfile/User";
 
 export default function AppRoutes() {
   return (
@@ -54,10 +54,11 @@ export default function AppRoutes() {
           <Route path="/learning" element={<LearningHub />} />
           <Route path="/coin" element={<CoinPageOutlet />} >
             <Route path="coin-details/:coinId" element={<CoinDetailsPage />} />
-            <Route path="purchase-details" element={<PurchaseDetails />} />
           </Route>
-          <Route path="/user-profile/:userId" element={<UserDashboard />} />
-          <Route path="/user/settings" element={<UserSettings />} />
+          <Route element={<User />}>
+            <Route path="/user-profile/:userId" element={<UserDashboard />} />
+            <Route path="/user/settings" element={<UserSettings />} />
+          </Route>
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />

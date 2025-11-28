@@ -6,7 +6,7 @@ import PortfolioHeader from "@/Components/portfolio/PortfolioHeader";
 import PerformanceChart from "@/Components/portfolio/PerformanceChart";
 import PortfolioDistribution from "@/Components/portfolio/PortfolioDistribution";
 import HoldingsTable from "@/Components/portfolio/HoldingsTable";
-import TradeModal from "@/Pages/UserProfile/Components/TradeModal";
+import TradeModal from "@/Components/Common/TradeModal";
 import TransactionHistory from "@/Components/portfolio/TransactionHistory";
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
@@ -76,7 +76,7 @@ const PortfolioPage = () => {
       
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
 
-      ws.current.onopen = () => { console.log('WebSocket connected for portfolio live prices'); };
+      ws.current.onopen = () => { };
 
       ws.current.onmessage = (event) => {
         const now = Date.now();
@@ -178,7 +178,7 @@ const PortfolioPage = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-5 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen p-2 sm:p-5 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
         

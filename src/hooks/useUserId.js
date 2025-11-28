@@ -21,9 +21,7 @@ export const useUserId = () => {
   // Handle both 'id' and '_id' fields
   const userId = user?.id || user?._id || localStorageUser?.id || localStorageUser?._id;
   
-  if (!userId) {
-    console.warn("⚠️ No user ID found in context or localStorage");
-  }
+
   
   return userId;
 };

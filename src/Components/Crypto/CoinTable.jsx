@@ -4,7 +4,7 @@ import useCoinContext from "@/Context/CoinContext/useCoinContext";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useNavigate } from "react-router-dom";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 
 // Utility to check if light mode is active based on global class
@@ -156,7 +156,7 @@ function CoinTable({ onTrade }) {
     try {
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${symbols}`);
 
-      ws.current.onopen = () => { console.log('WebSocket connected for live prices'); };
+      ws.current.onopen = () => { };
 
       ws.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -190,7 +190,7 @@ function CoinTable({ onTrade }) {
       };
 
       ws.current.onerror = (error) => { console.error('WebSocket error:', error); };
-      ws.current.onclose = () => { console.log('WebSocket disconnected for live prices'); };
+      ws.current.onclose = () => { };
 
     } catch (error) {
       console.error('WebSocket setup failed:', error);
@@ -204,7 +204,19 @@ function CoinTable({ onTrade }) {
   // Watchlist toggle function with backend API
   const toggleWishlist = useCallback(async (coinId, coinData) => {
     if (!user?.id) {
-      toast.error("Please login to manage watchlist");
+      toast.error("Please login to manage watchlist", {
+        style: {
+          background: "#FEE2E2",
+          color: "#991B1B",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          borderRadius: "8px",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          border: "none",
+        },
+        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+      });
       return;
     }
 
@@ -241,32 +253,37 @@ function CoinTable({ onTrade }) {
           user_id: user.id,
         });
         toast.success("Coin removed from watchlist!", {
-          icon: "✅",
           // 💡 Adjust toast styles for dual mode
           style: {
-            background: isLight ? "#FFFFFF" : "#111827",
-            color: isLight ? "#16A34A" : "#22c55e",
+            background: "#FEF2F2", // Light red
+            color: "#991B1B", // Dark red
             fontWeight: "600",
             fontSize: "14px",
             padding: "12px 16px",
             borderRadius: "8px",
-            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            border: "none",
           },
+          iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
         });
       } else {
         // Add to watchlist
         await postForm("/watchlist/add", postData);
         toast.success("Coin added to watchlist!", {
-          icon: "⭐",
           // 💡 Adjust toast styles for dual mode
           style: {
-            background: isLight ? "#FFFFFF" : "#111827",
-            color: isLight ? "#FACC15" : "#eab308",
+            background: "#FEFCE8", // Light yellow/gold
+            color: "#854D0E", // Dark gold/brown
             fontWeight: "600",
             fontSize: "14px",
             padding: "12px 16px",
             borderRadius: "8px",
-            boxShadow: isLight ? "0 4px 6px rgba(0,0,0,0.1)" : "0 4px 6px rgba(0,0,0,0.4)",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            border: "none", // Removed border as requested
+          },
+          iconTheme: {
+            primary: "#EAB308", // Gold icon
+            secondary: "#FFFFFF",
           },
         });
       }
@@ -280,7 +297,19 @@ function CoinTable({ onTrade }) {
           ? [...prev, coinId]
           : prev.filter(id => id !== coinId)
       );
-      toast.error("Operation failed. Please try again.");
+      toast.error("Operation failed. Please try again.", {
+        style: {
+          background: "#FEE2E2",
+          color: "#991B1B",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          borderRadius: "8px",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          border: "none",
+        },
+        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+      });
     } finally {
       setSubmitting(false);
     }

@@ -138,7 +138,7 @@ export const usePurchasedCoins = () => {
       }
 
       try {
-        console.log("🔄 Selling coins - Raw data:", sellData);
+
 
         const backendSellData = {
           user_id: String(userId),
@@ -147,10 +147,10 @@ export const usePurchasedCoins = () => {
           current_price: Number(parseFloat(sellData.current_price)),
         };
 
-        console.log("📤 Sending sell data to backend:", backendSellData);
+
 
         const response = await postForm("/purchases/sell", backendSellData);
-        console.log("✅ Backend sell response:", response);
+
 
         if (response.success) {
           await fetchPurchasedCoins();

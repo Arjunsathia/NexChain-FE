@@ -10,20 +10,17 @@ const PortfolioProvider = ({ children }) => {
 
   const refreshPurchasedCoins = useCallback(async () => {
     if (!userId) {
-      // console.log('No user ID found, setting empty purchased coins');
+
       setPurchasedCoins([]);
       return;
     }
 
     setLoading(true);
     try {
-      // console.log('🔄 Fetching purchases for user:', userId);
       const response = await getData(`/purchases/${userId}`);
-      // console.log('Purchases API Response:', response);
       
       if (response.success) {
         const purchases = response.purchases || [];
-        // console.log('✅ Purchases found:', purchases.length);
         
         const transformedData = purchases.map(coin => ({
           id: coin._id || coin.id,
@@ -38,10 +35,10 @@ const PortfolioProvider = ({ children }) => {
           purchaseDate: coin.purchaseDate || coin.createdAt
         }));
         
-        // console.log('📊 Transformed purchased coins:', transformedData);
+
         setPurchasedCoins(transformedData);
       } else {
-        // console.log('No purchases found');
+
         setPurchasedCoins([]);
       }
     } catch (error) {
@@ -58,7 +55,7 @@ const PortfolioProvider = ({ children }) => {
     }
 
     try {
-      // console.log('🔄 Adding purchase for user:', userId, purchaseData);
+
       
       const finalPurchaseData = {
         ...purchaseData,
@@ -66,7 +63,6 @@ const PortfolioProvider = ({ children }) => {
       };
 
       const response = await postForm('/purchases/buy', finalPurchaseData);
-      // console.log('✅ Backend purchase response:', response);
       
       if (response.success) {
         await refreshPurchasedCoins();
@@ -96,7 +92,7 @@ const PortfolioProvider = ({ children }) => {
     }
 
     try {
-      // console.log('🔄 Selling coins for user:', userId, sellData);
+
       
       const finalSellData = {
         ...sellData,
@@ -104,7 +100,6 @@ const PortfolioProvider = ({ children }) => {
       };
 
       const response = await postForm('/purchases/sell', finalSellData);
-      // console.log('✅ Backend sell response:', response);
       
       if (response.success) {
         await refreshPurchasedCoins();

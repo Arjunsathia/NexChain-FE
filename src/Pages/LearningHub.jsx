@@ -164,7 +164,7 @@ function LearningHub() {
   const featuredCourses = courses.filter(c => c.featured);
 
   return (
-    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6`}>
+    <div className={`min-h-screen p-2 sm:p-4 lg:p-6`}>
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-6 sm:py-8">
         
         {/* Hero Section */}
@@ -183,21 +183,21 @@ function LearningHub() {
                   Learning Hub
                 </h1>
               </div>
-              <p className={`text-base sm:text-lg mb-6 ${TC.textSecondary} max-w-2xl`}>
+              <p className={`text-base sm:text-lg mb-6 ${TC.textPrimary} max-w-2xl`}>
                 Master cryptocurrency trading, blockchain technology, and investment strategies with our comprehensive courses
               </p>
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
                   <FaBook className="text-cyan-400" />
-                  <span className="text-sm font-medium">{courses.length} Courses</span>
+                  <span className={`text-sm font-medium ${TC.textPrimary}`}>{courses.length} Courses</span>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
                   <FaFire className="text-orange-400" />
-                  <span className="text-sm font-medium">{featuredCourses.length} Featured</span>
+                  <span className={`text-sm font-medium ${TC.textPrimary}`}>{featuredCourses.length} Featured</span>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
                   <FaTrophy className="text-yellow-400" />
-                  <span className="text-sm font-medium">Earn Certificates</span>
+                  <span className={`text-sm font-medium ${TC.textPrimary}`}>Earn Certificates</span>
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@ function LearningHub() {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`
                     flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-300
-                    ${isActive ? TC.bgCategoryActive : TC.bgCategory}
+                    ${isActive ? TC.bgCategoryActive : `${TC.bgCategory} ${TC.textSecondary}`}
                     ${isActive ? 'shadow-lg shadow-cyan-500/25 scale-105' : 'hover:scale-105'}
                   `}
                 >
@@ -265,7 +265,7 @@ function LearningHub() {
           >
             <div className="flex items-center gap-3 mb-6">
               <FaStar className="text-2xl text-yellow-400" />
-              <h2 className="text-2xl font-bold">Featured Courses</h2>
+              <h2 className={`text-2xl font-bold ${TC.textPrimary}`}>Featured Courses</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {featuredCourses.map((course, idx) => (
@@ -281,7 +281,7 @@ function LearningHub() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <h2 className="text-2xl font-bold mb-6">
+          <h2 className={`text-2xl font-bold mb-6 ${TC.textPrimary}`}>
             {selectedCategory === "all" ? "All Courses" : `${categories.find(c => c.id === selectedCategory)?.name} Courses`}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -35,7 +35,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     // Base/Container Styles 
     bgNavbar: isDarkMode
       ? "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20"
-      : "bg-white/80 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12)]",
+      : "bg-white/80 backdrop-blur-xl shadow-[0_2px_10px_rgba(0,0,0,0.06)]",
     textBase: isDarkMode ? "text-gray-300" : "text-gray-700",
     
     // Hover/Interactive

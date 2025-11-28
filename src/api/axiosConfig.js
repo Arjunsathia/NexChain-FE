@@ -1,13 +1,16 @@
 // src/api/axiosConfig.js
 import axios from "axios";
 
+const COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+
 export const coinGecko = axios.create({
-  baseURL: "https://api.coingecko.com/api/v3",
+  baseURL: COINGECKO_BASE_URL,
 });
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:5000",
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -34,7 +37,6 @@ api.interceptors.request.use(
 // Response Interceptor
 api.interceptors.response.use(
   (response) => {
-    // console.log("API Response:", response.config.url, response.status);
     return response;
   },
   (error) => {
@@ -47,7 +49,6 @@ api.interceptors.response.use(
 export const getData = async (url, params) => {
   try {
     const response = await api.get(url, params && { params });
-    // console.info("GET success:", url);
     return response.data;
   } catch (error) {
     console.error("GET Error for", url, error);
@@ -58,22 +59,10 @@ export const getData = async (url, params) => {
 // GET by ID
 export const getById = async (url, id) => {
   try {
-    // console.log("Making GET request to:", `${url}/${id}`);
     const response = await api.get(`${url}/${id}`);
-    // console.info("GET by ID success:", `${url}/${id}`);
     return response.data;
   } catch (error) {
     console.error("GET by ID Error for", `${url}/${id}`, error);
-    throw error;
-  }
-};
-
-export const getDataP = async (url, params = {}) => {
-  try {
-    const response = await api.get(url, { params });
-    return response.data;
-  } catch (error) {
-    console.error("GET Error for", url, error);
     throw error;
   }
 };
@@ -82,7 +71,6 @@ export const getDataP = async (url, params = {}) => {
 export const postForm = async (url, formData) => {
   try {
     const response = await api.post(url, formData);
-    // console.info("POST success:", url);
     return response.data;
   } catch (error) {
     console.error("POST Error for", url, error);
@@ -94,7 +82,6 @@ export const postForm = async (url, formData) => {
 export const updateById = async (url, id, updateData) => {
   try {
     const response = await api.put(`${url}/${id}`, updateData);
-    // console.info("Updated successfully:", `${url}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Update Error for", `${url}/${id}`, error);
@@ -106,7 +93,6 @@ export const updateById = async (url, id, updateData) => {
 export const deleteById = async (url, id) => {
   try {
     const response = await api.delete(`${url}/${id}`);
-    // console.info("Deleted successfully:", `${url}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Delete Error for", `${url}/${id}`, error);
@@ -118,7 +104,6 @@ export const deleteById = async (url, id) => {
 export const login = async (url, credentials) => {
   try {
     const response = await api.post(url, credentials);
-    // console.info("Login successful");
     return response.data;
   } catch (error) {
     console.error("Login Error", error);
@@ -129,7 +114,6 @@ export const login = async (url, credentials) => {
 export const logout = async () => {
   try {
     await api.post("/users/logout");
-    // console.info("Logout successful");
   } catch (error) {
     console.error("Logout Error", error);
     throw error;
@@ -139,7 +123,6 @@ export const logout = async () => {
 export const deleteWatchList = async (url, params) => {
   try {
     const response = await api.delete(url, { params });
-    // console.info("Deleted successfully");
     return response.data;
   } catch (error) {
     console.error("Delete Error", error);

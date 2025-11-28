@@ -4,11 +4,11 @@ import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
 import TrendingCoins from "@/Components/Crypto/TrendingCoins";
-import { formatNumberWithCommas } from "@/utils/helper";
+
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
-import TradeModal from "./UserProfile/Components/TradeModal";
+import TradeModal from "@/Components/Common/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
 
@@ -124,6 +124,14 @@ function CryptoList() {
     return value < 0 ? TC.bgPillNegative : TC.bgPillPositive;
   };
 
+  // Helper for compact number formatting
+  const formatCompactNumber = (number) => {
+    return new Intl.NumberFormat("en-US", {
+      notation: "compact",
+      maximumFractionDigits: 2,
+    }).format(number);
+  };
+
   return (
     // Applied transition to the main wrapper using isMounted state
     <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
@@ -157,13 +165,13 @@ function CryptoList() {
         <div className="flex flex-col items-end">
           <span className={TC.textTertiary}>Market Cap</span>
           <span className="font-semibold">
-            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_market_cap?.usd)}`}
+            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
           </span>
         </div>
         <div className="flex flex-col items-end">
           <span className={TC.textTertiary}>24h Volume</span>
           <span className="font-semibold">
-            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_volume?.usd)}`}
+            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
           </span>
         </div>
       </div>
@@ -177,7 +185,7 @@ function CryptoList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
           
           {/* Global Market Card (Large) - Added 'fade-in' class */}
-          <div className={`lg:col-span-4 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in`} style={{ transitionDelay: '0.1s' }}>
+          <div className={`lg:col-span-4 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in h-full flex flex-col justify-between`} style={{ transitionDelay: '0.1s' }}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400"}`}>
@@ -193,11 +201,11 @@ function CryptoList() {
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 flex-1 flex flex-col justify-center">
               <div>
                 <p className={`text-sm mb-1 ${TC.textTertiary}`}>Total Market Cap</p>
                 <h2 className="text-3xl font-bold tracking-tight">
-                  {loading ? <Skeleton width={180} height={36} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_market_cap?.usd)}`}
+                  {loading ? <Skeleton width={180} height={36} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
                 </h2>
               </div>
               
@@ -209,7 +217,7 @@ function CryptoList() {
               <div className="pt-4 border-t border-gray-200/10 flex justify-between items-center text-sm">
                  <span className={TC.textSecondary}>24h Volume</span>
                  <span className={`font-mono font-semibold ${TC.textPrimary}`}>
-                    {loading ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatNumberWithCommas(globalData?.total_volume?.usd)}`}
+                    {loading ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
                  </span>
               </div>
             </div>

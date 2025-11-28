@@ -167,7 +167,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   return (
     <div
       className={`
-        rounded-2xl p-4 sm:p-6
+        rounded-2xl p-4 sm:p-6 h-full flex flex-col
         ${TC.bgContainer}
       `}
     >
@@ -198,7 +198,7 @@ const EmptyState = ({ isLight, TC }) => {
   return (
     <div
       className={`
-        rounded-2xl p-6 fade-in
+        rounded-2xl p-6 fade-in h-full
         ${TC.bgContainer}
         transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:-translate-y-1 will-change-transform
       `}
@@ -209,7 +209,7 @@ const EmptyState = ({ isLight, TC }) => {
           Portfolio Performance
         </h2>
       </div>
-      <div className={`flex flex-col items-center justify-center py-12 ${TC.textSecondary}`}>
+      <div className={`flex flex-col items-center justify-center py-12 ${TC.textSecondary} h-full`}>
         <div className="text-4xl mb-3">📊</div>
         <p className={`text-center text-base ${TC.textPrimary}`}>No investment data available</p>
         <p className={`text-sm mt-2 text-center ${TC.textSecondary}`}>Start investing to track your performance</p>
@@ -281,7 +281,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
 
   if (!performanceData || performanceData.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-gray-400">
+      <div className="flex-1 min-h-[250px] flex items-center justify-center text-gray-400">
         <p className="text-sm">No performance data available</p>
       </div>
     );
@@ -308,7 +308,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
   };
 
   return (
-    <div className="h-64 w-full">
+    <div className="flex-1 min-h-[250px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={performanceData}>
           <defs>

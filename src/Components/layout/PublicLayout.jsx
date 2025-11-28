@@ -1,13 +1,8 @@
-
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function PublicLayout() {
-  // 💡 State for Dark Mode
-  const [isDark, setIsDark] = useState(() => {
-    // Initialize based on localStorage or default to dark
-    return localStorage.getItem("theme") === "light" ? false : true;
-  });
+  const [isDark, setIsDark] = useState(true);
 
   // 💡 Function to toggle Dark Mode globally
   const toggleDarkMode = () => {
@@ -26,12 +21,9 @@ export default function PublicLayout() {
 
   // Set initial theme based on state
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }, []);
 
   // 💡 Gradient classes switched based on isDark state
   const backgroundClass = isDark
@@ -39,7 +31,7 @@ export default function PublicLayout() {
     : "bg-gradient-to-tl from-white via-slate-50 to-blue-50"; // 💨 Subtle Premium Cool Gradient
 
   return (
-    <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
+    <div className={`min-h-screen flex flex-col ${backgroundClass} text-white`}>
       <main className="flex-1 p-4">
         <Outlet />
       </main>

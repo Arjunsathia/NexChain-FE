@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Components/Sidebar";
-import MobileNavbar from "./Components/MobileNavbar";
+import Sidebar from "@/Components/Admin/Sidebar";
+import MobileNavbar from "@/Components/Admin/MobileNavbar";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {

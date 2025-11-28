@@ -16,11 +16,11 @@ const WalletProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      // console.log("🔄 Refreshing balance for user:", userId);
+
       const response = await getData(`/purchases/balance/${userId}`);
       
       if (response.success) {
-        // console.log("💰 New balance:", response.virtualBalance);
+
         setBalance(response.virtualBalance);
         return response.virtualBalance;
       } else {
