@@ -32,6 +32,9 @@ const AuthPage = () => {
   const [logging, setLogging] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [userId, setUserId] = useState(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +57,21 @@ const AuthPage = () => {
     e.preventDefault();
     setLogging(true);
     try {
-      const res = await login("/users/login", loginData);
+      // Backend expects 'email' field, but we're collecting it as 'user_name' in the UI
+      const loginPayload = {
+        email: loginData.user_name, // Send user_name value as email
+        password: loginData.password
+      };
+      const res = await login("/users/login", loginPayload);
+      
+      if (res.twoFactorRequired) {
+          setTwoFactorRequired(true);
+          setUserId(res.user_id);
+          setLogging(false);
+          toast("2FA Required", { icon: "🔒" });
+          return;
+      }
+
       if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
       if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
 
@@ -71,9 +88,14 @@ const AuthPage = () => {
         },
         iconTheme: { primary: "#0891B2", secondary: "#FFFFFF" },
       });
-      navigate("/dashboard");
+      if (res?.user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
-      toast.error("Incorrect username or password", {
+      const errorMessage = err.response?.data?.message || "Incorrect username or password";
+      toast.error(errorMessage, {
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
@@ -89,6 +111,28 @@ const AuthPage = () => {
     } finally {
       setLogging(false);
     }
+  };
+
+  const handleVerify2FA = async (e) => {
+      e.preventDefault();
+      setLogging(true);
+      try {
+          const res = await postForm("/users/verify-login-2fa", { user_id: userId, token: otp });
+          
+          if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
+          if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user || res)); // Handle response structure
+
+          toast.success(`Welcome back!`);
+          if (res?.user?.role === "admin" || res?.role === "admin") {
+              navigate("/admin");
+          } else {
+              navigate("/dashboard");
+          }
+      } catch (err) {
+          toast.error(err.response?.data?.message || "Invalid 2FA Code");
+      } finally {
+          setLogging(false);
+      }
   };
 
   const handleRegister = async (e) => {
@@ -166,7 +210,8 @@ const AuthPage = () => {
         iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
       });
     } catch (err) {
-      toast.error("Registration failed. Please try again", {
+      const errorMessage = err.response?.data?.message || "Registration failed. Please try again";
+      toast.error(errorMessage, {
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
@@ -261,8 +306,68 @@ const AuthPage = () => {
               </div>
 
               {/* Forms */}
-              <AnimatePresence mode="wait">
-                  {activeTab === "login" ? (
+                  <AnimatePresence mode="wait">
+                      {twoFactorRequired ? (
+                          <motion.form
+                              key="2fa"
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ duration: 0.3 }}
+                              className="space-y-5"
+                              onSubmit={handleVerify2FA}
+                          >
+                              <div className="text-center mb-6">
+                                  <div className="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                      <Lock className="w-8 h-8 text-cyan-500" />
+                                  </div>
+                                  <h3 className="text-xl font-bold text-white">Two-Factor Authentication</h3>
+                                  <p className="text-gray-400 text-sm mt-2">Enter the 6-digit code from your authenticator app</p>
+                              </div>
+
+                              <div className="space-y-2">
+                                  <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Authentication Code</Label>
+                                  <div className="relative group">
+                                      <Input
+                                          type="text"
+                                          value={otp}
+                                          onChange={(e) => setOtp(e.target.value)}
+                                          placeholder="000000"
+                                          maxLength={6}
+                                          className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600 text-center text-2xl tracking-[0.5em] font-mono"
+                                          required
+                                          autoFocus
+                                      />
+                                  </div>
+                              </div>
+
+                              <Button
+                                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-14 text-lg mt-4"
+                                  type="submit"
+                                  disabled={logging || otp.length !== 6}
+                              >
+                                  {logging ? (
+                                      <div className="flex items-center gap-2">
+                                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                          <span>Verifying...</span>
+                                      </div>
+                                  ) : (
+                                      <div className="flex items-center gap-2">
+                                          <span>Verify Code</span>
+                                          <ChevronRight className="w-5 h-5" />
+                                      </div>
+                                  )}
+                              </Button>
+                              
+                              <button 
+                                  type="button"
+                                  onClick={() => { setTwoFactorRequired(false); setOtp(""); }}
+                                  className="w-full text-center text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                              >
+                                  Back to Login
+                              </button>
+                          </motion.form>
+                      ) : activeTab === "login" ? (
                   <motion.form
                       key="login"
                       initial={{ opacity: 0, x: 20 }}

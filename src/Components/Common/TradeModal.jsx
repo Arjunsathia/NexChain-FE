@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
+import api from "@/api/axiosConfig";
 
 // Sub-components
 import TradeModalHeader from "../TradeModal/TradeModalHeader";
@@ -42,6 +43,7 @@ function TradeModal({
   type = "buy",
   showHoldingsInfo = false,
   purchasedCoins = [],
+  initialAlertMode = false,
 }) {
   const isLight = useThemeCheck();
   const { user } = useUserContext();
@@ -58,6 +60,15 @@ function TradeModal({
   const [isVisible, setIsVisible] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
   const [successData, setSuccessData] = useState(null);
+
+  // Limit/Stop Order State
+  const [orderType, setOrderType] = useState("market"); // 'market', 'limit', 'stop_limit'
+  const [limitPrice, setLimitPrice] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
+
+  // Alert State
+  const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
+  const [alertTargetPrice, setAlertTargetPrice] = useState("");
 
   // 💡 Theme classes derived from isLight
   const TC = useMemo(
@@ -186,6 +197,10 @@ function TradeModal({
     };
   }, [shouldShowHoldingsInfo, coin, currentPrice, userHoldings]);
 
+  const effectivePrice = useMemo(() => {
+    return (orderType === "limit" || orderType === "stop_limit") && limitPrice ? parseFloat(limitPrice) : currentPrice;
+  }, [orderType, limitPrice, currentPrice]);
+
   const maxAvailable = useMemo(() => {
     const isSellMode = shouldShowHoldingsInfo
       ? activeTab === "withdraw"
@@ -194,9 +209,9 @@ function TradeModal({
       return holdingsSummary.totalQuantity || 0;
     }
 
-    if (balance && currentPrice > 0) {
+    if (balance && effectivePrice > 0) {
       const maxUSD = balance * 0.95;
-      return maxUSD / currentPrice;
+      return maxUSD / effectivePrice;
     }
 
     return 0;
@@ -206,7 +221,7 @@ function TradeModal({
     type,
     holdingsSummary,
     balance,
-    currentPrice,
+    effectivePrice,
   ]);
 
   const shouldShowSellAll = useMemo(() => {
@@ -224,6 +239,7 @@ function TradeModal({
       setIsSubmitting(false);
       setIsVisible(false);
       setSuccessData(null);
+      setIsAlertMode(initialAlertMode || false);
 
       setTimeout(() => setIsVisible(true), 10);
 
@@ -240,6 +256,11 @@ function TradeModal({
         coin.market_data?.current_price?.usd ||
         0;
       setCurrentPrice(price);
+      setLimitPrice(price); // Default limit price to current price
+      setStopPrice(price);
+      setOrderType("market");
+      setIsAlertMode(false);
+      setAlertTargetPrice(price);
     }
   }, [show, coin, type, shouldShowHoldingsInfo]);
 
@@ -248,14 +269,16 @@ function TradeModal({
     setForceUpdate((prev) => prev + 1);
   }, [purchasedCoins]);
 
+
+
   const handleUsdAmountChange = (e) => {
     const value = e.target.value;
     setUsdAmount(value);
 
-    if (value && currentPrice > 0) {
+    if (value && effectivePrice > 0) {
       const amount = parseFloat(value);
       if (!isNaN(amount) && amount > 0) {
-        const calculatedCoins = amount / currentPrice;
+        const calculatedCoins = amount / effectivePrice;
         setCoinAmount(calculatedCoins.toFixed(8));
       } else {
         setCoinAmount("");
@@ -267,10 +290,10 @@ function TradeModal({
     const value = e.target.value;
     setCoinAmount(value);
 
-    if (value && currentPrice > 0) {
+    if (value && effectivePrice > 0) {
       const coins = parseFloat(value);
       if (!isNaN(coins) && coins > 0) {
-        const calculatedUSD = coins * currentPrice;
+        const calculatedUSD = coins * effectivePrice;
         setUsdAmount(calculatedUSD.toFixed(2));
       } else {
         setUsdAmount("");
@@ -278,12 +301,25 @@ function TradeModal({
     }
   };
 
+  const handleLimitPriceChange = (e) => {
+    const value = e.target.value;
+    setLimitPrice(value);
+    
+    // Update USD amount based on new price and existing coin amount
+    if (coinAmount && value > 0) {
+        const price = parseFloat(value);
+        const calculatedUSD = parseFloat(coinAmount) * price;
+        setUsdAmount(calculatedUSD.toFixed(2));
+    }
+  };
+
   const setMaxAmount = () => {
-    const maxCoins = maxAvailable;
+    const maxCoins = maxAvailable; // Note: maxAvailable logic might need adjustment for Limit Buy (USD balance / limitPrice)
     if (maxCoins > 0) {
       setCoinAmount(maxCoins.toFixed(8));
-      const calculatedUSD = maxCoins * currentPrice;
+      const calculatedUSD = maxCoins * effectivePrice;
       setUsdAmount(calculatedUSD.toFixed(2));
+// ... rest of setMaxAmount
 
       const isSellMode = shouldShowHoldingsInfo
         ? activeTab === "withdraw"
@@ -357,6 +393,8 @@ function TradeModal({
     return amount.toFixed(2);
   }, [usdAmount]);
 
+
+
   const handleTradeSubmit = useCallback(
     async (tradeData) => {
       if (!user) {
@@ -379,56 +417,124 @@ function TradeModal({
       const { type, symbol, coinAmount, total, coinData } = tradeData;
 
       try {
-        if (type === "buy") {
-          if (!coinData) {
-            throw new Error("Coin data not found");
-          }
+        // ALERT LOGIC
+        if (isAlertMode) {
+            const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
+            const alertData = {
+                user_id: user.id,
+                coin_id: coinData.coinId || coinData.id,
+                coin_symbol: symbol,
+                coin_name: coinData.name || coinData.coinName,
+                coin_image: coinData.image,
+                target_price: parseFloat(alertTargetPrice),
+                condition
+            };
 
-          const cryptocurrencyId = coinData.coinId || coinData.id;
-
-          const purchaseData = {
-            user_id: user.id,
-            coin_id: cryptocurrencyId,
-            coin_name: coinData.name || coinData.coinName,
-            coin_symbol: coinData.symbol || coinData.coinSymbol,
-            coin_price_usd: currentPrice,
-            quantity: parseFloat(coinAmount),
-            total_cost: parseFloat(total),
-            fees: 0,
-            image: coinData.image,
-          };
-
-          const result = await addPurchase(purchaseData);
-          if (result.success) {
-            toast.success(
-              `Successfully bought ${parseFloat(coinAmount).toFixed(
-                6
-              )} ${symbol.toUpperCase()}`,
-              {
-                style: {
-                  background: "#DCFCE7",
-                  color: "#166534",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  padding: "12px 16px",
-                  borderRadius: "8px",
-                  border: "none",
-                },
-                iconTheme: {
-                  primary: "#16A34A",
-                  secondary: "#FFFFFF",
-                },
-              }
-            );
-
-            if (refreshPurchasedCoins) {
-              await refreshPurchasedCoins();
+            const res = await api.post("/alerts/create", alertData);
+            if (res.data.success) {
+                toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`, {
+                    style: {
+                      background: "#DCFCE7",
+                      color: "#166534",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                      padding: "12px 16px",
+                      borderRadius: "8px",
+                      border: "none",
+                    },
+                    iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
+                });
+                handleClose();
+                return;
+            } else {
+                throw new Error("Failed to create alert");
             }
-          } else {
-            throw new Error(result.error || "Purchase failed");
-          }
+        }
+
+        // LIMIT & STOP ORDER LOGIC
+        if (orderType === "limit" || orderType === "stop_limit") {
+            const orderData = {
+                user_id: user.id,
+                coin_id: coinData.coinId || coinData.id,
+                coin_symbol: symbol,
+                coin_name: coinData.name || coinData.coinName,
+                coin_image: coinData.image,
+                type: type, // 'buy' or 'sell'
+                category: orderType, // 'limit' or 'stop_limit'
+                limit_price: parseFloat(limitPrice),
+                stop_price: orderType === 'stop_limit' ? parseFloat(stopPrice) : undefined,
+                quantity: parseFloat(coinAmount)
+            };
+
+            const res = await api.post("/orders/create", orderData);
+            
+            if (res.data.success) {
+                toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
+                setSuccessData({
+                    ...orderData,
+                    price: parseFloat(limitPrice),
+                    total: parseFloat(coinAmount) * parseFloat(limitPrice),
+                    newBalance: res.data.newBalance
+                });
+                refreshBalance();
+                refreshPurchasedCoins();
+                handleClose();
+                return;
+            } else {
+                throw new Error(res.data.error || "Failed to create order");
+            }
         } else {
+            // MARKET ORDER LOGIC
+            if (isBuyOperation) {
+                if (!coinData) {
+                    throw new Error("Coin data not found");
+                }
+
+                const cryptocurrencyId = coinData.coinId || coinData.id;
+
+                const purchaseData = {
+                    user_id: user.id,
+                    coin_id: cryptocurrencyId,
+                    coin_name: coinData.name || coinData.coinName,
+                    coin_symbol: coinData.symbol || coinData.coinSymbol,
+                    coin_price_usd: currentPrice,
+                    quantity: parseFloat(coinAmount),
+                    total_cost: parseFloat(total),
+                    fees: 0,
+                    image: coinData.image,
+                };
+
+                const result = await addPurchase(purchaseData);
+                if (result.success) {
+                    toast.success(
+                        `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
+                        {
+                            style: {
+                                background: "#DCFCE7",
+                                color: "#166534",
+                                boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                                fontWeight: "600",
+                                fontSize: "14px",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                border: "none",
+                            },
+                            iconTheme: {
+                                primary: "#16A34A",
+                                secondary: "#FFFFFF",
+                            },
+                        }
+                    );
+
+                    if (refreshPurchasedCoins) {
+                        await refreshPurchasedCoins();
+                    }
+                } else {
+                    throw new Error(result.error || "Purchase failed");
+                }
+            } else {
+          // SELL LOGIC
           if (!coinData) {
             throw new Error("Coin data not found");
           }
@@ -473,6 +579,7 @@ function TradeModal({
             throw new Error(result.error || "Sell failed");
           }
         }
+      }
 
         let retryCount = 0;
         const maxRetries = 3;
@@ -495,7 +602,25 @@ function TradeModal({
         setForceUpdate((prev) => prev + 1);
       } catch (error) {
         console.error("Trade execution error:", error);
-        throw error;
+        const errorMessage =
+          error.response?.data?.error ||
+          error.message ||
+          "Trade failed. Please try again.";
+        toast.error(errorMessage, {
+          style: {
+            background: "#FEE2E2",
+            color: "#991B1B",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            borderRadius: "8px",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            border: "none",
+          },
+          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+        });
+      } finally {
+        setIsSubmitting(false);
       }
     },
     [
@@ -505,6 +630,11 @@ function TradeModal({
       currentPrice,
       refreshBalance,
       refreshPurchasedCoins,
+      orderType,
+      limitPrice,
+      stopPrice,
+      isAlertMode,
+      alertTargetPrice
     ]
   );
 
@@ -784,6 +914,16 @@ function TradeModal({
               isBuyOperation={isBuyOperation}
               handleSubmit={handleSubmit}
               isSubmitting={isSubmitting}
+              orderType={orderType}
+              setOrderType={setOrderType}
+              limitPrice={limitPrice}
+              handleLimitPriceChange={handleLimitPriceChange}
+              isAlertMode={isAlertMode}
+              setIsAlertMode={setIsAlertMode}
+              alertTargetPrice={alertTargetPrice}
+              setAlertTargetPrice={setAlertTargetPrice}
+              stopPrice={stopPrice}
+              setStopPrice={setStopPrice}
             />
           )}
 

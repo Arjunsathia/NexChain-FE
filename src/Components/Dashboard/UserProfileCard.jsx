@@ -3,6 +3,8 @@ import { FaUser, FaWallet } from "react-icons/fa";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
 
+const SERVER_URL = "http://localhost:5050";
+
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
   const [isLight, setIsLight] = useState(
@@ -53,6 +55,11 @@ function UserProfileCard() {
     [isLight]
   );
 
+  const getUserImage = (user) => {
+    if (!user?.image) return null;
+    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`;
+  };
+
   return (
     <div
       className={`
@@ -77,8 +84,16 @@ function UserProfileCard() {
         <div
           className={`flex items-center gap-3 p-3 rounded-xl border hover:border-cyan-600/30 transition-all duration-200 group ${TC.bgItem}`}
         >
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-200">
-            {user?.name?.charAt(0)?.toUpperCase() || "U"}
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-200 overflow-hidden">
+            {getUserImage(user) ? (
+              <img 
+                src={getUserImage(user)} 
+                alt={user.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user?.name?.charAt(0)?.toUpperCase() || "U"
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`font-semibold text-xs truncate ${TC.textPrimary}`}>

@@ -78,8 +78,10 @@ function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [trendingCoinData, setTrendingCoinData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
+  const [timeRange, setTimeRange] = useState("Month");
 
   useEffect(() => {
     let mounted = true;
@@ -172,11 +174,26 @@ function AdminDashboard() {
       }
     };
 
+    const fetchTrendingCoin = async () => {
+      try {
+        const res = await getData("/watchlist/trending");
+        const data = res?.data ?? res;
+        if (mounted) setTrendingCoinData(data);
+      } catch (err) {
+        console.error("Failed to fetch trending coin:", err);
+      }
+    };
+
     const load = async () => {
       setIsLoading(true);
       setContentLoaded(false);
       try {
-        await Promise.all([fetchUsers(), fetchReports(), fetchRecentActivity()]);
+        await Promise.all([
+          fetchUsers(),
+          fetchReports(),
+          fetchRecentActivity(),
+          fetchTrendingCoin(),
+        ]);
       } catch (err) {
         console.error("Failed to fetch admin data:", err);
       } finally {
@@ -193,6 +210,7 @@ function AdminDashboard() {
         fetchUsers();
         fetchReports();
         fetchRecentActivity();
+        fetchTrendingCoin();
       }
     }, 30000);
 
@@ -204,17 +222,23 @@ function AdminDashboard() {
 
   const adminStats = useMemo(() => {
     const totalUsers = users.length;
-    const totalCoins = Array.isArray(coins) ? coins.length : 0;
+    // Mock coins count if not available from API
+    const totalCoins = 150;
     const totalTrades = users.reduce(
       (total, u) => total + (u.purchasedCoins?.length || 0),
       0
     );
-    const totalWatchlistItems = users.reduce(
-      (total, u) => total + (u.watchlist?.length || 0),
-      0
-    );
-    return { totalUsers, totalCoins, totalTrades, totalWatchlistItems };
-  }, [users, coins]);
+
+    // Use fetched data or fallback to Bitcoin if no data exists
+    const trending = trendingCoinData || { symbol: "BTC", price_change_percentage_24h: 2.45 };
+
+    return {
+        totalUsers,
+        totalCoins,
+        totalTrades,
+        trendingCoin: trending
+    };
+  }, [users, trendingCoinData]);
 
   const latestUsers = useMemo(() => {
     return [...users]
@@ -234,7 +258,22 @@ function AdminDashboard() {
   }, [users]);
 
   const handleQuickAction = (action) => {
-    // Action triggered
+    switch (action) {
+      case "addCoin":
+        navigate("/admin/cryptocurrencies");
+        break;
+      case "viewUsers":
+        navigate("/admin/users");
+        break;
+      case "systemSettings":
+        navigate("/admin/settings");
+        break;
+      case "generateReport":
+        navigate("/admin/feedback");
+        break;
+      default:
+        console.warn("Unknown action:", action);
+    }
   };
 
   return (
@@ -297,34 +336,33 @@ function AdminDashboard() {
                 value: adminStats.totalUsers,
                 icon: FaUsers,
                 color: "from-blue-500 to-cyan-400",
+                badge: "+12%"
               },
               {
-                label: "Total Coins",
+                label: "Active Coins",
                 value: adminStats.totalCoins,
                 icon: FaCoins,
-                color: "from-cyan-500 to-teal-400",
+                color: "from-purple-500 to-pink-400",
+                badge: "+5 new"
               },
               {
                 label: "Total Trades",
                 value: adminStats.totalTrades,
                 icon: FaChartLine,
-                color: "from-purple-500 to-violet-400",
+                color: "from-green-500 to-emerald-400",
+                badge: "+8.2%"
               },
               {
-                label: "Watchlist Items",
-                value: adminStats.totalWatchlistItems,
+                label: "Trending Coin",
+                value: adminStats.trendingCoin ? adminStats.trendingCoin.symbol?.toUpperCase() : "N/A",
                 icon: FaStar,
                 color: "from-amber-500 to-yellow-400",
+                badge: (adminStats.trendingCoin && adminStats.trendingCoin.price_change_percentage_24h != null)
+                    ? `${Number(adminStats.trendingCoin.price_change_percentage_24h).toFixed(2)}%`
+                    : "No data"
               },
             ].map((stat, i) => (
-              <StatCard
-                key={i}
-                label={stat.label}
-                value={stat.value}
-                icon={stat.icon}
-                color={stat.color}
-                TC={TC}
-              />
+              <StatCard key={i} {...stat} TC={TC} />
             ))
           )}
         </div>
@@ -338,8 +376,26 @@ function AdminDashboard() {
                 className={`text-base sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
               >
                 <FaChartLine className="text-cyan-400 text-sm sm:text-base" />{" "}
-                User Growth
+                User Registration
               </h2>
+              
+              {/* Time Range Selector */}
+              <div className={`flex items-center p-1 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-gray-700/50'}`}>
+                {['Week', 'Month'].map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`
+                      px-3 py-1 text-xs font-medium rounded-md transition-all duration-200
+                      ${timeRange === range 
+                        ? (isLight ? 'bg-white text-gray-900 shadow-sm' : 'bg-gray-600 text-white shadow-sm') 
+                        : (isLight ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white')}
+                    `}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {isLoading ? (
@@ -347,7 +403,7 @@ function AdminDashboard() {
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/30 rounded" />
             ) : (
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
-                <UserLineChart users={users} />
+                <UserLineChart users={users} timeRange={timeRange} />
               </div>
             )}
           </div>

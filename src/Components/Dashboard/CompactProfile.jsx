@@ -3,6 +3,8 @@ import { FaWallet } from "react-icons/fa";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
 
+const SERVER_URL = "http://localhost:5050";
+
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
   const [isLight, setIsLight] = useState(
@@ -40,12 +42,25 @@ const CompactProfile = () => {
     textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
   };
 
+  const getUserImage = (user) => {
+    if (!user?.image) return null;
+    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`;
+  };
+
   return (
     <div className={`rounded-xl p-4 fade-in ${TC.bgCard}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg">
-            {user?.name?.charAt(0)?.toUpperCase() || "U"}
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg overflow-hidden">
+            {getUserImage(user) ? (
+              <img 
+                src={getUserImage(user)} 
+                alt={user.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user?.name?.charAt(0)?.toUpperCase() || "U"
+            )}
           </div>
           <div className="min-w-0">
             <h3 className={`font-semibold text-sm truncate ${TC.textPrimary}`}>

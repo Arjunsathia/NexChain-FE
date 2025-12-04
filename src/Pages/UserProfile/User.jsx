@@ -46,13 +46,13 @@ export default function User() {
     try {
       setIsLogoutLoading(true);
       await logout();
-      localStorage.removeItem("NEXCHAIN_USER_TOKEN");
-      localStorage.removeItem("NEXCHAIN_USER");
-      navigate("/auth");
     } catch (error) {
       console.error("Error While Logout", error);
     } finally {
+      localStorage.removeItem("NEXCHAIN_USER_TOKEN");
+      localStorage.removeItem("NEXCHAIN_USER");
       setIsLogoutLoading(false);
+      navigate("/auth");
     }
   };
 

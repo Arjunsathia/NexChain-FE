@@ -1,9 +1,16 @@
-import React, { useMemo } from 'react';
-import { FaExchangeAlt, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import React, { useState, useMemo } from 'react';
+import { FaExchangeAlt, FaArrowUp, FaArrowDown, FaBell } from 'react-icons/fa';
+import PriceAlertModal from '@/Components/Common/PriceAlertModal';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
+  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
+
+  const handleAlertClick = (e, coin) => {
+    e.stopPropagation();
+    setAlertModal({ show: true, coin });
+  };
   const TC = useMemo(() => ({
     // Text Colors
     textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -100,6 +107,9 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                 ${TC.bgHeader} ${TC.textSecondary}
               `}
             >
+              <th className="px-4 sm:px-6 py-3 text-center w-12">
+                <FaBell className="mx-auto" />
+              </th>
               <th className="px-4 sm:px-6 py-3">Asset</th>
               <th className="px-4 sm:px-6 py-3 text-right">Price</th>
               <th className="px-4 sm:px-6 py-3 text-right">Balance</th>
@@ -120,6 +130,20 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                 `}
                 style={{ animationDelay: `${0.1 + index * 0.05}s` }}
               >
+                {/* Alert Icon */}
+                <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
+                  <button
+                    onClick={(e) => handleAlertClick(e, coin)}
+                    className={`p-2 rounded-full transition-colors ${
+                      isLight 
+                        ? "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50" 
+                        : "text-gray-500 hover:text-yellow-400 hover:bg-yellow-500/10"
+                    }`}
+                  >
+                    <FaBell />
+                  </button>
+                </td>
+
                 {/* Asset */}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
@@ -221,14 +245,11 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                       e.stopPropagation();
                       onTrade(coin);
                     }}
-                    className={`
-                      inline-flex items-center justify-center p-2 rounded-xl
-                      transition-all duration-200 hover:scale-105
-                      ${TC.bgButton} ${TC.textButtonHover}
-                    `}
+                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-md"
                     title="Trade"
                   >
-                    <FaExchangeAlt className="text-base" />
+                    <FaExchangeAlt className="text-xs" />
+                    Trade
                   </button>
                 </td>
               </tr>
@@ -288,6 +309,11 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
           </div>
         ))}
       </div>
+      <PriceAlertModal 
+        show={alertModal.show} 
+        onClose={() => setAlertModal({ show: false, coin: null })} 
+        coin={alertModal.coin} 
+      />
     </div>
   );
 };

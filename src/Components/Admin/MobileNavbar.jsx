@@ -10,7 +10,8 @@ import {
   FaCog,
   FaBars,
   FaTimes,
-  FaSignal
+  FaSignal,
+  FaSignOutAlt
 } from "react-icons/fa";
 
 // Utility to check if light mode is active based on global class
@@ -30,7 +31,7 @@ const useThemeCheck = () => {
     return isLight;
 };
 
-function MobileNavbar({ isOpen, onToggle }) {
+function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
@@ -87,6 +88,8 @@ function MobileNavbar({ isOpen, onToggle }) {
     // Footer
     bgFooter: isLight ? "bg-gray-100/50" : "bg-gray-800/30",
     textFooter: isLight ? "text-gray-600" : "text-gray-400",
+    // Logout
+    btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
   }), [isLight]);
 
 
@@ -246,6 +249,26 @@ function MobileNavbar({ isOpen, onToggle }) {
                   Admin Portal
                 </p>
               </div>
+            </div>
+
+            {/* Logout Button */}
+            <div className="mt-4 pt-4 border-t border-gray-200/10">
+                <button
+                className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
+                onClick={onLogout}
+                disabled={isLogoutLoading}
+                >
+                {isLogoutLoading ? (
+                    <>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Logging out...</span>
+                    </>
+                ) : (
+                    <>
+                    <FaSignOutAlt /> Logout
+                    </>
+                )}
+                </button>
             </div>
           </div>
         </div>

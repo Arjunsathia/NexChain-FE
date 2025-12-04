@@ -8,7 +8,11 @@ import PortfolioDistribution from "@/Components/portfolio/PortfolioDistribution"
 import HoldingsTable from "@/Components/portfolio/HoldingsTable";
 import TradeModal from "@/Components/Common/TradeModal";
 import TransactionHistory from "@/Components/portfolio/TransactionHistory";
+import OpenOrders from "@/Components/portfolio/OpenOrders";
+
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
+
+
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = () => {
@@ -229,7 +233,14 @@ const PortfolioPage = () => {
           />
         </div>
 
-        {/* 5. Recent Activity */}
+        {/* 5. Open Orders */}
+        <div className="fade-in" style={{ animationDelay: "0.35s" }}>
+           <OpenOrders isLight={isLight} livePrices={livePrices} />
+        </div>
+
+
+
+        {/* 7. Recent Activity */}
         <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: "0.4s" }}>
            <TransactionHistory />
         </div>

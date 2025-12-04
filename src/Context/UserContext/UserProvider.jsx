@@ -12,14 +12,23 @@ export const UserProvider = ({ children }) => {
   const userDataFromLocalStorage = localStorage.getItem("NEXCHAIN_USER");
 
   const fetchUsers = useCallback(async () => {
-    const parsedUserDataFromLocalStorage = JSON.parse(userDataFromLocalStorage);
-    if (parsedUserDataFromLocalStorage?.id) {
-      setUser(parsedUserDataFromLocalStorage);
-    } else {
+    // 1. Load from LocalStorage (Fast)
+    if (userDataFromLocalStorage) {
+        const parsed = JSON.parse(userDataFromLocalStorage);
+        if (parsed?.id) setUser(parsed);
+    }
+
+    // 2. Fetch Fresh Data from Server (Reliable)
+    if (userIdFromToken) {
       try {
-        setLoading(true);
+        // Only set loading if we didn't have local data
+        if (!userDataFromLocalStorage) setLoading(true);
+        
         const data = await getById("/users", userIdFromToken);
-        setUser(data || []);
+        if (data) {
+            setUser(data);
+            localStorage.setItem("NEXCHAIN_USER", JSON.stringify(data));
+        }
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {

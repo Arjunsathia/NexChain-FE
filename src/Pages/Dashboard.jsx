@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
 import TrendingCoins from "@/Components/Dashboard/TrendingCoins";
-import LearningHub from "@/Components/Dashboard/LearningHub";
+import LearningHub from "@/Components/Dashboard/LearningHubWidget";
 import { getCoins } from "@/api/coinApis";
 import "react-loading-skeleton/dist/skeleton.css";
 import WatchlistPreview from "@/Components/Dashboard/WatchlistPreview";

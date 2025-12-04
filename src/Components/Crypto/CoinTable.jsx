@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { FaStar, FaRegStar, FaSearch, FaExchangeAlt } from "react-icons/fa";
+import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useNavigate } from "react-router-dom";
@@ -316,8 +316,8 @@ function CoinTable({ onTrade }) {
   }, [watchlist, user?.id, fetchWatchlist, isLight]);
 
   // Enhanced handleTrade function that refreshes purchased coins
-  const handleTrade = useCallback(async (coin) => {
-    onTrade(coin);
+  const handleTrade = useCallback(async (coin, options = {}) => {
+    onTrade(coin, options);
     // Refresh purchased coins after trade to get latest holdings data
     if (refreshPurchasedCoins) {
       try {
@@ -552,17 +552,20 @@ function CoinTable({ onTrade }) {
                 </div>
 
                 {/* Trade Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTrade(coin);
-                  }}
-                  className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 fade-in"
-                  style={{ animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
-                >
-                  <FaExchangeAlt className="text-sm" />
-                  Trade
-                </button>
+                {/* Trade and Alert Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTrade(coin);
+                    }}
+                    className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 fade-in"
+                    style={{ animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
+                  >
+                    <FaExchangeAlt className="text-sm" />
+                    Trade
+                  </button>
+                </div>
               </div>
             ))
           ) : (
@@ -706,7 +709,7 @@ function CoinTable({ onTrade }) {
 
                         {/* Trade Button */}
                         <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.09}s` }}>
-                          <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => handleTrade(coin)}
                               className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50 flex items-center gap-2"

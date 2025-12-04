@@ -1,17 +1,27 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, User, ChevronRight, Rocket } from "lucide-react";
+import { Sun, Moon, Menu, X, User, ChevronRight, Rocket, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import useRoleContext from "@/Context/RoleContext/useRoleContext";
+import NotificationModal from "@/Components/Common/NotificationModal";
+import api from "@/api/axiosConfig";
+
+const SERVER_URL = "http://localhost:5050";
 
 // Utility to check if light mode is active based on global class
 const useThemeCheck = (initialDark) => {
-    const [isDark, setIsDark] = useState(initialDark);
+    const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
     useEffect(() => {
-        setIsDark(initialDark);
-    }, [initialDark]);
+        const observer = new MutationObserver(() => {
+            setIsDark(document.documentElement.classList.contains('dark'));
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
 
     return isDark;
 };
@@ -26,6 +36,8 @@ export default function Navbar({ isDark, toggleDarkMode }) {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 💡 Theme Classes Helper - BORDER ADDED (Subtle/Themed)
   const TC = useMemo(() => ({
@@ -58,7 +70,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     // Profile Button
     bgProfile: isDarkMode ? "from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700" : "from-blue-700 to-cyan-800 hover:from-blue-600 hover:to-cyan-700",
     borderProfile: "", 
-
+    
     // Mobile Menu Drawer
     bgDrawer: isDarkMode ? "bg-gray-900/95 backdrop-blur-xl shadow-2xl border-none" : "bg-white/95 backdrop-blur-xl shadow-2xl border-none",
     
@@ -88,6 +100,25 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Fetch unread count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get('/notifications');
+        const count = res.data.filter(n => !n.isRead).length;
+        setUnreadCount(count);
+      } catch (error) {
+        console.error("Failed to fetch notifications", error);
+      }
+    };
+    if (user) {
+      fetchUnreadCount();
+      // Optional: Poll every 60s
+      const interval = setInterval(fetchUnreadCount, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   // Close mobile UI when route changes
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -100,6 +131,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     const onKey = (e) => {
       if (e.key === "Escape") {
         setIsMobileMenuOpen(false);
+        setIsNotificationOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -131,6 +163,11 @@ export default function Navbar({ isDark, toggleDarkMode }) {
   const handleNavigate = (path) => {
     setIsMobileMenuOpen(false);
     navigate(path);
+  };
+
+  const getUserImage = (user) => {
+    if (!user?.image) return null;
+    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`;
   };
 
   return (
@@ -213,6 +250,25 @@ export default function Navbar({ isDark, toggleDarkMode }) {
 
         {/* Right: dark toggle, profile */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          
+          {/* Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className={`
+                w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
+                ${TC.hoverBg} ${TC.iconBase} ${TC.iconHover}
+              `}
+              title="Notifications"
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+              )}
+            </button>
+            <NotificationModal isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} isDark={isDarkMode} />
+          </div>
+
           {/* Dark mode toggle */}
           <button
             onClick={toggleDarkMode}
@@ -238,15 +294,29 @@ export default function Navbar({ isDark, toggleDarkMode }) {
 
           {/* Profile avatar */}
           <button
-            onClick={() => user?.id && navigate(`/user-profile/${user.id}`)}
+            onClick={() => {
+              if (user?.id) {
+                navigate(`/user-profile/${user.id}`);
+              } else {
+                navigate("/auth");
+              }
+            }}
             title={user?.name || "User Profile"}
             className={`
               w-9 h-9 rounded-xl bg-gradient-to-r ${TC.bgProfile} flex items-center justify-center
               font-bold text-white transition-all duration-300
-              shadow-lg hover:shadow-xl transform hover:scale-110 fade-in
+              shadow-lg hover:shadow-xl transform hover:scale-110 fade-in overflow-hidden
             `}
           >
-            {user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-white" />}
+            {getUserImage(user) ? (
+              <img 
+                src={getUserImage(user)} 
+                alt={user.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-white" />
+            )}
           </button>
         </div>
       </nav>
@@ -293,10 +363,27 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                 </div>
 
                 {/* User Profile Section */}
-                <div className={`mb-6 p-4 rounded-xl ${TC.bgMobileCard}`}>
+                <button 
+                  onClick={() => {
+                    if (user?.id) {
+                      handleNavigate(`/user-profile/${user.id}`);
+                    } else {
+                      handleNavigate("/auth");
+                    }
+                  }}
+                  className={`w-full text-left mb-6 p-4 rounded-xl ${TC.bgMobileCard} transition-transform active:scale-95`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${isDarkMode ? "from-cyan-600 to-blue-600" : "from-blue-600 to-cyan-700"} flex items-center justify-center font-bold text-white text-lg shadow-lg`}>
-                      {user?.name?.charAt(0).toUpperCase() || "U"}
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${isDarkMode ? "from-cyan-600 to-blue-600" : "from-blue-600 to-cyan-700"} flex items-center justify-center font-bold text-white text-lg shadow-lg overflow-hidden`}>
+                      {getUserImage(user) ? (
+                        <img 
+                          src={getUserImage(user)} 
+                          alt={user.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        user?.name?.charAt(0).toUpperCase() || "U"
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={`${TC.textMobileName} font-semibold text-sm truncate`}>
@@ -312,7 +399,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                     {/* Rocket Icon in Mobile Menu */}
                     <Rocket className={`h-6 w-6 ${TC.activeText}`} />
                   </div>
-                </div>
+                </button>
 
                 {/* Navigation */}
                 <nav className="space-y-2 mb-8">

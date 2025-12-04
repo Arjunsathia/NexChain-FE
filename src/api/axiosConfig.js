@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3";
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5050/api";
 
 export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,

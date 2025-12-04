@@ -63,20 +63,6 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
                 <span>Learning Hub</span>
               </button>
             </div>
-
-            {/* Trust Stats */}
-            <div className="pt-4 md:pt-10 flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-8 border-t border-white/5 mt-4 md:mt-8"> 
-              {[
-                { label: "Active Users", value: "50K+" },
-                { label: "Quarterly Volume", value: "$2B+" },
-                { label: "Countries", value: "120+" },
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col">
-                  <p className={`text-lg md:text-2xl font-bold text-white tracking-tight`}>{stat.value}</p>
-                  <p className={`text-[10px] md:text-xs font-medium ${TC.textSecondary} uppercase tracking-wider`}>{stat.label}</p>
-                </div>
-              ))}
-            </div>
           </motion.div>
 
           {/* Hero Visual */}

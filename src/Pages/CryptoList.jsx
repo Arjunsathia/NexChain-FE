@@ -9,6 +9,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
 import TradeModal from "@/Components/Common/TradeModal";
+import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
 
@@ -53,6 +54,11 @@ function CryptoList() {
     type: "buy",
   });
 
+  const [alertModal, setAlertModal] = useState({
+    show: false,
+    coin: null,
+  });
+
   // 💡 Theme Classes Helper
   const TC = useMemo(() => ({
     // General text colors
@@ -84,7 +90,6 @@ function CryptoList() {
     
   }), [isLight]);
 
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -102,12 +107,19 @@ function CryptoList() {
   }, [fetchData]);
 
   // Handler for trade button clicks from CoinTable
-  const handleTrade = useCallback((coin) => {
-    setTradeModal({
-      show: true,
-      coin,
-      type: "buy",
-    });
+  const handleTrade = useCallback((coin, options = {}) => {
+    if (options.initialAlertMode) {
+      setAlertModal({
+        show: true,
+        coin,
+      });
+    } else {
+      setTradeModal({
+        show: true,
+        coin,
+        type: "buy",
+      });
+    }
   }, []);
 
   // Handler for closing modal
@@ -116,6 +128,13 @@ function CryptoList() {
       show: false,
       coin: null,
       type: "buy",
+    });
+  }, []);
+
+  const handleCloseAlertModal = useCallback(() => {
+    setAlertModal({
+      show: false,
+      coin: null,
     });
   }, []);
 
@@ -259,6 +278,13 @@ function CryptoList() {
         coin={tradeModal.coin}
         type={tradeModal.type}
         purchasedCoins={purchasedCoins}
+      />
+
+      {/* Price Alert Modal */}
+      <PriceAlertModal
+        show={alertModal.show}
+        onClose={handleCloseAlertModal}
+        coin={alertModal.coin}
       />
     </div>
   );

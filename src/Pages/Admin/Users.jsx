@@ -9,7 +9,7 @@ import UsersTable from "@/Components/Admin/Users/UsersTable";
 import UserDeleteModal from "@/Components/Admin/Users/UserDeleteModal";
 import UserDetailsModal from "@/Components/Admin/Users/UserDetailsModal";
 
-import { getData, deleteById } from "@/api/axiosConfig";
+import api, { getData, deleteById, deleteWatchList } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 
 // ----------------------------------------------------
@@ -111,7 +111,31 @@ const Users = () => {
 
     try {
       setDeleteLoading(true);
-      await deleteById("/users", userToDelete._id);
+      // await deleteById("/users", userToDelete._id);
+      try {
+        // Strategy 1: Standard REST DELETE /users/:id
+        await api.delete(`/users/${userToDelete._id}`);
+      } catch (err) {
+        console.warn("Strategy 1 failed:", err);
+        try {
+          // Strategy 2: Try using .id instead of ._id if available
+          if (userToDelete.id && userToDelete.id !== userToDelete._id) {
+             await api.delete(`/users/${userToDelete.id}`);
+          } else {
+             throw new Error("No alternate ID");
+          }
+        } catch (err2) {
+           console.warn("Strategy 2 failed:", err2);
+           try {
+             // Strategy 3: POST /users/delete with body
+             await api.post("/users/delete", { id: userToDelete._id });
+           } catch (err3) {
+             console.warn("Strategy 3 failed:", err3);
+             // Strategy 4: DELETE /users with body
+             await api.delete("/users", { data: { id: userToDelete._id } });
+           }
+        }
+      }
       setUsers(users.filter((u) => u._id !== userToDelete._id));
       toast.success("User deleted successfully", {
         style: {

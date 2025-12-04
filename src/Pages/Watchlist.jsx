@@ -209,8 +209,8 @@ const Watchlist = () => {
       await deleteWatchList("/watchlist/remove", { id: removeModal.coin?.id, user_id: userId });
       toast.success("Removed from watchlist!", {
         style: {
-          background: "#FEF2F2", // Light red
-          color: "#991B1B", // Dark red
+          background: "#DCFCE7", // Light green
+          color: "#166534", // Dark green
           fontWeight: "600",
           fontSize: "14px",
           padding: "12px 16px",
@@ -218,7 +218,7 @@ const Watchlist = () => {
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           border: "none",
         },
-        iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
+        iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
       });
 
       fetchData();

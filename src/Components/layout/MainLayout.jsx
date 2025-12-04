@@ -5,43 +5,15 @@ import { useEffect, useState } from "react";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import useRoleContext from "@/Context/RoleContext/useRoleContext";
 
+import { useTheme } from "@/Context/ThemeContext";
+
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
   const { fetchRole } = useRoleContext();
+  const { isDark, toggleTheme } = useTheme();
 
   const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
   const navigate = useNavigate();
-
-  // 💡 State for Dark Mode
-  const [isDark, setIsDark] = useState(() => {
-    // Initialize based on localStorage or default to dark
-    return localStorage.getItem("theme") === "light" ? false : true;
-  });
-
-  // 💡 Function to toggle Dark Mode globally
-  const toggleDarkMode = () => {
-    setIsDark(prevIsDark => {
-      const newIsDark = !prevIsDark;
-      if (newIsDark) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("theme", "light");
-      }
-      return newIsDark;
-    });
-  };
-
-  // Set initial theme based on state
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
-
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -60,7 +32,7 @@ export default function MainLayout() {
   return (
     <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
       {/* 💡 Passing isDark and toggleDarkMode to Navbar */}
-      <Navbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
+      <Navbar isDark={isDark} toggleDarkMode={toggleTheme} />
       <main className="flex-1 p-4">
         <Outlet />
       </main>

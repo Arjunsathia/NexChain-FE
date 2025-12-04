@@ -1,6 +1,6 @@
 import React from "react";
 
-function StatCard({ label, value, icon: Icon, color, TC }) {
+function StatCard({ label, value, icon: Icon, color, badge, TC }) {
   return (
     <div
       className={`
@@ -14,11 +14,13 @@ function StatCard({ label, value, icon: Icon, color, TC }) {
         <div className={`p-2 bg-gradient-to-r ${color} rounded-lg shadow-lg`}>
           <Icon className="text-white text-base" />
         </div>
-        <span
-          className={`text-xs font-medium px-2 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
-        >
-          +2.4%
-        </span>
+        {badge && (
+          <span
+            className={`text-xs font-medium px-2 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
+          >
+            {badge}
+          </span>
+        )}
       </div>
 
       <p
