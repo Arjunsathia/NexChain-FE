@@ -61,7 +61,7 @@ const KYCVerification = () => {
   };
 
   // Theme Classes
-  const containerClass = `max-w-2xl mx-auto p-6 rounded-2xl shadow-lg border ${
+  const containerClass = `max-w-2xl mx-auto p-4 sm:p-6 rounded-2xl shadow-lg border ${
     isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
   }`;
   const textPrimary = isDark ? "text-white" : "text-gray-900";

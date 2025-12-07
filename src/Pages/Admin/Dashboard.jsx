@@ -16,35 +16,7 @@ import {
   FaStar,
 } from "react-icons/fa";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(() => {
-    try {
-      return !document.documentElement.classList.contains("dark");
-    } catch (e) {
-      // document may be undefined during SSR; default to light
-      return true;
-    }
-  });
-
-  useEffect(() => {
-    const update = () =>
-      setIsLight(!document.documentElement.classList.contains("dark"));
-
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    // Also ensure we set the correct value on mount
-    update();
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -254,6 +226,7 @@ function AdminDashboard() {
         joinDate: u.createdAt
           ? new Date(u.createdAt).toLocaleDateString()
           : "Unknown",
+        image: u.image,
       }));
   }, [users]);
 
@@ -319,7 +292,7 @@ function AdminDashboard() {
         }`}
       >
         {/* Stat Cards / Skeleton (shown in the same place) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
           {isLoading ? (
             // skeleton cards
             [...Array(4)].map((_, i) => (

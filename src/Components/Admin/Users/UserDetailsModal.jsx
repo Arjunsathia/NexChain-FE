@@ -31,11 +31,19 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 p-1 shadow-lg shadow-cyan-500/20">
               <div
-                className={`w-full h-full rounded-full flex items-center justify-center text-2xl font-bold text-white ${
+                className={`w-full h-full rounded-full flex items-center justify-center text-2xl font-bold text-white overflow-hidden ${
                   isLight ? "bg-white/20" : "bg-black/40"
                 }`}
               >
-                {selectedUser.name?.charAt(0).toUpperCase()}
+                {selectedUser.image ? (
+                  <img 
+                    src={selectedUser.image.startsWith('http') ? selectedUser.image : `http://localhost:5050/uploads/${selectedUser.image}`} 
+                    alt={selectedUser.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  selectedUser.name?.charAt(0).toUpperCase()
+                )}
               </div>
             </div>
             <div>

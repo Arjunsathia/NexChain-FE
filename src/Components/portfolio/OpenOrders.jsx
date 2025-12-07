@@ -8,7 +8,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
   const { user } = useUserContext();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [executing, setExecuting] = useState({}); // Track executing orders to prevent duplicates
+  const [executing, setExecuting] = useState({}); 
 
   const fetchOrders = async () => {
     if (!user) return;
@@ -101,7 +101,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
   if (!user) return null;
 
   const TC = {
-    bgCard: isLight ? "bg-white border-gray-200" : "bg-gray-800/40 border-gray-700",
+    bgCard: isLight ? "bg-white/60 border-gray-200 backdrop-blur-sm" : "bg-gray-800/40 border-gray-700",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     rowHover: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",

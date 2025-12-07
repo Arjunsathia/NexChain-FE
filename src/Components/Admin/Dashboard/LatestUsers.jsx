@@ -39,8 +39,16 @@ function LatestUsers({ users, isLoading, TC }) {
               className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200`}
             >
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs sm:text-sm font-bold text-white shadow-lg flex-shrink-0">
-                  {(user.name || "U").charAt(0)}
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs sm:text-sm font-bold text-white shadow-lg flex-shrink-0 overflow-hidden">
+                  {user.image ? (
+                    <img 
+                      src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
+                      alt={user.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (user.name || "U").charAt(0)
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h4

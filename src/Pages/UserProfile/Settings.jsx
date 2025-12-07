@@ -13,7 +13,6 @@ const Settings = () => {
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
   const { user } = useUserContext();
-  const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [contentLoaded, setContentLoaded] = useState(false);
 
@@ -45,13 +44,7 @@ const Settings = () => {
     headerGradient: "from-cyan-400 to-blue-500",
   }), [isDark]);
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      // alert("Settings saved successfully!"); // Optional feedback
-    }, 1500);
-  };
+
 
   const tabs = [
     { id: "profile", label: "Profile", icon: FaUser },
@@ -62,7 +55,7 @@ const Settings = () => {
   ];
 
   return (
-    <div className={`flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
+    <div className={`flex-1 w-full max-w-full overflow-x-hidden p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -73,26 +66,10 @@ const Settings = () => {
             Manage your personal information and preferences
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg transition-all duration-200 hover:shadow-xl`}
-        >
-          {isSaving ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <FaSave /> Save Changes
-            </>
-          )}
-        </button>
       </div>
 
       {/* Tabs */}
-      <div className={`flex overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
+      <div className={`flex w-full max-w-full overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -130,7 +107,7 @@ const Settings = () => {
             contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
+          <div className={`${TC.bgCard} w-full overflow-hidden rounded-2xl p-3 sm:p-6 lg:p-8`}>
             {activeTab === "profile" && <ProfileSettings />}
             {activeTab === "security" && <SecuritySettings />}
             {activeTab === "kyc" && <KYCVerification />}

@@ -7,27 +7,9 @@ import FeedbackTable from "@/Components/Admin/Feedback/FeedbackTable";
 import FeedbackDetailsModal from "@/Components/Admin/Feedback/FeedbackDetailsModal";
 import FeedbackDeleteModal from "@/Components/Admin/Feedback/FeedbackDeleteModal";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
+import useThemeCheck from "@/hooks/useThemeCheck";
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
 
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 const AdminFeedback = () => {
   const isLight = useThemeCheck();

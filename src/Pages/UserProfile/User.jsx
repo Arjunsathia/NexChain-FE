@@ -66,7 +66,7 @@ export default function User() {
       )}
       
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen relative">
+      <div className="flex-1 flex flex-col min-h-screen relative w-full overflow-x-hidden">
         {/* Show MobileNavbar only on small and medium screens */}
         {!isDesktop && (
           <div className="sticky top-0 z-50">
@@ -80,7 +80,7 @@ export default function User() {
         )}
         
         {/* Page content - Scrollable area */}
-        <div className="flex-1 w-full max-w-[1600px] mx-auto">
+        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
           <Outlet />
         </div>
       </div>

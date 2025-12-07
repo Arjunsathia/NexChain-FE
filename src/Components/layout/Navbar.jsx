@@ -9,25 +9,11 @@ import api from "@/api/axiosConfig";
 
 const SERVER_URL = "http://localhost:5050";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = (initialDark) => {
-    const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsDark(document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isDark;
-};
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 export default function Navbar({ isDark, toggleDarkMode }) {
-  const isDarkMode = useThemeCheck(isDark); 
+  const isLight = useThemeCheck();
+  const isDarkMode = !isLight; 
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -167,7 +153,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
 
   const getUserImage = (user) => {
     if (!user?.image) return null;
-    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`;
+    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`;
   };
 
   return (

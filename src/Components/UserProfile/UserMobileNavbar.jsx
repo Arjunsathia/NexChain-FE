@@ -18,22 +18,7 @@ import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
@@ -168,10 +153,25 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
             {/* Compact Logo and Title */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>
-                  {user?.name || 'User'}
-                </h2>
-                <p className={`text-xs ${TC.textSecondary} hidden sm:block`}>Personal Account</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${isLight ? "from-blue-600 to-cyan-700" : "from-cyan-600 to-blue-600"} flex items-center justify-center font-bold text-white text-xs shadow-lg overflow-hidden`}>
+                    {user?.image ? (
+                      <img 
+                        src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
+                        alt={user.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      user?.name?.charAt(0).toUpperCase() || "U"
+                    )}
+                  </div>
+                  <div>
+                    <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>
+                      {user?.name || 'User'}
+                    </h2>
+                    <p className={`text-xs ${TC.textSecondary} hidden sm:block`}>Personal Account</p>
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -24,7 +24,7 @@ const PreferenceSettings = () => {
       </h2>
       
       <div className={containerClass}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h3 className={`font-semibold ${textPrimary}`}>Dark Mode</h3>
             <p className={`text-sm ${textSecondary}`}>Toggle application theme</p>

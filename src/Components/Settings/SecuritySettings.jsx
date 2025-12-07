@@ -77,7 +77,7 @@ const SecuritySettings = () => {
   }`;
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textSecondary = isDark ? "text-gray-400" : "text-gray-500";
-  const inputClass = `px-4 py-2 rounded-lg border outline-none w-48 text-center tracking-widest font-mono text-lg focus:ring-2 focus:ring-cyan-500 ${
+  const inputClass = `px-4 py-2 rounded-lg border outline-none w-full sm:w-48 text-center tracking-widest font-mono text-lg focus:ring-2 focus:ring-cyan-500 ${
     isDark 
       ? "bg-gray-700 text-white border-gray-600" 
       : "bg-white text-gray-900 border-gray-300"
@@ -136,7 +136,7 @@ const SecuritySettings = () => {
                             2. Scan the QR code. <br/>
                             3. Enter the 6-digit code below to verify.
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                             <input 
                                 type="text" 
                                 placeholder="Enter 6-digit code" 

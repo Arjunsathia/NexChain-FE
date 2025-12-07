@@ -43,14 +43,14 @@ const TransactionForm = ({
     <div className="space-y-4 fade-in">
       {/* Mode Toggles */}
       <div className="flex gap-2 mb-4">
-          <div className="flex-1 flex p-1 bg-gray-200/50 dark:bg-gray-800/50 rounded-lg overflow-x-auto">
+          <div className={`flex-1 flex p-1 rounded-lg overflow-x-auto ${isLight ? "bg-white border border-gray-200" : "bg-gray-800/50 border-none"}`}>
             {['market', 'limit', 'stop_limit', 'stop_market'].map((type) => (
               <button
                 key={type}
                 onClick={() => { setOrderType(type); setIsAlertMode(false); }}
                 className={`flex-1 py-1.5 px-2 text-[10px] sm:text-xs font-bold rounded-md capitalize whitespace-nowrap transition-all duration-200 ${
                   orderType === type && !isAlertMode
-                    ? "bg-white dark:bg-gray-700 shadow-sm text-cyan-600"
+                    ? "bg-cyan-600 text-white shadow-sm dark:bg-gray-700 dark:text-cyan-400"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 }`}
               >

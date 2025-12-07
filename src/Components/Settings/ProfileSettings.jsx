@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaUser, FaEnvelope, FaLock, FaCamera, FaSave, FaTimes, FaCheck } from "react-icons/fa";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import toast from "react-hot-toast";
-import api from "@/api/axiosConfig";
+
 import { useTheme } from "@/Context/ThemeContext";
 import Cropper from 'react-easy-crop';
 import getCroppedImg from "@/utils/cropImage";
@@ -43,7 +43,7 @@ const ProfileSettings = () => {
         email: user.email || "" 
       }));
       if (user.image) {
-        setPreviewImage(user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`);
+        setPreviewImage(user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`);
       } else {
         setPreviewImage(null);
       }
@@ -113,26 +113,43 @@ const ProfileSettings = () => {
         // Append the blob with a filename
         updateData.append("image", profileImage, "profile.jpg");
       }
-      
-      const res = await api.put(`/users/${user.id}`, updateData);
 
-      if (res.data.user) {
+      // Use fetch for reliable file upload
+      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      
+      const response = await fetch(`${SERVER_URL}/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Do NOT set Content-Type header, let browser set it with boundary
+        },
+        body: updateData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || "Failed to update profile");
+      }
+
+      const data = await response.json();
+
+      if (data.user) {
         toast.success("Profile updated successfully");
         // Update local storage to reflect changes
-        localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res.data.user));
+        localStorage.setItem("NEXCHAIN_USER", JSON.stringify(data.user));
         // Reload to update context and navbar image
         window.location.reload();
       }
     } catch (error) {
       console.error("Update error:", error);
-      toast.error(error.response?.data?.message || error.response?.data?.error || "Failed to update profile");
+      toast.error(error.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
   };
 
   // Input Class Helper
-  const inputClass = `w-full px-4 py-2 rounded-lg border outline-none transition-all focus:ring-2 focus:ring-cyan-500 ${
+  const inputClass = `w-full px-3 sm:px-4 py-2 rounded-lg border outline-none transition-all focus:ring-2 focus:ring-cyan-500 ${
     isDark 
       ? "bg-gray-700 text-white border-gray-600 placeholder-gray-400" 
       : "bg-white text-gray-900 border-gray-300 placeholder-gray-500"
@@ -200,7 +217,7 @@ const ProfileSettings = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
-        <div className="flex items-center gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8 text-center sm:text-left">
           <div className="relative group">
             <div className={`w-24 h-24 rounded-full overflow-hidden border-4 ${isDark ? "border-gray-700 bg-gray-700" : "border-gray-100 bg-gray-100"}`}>
               {previewImage ? (
@@ -220,7 +237,7 @@ const ProfileSettings = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
           <div>
             <label className={labelClass}>Full Name</label>
             <input
@@ -290,11 +307,11 @@ const ProfileSettings = () => {
           </div>
         </div>
 
-        <div className="flex justify-end pt-6">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6">
           <button
             type="submit"
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>

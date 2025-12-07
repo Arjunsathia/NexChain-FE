@@ -1,4 +1,3 @@
-// src/api/axiosConfig.js
 import axios from "axios";
 
 const COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3";
@@ -12,15 +11,13 @@ export const coinGecko = axios.create({
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // ❌ REMOVED 'headers' block here. 
+  // Axios will now automatically set 'multipart/form-data' when uploading images.
 });
 
-// Request Interceptor - FIXED TOKEN HANDLING
+// Request Interceptor
 api.interceptors.request.use(
   (config) => {
-    // Get token from NEXCHAIN_USER_TOKEN directly
     try {
       const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
       if (token) {
@@ -45,7 +42,7 @@ api.interceptors.response.use(
   }
 );
 
-// GET request
+// --- API Methods (Keep these exactly as you had them) ---
 export const getData = async (url, params) => {
   try {
     const response = await api.get(url, params && { params });
@@ -56,7 +53,6 @@ export const getData = async (url, params) => {
   }
 };
 
-// GET by ID
 export const getById = async (url, id) => {
   try {
     const response = await api.get(`${url}/${id}`);
@@ -67,7 +63,6 @@ export const getById = async (url, id) => {
   }
 };
 
-// POST form data
 export const postForm = async (url, formData) => {
   try {
     const response = await api.post(url, formData);
@@ -78,7 +73,6 @@ export const postForm = async (url, formData) => {
   }
 };
 
-// UPDATE by ID (PUT)
 export const updateById = async (url, id, updateData) => {
   try {
     const response = await api.put(`${url}/${id}`, updateData);
@@ -89,7 +83,6 @@ export const updateById = async (url, id, updateData) => {
   }
 };
 
-// DELETE by ID
 export const deleteById = async (url, id) => {
   try {
     const response = await api.delete(`${url}/${id}`);
@@ -100,7 +93,6 @@ export const deleteById = async (url, id) => {
   }
 };
 
-// LOGIN (POST)
 export const login = async (url, credentials) => {
   try {
     const response = await api.post(url, credentials);

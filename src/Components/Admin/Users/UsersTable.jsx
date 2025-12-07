@@ -44,8 +44,17 @@ function UsersTable({
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
                   <div className="flex items-center gap-2 sm:gap-3">
                     {/* Avatar */}
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-xs sm:text-base flex-shrink-0">
-                      {user.name?.charAt(0).toUpperCase()}
+                    {/* Avatar */}
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-xs sm:text-base flex-shrink-0 overflow-hidden">
+                      {user.image ? (
+                        <img 
+                          src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
+                          alt={user.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        user.name?.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p

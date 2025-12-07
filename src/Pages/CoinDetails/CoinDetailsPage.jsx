@@ -416,7 +416,7 @@ function CoinDetailsPage() {
                 style={{ animationDelay: "0.3s" }}
               >
                 <TradingViewWidget
-                  symbol={coin.symbol?.toUpperCase() + "USD"}
+                  symbol={coin.symbol?.toUpperCase() + "USDT"}
                   theme={isLight ? "light" : "dark"}
                 />
               </div>
