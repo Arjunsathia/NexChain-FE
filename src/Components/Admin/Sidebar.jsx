@@ -216,25 +216,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             ))}
           </nav>
 
-          {/* Mobile Logout */}
-          <div className="mt-4 pt-4 border-t border-gray-200/10">
-            <button
-              className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
-              onClick={handleLogoutClick}
-              disabled={isLogoutLoading}
-            >
-              {isLogoutLoading ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Logging out...</span>
-                </>
-              ) : (
-                <>
-                  <FaSignOutAlt /> Logout
-                </>
-              )}
-            </button>
-          </div>
+
         </div>
       </div>
 
@@ -321,25 +303,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {/* Logout Button */}
-        <div className="mt-4 slide-in" style={{ animationDelay: '0.6s' }}>
-          <button
-            className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}
-            onClick={handleLogoutClick}
-            disabled={isLogoutLoading}
-          >
-            {isLogoutLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Logging out...</span>
-              </>
-            ) : (
-              <>
-                <FaSignOutAlt /> Logout
-              </>
-            )}
-          </button>
-        </div>
+
       </aside>
 
       <LogoutConfirmationModal 

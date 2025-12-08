@@ -151,10 +151,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     navigate(path);
   };
 
-  const getUserImage = (user) => {
-    if (!user?.image) return null;
-    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`;
-  };
+
 
   return (
     <>
@@ -294,15 +291,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
               shadow-lg hover:shadow-xl transform hover:scale-110 fade-in overflow-hidden
             `}
           >
-            {getUserImage(user) ? (
-              <img 
-                src={getUserImage(user)} 
-                alt={user.name} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-white" />
-            )}
+            {user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-white" />}
           </button>
         </div>
       </nav>
@@ -361,15 +350,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${isDarkMode ? "from-cyan-600 to-blue-600" : "from-blue-600 to-cyan-700"} flex items-center justify-center font-bold text-white text-lg shadow-lg overflow-hidden`}>
-                      {getUserImage(user) ? (
-                        <img 
-                          src={getUserImage(user)} 
-                          alt={user.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        user?.name?.charAt(0).toUpperCase() || "U"
-                      )}
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={`${TC.textMobileName} font-semibold text-sm truncate`}>

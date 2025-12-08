@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import useUserContext from '@/Context/UserContext/useUserContext';
 import api from '@/api/axiosConfig';
+import toast from 'react-hot-toast';
+import { FaBell } from 'react-icons/fa';
 
 const AlertChecker = () => {
   const { user } = useUserContext();
@@ -100,6 +102,32 @@ const AlertChecker = () => {
                 
                 if (res.data.success && res.data.triggered.length > 0) {
                     // Alerts triggered! 
+                    res.data.triggered.forEach(alert => {
+                        toast((t) => (
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-yellow-100 rounded-lg">
+                                    <FaBell className="text-yellow-600" size={16} />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-900">Price Alert Triggered!</p>
+                                    <p className="text-sm text-gray-700">
+                                        {alert.coin_symbol.toUpperCase()} {alert.condition === 'above' ? 'passed' : 'dropped below'} ${alert.target_price.toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                        ), { 
+                            duration: 6000, 
+                            position: 'top-right',
+                            style: {
+                                background: '#fff',
+                                color: '#333',
+                                border: '1px solid #e5e7eb',
+                                padding: '12px 16px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            }
+                        });
+                    });
+
                     // Backend created notifications.
                     // We should refresh alerts to remove the triggered ones from our local list
                     fetchAlerts();

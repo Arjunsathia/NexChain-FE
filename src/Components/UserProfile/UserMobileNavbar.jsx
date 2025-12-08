@@ -155,15 +155,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               <div className="flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${isLight ? "from-blue-600 to-cyan-700" : "from-cyan-600 to-blue-600"} flex items-center justify-center font-bold text-white text-xs shadow-lg overflow-hidden`}>
-                    {user?.image ? (
-                      <img 
-                        src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
-                        alt={user.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      user?.name?.charAt(0).toUpperCase() || "U"
-                    )}
+                     {user?.name?.charAt(0).toUpperCase() || "U"}
                   </div>
                   <div>
                     <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>

@@ -29,49 +29,7 @@ const PriceAlerts = ({ isLight, livePrices }) => {
     return () => clearInterval(interval);
   }, [user]);
 
-  // Check for triggers
-  useEffect(() => {
-    if (!alerts.length || !livePrices) return;
 
-    const checkTriggers = async () => {
-        const pricesToCheck = {};
-        alerts.forEach(alert => {
-            if (livePrices[alert.coin_id]) {
-                pricesToCheck[alert.coin_id] = livePrices[alert.coin_id].current_price;
-            }
-        });
-
-        if (Object.keys(pricesToCheck).length > 0) {
-            try {
-                const res = await api.post('/alerts/check', {
-                    user_id: user.id,
-                    current_prices: pricesToCheck
-                });
-                
-                if (res.data.success && res.data.triggered.length > 0) {
-                    res.data.triggered.forEach(alert => {
-                        toast((t) => (
-                            <div className="flex items-center gap-2">
-                                <FaBell className="text-yellow-500" />
-                                <div>
-                                    <p className="font-bold">Price Alert Triggered!</p>
-                                    <p className="text-sm">{alert.coin_symbol.toUpperCase()} is {alert.condition} ${alert.target_price}</p>
-                                </div>
-                            </div>
-                        ), { duration: 5000 });
-                    });
-                    fetchAlerts(); // Refresh to remove triggered alerts
-                }
-            } catch (error) {
-                console.error("Error checking alerts", error);
-            }
-        }
-    };
-
-    const timer = setInterval(checkTriggers, 10000); // Check every 10s
-    return () => clearInterval(timer);
-
-  }, [alerts, livePrices, user]);
 
   const handleDelete = async (alertId) => {
     try {
