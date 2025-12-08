@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input.jsx";
+import { Button } from "@/components/ui/button.jsx";
+import { Label } from "@/components/ui/label.jsx";
+import { Card, CardContent } from "@/components/ui/card.jsx";
 import { Mail, Lock, User, Phone, ArrowLeft, Rocket, ChevronRight, Sparkles } from "lucide-react";
 import { login, postForm } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
