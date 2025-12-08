@@ -7,9 +7,9 @@ import {
 } from "@headlessui/react";
 import { getById, postForm, updateById } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
-import { Input } from "@/components/ui/input.jsx";
-import { Button } from "@/components/ui/button.jsx";
-import { Label } from "@/components/ui/label.jsx";
+import { Input } from "@/Components/ui/input.jsx";
+import { Button } from "@/Components/ui/button.jsx";
+import { Label } from "@/Components/ui/label.jsx";
 import { Mail, Lock, User, Phone, Shield, X } from "lucide-react";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
