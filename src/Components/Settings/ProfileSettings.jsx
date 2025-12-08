@@ -47,14 +47,17 @@ const ProfileSettings = () => {
     }
 
     try {
-      const updateData = new FormData();
-      updateData.append("name", formData.name);
-      updateData.append("user_name", formData.user_name);
-      updateData.append("email", formData.email);
+      // Create plain object for JSON request
+      const updateData = {
+        name: formData.name,
+        user_name: formData.user_name,
+        email: formData.email,
+      };
       
       if (formData.currentPassword) {
-        updateData.append("currentPassword", formData.currentPassword);
-        updateData.append("newPassword", formData.newPassword);
+        updateData.currentPassword = formData.currentPassword;
+        updateData.newPassword = formData.newPassword;
+        updateData.confirmPassword = formData.confirmPassword;
       }
 
       // Use fetch for reliable file upload
@@ -64,9 +67,9 @@ const ProfileSettings = () => {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // Do NOT set Content-Type header, let browser set it with boundary
+          'Content-Type': 'application/json',
         },
-        body: updateData
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
