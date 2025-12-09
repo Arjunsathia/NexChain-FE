@@ -5,11 +5,13 @@ import { motion, useScroll, useTransform } from "framer-motion";
 // Components
 import InteractiveGridPattern from "../Components/Landing/Background";
 import HeroSection from "../Components/Landing/HeroSection";
-import FeaturesSection from "../Components/Landing/FeaturesSection";
-import MarketOverviewSection from "../Components/Landing/MarketOverviewSection";
-import TestimonialsSection from "../Components/Landing/TestimonialsSection";
-import CTASection from "../Components/Landing/CTASection";
 import { TC } from "../Components/Landing/theme";
+
+// Lazy Load Heavy Sections
+const FeaturesSection = React.lazy(() => import("../Components/Landing/FeaturesSection"));
+const MarketOverviewSection = React.lazy(() => import("../Components/Landing/MarketOverviewSection"));
+const TestimonialsSection = React.lazy(() => import("../Components/Landing/TestimonialsSection"));
+const CTASection = React.lazy(() => import("../Components/Landing/CTASection"));
 
 // Section Animation Variants
 const sectionVariants = {
@@ -133,35 +135,41 @@ export default function Landing() {
 
       {/* Features Section */}
       <StickySection className="z-10"> 
-        <MemoizedFeaturesSection 
-          ref={featuresRef} 
-          TC={TC} 
-          sectionVariants={sectionVariants} 
-        />
+        <React.Suspense fallback={<div className="min-h-screen" />}>
+          <MemoizedFeaturesSection 
+            ref={featuresRef} 
+            TC={TC} 
+            sectionVariants={sectionVariants} 
+          />
+        </React.Suspense>
       </StickySection>
 
       {/* Market Overview Section */}
       <StickySection className="z-20">
-        <MemoizedMarketOverviewSection 
-          ref={marketRef} 
-          TC={TC} 
-          sectionVariants={sectionVariants} 
-          livePrices={livePrices} 
-        />
+        <React.Suspense fallback={<div className="min-h-screen" />}>
+          <MemoizedMarketOverviewSection 
+            ref={marketRef} 
+            TC={TC} 
+            sectionVariants={sectionVariants} 
+            livePrices={livePrices} 
+          />
+        </React.Suspense>
       </StickySection>
 
       {/* Combined Testimonials & CTA Section */}
       <div className="relative z-30">
-        <MemoizedTestimonialsSection 
-          TC={TC} 
-          sectionVariants={sectionVariants} 
-          isMobile={isMobile} 
-        />
-        <MemoizedCTASection 
-          TC={TC} 
-          sectionVariants={sectionVariants} 
-          navigate={navigate} 
-        />
+        <React.Suspense fallback={<div className="h-96" />}>
+          <MemoizedTestimonialsSection 
+            TC={TC} 
+            sectionVariants={sectionVariants} 
+            isMobile={isMobile} 
+          />
+          <MemoizedCTASection 
+            TC={TC} 
+            sectionVariants={sectionVariants} 
+            navigate={navigate} 
+          />
+        </React.Suspense>
       </div>
     </div>
   );
