@@ -9,6 +9,7 @@ import { login, postForm } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import InteractiveGridPattern from "@/Components/Landing/Background"; // Import from Landing
+import useUserContext from "@/Context/UserContext/useUserContext";
 
 // =================================================================
 // MAIN AUTH PAGE COMPONENT
@@ -26,6 +27,7 @@ const initialRegisterKeys = {
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { fetchUsers } = useUserContext();
   const [loginData, setLoginData] = useState({ user_name: "", password: "" });
   const [registerData, setRegisterData] = useState(initialRegisterKeys);
   const [activeTab, setActiveTab] = useState("login");
@@ -74,6 +76,9 @@ const AuthPage = () => {
 
       if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
       if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
+      
+      // Update Context State Immediately
+      await fetchUsers();
 
       toast.success(`Welcome back, ${res?.user?.name || "User"}!`, {
         style: {
@@ -121,6 +126,9 @@ const AuthPage = () => {
           
           if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
           if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user || res)); // Handle response structure
+          
+          // Update Context State Immediately
+          await fetchUsers();
 
           toast.success(`Welcome back!`);
           if (res?.user?.role === "admin" || res?.role === "admin") {
