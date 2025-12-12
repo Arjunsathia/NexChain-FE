@@ -9,84 +9,12 @@ import {
   FaCommentAlt,
   FaCog,
   FaUserShield,
-  FaSignOutAlt,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { createPortal } from "react-dom";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-// Logout Confirmation Modal
-const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
-  if (typeof document === 'undefined') return null;
 
-  return createPortal(
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${
-              isLight ? "bg-white" : "bg-gray-800 border border-gray-700"
-            }`}
-          >
-            <div className="text-center">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                isLight ? "bg-red-100" : "bg-red-500/20"
-              }`}>
-                <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-600" : "text-red-400"}`} />
-              </div>
-              
-              <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
-                Sign Out?
-              </h3>
-              
-              <p className={`text-sm mb-6 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
-                Are you sure you want to sign out of your account?
-              </p>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
-                    isLight 
-                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={onConfirm}
-                  disabled={isLoading}
-                  className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Signing Out...</span>
-                    </>
-                  ) : (
-                    "Sign Out"
-                  )}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body
-  );
-};
 
 function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
@@ -140,17 +68,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogoutClick = () => {
-    setShowLogoutModal(true);
-  };
-
-  const confirmLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
-  };
 
   const menus = [
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
@@ -305,15 +223,9 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
 
       </aside>
-
-      <LogoutConfirmationModal 
-        show={showLogoutModal} 
-        onClose={() => setShowLogoutModal(false)} 
-        onConfirm={confirmLogout} 
-        isLight={isLight} 
-        isLoading={isLogoutLoading} 
-      />
     </>
+
+
   );
 }
 

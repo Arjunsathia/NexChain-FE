@@ -11,7 +11,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   const TC = useMemo(() => ({
     // Card Background (matches Admin/Sidebar look, no border here)
     bgContainer: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     
     // Text Colors
@@ -167,7 +167,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   return (
     <div
       className={`
-        rounded-2xl p-4 sm:p-6 h-full flex flex-col
+        rounded-lg md:rounded-2xl p-3 md:p-6 h-full flex flex-col
         ${TC.bgContainer}
       `}
     >
@@ -248,25 +248,25 @@ const StatsGrid = ({ isLight, currentMetrics, periodReturns, timeRange, TC }) =>
   const { totalInvestment, profitLoss } = currentMetrics;
   
   return (
-    <div className="grid grid-cols-3 gap-4 mb-6">
-      <div className={`border rounded-xl p-3 sm:p-4 ${TC.bgStatCard}`}>
-        <p className={`text-xs mb-1 ${TC.textSecondary}`}>Invested</p>
-        <p className={`text-base sm:text-lg font-bold ${TC.textPrimary}`}>
+    <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
+      <div className={`border rounded-lg md:rounded-xl p-2 md:p-4 ${TC.bgStatCard}`}>
+        <p className={`text-[10px] md:text-xs mb-0.5 md:mb-1 ${TC.textSecondary}`}>Invested</p>
+        <p className={`text-sm md:text-lg font-bold ${TC.textPrimary}`}>
           ${totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </p>
       </div>
 
-      <div className={`border rounded-xl p-3 sm:p-4 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
-        <p className={`text-xs mb-1 ${TC.textSecondary}`}>Total P&L</p>
-        <div className={`flex items-center gap-1 font-bold text-base sm:text-lg ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
+      <div className={`border rounded-lg md:rounded-xl p-2 md:p-4 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
+        <p className={`text-[10px] md:text-xs mb-0.5 md:mb-1 ${TC.textSecondary}`}>Total P&L</p>
+        <div className={`flex items-center gap-1 font-bold text-sm md:text-lg ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
           {profitLoss >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
           <span>${Math.abs(profitLoss).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
         </div>
       </div>
 
-      <div className={`border rounded-xl p-3 sm:p-4 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
-        <p className={`text-xs mb-1 ${TC.textSecondary}`}>{timeRange} Return</p>
-        <div className={`flex items-center gap-1 font-bold text-base sm:text-lg ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
+      <div className={`border rounded-lg md:rounded-xl p-2 md:p-4 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
+        <p className={`text-[10px] md:text-xs mb-0.5 md:mb-1 ${TC.textSecondary}`}>{timeRange} Return</p>
+        <div className={`flex items-center gap-1 font-bold text-sm md:text-lg ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
           {periodReturns[timeRange] >= 0 ? <FaArrowUp size={10} /> : <FaArrowDown size={10} />}
           <span>{Math.abs(periodReturns[timeRange]).toFixed(2)}%</span>
         </div>
@@ -310,7 +310,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
   return (
     <div className="flex-1 min-h-[250px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={performanceData}>
+        <LineChart data={performanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={isPositive ? "#10B981" : "#EF4444"} stopOpacity={0.3}/>
@@ -327,6 +327,7 @@ const Chart = ({ isLight, performanceData, currentMetrics, TC }) => {
             minTickGap={30}
           />
           <YAxis 
+            width={40}
             stroke={TC.chartStroke} 
             fontSize={11}
             tickLine={false}

@@ -29,7 +29,7 @@ function Highlights() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    bgCard: isLight ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgIcon: isLight ? "bg-green-100" : "bg-green-500/10",
     iconColor: isLight ? "text-green-700" : "text-green-400",
     headerGradient: "bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent",
@@ -51,52 +51,52 @@ function Highlights() {
   }, [coins]);
 
   return (
-    <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in`}>
+    <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full fade-in`}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 fade-in">
-        <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
-          <FaFire className={`text-lg ${TC.iconColor}`} />
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4 fade-in">
+        <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
+          <FaFire className={`text-base sm:text-lg ${TC.iconColor}`} />
         </div>
         <div>
-          <h2 className={`text-lg font-bold ${TC.headerGradient}`}>
+          <h2 className={`text-base sm:text-lg font-bold ${TC.headerGradient}`}>
             Top Gainers
           </h2>
-          <p className={`text-xs ${TC.textSecondary}`}>
+          <p className={`text-[10px] sm:text-xs ${TC.textSecondary}`}>
             Best performing coins (24h)
           </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {topGainers.map((coin, index) => (
           <div
             key={coin?.id ?? coin?.symbol ?? index}
-            className={`flex items-center justify-between p-3 rounded-lg ${TC.bgItem} transition-all duration-200 group cursor-pointer fade-in`}
+            className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${TC.bgItem} transition-all duration-200 group cursor-pointer fade-in`}
             style={{ animationDelay: `${0.3 + index * 0.1}s` }}
           >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
               <img
                 src={coin?.image}
                 alt={coin?.name}
-                className="w-8 h-8 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
               />
               <div className="min-w-0 flex-1">
-                <span className={`font-semibold text-sm transition-colors truncate block ${TC.textPrimary} ${TC.textItemHover}`}>
+                <span className={`font-semibold text-xs sm:text-sm transition-colors truncate block ${TC.textPrimary} ${TC.textItemHover}`}>
                   {coin?.name ?? 'Unknown'}
                 </span>
-                <span className={`text-xs uppercase ${TC.textSecondary}`}>
+                <span className={`text-[10px] sm:text-xs uppercase ${TC.textSecondary}`}>
                   {coin?.symbol?.toUpperCase() ?? ''}
                 </span>
               </div>
             </div>
 
             <div className="text-right">
-              <div className={`flex items-center gap-1 font-bold text-sm ${TC.textValue}`}>
-                <FaArrowUp className="text-xs" />
+              <div className={`flex items-center gap-1 font-bold text-xs sm:text-sm ${TC.textValue}`}>
+                <FaArrowUp className="text-[10px] sm:text-xs" />
                 {coin?.price_change_percentage_24h?.toFixed(1)}%
               </div>
-              <div className={`text-xs mt-1 font-medium ${TC.textPrice}`}>
+              <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium ${TC.textPrice}`}>
                 ${coin?.current_price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
               </div>
             </div>

@@ -22,10 +22,11 @@ const SimpleSparkline = ({
 
   return (
     <svg
-      width={width}
-      height={height}
+      width="100%"
+      height="100%"
       viewBox={`0 0 ${width} ${height}`}
-      className="overflow-visible"
+      className="overflow-visible w-full h-full"
+      preserveAspectRatio="none"
     >
       <polyline
         points={points}

@@ -8,20 +8,36 @@ import { motion } from "framer-motion";
 const DarkCosmicBlockchainBackground = React.memo(() => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const gradientRef = useRef(null);
   
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no alpha channel on canvas itself if possible, but we need transparency? No, it's a background.
-    // Actually, we want it to be opaque black base.
+    // Optimize context: alpha: false is faster if we don't need transparency 
+    // (which we don't, since we fillRect the whole screen)
+    const ctx = canvas.getContext('2d', { alpha: false }); 
     
     let width = window.innerWidth;
     let height = window.innerHeight;
     
-    // Set canvas size
+    // Function to cache the background gradient
+    const updateGradient = () => {
+      if (!ctx) return;
+      const g = ctx.createRadialGradient(
+        width / 2, height / 2, 0,
+        width / 2, height / 2, Math.max(width, height) / 2
+      );
+      g.addColorStop(0, '#111827'); // Gray 900 Center
+      g.addColorStop(0.7, '#020617'); // Slate 950
+      g.addColorStop(1, '#000000'); // Black Edges
+      gradientRef.current = g;
+    };
+
+    // Set canvas size and gradient
     canvas.width = width;
     canvas.height = height;
+    updateGradient();
     
     // Handle resize
     const handleResize = () => {
@@ -29,18 +45,20 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
+      updateGradient();
     };
     
+    // Debounce resize if needed, but for now standard listener is okay if logic is light
     window.addEventListener('resize', handleResize);
     
-    // Particle system
+    // Particle system containers
     const particles = [];
     const networkNodes = [];
     const networkLines = [];
     const lightFlares = [];
     
-    // Initialize particles - REDUCED COUNT for Optimization
-    for (let i = 0; i < 40; i++) { 
+    // Initialize particles - REDUCED COUNT (30 is plenty for mobile/desktop background)
+    for (let i = 0; i < 30; i++) { 
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -52,8 +70,8 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       });
     }
     
-    // Initialize network nodes - REDUCED COUNT
-    for (let i = 0; i < 10; i++) { 
+    // Initialize network nodes - REDUCED COUNT (8 is cleaner)
+    for (let i = 0; i < 8; i++) { 
       networkNodes.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -65,8 +83,9 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       });
     }
     
-    // Create network connections
+    // Create network connections - Optimized logic
     networkNodes.forEach((node, i) => {
+      // Find closest nodes
       const distances = networkNodes.map((other, j) => ({
         index: j,
         distance: Math.sqrt((node.x - other.x) ** 2 + (node.y - other.y) ** 2)
@@ -74,7 +93,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       
       distances.sort((a, b) => a.distance - b.distance);
       
-      // Connect to fewer nodes for cleaner look
+      // Connect to 1-2 nearest neighbors
       const numConnections = Math.floor(Math.random() * 2) + 1;
       for (let j = 1; j <= numConnections && j < distances.length; j++) {
         if (!node.connections.includes(distances[j].index)) {
@@ -98,7 +117,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       }
     });
     
-    // Initialize light flares - MINIMAL
+    // Initialize light flares - Minimal
     for (let i = 0; i < 2; i++) { 
       lightFlares.push({
         x: Math.random() * width,
@@ -112,26 +131,22 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
     
     // Animation loop
     const animate = () => {
-      // Clear canvas with BRIGHTER DARK gradient
-      // Re-creating gradient every frame is necessary if window resizes, but we can optimize by not doing it if size hasn't changed.
-      // However, for simplicity and correctness on resize, we keep it. The cost is relatively low for one gradient.
-      const gradient = ctx.createRadialGradient(
-        width / 2, height / 2, 0,
-        width / 2, height / 2, Math.max(width, height) / 2
-      );
-      gradient.addColorStop(0, '#111827'); // Gray 900 Center (Visible)
-      gradient.addColorStop(0.7, '#020617'); // Slate 950
-      gradient.addColorStop(1, '#000000'); // Black Edges
-      
-      ctx.fillStyle = gradient;
+      if (!ctx || !gradientRef.current) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      // Clear with CACHED gradient
+      ctx.fillStyle = gradientRef.current;
       ctx.fillRect(0, 0, width, height);
       
-      // Update and draw particles with parallax
+      // Update and draw particles
       particles.forEach(particle => {
         const moveSpeed = particle.speed * (particle.layer + 1);
         particle.x += Math.cos(particle.direction) * moveSpeed;
         particle.y += Math.sin(particle.direction) * moveSpeed;
         
+        // Wrap around screen
         if (particle.x < -10) particle.x = width + 10;
         if (particle.x > width + 10) particle.x = -10;
         if (particle.y < -10) particle.y = height + 10;
@@ -151,22 +166,23 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         
         const pulseSize = 2.0 + Math.sin(node.pulse) * 1.0; 
         
-        // Visible glow
-        const gradient = ctx.createRadialGradient(
+        // Draw glow
+        const g = ctx.createRadialGradient(
           node.x, node.y, 0,
           node.x, node.y, pulseSize * 3.0
         );
-        gradient.addColorStop(0, `rgba(114, 138, 213, ${0.3 + Math.sin(node.pulse) * 0.1})`); 
-        gradient.addColorStop(1, 'rgba(114, 138, 213, 0)');
+        g.addColorStop(0, `rgba(114, 138, 213, ${0.3 + Math.sin(node.pulse) * 0.1})`); 
+        g.addColorStop(1, 'rgba(114, 138, 213, 0)');
         
         ctx.beginPath();
         ctx.arc(node.x, node.y, pulseSize * 2.0, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = g;
         ctx.fill();
         
+        // Draw core
         ctx.beginPath();
         ctx.arc(node.x, node.y, pulseSize, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(165, 180, 252, ${0.6 + Math.sin(node.pulse) * 0.2})`; // Brighter core
+        ctx.fillStyle = `rgba(165, 180, 252, ${0.6 + Math.sin(node.pulse) * 0.2})`; 
         ctx.fill();
       });
       
@@ -180,18 +196,18 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         const pulseWidth = line.baseWidth;
         const pulseOpacity = 0.15 + Math.sin(line.pulse) * 0.1; 
         
-        const gradient = ctx.createLinearGradient(
+        const g = ctx.createLinearGradient(
           fromNode.x, fromNode.y,
           toNode.x, toNode.y
         );
-        gradient.addColorStop(0, `rgba(114, 138, 213, ${pulseOpacity})`);
-        gradient.addColorStop(1, `rgba(114, 138, 213, ${pulseOpacity})`);
+        g.addColorStop(0, `rgba(114, 138, 213, ${pulseOpacity})`);
+        g.addColorStop(1, `rgba(114, 138, 213, ${pulseOpacity})`);
         
         ctx.beginPath();
         ctx.moveTo(fromNode.x, fromNode.y);
         ctx.lineTo(toNode.x, toNode.y);
         ctx.lineWidth = pulseWidth;
-        ctx.strokeStyle = gradient;
+        ctx.strokeStyle = g;
         ctx.stroke();
       });
       
@@ -202,13 +218,13 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         ctx.translate(flare.x, flare.y);
         ctx.rotate(flare.rotation);
         
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, flare.size);
-        gradient.addColorStop(0, `rgba(114, 138, 213, ${flare.opacity * 2})`); 
-        gradient.addColorStop(1, `rgba(114, 138, 213, 0)`);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, flare.size);
+        g.addColorStop(0, `rgba(114, 138, 213, ${flare.opacity * 2})`); 
+        g.addColorStop(1, `rgba(114, 138, 213, 0)`);
         
         ctx.beginPath();
         ctx.arc(0, 0, flare.size, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = g;
         ctx.fill();
         ctx.restore();
       });

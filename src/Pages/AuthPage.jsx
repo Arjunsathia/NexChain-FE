@@ -4,7 +4,7 @@ import { Input } from "@/Components/ui/input.jsx";
 import { Button } from "@/Components/ui/button.jsx";
 import { Label } from "@/Components/ui/label.jsx";
 import { Card, CardContent } from "@/Components/ui/card.jsx";
-import { Mail, Lock, User, Phone, ArrowLeft, Rocket, ChevronRight, Sparkles } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowLeft, Rocket, ChevronRight, Sparkles, Eye, EyeOff } from "lucide-react";
 import { login, postForm } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -37,7 +37,18 @@ const AuthPage = () => {
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [otp, setOtp] = useState("");
   const [userId, setUserId] = useState(null);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,14 +92,12 @@ const AuthPage = () => {
       await fetchUsers();
 
       toast.success(`Welcome back, ${res?.user?.name || "User"}!`, {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#CFFAFE",
           color: "#155E75",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#0891B2", secondary: "#FFFFFF" },
@@ -101,14 +110,12 @@ const AuthPage = () => {
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Incorrect username or password";
       toast.error(errorMessage, {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -149,14 +156,12 @@ const AuthPage = () => {
     // Email Validation
     if (!registerData.email || !registerData.email.includes("@")) {
       toast.error("Please enter a valid email address.", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -168,14 +173,12 @@ const AuthPage = () => {
     const hasNumber = /\d/.test(registerData.phone);
     if (!registerData.phone || !hasNumber) {
       toast.error("Please enter a valid phone number.", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -185,14 +188,12 @@ const AuthPage = () => {
 
     if (registerData.password !== registerData.confirm_password) {
       toast.error("Passwords do not match.", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -205,14 +206,12 @@ const AuthPage = () => {
       setActiveTab("login");
       setRegisterData(initialRegisterKeys);
       toast.success("Account created successfully", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#DCFCE7",
           color: "#166534",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
@@ -220,14 +219,12 @@ const AuthPage = () => {
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Registration failed. Please try again";
       toast.error(errorMessage, {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -242,7 +239,7 @@ const AuthPage = () => {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className={`
-        flex items-center justify-center min-h-screen bg-[#000108] text-white px-4 relative overflow-hidden
+        flex items-center justify-center min-h-screen bg-[#000108] text-white px-4 py-10 relative overflow-hidden
       `}
     >
       {/* Use Landing Page Background */}
@@ -269,17 +266,17 @@ const AuthPage = () => {
               {/* Top Highlight Line */}
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
               
-              <CardContent className="p-8 md:p-10">
+              <CardContent className="p-5 md:p-10">
               {/* Header */}
-              <div className="text-center mb-10">
+              <div className="text-center mb-6 md:mb-10">
                   <motion.div 
                       initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                      className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20"
+                      className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 md:mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20"
                   >
-                      <Rocket className="h-8 w-8 text-white" />
+                      <Rocket className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </motion.div>
                   
-                  <h2 className="text-4xl font-extrabold text-white mb-3 tracking-tight">
+                  <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-2 md:mb-3 tracking-tight">
                   Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">NexChain</span>
                   </h2>
                   <p className="text-gray-400">
@@ -288,26 +285,26 @@ const AuthPage = () => {
               </div>
 
               {/* Tab Navigation */}
-              <div className="grid grid-cols-2 bg-gray-900/50 p-1.5 rounded-xl border border-gray-800/50 mb-8 relative">
+              <div className="grid grid-cols-2 bg-gray-900/50 p-1 md:p-1.5 rounded-lg md:rounded-xl border border-gray-800/50 mb-6 relative w-full max-w-[240px] md:max-w-full mx-auto">
                   <motion.div 
-                      className="absolute top-1.5 bottom-1.5 rounded-lg bg-gray-800 shadow-sm"
+                      className="absolute top-1 md:top-1.5 bottom-1 md:bottom-1.5 rounded-md md:rounded-lg bg-gray-800 shadow-sm"
                       initial={false}
                       animate={{ 
-                          left: activeTab === "login" ? "6px" : "50%", 
-                          width: "calc(50% - 9px)",
-                          x: activeTab === "register" ? 3 : 0
+                          left: activeTab === "login" ? (isMobile ? "4px" : "6px") : "50%", 
+                          width: isMobile ? "calc(50% - 6px)" : "calc(50% - 9px)",
+                          x: activeTab === "register" ? (isMobile ? 2 : 3) : 0
                       }}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                   <button
                       onClick={() => setActiveTab("login")}
-                      className={`relative z-10 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200 ${activeTab === "login" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}
+                      className={`relative z-10 py-1.5 md:py-2.5 text-xs md:text-sm font-semibold rounded-md md:rounded-lg transition-colors duration-200 ${activeTab === "login" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}
                   >
                       Sign In
                   </button>
                   <button
                       onClick={() => setActiveTab("register")}
-                      className={`relative z-10 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200 ${activeTab === "register" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}
+                      className={`relative z-10 py-1.5 md:py-2.5 text-xs md:text-sm font-semibold rounded-md md:rounded-lg transition-colors duration-200 ${activeTab === "register" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}
                   >
                       Create Account
                   </button>
@@ -342,7 +339,7 @@ const AuthPage = () => {
                                           onChange={(e) => setOtp(e.target.value)}
                                           placeholder="000000"
                                           maxLength={6}
-                                          className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600 text-center text-2xl tracking-[0.5em] font-mono"
+                                          className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600 text-center text-xl md:text-2xl tracking-[0.5em] font-mono"
                                           required
                                           autoFocus
                                       />
@@ -350,7 +347,7 @@ const AuthPage = () => {
                               </div>
 
                               <Button
-                                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-14 text-lg mt-4"
+                                  className="w-full max-w-[240px] md:max-w-full mx-auto flex justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 md:py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-10 md:h-14 text-base md:text-lg mt-2 md:mt-4"
                                   type="submit"
                                   disabled={logging || otp.length !== 6}
                               >
@@ -382,41 +379,48 @@ const AuthPage = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-5"
+                      className="space-y-4 md:space-y-5"
                       onSubmit={handleLogin}
                   >
                       <div className="space-y-2">
                           <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Username</Label>
                           <div className="relative group">
                               <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors" />
-                              <Input
-                                  type="text"
-                                  value={loginData.user_name}
-                                  onChange={(e) => setLoginData({ ...loginData, user_name: e.target.value })}
-                                  placeholder="Enter your username"
-                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
-                                  required
-                              />
+                                  <Input
+                                      type="text"
+                                      value={loginData.user_name}
+                                      onChange={(e) => setLoginData({ ...loginData, user_name: e.target.value })}
+                                      placeholder="Enter your username"
+                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                      required
+                                  />
                           </div>
                       </div>
 
                       <div className="space-y-2">
                           <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Password</Label>
                           <div className="relative group">
-                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors" />
+                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors z-10" />
                               <Input
-                                  type="password"
+                                  type={showLoginPassword ? "text" : "password"}
                                   value={loginData.password}
                                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                                   placeholder="Enter your password"
-                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                  className="pl-12 pr-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                   required
                               />
+                              <button
+                                  type="button"
+                                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition-colors z-10 bg-transparent border-0 p-0" 
+                              >
+                                  {showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                              </button>
                           </div>
                       </div>
 
                       <Button
-                          className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-14 text-lg mt-4"
+                          className="w-full max-w-[240px] md:max-w-full mx-auto flex justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 md:py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-10 md:h-14 text-base md:text-lg mt-2 md:mt-4"
                           type="submit"
                           disabled={logging}
                       >
@@ -451,8 +455,8 @@ const AuthPage = () => {
                                   type="text"
                                   value={registerData.name}
                                   onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-                                  placeholder="John Doe"
-                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                  placeholder="Enter your full name"
+                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                   required
                               />
                           </div>
@@ -466,8 +470,8 @@ const AuthPage = () => {
                                   type="email"
                                   value={registerData.email}
                                   onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                  placeholder="john@example.com"
-                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                  placeholder="Enter your email address"
+                                  className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                   required
                               />
                           </div>
@@ -482,8 +486,8 @@ const AuthPage = () => {
                                       type="tel"
                                       value={registerData.phone}
                                       onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                                      placeholder="+1 234..."
-                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                      placeholder="Enter your phone number"
+                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                   />
                               </div>
                           </div>
@@ -495,8 +499,8 @@ const AuthPage = () => {
                                       type="text"
                                       value={registerData.user_name}
                                       onChange={(e) => setRegisterData({ ...registerData, user_name: e.target.value })}
-                                      placeholder="@username"
-                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                      placeholder="Choose a username"
+                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                       required
                                   />
                               </div>
@@ -507,35 +511,49 @@ const AuthPage = () => {
                           <div className="space-y-2">
                               <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Password</Label>
                               <div className="relative group">
-                                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors" />
+                                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors z-10" />
                                   <Input
-                                      type="password"
+                                      type={showRegisterPassword ? "text" : "password"}
                                       value={registerData.password}
                                       onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                                      placeholder="••••••••"
-                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                      placeholder="Create a strong password"
+                                      className="pl-12 pr-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                       required
                                   />
+                                  <button
+                                      type="button"
+                                      onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition-colors z-10 bg-transparent border-0 p-0" 
+                                  >
+                                      {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                  </button>
                               </div>
                           </div>
                           <div className="space-y-2">
                               <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Confirm</Label>
                               <div className="relative group">
-                                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors" />
+                                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors z-10" />
                                   <Input
-                                      type="password"
+                                      type={showConfirmPassword ? "text" : "password"}
                                       value={registerData.confirm_password}
                                       onChange={(e) => setRegisterData({ ...registerData, confirm_password: e.target.value })}
-                                      placeholder="••••••••"
-                                      className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
+                                      placeholder="Confirm your password"
+                                      className="pl-12 pr-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-10 md:h-14 text-sm md:text-base focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-600"
                                       required
                                   />
+                                  <button
+                                      type="button"
+                                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition-colors z-10 bg-transparent border-0 p-0" 
+                                  >
+                                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                  </button>
                               </div>
                           </div>
                       </div>
 
                       <Button
-                          className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-14 text-lg mt-4"
+                          className="w-full max-w-[240px] md:max-w-full mx-auto flex justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 md:py-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:scale-[1.02] h-10 md:h-14 text-base md:text-lg mt-2 md:mt-4"
                           type="submit"
                           disabled={registering}
                       >
@@ -558,7 +576,7 @@ const AuthPage = () => {
               {/* Footer Actions */}
               <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-800/50">
                   <button
-                      className="flex items-center gap-2 text-gray-500 hover:text-cyan-400 transition-all duration-300 text-sm font-medium group"
+                      className="flex items-center gap-2 text-gray-500 hover:text-cyan-400 transition-all duration-300 text-xs md:text-sm font-medium group"
                       onClick={() => navigate("/")}
                   >
                       <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
@@ -566,7 +584,7 @@ const AuthPage = () => {
                   </button>
                   
                   <button
-                      className="text-cyan-500 hover:text-cyan-300 text-sm font-medium transition-colors"
+                      className="text-cyan-500 hover:text-cyan-300 text-xs md:text-sm font-medium transition-colors"
                       onClick={() => navigate("/public-learning")}
                   >
                       Explore Learning Hub

@@ -62,7 +62,7 @@ function NewsSection() {
         {sampleNews.map((news, index) => (
           <div
             key={news.id}
-            className={`rounded-xl overflow-hidden transition-all duration-300 group cursor-pointer fade-in ${TC.bgCard}`}
+            className={`rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 group cursor-pointer fade-in ${TC.bgCard}`}
             style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
           >
             <img

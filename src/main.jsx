@@ -10,13 +10,19 @@ createRoot(document.getElementById("root")).render(
     <App />
     <Toaster
       position="top-right"
+      containerStyle={{
+        top: 20,
+        left: 20,
+        bottom: 20,
+        right: 20,
+      }}
       toastOptions={{
-        className: '',
+        className: '!max-w-[85vw] !text-[11px] sm:!text-xs md:!text-base font-medium shadow-xl !px-3 !py-2 md:!px-4 md:!py-3',
         style: {
           background: '#333',
           color: '#fff',
-          borderRadius: '10px',
-          padding: '16px',
+          borderRadius: '12px',
+          // Padding is now handled by className for responsiveness
         },
         success: {
           style: {

@@ -2,6 +2,8 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from "react"
 import { deleteWatchList, getData } from "@/api/axiosConfig";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import PriceAlertModal from "@/Components/Common/PriceAlertModal";
+
 import { Outlet, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import TradeModal from "@/Components/Common/TradeModal";
@@ -41,7 +43,7 @@ const Watchlist = () => {
 
   const userFromLocalStorage = JSON.parse(localStorage.getItem("NEXCHAIN_USER"));
   const userId = user?.id || userFromLocalStorage?.id;
-
+  
   const [watchlistData, setWatchlistData] = useState([]);
   const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,12 @@ const Watchlist = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [tradeModal, setTradeModal] = useState({ show: false, coin: null, type: "buy" });
   const [removeModal, setRemoveModal] = useState({ show: false, coin: null });
+  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
+
+  const handleAlertClick = (e, coin) => {
+    e.stopPropagation();
+    setAlertModal({ show: true, coin });
+  };
 
   const ws = useRef(null);
   const livePricesRef = useRef({});
@@ -60,10 +68,10 @@ const Watchlist = () => {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     bgCard: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     bgStatsCard: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
     bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
     skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
@@ -327,7 +335,8 @@ const Watchlist = () => {
                 isLight={isLight} 
                 handleCoinClick={handleCoinClick} 
                 handleTrade={handleTrade} 
-                setRemoveModal={setRemoveModal} 
+                setRemoveModal={setRemoveModal}
+                handleAlertClick={handleAlertClick}
               />
 
               {/* Mobile Card View */}
@@ -337,7 +346,8 @@ const Watchlist = () => {
                 isLight={isLight} 
                 handleCoinClick={handleCoinClick} 
                 handleTrade={handleTrade} 
-                setRemoveModal={setRemoveModal} 
+                setRemoveModal={setRemoveModal}
+                handleAlertClick={handleAlertClick}
               />
             </>
           )}
@@ -352,6 +362,12 @@ const Watchlist = () => {
           />
         </div>
       </main>
+
+      <PriceAlertModal 
+        show={alertModal.show} 
+        onClose={() => setAlertModal({ show: false, coin: null })} 
+        coin={alertModal.coin} 
+      />
 
       <RemoveConfirmationModal
         show={removeModal.show}

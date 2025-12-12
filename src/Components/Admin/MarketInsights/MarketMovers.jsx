@@ -22,7 +22,7 @@ function MarketMovers({
           </h3>
           <button
             onClick={() => setShowTopGainers(true)}
-            className="text-xs text-cyan-400 hover:text-cyan-300 hidden sm:block"
+            className="text-xs text-cyan-400 hover:text-cyan-300"
           >
             View All
           </button>
@@ -73,7 +73,7 @@ function MarketMovers({
           </h3>
           <button
             onClick={() => setShowTopLosers(true)}
-            className="text-xs text-cyan-400 hover:text-cyan-300 hidden sm:block"
+            className="text-xs text-cyan-400 hover:text-cyan-300"
           >
             View All
           </button>

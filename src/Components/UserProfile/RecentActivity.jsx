@@ -29,7 +29,7 @@ function RecentActivity() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    bgCard: isLight ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
     // Header
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
@@ -136,31 +136,31 @@ function RecentActivity() {
   }
 
   return (
-    <div className={`${TC.bgCard} rounded-xl p-5 h-full fade-in`}>
+    <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full fade-in`}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 fade-in">
-        <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
-          <FaHistory className={`${TC.iconColor} text-lg`} />
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4 fade-in">
+        <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
+          <FaHistory className={`${TC.iconColor} text-base sm:text-lg`} />
         </div>
         <div>
-          <h2 className={`text-lg font-bold ${TC.headerGradient}`}>
+          <h2 className={`text-base sm:text-lg font-bold ${TC.headerGradient}`}>
             Recent Activity
           </h2>
-          <p className={`text-xs ${TC.textSecondary}`}>
+          <p className={`text-[10px] sm:text-xs ${TC.textSecondary}`}>
             Latest transactions and purchases
           </p>
         </div>
       </div>
       
       {/* Content */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {recentActivities.length === 0 ? (
           <div className="text-center py-6 flex flex-col items-center justify-center gap-3 h-full fade-in">
             <div className={`p-3 rounded-full ${TC.bgEmptyIcon}`}>
               <FaHistory className={`text-lg ${TC.textEmptyIcon}`} />
             </div>
-            <p className={`${TC.textSecondary} text-sm`}>No recent activity</p>
-            <p className={`${TC.textTertiary} text-xs`}>Your transactions will appear here</p>
+            <p className={`${TC.textSecondary} text-xs sm:text-sm`}>No recent activity</p>
+            <p className={`${TC.textTertiary} text-[10px] sm:text-xs`}>Your transactions will appear here</p>
           </div>
         ) : (
           recentActivities.map((activity, idx) => {
@@ -171,22 +171,22 @@ function RecentActivity() {
             return (
               <div 
                 key={activity.id || idx} 
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer fade-in ${TC.bgItem}`}
+                className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg transition-all duration-200 group cursor-pointer fade-in ${TC.bgItem}`}
                 style={{ animationDelay: `${0.3 + idx * 0.1}s` }}
               >
                 <div className="relative flex-shrink-0">
                   <img 
                     src={activity.image} 
                     alt={activity.coinName}
-                    className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-200"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full group-hover:scale-110 transition-transform duration-200"
                   />
-                  <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 ${TC.iconBorder} flex items-center justify-center ${
+                  <div className={`absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 ${TC.iconBorder} flex items-center justify-center ${
                     isBuy ? 'bg-green-500' : 'bg-red-500'
                   }`}>
                     {isBuy ? (
-                      <FaArrowUp className="text-white text-xs" />
+                      <FaArrowUp className="text-white text-[10px] sm:text-xs" />
                     ) : (
-                      <FaArrowDown className="text-white text-xs" />
+                      <FaArrowDown className="text-white text-[10px] sm:text-xs" />
                     )}
                   </div>
                 </div>
@@ -194,27 +194,27 @@ function RecentActivity() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                      <p className={`font-semibold text-sm truncate transition-colors ${TC.textPrimary} ${TC.textItemHover}`}>
+                      <p className={`font-semibold text-xs sm:text-sm truncate transition-colors ${TC.textPrimary} ${TC.textItemHover}`}>
                         {activity.coinName}
                       </p>
-                      <p className={`text-xs truncate ${TC.textSecondary}`}>
+                      <p className={`text-[10px] sm:text-xs truncate ${TC.textSecondary}`}>
                         {activity.coinSymbol?.toUpperCase()}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className={`font-bold text-sm ${valueClasses}`}>
+                      <p className={`font-bold text-xs sm:text-sm ${valueClasses}`}>
                         {isBuy ? '+' : '-'}{(activity.quantity || 1).toFixed(2)}
                       </p>
-                      <p className={`text-xs font-medium ${TC.textAmount}`}>
+                      <p className={`text-[10px] sm:text-xs font-medium ${TC.textAmount}`}>
                         ${((activity.amount || 0)).toFixed(2)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${statusClasses}`}>
+                  <div className="flex justify-between items-center mt-1 sm:mt-2">
+                    <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full ${statusClasses}`}>
                       {isBuy ? 'Bought' : 'Sold'}
                     </span>
-                    <p className={`text-xs truncate ${TC.textTertiary}`}>
+                    <p className={`text-[10px] sm:text-xs truncate ${TC.textTertiary}`}>
                       {activity.date ? new Date(activity.date).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',

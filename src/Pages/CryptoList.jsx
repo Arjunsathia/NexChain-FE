@@ -69,7 +69,7 @@ function CryptoList() {
     // Backgrounds
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     bgCard: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
     
@@ -204,13 +204,13 @@ function CryptoList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
           
           {/* Global Market Card (Large) - Added 'fade-in' class */}
-          <div className={`lg:col-span-4 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in h-full flex flex-col justify-between`} style={{ transitionDelay: '0.1s' }}>
-            <div className="flex items-center justify-between mb-6">
+          <div className={`lg:col-span-4 rounded-lg md:rounded-2xl p-3 md:p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in h-full flex flex-col justify-between`} style={{ transitionDelay: '0.1s' }}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400"}`}>
                   <FaGlobeAmericas />
                 </div>
-                <h3 className="font-bold">Global Market</h3>
+                <h3 className="text-sm sm:text-base font-bold">Global Market</h3>
               </div>
               {!loading && (
                 <span className={`text-xs font-bold px-2 py-1 rounded-full border ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)}`}>
@@ -220,20 +220,20 @@ function CryptoList() {
               )}
             </div>
 
-            <div className="space-y-6 flex-1 flex flex-col justify-center">
+            <div className="space-y-4 sm:space-y-6 flex-1 flex flex-col justify-center">
               <div>
-                <p className={`text-sm mb-1 ${TC.textTertiary}`}>Total Market Cap</p>
-                <h2 className="text-3xl font-bold tracking-tight">
+                <p className={`text-xs sm:text-sm mb-1 ${TC.textTertiary}`}>Total Market Cap</p>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                   {loading ? <Skeleton width={180} height={36} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
                 </h2>
               </div>
               
-              <div className="h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="h-10 sm:h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
                  {/* Decorative Sparkline Placeholder or Real Graph */}
                  {loading ? <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : <SparklineGraph />}
               </div>
 
-              <div className="pt-4 border-t border-gray-200/10 flex justify-between items-center text-sm">
+              <div className="pt-4 border-t border-gray-200/10 flex justify-between items-center text-xs sm:text-sm">
                  <span className={TC.textSecondary}>24h Volume</span>
                  <span className={`font-mono font-semibold ${TC.textPrimary}`}>
                     {loading ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
@@ -254,10 +254,8 @@ function CryptoList() {
         </div>
 
         {/* 3. Main Coin List Section - Added 'fade-in' class */}
-        <div className="space-y-4 fade-in" style={{ transitionDelay: '0.4s' }}>
-          <div className={`rounded-2xl overflow-hidden transition-all duration-300 p-6 ${TC.bgCard}`}>
-             <CoinTable onTrade={handleTrade} />
-          </div>
+        <div className="fade-in" style={{ transitionDelay: '0.4s' }}>
+           <CoinTable onTrade={handleTrade} />
         </div>
 
         {/* 4. News Section - Added 'fade-in' class */}

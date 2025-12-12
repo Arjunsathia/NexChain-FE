@@ -4,7 +4,7 @@ import { FaGlobe, FaExternalLinkAlt, FaBook } from "react-icons/fa";
 function QuickLinks({ coin, TC, isLight }) {
   return (
     <div
-      className={`order-5 rounded-2xl p-6 fade-in ${TC.bgCard}`}
+      className={`order-5 rounded-lg md:rounded-2xl p-4 md:p-6 fade-in ${TC.bgCard}`}
       style={{ animationDelay: "0.5s" }}
     >
       <h3 className="text-lg font-bold mb-4 flex items-center gap-2">

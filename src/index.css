@@ -28,6 +28,11 @@
   opacity: 0;
 }
 
+.fade-in-fast {
+  animation: fadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+
 /* Glow Fade Animation */
 @keyframes glowFade {
   0% {
@@ -330,12 +335,14 @@
   background: rgba(107, 114, 128, 0.7);
 }
 
-.custom-scrollbar {
+.custom-scrollbar,
+.no-scrollbar {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
 

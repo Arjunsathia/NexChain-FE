@@ -11,17 +11,20 @@ import {
   FaWallet,
   FaCoins,
   FaStar,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaMoon,
+  FaSun
 } from "react-icons/fa";
+import { useTheme } from "@/Context/ThemeContext";
 import useUserContext from '@/Context/UserContext/useUserContext';
 import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
-import useThemeCheck from "@/hooks/useThemeCheck";
 
 function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
-  const isLight = useThemeCheck();
+  const { isDark, toggleTheme } = useTheme();
+  const isLight = !isDark;
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -39,8 +42,8 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
     // Navbar Container
     bgNavbar: isLight 
-      ? "bg-white shadow-xl" 
-      : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-lg",
+      ? "bg-white shadow-sm" 
+      : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-md",
     
     // Header
     headerTitle: isLight ? "text-blue-600" : "text-cyan-400",
@@ -144,7 +147,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     <>
       {/* Fully Rounded Top Navigation Bar */}
       <nav className={`
-        ${TC.bgNavbar} shadow-lg sticky top-0 z-50 rounded-3xl mx-2 mt-2
+        ${TC.bgNavbar} sticky top-0 z-50 rounded-3xl mx-2 mt-2
         transition-all duration-500 ease-out
         ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}
       `}>
@@ -166,6 +169,8 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 </div>
               </div>
             </div>
+
+
 
             {/* Compact mobile menu button */}
             <button

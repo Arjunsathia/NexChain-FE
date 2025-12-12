@@ -36,7 +36,7 @@ function Watchlist() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+    bgCard: isLight ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
     // Header
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
@@ -99,18 +99,18 @@ function Watchlist() {
   };
 
   return (
-    <div className={`${TC.bgCard} rounded-xl p-5 h-full flex flex-col fade-in`}>
+    <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full flex flex-col fade-in`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 fade-in">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
-            <FaStar className={`${TC.iconColor} text-lg`} />
+      <div className="flex items-center justify-between mb-2 sm:mb-4 fade-in">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
+            <FaStar className={`${TC.iconColor} text-base sm:text-lg`} />
           </div>
           <div>
-            <h2 className={`text-lg font-bold ${TC.headerGradient}`}>
+            <h2 className={`text-base sm:text-lg font-bold ${TC.headerGradient}`}>
               Watchlist
             </h2>
-            <p className={`text-xs ${TC.textSecondary}`}>
+            <p className={`text-[10px] sm:text-xs ${TC.textSecondary}`}>
               {totalCoins} coin{totalCoins !== 1 ? 's' : ''} tracked
             </p>
           </div>
@@ -163,33 +163,33 @@ function Watchlist() {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {displayCoins.map((coin, index) => (
               <div
                 key={coin.id}
-                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
+                className={`flex items-center justify-between p-2 sm:p-3 rounded-lg transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
                 style={{ animationDelay: `${0.4 + index * 0.1}s` }}
                 onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <img src={coin.image} alt={coin.name} className="w-8 h-8 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <img src={coin.image} alt={coin.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
                   <div className="min-w-0 flex-1">
-                    <span className={`font-semibold text-sm transition-colors truncate block ${TC.textPrimary} ${TC.textItemHover}`}>
+                    <span className={`font-semibold text-xs sm:text-sm transition-colors truncate block ${TC.textPrimary} ${TC.textItemHover}`}>
                       {coin.name}
                     </span>
-                    <span className={`text-xs uppercase ${TC.textSecondary}`}>
+                    <span className={`text-[10px] sm:text-xs uppercase ${TC.textSecondary}`}>
                       {coin.symbol}
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className={`font-bold text-sm ${
+                  <div className={`font-bold text-xs sm:text-sm ${
                     coin.price_change_percentage_24h >= 0 ? TC.textPositive : TC.textNegative
                   }`}>
                     {coin.price_change_percentage_24h >= 0 ? "+" : ""}{coin.price_change_percentage_24h?.toFixed(1)}%
                   </div>
-                  <div className={`text-xs mt-1 font-medium ${TC.textAmount}`}>
+                  <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium ${TC.textAmount}`}>
                     ${coin.current_price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                   </div>
                 </div>
@@ -201,14 +201,14 @@ function Watchlist() {
 
       {/* Footer */}
       {!loading && !error && displayCoins.length > 0 && totalCoins > 4 && (
-        <div className={`flex items-center justify-between pt-3 mt-3 ${TC.borderFooter} text-sm ${TC.textSecondary} fade-in`}>
+        <div className={`flex items-center justify-between pt-2 mt-2 sm:pt-3 sm:mt-3 ${TC.borderFooter} text-[10px] sm:text-sm ${TC.textSecondary} fade-in`}>
           <span>Showing 4 of {totalCoins}</span>
           <button
             onClick={() => navigate("/watchlist")}
-            className={`transition-all duration-200 flex items-center gap-1 text-sm ${TC.textFooterLink}`}
+            className={`transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-sm ${TC.textFooterLink}`}
           >
             View all
-            <FaArrowRight className="text-xs" />
+            <FaArrowRight className="text-[10px] sm:text-xs" />
           </button>
         </div>
       )}

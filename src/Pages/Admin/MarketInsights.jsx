@@ -20,10 +20,10 @@ const MarketInsights = () => {
       textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
       bgCard: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
         : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
       bgStatsCard: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
         : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
       bgItem: isLight ? "bg-gray-50" : "bg-white/5",
       bgInput: isLight
@@ -210,7 +210,7 @@ const MarketInsights = () => {
 
   return (
     <div
-      className={`flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
+      className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

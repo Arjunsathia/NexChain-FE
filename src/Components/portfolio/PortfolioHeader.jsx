@@ -11,7 +11,7 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
     // 🟩 Card Styling — No Border + Cyan Hover Glow + Animation
     bgCard: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
 
     // Skeleton
@@ -39,27 +39,27 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
   const isProfit = totalPnL >= 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6">
 
       {/* 🔹 Total Balance Card */}
       <div className={`
-        rounded-2xl p-5 sm:p-6 transition-all duration-300 ease-in-out 
-        transform hover:scale-[1.02] hover:-translate-y-1 will-change-transform
+        rounded-lg md:rounded-2xl p-3 md:p-6 transition-all duration-300 ease-in-out 
+        transform hover:scale-105 hover:-translate-y-1 will-change-transform
         ${TC.bgCard}
       `}>
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl shadow-md ${TC.iconBlue}`}>
-            <FaWallet className="text-xl" />
+        <div className="flex items-center justify-between mb-2">
+          <div className={`p-1.5 md:p-2.5 rounded-lg shadow-lg ${TC.iconBlue}`}>
+            <FaWallet className="text-sm md:text-lg" />
           </div>
-          <div className={`text-xs font-bold px-2 py-1 rounded-full ${TC.bgLive} ${TC.textLive}`}>
+          <div className={`text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-full ${TC.bgLive} ${TC.textLive}`}>
             Live
           </div>
         </div>
 
-        <p className={`text-sm font-medium mb-1 ${TC.textSecondary}`}>Total Portfolio Value</p>
-        <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${TC.textPrimary}`}>
+        <p className={`text-[10px] md:text-xs font-medium mb-0.5 md:mb-1 ${TC.textSecondary}`}>Total Portfolio Value</p>
+        <h3 className={`text-base md:text-2xl font-bold tracking-tight ${TC.textPrimary}`}>
           {loading 
-            ? <Skeleton width={140} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/> 
+            ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/> 
             : `$${totalBalance.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}`
           }
         </h3>
@@ -67,24 +67,24 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
       {/* 🔹 Profit / Loss */}
       <div className={`
-        rounded-2xl p-5 sm:p-6 transition-all duration-300 ease-in-out 
-        transform hover:scale-[1.02] hover:-translate-y-1 will-change-transform
+        rounded-lg md:rounded-2xl p-3 md:p-6 transition-all duration-300 ease-in-out 
+        transform hover:scale-105 hover:-translate-y-1 will-change-transform
         ${TC.bgCard}
       `}>
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl shadow-md ${isProfit ? TC.bgPillProfit : TC.bgPillLoss}`}>
-            {isProfit ? <FaArrowUp className="text-xl" /> : <FaArrowDown className="text-xl" />}
+        <div className="flex items-center justify-between mb-2">
+          <div className={`p-1.5 md:p-2.5 rounded-lg shadow-lg ${isProfit ? TC.bgPillProfit : TC.bgPillLoss}`}>
+            {isProfit ? <FaArrowUp className="text-sm md:text-lg" /> : <FaArrowDown className="text-sm md:text-lg" />}
           </div>
 
-          <div className={`text-sm font-bold px-2 py-1 rounded-full ${isProfit ? TC.bgPillProfit : TC.bgPillLoss}`}>
+          <div className={`text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-full ${isProfit ? TC.bgPillProfit : TC.bgPillLoss}`}>
             {isProfit && "+"}{totalPnLPercent.toFixed(2)}%
           </div>
         </div>
 
-        <p className={`text-sm font-medium mb-1 ${TC.textSecondary}`}>Total Profit/Loss (24h)</p>
-        <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isProfit ? TC.textProfit : TC.textLoss}`}>
+        <p className={`text-[10px] md:text-xs font-medium mb-0.5 md:mb-1 ${TC.textSecondary}`}>Total Profit/Loss (24h)</p>
+        <h3 className={`text-base md:text-2xl font-bold tracking-tight ${isProfit ? TC.textProfit : TC.textLoss}`}>
           {loading 
-            ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/>
+            ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/>
             : `${isProfit?"+":""}$${Math.abs(totalPnL).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}`
           }
         </h3>
@@ -92,38 +92,39 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
       {/* 🔹 Top Performer */}
       <div className={`
-        rounded-2xl p-5 sm:p-6 transition-all duration-300 ease-in-out 
-        transform hover:scale-[1.02] hover:-translate-y-1 will-change-transform
+        rounded-lg md:rounded-2xl p-3 md:p-6 transition-all duration-300 ease-in-out 
+        transform hover:scale-105 hover:-translate-y-1 will-change-transform
         ${TC.bgCard}
+        col-span-2 lg:col-span-1
       `}>
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl shadow-md ${TC.iconYellow}`}>
-            <FaTrophy className="text-xl" />
+        <div className="flex items-center justify-between mb-2">
+          <div className={`p-1.5 md:p-2.5 rounded-lg shadow-lg ${TC.iconYellow}`}>
+            <FaTrophy className="text-sm md:text-lg" />
           </div>
           {topPerformer && (
-            <div className={`text-xs font-bold px-2 py-1 rounded-full ${TC.iconYellow}`}>
+            <div className={`text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-full ${TC.iconYellow}`}>
               Top Asset
             </div>
           )}
         </div>
 
-        <p className={`text-sm font-medium mb-1 ${TC.textSecondary}`}>Best Performer (24h)</p>
+        <p className={`text-[10px] md:text-xs font-medium mb-0.5 md:mb-1 ${TC.textSecondary}`}>Best Performer (24h)</p>
 
         {loading ? (
-          <Skeleton width={120} height={30} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/>
+          <Skeleton width={100} height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight}/>
         ) : topPerformer ? (
           <div>
-            <h3 className={`text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2 ${TC.textPrimary}`}>
+            <h3 className={`text-base md:text-2xl font-bold tracking-tight flex items-center gap-2 ${TC.textPrimary}`}>
               <img src={topPerformer.image} alt={topPerformer.name}
-                className="w-6 h-6 rounded-full" />
+                className="w-5 h-5 md:w-6 md:h-6 rounded-full" />
               {topPerformer.name}
             </h3>
-            <p className={`text-sm font-semibold mt-1 ${TC.textProfit}`}>
+            <p className={`text-[10px] md:text-sm font-semibold mt-0.5 ${TC.textProfit}`}>
               +{topPerformer.profitLossPercentage?.toFixed(2)}%
             </p>
           </div>
         ) : (
-          <h3 className={`text-xl font-bold ${TC.textSecondary}`}>No Data</h3>
+          <h3 className={`text-base md:text-xl font-bold ${TC.textSecondary}`}>No Data</h3>
         )}
       </div>
 

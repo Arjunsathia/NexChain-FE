@@ -43,7 +43,7 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
       {stats.map((stat, i) => (
         <div
           key={i}
-          className={`rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
+          className={`rounded-lg md:rounded-2xl p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
         >
           <div className="flex items-center justify-between mb-2">
             <div

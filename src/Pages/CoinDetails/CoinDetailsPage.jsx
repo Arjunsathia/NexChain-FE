@@ -24,7 +24,7 @@ import CoinHeader from "@/Components/CoinDetails/CoinHeader";
 import CoinStats from "@/Components/CoinDetails/CoinStats";
 import AdditionalStats from "@/Components/CoinDetails/AdditionalStats";
 import QuickLinks from "@/Components/CoinDetails/QuickLinks";
-import HoldingsBadge from "@/Components/CoinDetails/HoldingsBadge";
+
 
 // Utility to check if light mode is active
 const useThemeCheck = () => {
@@ -67,11 +67,11 @@ function CoinDetailsPage() {
       textPrimary: isLight ? "text-gray-900" : "text-white",
       textSecondary: isLight ? "text-gray-600" : "text-gray-400",
       bgCard: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+        ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
       bgHeader: isLight
-        ? "bg-white/80 backdrop-blur-xl shadow-lg border-none"
-        : "bg-gray-900/80 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+        ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-gray-200"
+        : "bg-gray-900/80 backdrop-blur-xl shadow-xl shadow-black/20 border-b border-gray-800",
       skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
       skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
     }),
@@ -386,16 +386,11 @@ function CoinDetailsPage() {
           handleTrade={handleTrade}
           isLight={isLight}
           TC={TC}
+          userHoldings={userHoldings}
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          {/* Holdings Badge */}
-          <HoldingsBadge
-            hasHoldings={hasHoldings}
-            userHoldings={userHoldings}
-            coin={coin}
-            isLight={isLight}
-          />
+
 
           {/* Stats Grid */}
           <CoinStats
@@ -412,7 +407,7 @@ function CoinDetailsPage() {
             <div className="contents lg:block lg:col-span-8 lg:space-y-6">
               {/* TradingView Chart */}
               <div
-                className={`order-1 rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
+                className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
                 style={{ animationDelay: "0.3s" }}
               >
                 <TradingViewWidget

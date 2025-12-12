@@ -18,7 +18,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
     
     // Card Background (aligned with other components – no border)
     bgCard: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
 
     // Table Header Background
@@ -94,7 +94,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
   return (
     <div
       className={`
-        rounded-2xl overflow-hidden
+        rounded-lg md:rounded-2xl overflow-hidden
         ${TC.bgCard}
       `}
     >
@@ -264,7 +264,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
         {holdings.map((coin, index) => (
           <div 
             key={coin.coinId} 
-            className={`p-4 space-y-3 fade-in ${TC.bgHover}`}
+            className={`p-3 space-y-2 fade-in ${TC.bgHover}`}
             style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             onClick={() => onTrade(coin)}
           >

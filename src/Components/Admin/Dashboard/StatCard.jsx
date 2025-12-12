@@ -4,19 +4,19 @@ function StatCard({ label, value, icon: Icon, color, badge, TC }) {
   return (
     <div
       className={`
-      ${TC.bgStatsCard} rounded-xl p-4 
+      ${TC.bgStatsCard} rounded-lg sm:rounded-xl p-3 sm:p-4 
       transition-all duration-300 ease-in-out 
       transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 will-change-transform
       cursor-pointer
     `}
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className={`p-2 bg-gradient-to-r ${color} rounded-lg shadow-lg`}>
-          <Icon className="text-white text-base" />
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <div className={`p-1.5 sm:p-2 bg-gradient-to-r ${color} rounded-lg shadow-lg`}>
+          <Icon className="text-white text-sm sm:text-base" />
         </div>
         {badge && (
           <span
-            className={`text-xs font-medium px-2 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
+            className={`text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
           >
             {badge}
           </span>
@@ -24,12 +24,12 @@ function StatCard({ label, value, icon: Icon, color, badge, TC }) {
       </div>
 
       <p
-        className={`text-lg font-bold mb-1 transition-colors ${TC.textPrimary} group-hover:text-blue-500`}
+        className={`text-base sm:text-lg font-bold mb-0.5 sm:mb-1 transition-colors ${TC.textPrimary} group-hover:text-blue-500`}
       >
         {value ?? 0}
       </p>
 
-      <p className={`text-sm font-medium ${TC.textSecondary}`}>{label}</p>
+      <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>{label}</p>
     </div>
   );
 }

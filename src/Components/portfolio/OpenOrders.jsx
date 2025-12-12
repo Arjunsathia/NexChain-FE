@@ -101,7 +101,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
   if (!user) return null;
 
   const TC = {
-    bgCard: isLight ? "bg-white/60 border-gray-200 backdrop-blur-sm" : "bg-gray-800/40 border-gray-700",
+    bgCard: isLight ? "bg-white/60 border-gray-200 backdrop-blur-sm shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" : "bg-gray-800/40 border-gray-700 shadow-xl shadow-black/20",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     rowHover: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
@@ -114,7 +114,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
   if (orders.length === 0) return null;
 
   return (
-    <div className={`rounded-2xl border p-6 ${TC.bgCard} shadow-sm fade-in`}>
+    <div className={`rounded-lg md:rounded-2xl border p-3 md:p-6 ${TC.bgCard} fade-in`}>
       <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${TC.textPrimary}`}>
         <FaClock className="text-amber-500" />
         Open Orders

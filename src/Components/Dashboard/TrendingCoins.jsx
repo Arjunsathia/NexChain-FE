@@ -49,8 +49,8 @@ function TrendingCoins() {
     () => ({
       // Main container: no border, strong shadow in light, glassy in dark
       bgContainer: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+        ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
 
       textPrimary: isLight ? "text-gray-900" : "text-white",
       textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -256,7 +256,7 @@ function TrendingCoins() {
   return (
     <div
       className={`
-        rounded-xl p-4 h-full flex flex-col fade-in
+        rounded-lg md:rounded-2xl p-3 md:p-4 h-full flex flex-col fade-in
         ${TC.bgContainer}
         ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
       `}

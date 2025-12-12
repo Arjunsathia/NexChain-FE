@@ -31,10 +31,10 @@ function AdminDashboard() {
       textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
       bgCard: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
         : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
       bgStatsCard: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
+        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
         : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25 border-none",
       bgItem: isLight ? "bg-gray-50" : "bg-white/5",
 
@@ -252,7 +252,7 @@ function AdminDashboard() {
   return (
     <div
       className={`
-        flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}
+        flex-1 p-2 sm:p-4 lg:p-8 space-y-3 sm:space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}
         transition-all duration-500 ease-in-out
         rounded-3xl
       `}
@@ -261,11 +261,11 @@ function AdminDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
-            className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}
+            className={`text-xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}
           >
             Dashboard Overview
           </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
+          <p className={`${TC.textSecondary} mt-1 text-[10px] sm:text-sm`}>
             Real-time platform monitoring and management
           </p>
         </div>
@@ -292,7 +292,7 @@ function AdminDashboard() {
         }`}
       >
         {/* Stat Cards / Skeleton (shown in the same place) */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-6">
           {isLoading ? (
             // skeleton cards
             [...Array(4)].map((_, i) => (
@@ -341,14 +341,14 @@ function AdminDashboard() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4">
           {/* Chart */}
-          <div className={`lg:col-span-2 ${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className={`lg:col-span-2 ${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
+            <div className="flex items-center justify-between mb-2 sm:mb-6">
               <h2
-                className={`text-base sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
+                className={`text-sm sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
               >
-                <FaChartLine className="text-cyan-400 text-sm sm:text-base" />{" "}
+                <FaChartLine className="text-cyan-400 text-xs sm:text-base" />{" "}
                 User Registration
               </h2>
               
@@ -382,7 +382,7 @@ function AdminDashboard() {
           </div>
 
           {/* Quick Actions & Health */}
-          <div className="space-y-4 lg:space-y-6">
+          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
             <PlatformHealth isLoading={isLoading} TC={TC} />
             <QuickActions
               isLoading={isLoading}
@@ -393,7 +393,7 @@ function AdminDashboard() {
         </div>
 
         {/* Bottom Grid: Reports & Users */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {/* Reports */}
           <RecentReports reports={reports} isLoading={isLoading} TC={TC} />
 

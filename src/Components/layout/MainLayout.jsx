@@ -33,7 +33,7 @@ export default function MainLayout() {
     <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
       {/* 💡 Passing isDark and toggleDarkMode to Navbar */}
       <Navbar isDark={isDark} toggleDarkMode={toggleTheme} />
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-2 sm:p-4">
         <Outlet />
       </main>
       <Footer />

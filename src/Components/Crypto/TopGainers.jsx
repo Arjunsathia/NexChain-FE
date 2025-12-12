@@ -26,7 +26,7 @@ function TopGainers() {
 
   const TC = useMemo(() => ({
     bgContainer: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textAccent: isLight ? "text-green-600" : "text-green-400",
@@ -56,7 +56,7 @@ function TopGainers() {
   }, []);
 
   return (
-    <div className={`rounded-2xl p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
+    <div className={`rounded-lg md:rounded-2xl p-3 md:p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
       <h2 className={`text-lg font-semibold mb-4 ${TC.textPrimary} fade-in`} style={{ animationDelay: "0.2s" }}>📈 Top Gainers</h2>
 
       {loading ? (

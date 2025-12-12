@@ -10,7 +10,6 @@ import TopCoins from "@/Components/Dashboard/TopCoins";
 import UserProfileCard from "@/Components/Dashboard/UserProfileCard";
 import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
-import CompactProfile from "@/Components/Dashboard/CompactProfile";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -164,11 +163,8 @@ export default function Dashboard() {
       {/* Mobile & Medium Layout (Gaps reduced to 4) */}
       <div className="xl:hidden flex flex-col gap-4">
         {/* 1. Profile */}
-        <div className="sm:hidden fade-in" style={{ animationDelay: "0.2s" }}>
-          <CompactProfile />
-        </div>
         <div
-          className="hidden sm:block fade-in"
+          className="fade-in"
           style={{ animationDelay: "0.2s" }}
         >
           <UserProfileCard />
@@ -206,7 +202,7 @@ export default function Dashboard() {
         </div>
 
         {/* 4. Watchlist & 5. Trending */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           <div className="fade-in" style={{ animationDelay: "0.6s" }}>
             <WatchlistPreview />
           </div>

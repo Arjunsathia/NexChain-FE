@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, User, ChevronRight, Rocket, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,6 +24,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const bellRef = useRef(null);
 
   // 💡 Theme Classes Helper - BORDER ADDED (Subtle/Themed)
   const TC = useMemo(() => ({
@@ -33,7 +34,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     // Base/Container Styles 
     bgNavbar: isDarkMode
       ? "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20"
-      : "bg-white/80 backdrop-blur-xl shadow-[0_2px_10px_rgba(0,0,0,0.06)]",
+      : "bg-white/80 backdrop-blur-xl shadow-sm sm:shadow-[0_2px_10px_rgba(0,0,0,0.06)]",
     textBase: isDarkMode ? "text-gray-300" : "text-gray-700",
     
     // Hover/Interactive
@@ -237,6 +238,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
           {/* Notification Bell */}
           <div className="relative">
             <button
+              ref={bellRef}
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               className={`
                 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
@@ -249,14 +251,19 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
               )}
             </button>
-            <NotificationModal isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} isDark={isDarkMode} />
+            <NotificationModal 
+              isOpen={isNotificationOpen} 
+              onClose={() => setIsNotificationOpen(false)} 
+              isDark={isDarkMode} 
+              triggerRef={bellRef}
+            />
           </div>
 
           {/* Dark mode toggle */}
           <button
             onClick={toggleDarkMode}
             className={`
-              w-11 h-6 rounded-full p-0.5 flex items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50
+              flex w-11 h-6 rounded-full p-0.5 items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50
               ${isDarkMode ? "bg-gray-700 justify-end" : "bg-cyan-100 justify-start"}
             `}
             title="Toggle Dark Mode"
@@ -297,31 +304,36 @@ export default function Navbar({ isDark, toggleDarkMode }) {
       </nav>
 
       {/* Mobile menu overlay + drawer (small and medium screens only) */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isMobileMenuOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+              animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
+              exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] lg:hidden"
+              className="fixed inset-0 bg-black/40 z-[55] lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               aria-hidden
             />
 
             <motion.aside
-              initial={{ x: -320, opacity: 0 }}
+              initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -320, opacity: 0 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className={`fixed left-0 top-0 h-full w-80 z-[60] lg:hidden shadow-2xl ${TC.bgDrawer} ${TC.borderThemed}`}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{ 
+                type: "spring", 
+                damping: 35, 
+                stiffness: 350, 
+                mass: 0.8 
+              }}
+              className={`fixed left-0 top-0 h-[100dvh] w-[85vw] max-w-[320px] z-[60] lg:hidden shadow-2xl ${TC.bgDrawer} ${TC.borderThemed}`}
               role="dialog"
               aria-modal="true"
             >
-              <div className={`h-full p-6`}>
+              <div className={`h-full p-6 flex flex-col items-center`}>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="w-full flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <Rocket className={`h-6 w-6 ${TC.activeText}`} />
                     <h2 className={`text-2xl font-bold text-transparent bg-clip-text ${TC.brandGradient}`}>
@@ -331,9 +343,9 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     aria-label="Close menu"
-                    className={`p-2 rounded-xl transition-all duration-200 ${TC.hoverBg} transform hover:scale-110`}
+                    className={`p-2 rounded-xl transition-all duration-200 ${TC.hoverBg} transform hover:scale-110 active:scale-95`}
                   >
-                    <X size={18} className={`${TC.iconBase} ${TC.iconHover} transition-colors`} />
+                    <X size={20} className={`${TC.iconBase} ${TC.iconHover} transition-colors`} />
                   </button>
                 </div>
 
@@ -346,10 +358,10 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                       handleNavigate("/auth");
                     }
                   }}
-                  className={`w-full text-left mb-6 p-4 rounded-xl ${TC.bgMobileCard} transition-transform active:scale-95`}
+                  className={`w-full text-left mb-8 p-3 rounded-xl ${TC.bgMobileCard} transition-all duration-200 active:scale-95 group`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${isDarkMode ? "from-cyan-600 to-blue-600" : "from-blue-600 to-cyan-700"} flex items-center justify-center font-bold text-white text-lg shadow-lg overflow-hidden`}>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${isDarkMode ? "from-cyan-600 to-blue-600" : "from-blue-600 to-cyan-700"} flex items-center justify-center font-bold text-white text-lg shadow-lg overflow-hidden group-hover:scale-105 transition-transform`}>
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -363,58 +375,61 @@ export default function Navbar({ isDark, toggleDarkMode }) {
                         {user?.email}
                       </p>
                     </div>
-                    {/* Rocket Icon in Mobile Menu */}
-                    <Rocket className={`h-6 w-6 ${TC.activeText}`} />
+                    <ChevronRight className={`h-5 w-5 ${TC.textTertiary} opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
                   </div>
                 </button>
 
                 {/* Navigation */}
-                <nav className="space-y-2 mb-8">
+                <nav className="w-full space-y-4 mb-2 flex-1">
                   {navItems.map((item, index) => (
                     <motion.button
                       key={item.path}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.03 }}
+                      transition={{ 
+                        duration: 0.2, 
+                        delay: 0.1 + (index * 0.04), // Staggered start
+                        ease: "easeOut"
+                      }}
                       onClick={() => handleNavigate(item.path)}
                       className={`
-                        w-full text-left p-4 rounded-xl transition-all duration-300 flex items-center gap-4
-                        transform hover:translate-x-2
+                        w-full text-left py-3 px-4 rounded-xl transition-all duration-200 flex items-center gap-4
+                        active:scale-[0.98]
                         ${
                           isActive(item.path)
-                            ? `${TC.activeBg} ${TC.activeText}`
-                            : `${TC.textMobileNavInactive} ${TC.bgMobileNavHover}`
+                            ? `${TC.activeBg} ${TC.activeText} font-semibold shadow-sm`
+                            : `${TC.textMobileNavInactive} ${TC.bgMobileNavHover} font-medium`
                         }
                       `}
                     >
-                      <span className="flex-1 font-medium">{item.label}</span>
+                      <span className="flex-1">{item.label}</span>
                       <ChevronRight
                         size={16}
-                        className={
+                        className={`transition-transform duration-300 ${
                           isActive(item.path)
-                            ? TC.activeText
-                            : TC.textSecondary
-                        }
+                            ? `${TC.activeText} translate-x-1`
+                            : `${TC.textSecondary} opacity-50`
+                        }`}
                       />
                     </motion.button>
                   ))}
                 </nav>
 
                 {/* Bottom Actions - Only Dark Mode Toggle */}
-                <div className="absolute bottom-6 left-6 right-6">
+                <div className="w-full pb-6 sm:pb-4 mt-auto">
                   <button
                     onClick={() => {
                       toggleDarkMode();
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`w-full p-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 ${TC.bgBottomAction} transform hover:scale-105`}
+                    className={`w-3/4 mx-auto p-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-2 ${TC.bgBottomAction} transform active:scale-95 shadow-md text-sm`}
                   >
                     {isDarkMode ? (
-                      <Sun size={18} className="text-yellow-400" />
+                      <Sun size={16} className="text-yellow-400" />
                     ) : (
-                      <Moon size={18} className="text-gray-700" />
+                      <Moon size={16} className="text-gray-700" />
                     )}
-                    <span className="font-medium">
+                    <span className="font-semibold">
                       {isDarkMode ? "Light Mode" : "Dark Mode"}
                     </span>
                   </button>

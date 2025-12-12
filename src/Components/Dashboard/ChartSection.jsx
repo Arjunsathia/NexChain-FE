@@ -36,8 +36,8 @@ function ChartSection({ coinId }) {
     () => ({
       // Container – unified with other widgets, no border
       bgContainer: isLight
-        ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+        ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
 
       textPrimary: isLight ? "text-gray-900" : "text-white",
       textSecondary: isLight ? "text-gray-600" : "text-gray-300",
@@ -153,6 +153,7 @@ function ChartSection({ coinId }) {
         style: { colors: [TC.chartAxisColor], fontSize: "11px" },
         datetimeFormatter: { hour: "HH:mm", day: "MMM dd" },
       },
+      tickAmount: 6,
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
@@ -170,7 +171,7 @@ function ChartSection({ coinId }) {
     grid: {
       borderColor: TC.chartGridColor,
       strokeDashArray: 3,
-      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      padding: { top: 0, right: 20, bottom: 0, left: 20 },
     },
     stroke: {
       curve: "smooth",
@@ -241,7 +242,7 @@ function ChartSection({ coinId }) {
 
   return (
     <div
-      className={`rounded-xl p-4 fade-in h-full flex flex-col ${TC.bgContainer} ${TC.textPrimary}`}
+      className={`rounded-lg md:rounded-2xl p-3 md:p-4 fade-in h-full flex flex-col ${TC.bgContainer} ${TC.textPrimary}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 fade-in">

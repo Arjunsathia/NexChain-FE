@@ -30,7 +30,7 @@ const TransactionHistory = () => {
   const TC = useMemo(() => ({
     // Card Background (aligned with other dashboard cards, no border)
     bgContainer: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     
     // Text Colors
@@ -109,7 +109,7 @@ const TransactionHistory = () => {
   return (
     <div
       className={`
-        rounded-2xl p-4 sm:p-6 fade-in
+        rounded-lg md:rounded-2xl p-3 md:p-6 fade-in
         ${TC.bgContainer}
       `}
     >
@@ -245,7 +245,7 @@ const TransactionSummary = ({ TC, buyCount, sellCount, totalBuyValue, totalSellV
     <div className="grid grid-cols-2 gap-4 mb-6 fade-in" style={{ animationDelay: "0.15s" }}>
       <div
         className={`
-          border rounded-xl p-4 transition-all duration-200 fade-in
+          border rounded-lg md:rounded-xl p-2.5 md:p-4 transition-all duration-200 fade-in
           ${TC.bgBuySummary}
         `}
         style={{ animationDelay: "0.2s" }}
@@ -269,7 +269,7 @@ const TransactionSummary = ({ TC, buyCount, sellCount, totalBuyValue, totalSellV
       
       <div
         className={`
-          border rounded-xl p-4 transition-all duration-200 fade-in
+          border rounded-lg md:rounded-xl p-2.5 md:p-4 transition-all duration-200 fade-in
           ${TC.bgSellSummary}
         `}
         style={{ animationDelay: "0.25s" }}
@@ -342,7 +342,7 @@ const TransactionItem = ({ transaction, index, TC }) => {
   return (
     <div 
       className={`
-        flex items-center gap-3 p-3 sm:p-4 rounded-xl border
+        flex items-center gap-2 sm:gap-3 p-2 md:p-4 rounded-lg md:rounded-xl border
         transition-all duration-200 hover:shadow-md fade-in
         ${TC.bgItem}
       `}
@@ -350,26 +350,26 @@ const TransactionItem = ({ transaction, index, TC }) => {
     >
       <div
         className={`
-          w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
+          w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
           ${isBuy ? TC.bgBuyIcon : TC.bgSellIcon}
         `}
       >
-        {isBuy ? <FaArrowUp className="text-lg" /> : <FaArrowDown className="text-lg" />}
+        {isBuy ? <FaArrowUp className="text-xs sm:text-lg" /> : <FaArrowDown className="text-xs sm:text-lg" />}
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1 sm:mb-2">
           <div className="min-w-0 flex-1">
-            <p className={`font-semibold text-sm sm:text-base truncate ${TC.textPrimary}`}>
+            <p className={`font-semibold text-xs sm:text-base truncate ${TC.textPrimary}`}>
               {transaction.coinName || transaction.coin_name}
             </p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={`text-xs ${TC.textSecondary}`}>
+            <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
+              <span className={`text-[10px] sm:text-xs ${TC.textSecondary}`}>
                 {transaction.coinSymbol?.toUpperCase()}
               </span>
               <span
                 className={`
-                  text-xs px-2 py-0.5 rounded-full font-medium
+                  text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium
                   ${isBuy ? TC.bgPillBuy : TC.bgPillSell}
                 `}
               >
@@ -378,17 +378,17 @@ const TransactionItem = ({ transaction, index, TC }) => {
             </div>
           </div>
           
-          <div className="text-right flex-shrink-0 ml-3">
+          <div className="text-right flex-shrink-0 ml-2 sm:ml-3">
             <p
               className={`
-                font-bold text-sm sm:text-base
+                font-bold text-xs sm:text-base
                 ${isBuy ? TC.textQuantityBuy : TC.textQuantitySell}
               `}
             >
               {isBuy ? '+' : '-'}
               {(transaction.quantity || 0).toFixed(6)}
             </p>
-            <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
+            <p className={`text-[10px] sm:text-sm ${TC.textSecondary}`}>
               ${(transaction.totalValue || transaction.total_cost || 0).toLocaleString('en-IN', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -399,13 +399,13 @@ const TransactionItem = ({ transaction, index, TC }) => {
         
         <div
           className={`
-            flex items-center justify-between text-xs sm:text-sm
-            ${TC.textTertiary} pt-2 border-t ${TC.borderItem}
+            flex items-center justify-between text-[10px] sm:text-sm
+            ${TC.textTertiary} pt-1 sm:pt-2 border-t ${TC.borderItem}
           `}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className={`flex items-center gap-1 ${TC.textPriceAccent}`}>
-              <FaMoneyBillWave className="text-xs" />
+              <FaMoneyBillWave className="text-[10px] sm:text-xs" />
               ${(transaction.price || transaction.coin_price_usd || 0).toLocaleString('en-IN', { 
                 minimumFractionDigits: 2, 
                 maximumFractionDigits: (transaction.price || transaction.coin_price_usd || 0) < 1 ? 6 : 2 
@@ -413,7 +413,7 @@ const TransactionItem = ({ transaction, index, TC }) => {
             </span>
           </div>
           <span className={`flex items-center gap-1 ${TC.textDateAccent}`}>
-            <FaExchangeAlt className="text-xs" />
+            <FaExchangeAlt className="text-[10px] sm:text-xs" />
             {formatDateTime(transaction.transactionDate || transaction.purchase_date)}
           </span>
         </div>

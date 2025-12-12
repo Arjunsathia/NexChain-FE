@@ -40,18 +40,22 @@ const TransactionForm = ({
   setStopPrice,
 }) => {
   return (
-    <div className="space-y-4 fade-in">
+    <div className="space-y-3 md:space-y-4 fade-in">
       {/* Mode Toggles */}
       <div className="flex gap-2 mb-4">
-          <div className={`flex-1 flex p-1 rounded-lg overflow-x-auto ${isLight ? "bg-white border border-gray-200" : "bg-gray-800/50 border-none"}`}>
+          <div className={`flex-1 flex p-1.5 rounded-xl ${isLight ? "bg-gray-100 border border-gray-200/60" : "bg-gray-800/80 border border-white/5"}`}>
             {['market', 'limit', 'stop_limit', 'stop_market'].map((type) => (
               <button
                 key={type}
                 onClick={() => { setOrderType(type); setIsAlertMode(false); }}
-                className={`flex-1 py-1.5 px-2 text-[10px] sm:text-xs font-bold rounded-md capitalize whitespace-nowrap transition-all duration-200 ${
+                className={`flex-1 py-2.5 px-3 text-[10px] sm:text-xs rounded-lg capitalize whitespace-nowrap transition-all duration-300 ${
                   orderType === type && !isAlertMode
-                    ? "bg-cyan-600 text-white shadow-sm dark:bg-gray-700 dark:text-cyan-400"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    ? `text-white font-bold shadow-lg ${
+                        isBuyOperation 
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 shadow-emerald-500/20" 
+                          : "bg-gradient-to-r from-red-500 to-rose-600 shadow-red-500/20"
+                      }`
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 font-medium dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-white/5"
                 }`}
               >
                 {type.replace('_', ' ')}
@@ -104,7 +108,7 @@ const TransactionForm = ({
                     placeholder="0.00"
                     value={stopPrice}
                     onChange={(e) => setStopPrice(e.target.value)}
-                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
+                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
                 />
                 </div>
             )}
@@ -121,7 +125,7 @@ const TransactionForm = ({
                     placeholder="0.00"
                     value={limitPrice}
                     onChange={handleLimitPriceChange}
-                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
+                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
                 />
                 </div>
             )}
@@ -144,7 +148,7 @@ const TransactionForm = ({
                     onChange={handleCoinAmountChange}
                     step="0.000001"
                     min="0.000001"
-                    className={`w-full border rounded-lg pl-3 pr-20 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
+                    className={`w-full border rounded-lg pl-3 pr-20 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
                     />
                     <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex gap-1">
                     {shouldShowSellAll && (
@@ -159,7 +163,7 @@ const TransactionForm = ({
                     )}
                     <button
                         onClick={setMaxAmount}
-                        className="bg-cyan-600 hover:bg-cyan-700 text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 hover:scale-110 group shadow-md"
+                        className={`${isBuyOperation ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"} text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 hover:scale-110 group shadow-md`}
                     >
                         <span className="group-hover:scale-110 inline-block transition-transform">
                         MAX
@@ -180,18 +184,18 @@ const TransactionForm = ({
                     placeholder="0.00"
                     value={usdAmount}
                     onChange={handleUsdAmountChange}
-                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
+                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
                 />
                 </div>
             </div>
 
             {/* Available Balance Info */}
             <div
-                className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border glow-fade hover:border-cyan-600/50 transition-all duration-300 ${TC.bgCard}`}
+                className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border glow-fade ${isBuyOperation ? "hover:border-emerald-500/50" : "hover:border-red-500/50"} transition-all duration-300 ${TC.bgCard}`}
                 style={{ animationDelay: "300ms" }}
             >
                 <div className="flex items-center gap-1">
-                <FaInfoCircle className="text-cyan-600 text-xs animate-pulse" />
+                <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} text-xs animate-pulse`} />
                 <span className={`${TC.textSecondary}`}>
                     Available:{" "}
                     <span className={`${TC.textPrimary} font-bold`}>
@@ -217,13 +221,13 @@ const TransactionForm = ({
 
             {/* Trading Details */}
             <div
-                className={`p-4 rounded-xl space-y-3 glow-fade transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
+                className={`p-3 md:p-4 rounded-xl space-y-3 glow-fade transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
                 style={{ animationDelay: "400ms" }}
             >
                 <h4
                 className={`text-sm font-bold mb-2 flex items-center gap-2 ${TC.textSecondary}`}
                 >
-                <FaExchangeAlt className="text-cyan-600 animate-pulse" />
+                <FaExchangeAlt className={`${isBuyOperation ? "text-emerald-600" : "text-red-600"} animate-pulse`} />
                 Transaction Details
                 </h4>
                 <div className="space-y-2">
@@ -251,7 +255,7 @@ const TransactionForm = ({
                         step="0.1"
                         min="0.1"
                         max="5"
-                        className={`w-16 border rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-2 focus:ring-cyan-600 font-semibold transition-all duration-300 ${
+                        className={`w-16 border rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500" : "focus:ring-red-500"} font-semibold transition-all duration-300 ${
                         isLight
                             ? "bg-gray-200 border-gray-300 text-gray-900"
                             : "bg-gray-700 border-gray-600 text-white"
@@ -347,7 +351,7 @@ const TransactionForm = ({
         className={`flex items-center gap-2 text-xs rounded px-2 py-1 border glow-fade ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
         style={{ animationDelay: "600ms" }}
       >
-        <FaInfoCircle className="text-cyan-600 flex-shrink-0 text-xs animate-pulse" />
+        <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} flex-shrink-0 text-xs animate-pulse`} />
         <span className={TC.textTertiary}>
           {isBuyOperation
             ? "You'll receive the coins instantly after purchase confirmation."

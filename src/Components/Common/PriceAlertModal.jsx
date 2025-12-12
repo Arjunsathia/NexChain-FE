@@ -31,6 +31,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
   const isLight = useThemeCheck();
   const { user } = useUserContext();
   const [selectedPrice, setSelectedPrice] = useState(0);
+  const manualInputRef = useRef(null);
   const [manualPrice, setManualPrice] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -154,13 +155,11 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
             targetPrice
           ).toFixed(2)}`,
           {
+            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
             style: {
               background: "#DCFCE7",
               color: "#166534",
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              fontWeight: "600",
-              fontSize: "14px",
-              padding: "12px 16px",
               borderRadius: "8px",
               border: "none",
             },
@@ -293,6 +292,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
             <span className={`${displayPrice > currentPrice ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}`}>$</span>
             <input
               type="number"
+              ref={manualInputRef}
               value={manualPrice || (selectedPrice > 0 ? selectedPrice : "")}
               onChange={handleManualPriceChange}
               placeholder="0.00"

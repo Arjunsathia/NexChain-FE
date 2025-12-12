@@ -135,14 +135,14 @@ function UserLineChart({ users = [], timeRange = 'Month' }) {
           tickLine={false}
           axisLine={false}
           dy={10}
-          padding={{ left: 10, right: 10 }}
+          padding={{ left: 0, right: 0 }}
         />
         <YAxis 
           stroke={chartColors.axis}
           fontSize={11}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => value === 0 ? '' : value}
+          domain={[0, 'auto']}
         />
         <Tooltip 
           cursor={{ stroke: chartColors.grid, strokeWidth: 1, strokeDasharray: '4 4' }}

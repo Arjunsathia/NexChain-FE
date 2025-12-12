@@ -52,7 +52,7 @@ export default function Footer() {
   const TC = useMemo(() => ({
     // Footer & Modal Base - Fluent Effect + Black Shadow
     bgFooter: isLight 
-      ? "bg-white/60 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
+      ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgModal: isLight 
       ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/30 border-none" 
@@ -157,22 +157,22 @@ export default function Footer() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.2 }}
         className={`
-          ${TC.bgFooter} rounded-xl px-3 py-6 my-2 mx-2 sm:px-6 sm:py-8 sm:my-4 sm:mx-4
+          ${TC.bgFooter} rounded-xl px-3 py-4 my-2 mx-2 sm:px-6 sm:py-6 sm:my-4 sm:mx-4
           transition-all duration-700 ease-out
         `}
       >
         <div className="max-w-7xl mx-auto">
           {/* Main Content: Disclaimer & Links */}
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-4 md:gap-8 mb-8">
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-8 mb-4 md:mb-8">
             
             {/* Column 1-3: Disclaimer Section */}
             <div className="col-span-3 md:col-span-3 lg:col-span-3">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 flex items-center gap-2">
+                <h3 className="text-sm sm:text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 sm:mb-4 flex items-center gap-2">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
                   Important Disclaimer
                 </h3>
-                <p className={`text-sm leading-relaxed ${TC.textSecondary}`}>
+                <p className={`text-xs sm:text-sm leading-relaxed ${TC.textSecondary}`}>
                   <span className={`font-semibold ${TC.textDisclaimerAccent}`}>
                     Cryptocurrency investments involve significant risk
                   </span>{" "}
@@ -189,11 +189,11 @@ export default function Footer() {
             {/* Column 4: Quick Actions */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
                 <h4
-                    className={`text-sm font-semibold mb-3 uppercase tracking-wider ${TC.textTertiary}`}
+                    className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
                 >
                     Quick Links
                 </h4>
-                <div className={`space-y-1 text-sm ${TC.textSecondary}`}>
+                <div className={`space-y-1 text-xs sm:text-sm ${TC.textSecondary}`}>
                     <a href="/faq" className="block hover:text-cyan-400 transition-colors">FAQ</a>
                     <a href="/terms" className="block hover:text-cyan-400 transition-colors">Terms of Service</a>
                     <a href="/privacy" className="block hover:text-cyan-400 transition-colors">Privacy Policy</a>
@@ -218,7 +218,7 @@ export default function Footer() {
               {/* Social Links */}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
                 <h4
-                  className={`text-sm font-semibold mb-3 uppercase tracking-wider ${TC.textTertiary}`}
+                  className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
                 >
                   Connect
                 </h4>
@@ -265,7 +265,7 @@ export default function Footer() {
           >
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div
-                className={`text-sm ${TC.textTertiary}`}
+                className={`text-[10px] sm:text-sm ${TC.textTertiary}`}
               >
                 © {new Date().getFullYear()} NexChain. All rights reserved.
               </div>
@@ -311,10 +311,10 @@ export default function Footer() {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative w-full max-w-md p-4"
+                className="relative w-[90vw] max-w-[320px] p-0 mx-auto"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className={`rounded-2xl ${TC.bgModal}`}>
+                <div className={`rounded-xl shadow-2xl ${TC.bgModal} overflow-hidden`}>
                   
                   {/* Success State */}
                   {showSuccess ? (
@@ -323,57 +323,57 @@ export default function Footer() {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className="p-8 text-center"
+                      className="p-6 text-center"
                     >
-                      <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FaCheckCircle className="text-3xl text-green-400" />
+                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <FaCheckCircle className="text-2xl text-green-400" />
                       </div>
-                      <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
+                      <h3 className={`text-lg font-bold mb-1 ${TC.textPrimary}`}>
                         Feedback Sent!
                       </h3>
-                      <p className={`mb-6 ${TC.textSecondary}`}>
+                      <p className={`text-xs mb-4 ${TC.textSecondary}`}>
                         We appreciate your input.
                       </p>
-                      <div className="w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4"></div>
+                      <div className="w-10 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto"></div>
                     </motion.div>
                   ) : (
                     /* Normal Form State */
                     <motion.div key="form">
                       {/* Header */}
                       <div
-                        className={`px-6 py-4 rounded-t-2xl ${TC.bgModalHeader}`}
+                        className={`px-4 py-3 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2.5">
                             <div
-                              className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg"
+                              className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center shadow-md"
                             >
-                              <FaPaperPlane className="h-5 w-5 text-white" />
+                              <FaPaperPlane className="h-3.5 w-3.5 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                              <h3 className="text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                                 Quick Feedback
                               </h3>
-                              <p className={`text-sm ${TC.textTertiary}`}>
-                                Share your thoughts with us
+                              <p className={`text-[10px] sm:text-xs ${TC.textTertiary}`}>
+                                Share your thoughts
                               </p>
                             </div>
                           </div>
                           <button
                             onClick={closeModal}
                             disabled={isSubmitting}
-                            className={`transition-all duration-200 p-1 rounded-lg hover:rotate-90 transform group disabled:opacity-50 disabled:cursor-not-allowed ${isLight ? "text-gray-500 hover:text-red-600 hover:bg-red-100" : "text-gray-400 hover:text-white hover:bg-red-500/20"}`}
+                            className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${TC.textTertiary}`}
                           >
-                            <X className="text-lg group-hover:scale-110 transition-transform" />
+                            <X size={18} />
                           </button>
                         </div>
                       </div>
 
                       {/* Form */}
-                      <form onSubmit={handleSubmitFeedback} className="p-6 space-y-5">
+                      <form onSubmit={handleSubmitFeedback} className="p-4 space-y-4">
                         {/* Feedback Type */}
                         <div>
-                          <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
+                          <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
                             Feedback Type
                           </label>
                           <div className="grid grid-cols-3 gap-2">
@@ -387,7 +387,7 @@ export default function Footer() {
                               {
                                 type: "bug",
                                 icon: FaBug,
-                                label: "Bug Report",
+                                label: "Bug",
                                 color: isLight ? "text-red-600" : "text-red-400",
                               },
                               {
@@ -402,10 +402,9 @@ export default function Footer() {
                                 type="button"
                                 onClick={() => setFeedbackType(item.type)}
                                 disabled={isSubmitting}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileTap={{ scale: 0.98 }}
                                 className={`
-                                  p-3 rounded-xl transition-all duration-200 flex flex-col items-center gap-2
+                                  py-2 px-1 rounded-lg transition-all duration-200 flex flex-col items-center gap-1.5
                                   ${
                                     feedbackType === item.type
                                       ? TC.bgBtnFeedbackActive
@@ -414,8 +413,8 @@ export default function Footer() {
                                   ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
                                 `}
                               >
-                                <item.icon className={item.color} />
-                                <span className="text-xs font-medium">
+                                <item.icon className={`text-sm ${item.color}`} />
+                                <span className="text-[10px] sm:text-xs font-medium truncate w-full text-center">
                                   {item.label}
                                 </span>
                               </motion.button>
@@ -425,15 +424,15 @@ export default function Footer() {
 
                         {/* Feedback Text */}
                         <div>
-                          <label className={`text-sm mb-2 block ${TC.textSecondary}`}>
+                          <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
                             Your Feedback
                           </label>
                           <textarea
                             value={feedback}
                             onChange={(e) => setFeedback(e.target.value)}
                             placeholder="Tell us what's on your mind..."
-                            rows="4"
-                            className={`w-full rounded-xl px-4 py-3 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 resize-none disabled:opacity-50 ${TC.inputBg}`}
+                            rows="3"
+                            className={`w-full rounded-xl px-3 py-2 text-xs sm:text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 resize-none disabled:opacity-50 ${TC.inputBg}`}
                             required
                             disabled={isSubmitting}
                           />
@@ -441,34 +440,32 @@ export default function Footer() {
 
                         {/* Action Buttons */}
                         <div
-                          className="flex gap-3 pt-2"
+                          className="flex gap-2 pt-1"
                         >
                           <motion.button
                             type="button"
                             onClick={closeModal}
                             disabled={isSubmitting}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`flex-1 px-4 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${TC.bgBtnCancel}`}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex-1 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${TC.bgBtnCancel}`}
                           >
                             Cancel
                           </motion.button>
                           <motion.button
                             type="submit"
                             disabled={!feedback.trim() || isSubmitting}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`flex-1 px-4 py-3 ${TC.bgPrimaryBtn} rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex-1 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium ${TC.bgPrimaryBtn} shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50`}
                           >
                             {isSubmitting ? (
                               <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 Sending...
                               </>
                             ) : (
                               <>
-                                <FaPaperPlane className="text-sm" />
-                                Send Feedback
+                                <FaPaperPlane className="text-xs" />
+                                Send
                               </>
                             )}
                           </motion.button>

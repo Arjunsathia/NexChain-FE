@@ -37,7 +37,7 @@ function AdditionalStats({
 
   return (
     <div
-      className={`order-4 rounded-2xl p-6 fade-in ${TC.bgCard}`}
+      className={`order-4 rounded-lg md:rounded-2xl p-4 md:p-6 fade-in ${TC.bgCard}`}
       style={{ animationDelay: "0.4s" }}
     >
       <h3 className="text-lg font-bold mb-4 flex items-center gap-2">

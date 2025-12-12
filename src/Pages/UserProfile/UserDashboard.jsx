@@ -49,7 +49,7 @@ export default function Dashboard() {
         }`}
       >
         {/* Header Section */}
-        <header className="mb-6">
+        <header className="mb-6 py-2 px-2">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               Welcome back, {currentUser?.name || 'User'} <span className="text-white">👋</span>

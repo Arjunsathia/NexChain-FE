@@ -34,7 +34,7 @@ function InfoCards() {
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
     bgCard: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     
@@ -154,7 +154,7 @@ function InfoCards() {
   };
 
   return (
-    <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
       {cards.map((card, idx) => {
         const Icon = card.icon;
         const trendColor = getTrendColor(card.trend);
@@ -163,28 +163,28 @@ function InfoCards() {
         return (
           <div
             key={idx}
-            className={`${TC.bgCard} rounded-xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 group cursor-pointer fade-in`}
+            className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 group cursor-pointer fade-in`}
             style={{ animationDelay: `${0.1 + idx * 0.1}s` }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 bg-gradient-to-r ${card.color} rounded-lg shadow-lg`}>
-                <Icon className="text-white text-base" />
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className={`p-1.5 sm:p-2 bg-gradient-to-r ${card.color} rounded-lg shadow-lg`}>
+                <Icon className="text-white text-sm sm:text-base" />
               </div>
               {trendText && (
-                <div className={`text-xs font-semibold ${trendColor}`}>
+                <div className={`text-[10px] sm:text-xs font-semibold ${trendColor}`}>
                   {trendText}
                 </div>
               )}
             </div>
             
-            <p className={`text-lg font-bold mb-1 transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
+            <p className={`text-base sm:text-lg font-bold mb-0.5 sm:mb-1 transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
               {formatValue(card.value, card.format)}
             </p>
             
-            <p className={`text-sm font-medium ${TC.textSecondary}`}>
+            <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>
               {card.title}
             </p>
-            <p className={`text-xs mt-1 ${TC.textTertiary}`}>
+            <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${TC.textTertiary}`}>
               {card.description}
             </p>
           </div>

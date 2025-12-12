@@ -54,8 +54,8 @@ const BentoCoinCard = React.memo(
 
         // Base card (used mainly for skeleton fallback)
         bgBase: isLight
-          ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.10)]"
-          : "bg-gray-800/70 shadow-xl shadow-black/30 backdrop-blur-md",
+          ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+          : "bg-gray-800/70 shadow-xl shadow-black/30 backdrop-blur-md border border-gray-800",
 
         // Selected state: subtle cyan ring + soft shadow
         ringSelected: isLight
@@ -82,14 +82,10 @@ const BentoCoinCard = React.memo(
 
         // Rank accent backgrounds (no borders, just bg)
         rankAccent: (idx) => {
-          if (idx === 0)
-            return isLight ? "bg-yellow-50" : "bg-yellow-900/20";
-          if (idx === 1)
-            return isLight ? "bg-gray-50" : "bg-gray-900/20";
-          if (idx === 2)
-            return isLight ? "bg-orange-50" : "bg-orange-900/20";
-          // default
-          return isLight ? "bg-white" : "bg-gray-800/70";
+          // Uniform styling for all top coins (no rank-specific bg)
+          return isLight
+            ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+            : "bg-gray-800/70 shadow-xl shadow-black/30 backdrop-blur-md border border-gray-800";
         },
       }),
       [isLight]
@@ -136,7 +132,7 @@ const BentoCoinCard = React.memo(
 
     // Card styling: NO border, only bg + shadow
     const getCardStyling = () => {
-      const base = `rounded-xl transition-all duration-300`; // border removed
+      const base = `rounded-lg md:rounded-2xl transition-all duration-300`; // border removed
       const accent = TC.rankAccent(index);
       return `${base} ${accent}`;
     };
@@ -158,9 +154,9 @@ const BentoCoinCard = React.memo(
     // Sizes
     const getCardSizeClasses = () => {
       if (isMobile) {
-        return "min-w-[160px] w-[45%] h-auto p-3 snap-center flex-shrink-0";
+        return "w-full h-auto p-3";
       }
-      return "w-full h-32 p-4";
+      return "w-full h-32 p-3 md:p-4";
     };
 
     if (isLoading) {
@@ -252,7 +248,7 @@ const BentoCoinCard = React.memo(
             </div>
             {/* Rank Number (Visible only on desktop/tablet) */}
             <div
-              className={`hidden sm:block text-sm font-semibold ${TC.textSecondary}`}
+              className={`text-sm font-semibold ${TC.textSecondary}`}
             >
               #{index + 1}
             </div>
@@ -295,7 +291,7 @@ const TopCoins = React.memo(
     // Determine container classes based on whether it's mobile or not
     const containerClasses = useMemo(() => {
       return isMobile 
-        ? "flex overflow-x-auto gap-3 w-full pb-2 snap-x scrollbar-hide" 
+        ? "grid grid-cols-1 gap-3 w-full" 
         : "grid grid-cols-1 md:grid-cols-3 gap-3 w-full";
     }, [isMobile]);
 

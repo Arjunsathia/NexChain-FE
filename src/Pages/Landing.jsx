@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 // Components
 import InteractiveGridPattern from "../Components/Landing/Background";
@@ -13,39 +13,33 @@ const MarketOverviewSection = React.lazy(() => import("../Components/Landing/Mar
 const TestimonialsSection = React.lazy(() => import("../Components/Landing/TestimonialsSection"));
 const CTASection = React.lazy(() => import("../Components/Landing/CTASection"));
 
-// Section Animation Variants
+// Section Animation Variants - Smoother Fade Up
 const sectionVariants = {
-  hidden: { opacity: 0, y: 100 },
+  hidden: { opacity: 0, y: 40 },
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 1.0, ease: [0.25, 0.1, 0.25, 1.0] }
+    transition: { duration: 0.8, ease: "easeOut" }
   }
 };
 
-// Sticky Section Wrapper for Parallax/Fade Effect
-const StickySection = React.memo(({ children, className }) => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"]
-  });
-  
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-
+// Standard Section Wrapper
+const SectionWrapper = ({ children, className, id }) => {
   return (
-    <motion.div 
-      ref={ref}
-      style={{ opacity, scale }}
-      className={`sticky top-0 min-h-screen flex flex-col justify-center ${className}`}
+    <motion.section 
+      id={id}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2, margin: "0px 0px -100px 0px" }}
+      variants={sectionVariants}
+      className={`relative w-full ${className}`}
     >
       {children}
-    </motion.div>
+    </motion.section>
   );
-});
+};
 
-// Memoize imported components to prevent re-renders
+// Memoize imported components
 const MemoizedHeroSection = React.memo(HeroSection);
 const MemoizedFeaturesSection = React.memo(FeaturesSection);
 const MemoizedMarketOverviewSection = React.memo(MarketOverviewSection);
@@ -58,14 +52,6 @@ export default function Landing() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [livePrices, setLivePrices] = useState({});
   const [isMobile, setIsMobile] = useState(false);
-
-  // Refs for scrolling
-  const featuresRef = useRef(null);
-  const marketRef = useRef(null);
-
-  // Scroll Hooks for Global Parallax
-  const { scrollY } = useScroll();
-  const bgParallaxY = useTransform(scrollY, [0, 1000], [0, 300]);
 
   // Check Login Status
   useEffect(() => {
@@ -81,7 +67,7 @@ export default function Landing() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Live Prices Simulation (Mock WebSocket)
+  // Live Prices Simulation (Optimized Interval)
   useEffect(() => {
     const initialPrices = {
       bitcoin: { price: 43250.00, change: 2.4 },
@@ -97,80 +83,94 @@ export default function Landing() {
     const interval = setInterval(() => {
       setLivePrices(prev => {
         const newPrices = { ...prev };
+        let hasChanges = false;
+        
+        // Randomly update subset of prices each tick to look organic but save react cycles
         Object.keys(newPrices).forEach(key => {
+          if (Math.random() > 0.3) return; // Skip 30% of updates
+          hasChanges = true;
           const change = (Math.random() - 0.5) * (newPrices[key].price * 0.002);
           newPrices[key].price += change;
           newPrices[key].change += (Math.random() - 0.5) * 0.1;
           newPrices[key].change = parseFloat(newPrices[key].change.toFixed(2));
         });
-        return newPrices;
+        
+        return hasChanges ? newPrices : prev;
       });
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
   const scrollToFeatures = useCallback(() => {
-    featuresRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Smooth scroll to features
+    const element = document.getElementById('features-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, []);
 
   return (
     <div className={`min-h-screen ${TC.bgPage} font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden relative`}>
-      {/* GLOBAL FIXED BACKGROUND - Visible in Hero & Market Overview */}
+      {/* GLOBAL FIXED BACKGROUND */}
       <MemoizedInteractiveGridPattern />
       
-      {/* Background Glows (Moved to Global Scope for Seamless Blend) */}
-      <motion.div style={{ y: bgParallaxY }} className={`absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-cyan-400 pointer-events-none`} /> 
-      <motion.div style={{ y: bgParallaxY }} className={`absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-blue-500 pointer-events-none`} /> 
+      {/* Background Glows - Fixed position to avoid scroll recalculations */}
+      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-cyan-400 pointer-events-none z-0" />
+      <div className="fixed bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-blue-500 pointer-events-none z-0" />
       
       {/* Hero Section */}
-      <StickySection className="z-0">
+      <div className="relative z-10">
         <MemoizedHeroSection 
           navigate={navigate} 
           isLoggedIn={isLoggedIn} 
           TC={TC} 
           scrollToFeatures={scrollToFeatures} 
         />
-      </StickySection>
+      </div>
 
       {/* Features Section */}
-      <StickySection className="z-10"> 
-        <React.Suspense fallback={<div className="min-h-screen" />}>
+      <SectionWrapper id="features-section" className="z-10 py-10 md:py-20"> 
+        <React.Suspense fallback={<div className="h-screen w-full flex items-center justify-center text-slate-500">Loading Features...</div>}>
           <MemoizedFeaturesSection 
-            ref={featuresRef} 
             TC={TC} 
             sectionVariants={sectionVariants} 
           />
         </React.Suspense>
-      </StickySection>
+      </SectionWrapper>
 
       {/* Market Overview Section */}
-      <StickySection className="z-20">
-        <React.Suspense fallback={<div className="min-h-screen" />}>
+      <SectionWrapper className="z-20 py-10 md:py-20">
+        <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection 
-            ref={marketRef} 
             TC={TC} 
             sectionVariants={sectionVariants} 
             livePrices={livePrices} 
           />
         </React.Suspense>
-      </StickySection>
+      </SectionWrapper>
 
-      {/* Combined Testimonials & CTA Section */}
-      <div className="relative z-30">
-        <React.Suspense fallback={<div className="h-96" />}>
+      {/* Testimonials */}
+      <SectionWrapper className="z-30 py-10 md:py-20">
+        <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedTestimonialsSection 
             TC={TC} 
             sectionVariants={sectionVariants} 
             isMobile={isMobile} 
           />
+        </React.Suspense>
+      </SectionWrapper>
+
+      {/* CTA Section */}
+      <SectionWrapper className="z-30 pb-20">
+        <React.Suspense fallback={<div className="h-64 w-full" />}>
           <MemoizedCTASection 
             TC={TC} 
             sectionVariants={sectionVariants} 
             navigate={navigate} 
           />
         </React.Suspense>
-      </div>
+      </SectionWrapper>
     </div>
   );
 }

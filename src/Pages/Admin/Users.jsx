@@ -41,7 +41,7 @@ const Users = () => {
     
     // Updated bgCard and headerGradient to match the provided AdminDashboard component's aesthetic for better continuity
     bgCard: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     bgItem: isLight ? "bg-gray-50" : "bg-white/5",
     bgInput: isLight ? "bg-white text-gray-900 placeholder-gray-500 shadow-sm" : "bg-gray-900/50 text-white placeholder-gray-500 shadow-inner",
@@ -203,7 +203,7 @@ const Users = () => {
 
   // Use the animation classes for the whole content area
   return (
-    <div className={`flex-1 p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
+    <div className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

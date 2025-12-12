@@ -5,7 +5,7 @@ import api from '@/api/axiosConfig';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NotificationModal = ({ isOpen, onClose, isDark }) => {
+const NotificationModal = ({ isOpen, onClose, isDark, triggerRef }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
@@ -19,7 +19,12 @@ const NotificationModal = ({ isOpen, onClose, isDark }) => {
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+      // Ignore clicks inside the modal OR on the trigger button (bell)
+      if (
+        modalRef.current && 
+        !modalRef.current.contains(event.target) &&
+        (!triggerRef?.current || !triggerRef.current.contains(event.target))
+      ) {
         onClose();
       }
     };
@@ -97,7 +102,7 @@ const NotificationModal = ({ isOpen, onClose, isDark }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-20 right-4 md:right-20 w-[90vw] md:w-[400px] rounded-2xl border z-[9999] overflow-hidden ${
+            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-2xl border z-[9999] overflow-hidden ${
               isDark 
                 ? 'bg-gray-900 text-white border-gray-700 shadow-[0_0_50px_rgba(0,0,0,0.5)]' 
                 : 'bg-white text-gray-900 border-gray-200 shadow-[0_0_50px_rgba(0,0,0,0.1)]'
@@ -106,14 +111,14 @@ const NotificationModal = ({ isOpen, onClose, isDark }) => {
             style={{ pointerEvents: 'auto' }}
           >
             {/* Header */}
-            <div className={`p-4 border-b flex justify-between items-center backdrop-blur-md ${
+            <div className={`p-3 md:p-4 border-b flex justify-between items-center backdrop-blur-md ${
               isDark ? 'bg-gray-900/95 border-gray-800' : 'bg-white/95 border-gray-100'
             }`}>
               <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${isDark ? 'bg-cyan-900/20' : 'bg-cyan-50'}`}>
                   <FaBell className="text-cyan-500" />
                 </div>
-                <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Notifications</h3>
+                <h3 className={`font-bold text-base md:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Notifications</h3>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                   isDark ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
                 }`}>
@@ -133,7 +138,7 @@ const NotificationModal = ({ isOpen, onClose, isDark }) => {
             </div>
 
             {/* List */}
-            <div className={`max-h-[450px] overflow-y-auto custom-scrollbar ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+            <div className={`max-h-[60vh] md:max-h-[450px] overflow-y-auto custom-scrollbar ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
               {loading ? (
                 <div className="p-12 text-center">
                   <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>

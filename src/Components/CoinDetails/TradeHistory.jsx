@@ -129,7 +129,7 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
   }, [TC]);
 
   return (
-    <div className={`${TC.bgCard} rounded-xl overflow-hidden h-full flex flex-col`}>
+    <div className={`${TC.bgCard} rounded-lg md:rounded-2xl overflow-hidden h-full flex flex-col`}>
       <div className={`p-3 border-b ${TC.borderHeader} flex-shrink-0`}>
         <div className="flex items-center justify-between mb-2">
           <h3 className={`text-base font-bold ${TC.headerGradient}`}>

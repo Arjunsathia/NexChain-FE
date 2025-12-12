@@ -55,10 +55,10 @@ const Settings = () => {
   ];
 
   return (
-    <div className={`flex-1 w-full max-w-full overflow-x-hidden p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
+    <div className={`flex-1 w-full max-w-full overflow-x-hidden p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}` }>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+        <div className="px-2 py-2"> 
           <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
             Account Settings
           </h1>

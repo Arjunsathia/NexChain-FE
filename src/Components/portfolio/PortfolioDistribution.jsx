@@ -18,7 +18,7 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
   const TC = useMemo(() => ({
     // Card Background (Matching PerformanceChart / PortfolioHeader / Sidebar)
     bgContainer: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
 
     // Text Colors
@@ -130,7 +130,7 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
   return (
     <div
       className={`
-        rounded-2xl p-4 sm:p-6 h-full flex flex-col fade-in
+        rounded-lg md:rounded-2xl p-3 md:p-6 h-full flex flex-col fade-in
         ${TC.bgContainer}
       `}
     >
@@ -184,7 +184,7 @@ const ProfitLossSummary = ({ isLight, totalProfitLoss, totalProfitLossPercentage
   const bgPill = isPositive ? TC.bgPillPositive : TC.bgPillNegative;
   
   return (
-    <div className={`mb-4 p-3 sm:p-4 rounded-xl border fade-in ${bgPill}`} style={{ animationDelay: "0.1s" }}>
+    <div className={`mb-4 p-2.5 md:p-4 rounded-lg md:rounded-xl border fade-in ${bgPill}`} style={{ animationDelay: "0.1s" }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${textPL}`}>
@@ -213,7 +213,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
   // Custom label component for external positioning with vibrant colors
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 30; // Position labels outside the chart
+    const radius = outerRadius + 15; // Position labels outside the chart
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -225,7 +225,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         className="font-bold"
-        style={{ fontSize: '14px', fontWeight: '700' }}
+        style={{ fontSize: '10px', fontWeight: '700' }}
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -233,7 +233,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
   };
 
   return (
-    <div className="w-full h-48 mb-4 flex-1 rounded-xl">
+    <div className="w-full min-h-[220px] mb-4 flex-1 rounded-xl">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           {/* Pie chart with vibrant colors and external labels */}
@@ -242,9 +242,9 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
             dataKey="value"
             cx="50%"
             cy="50%"
-            innerRadius={50} 
-            outerRadius={75} 
-            paddingAngle={3}
+            innerRadius={35} 
+            outerRadius={55} 
+            paddingAngle={2}
             label={renderCustomLabel}
             labelLine={false}
           >
@@ -290,7 +290,7 @@ const CustomTooltip = ({ active, payload, isLight, TC, totalPortfolioValue }) =>
 
 const PortfolioSummary = ({ isLight, balance, totalPortfolioValue, groupedHoldings, TC }) => {
   return (
-    <div className={`space-y-3 p-3 sm:p-4 rounded-xl border fade-in ${TC.bgSummaryCard}`} style={{ animationDelay: "0.2s" }}>
+    <div className={`space-y-3 p-2.5 md:p-4 rounded-lg md:rounded-xl border fade-in ${TC.bgSummaryCard}`} style={{ animationDelay: "0.2s" }}>
       <div className="flex items-center justify-between text-sm">
         <div className={`flex items-center gap-2 ${TC.textSecondary}`}>
           <FaWallet className="text-green-500" />

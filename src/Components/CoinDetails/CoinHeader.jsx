@@ -18,12 +18,13 @@ function CoinHeader({
   handleTrade,
   isLight,
   TC,
+  userHoldings,
 }) {
   return (
     <div
-      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-2xl mb-6 ${TC.bgHeader} transition-colors duration-300`}
+      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-lg md:rounded-2xl mb-4 md:mb-6 ${TC.bgHeader} transition-colors duration-300`}
     >
-      <div className="px-4 lg:px-6 py-4">
+      <div className="p-3 md:p-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img
@@ -60,6 +61,13 @@ function CoinHeader({
               <p className={`text-xs mt-1 ${TC.textSecondary}`}>
                 Rank #{coin.market_cap_rank || "N/A"}
               </p>
+              {userHoldings && (userHoldings.totalQuantity > 0 || userHoldings.quantity > 0) && (
+                <div className={`text-xs font-medium mt-1.5 px-2 py-0.5 rounded-md inline-block ${
+                  isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400"
+                }`}>
+                  Holding: {(userHoldings.totalQuantity || userHoldings.quantity)?.toLocaleString()} {coin.symbol?.toUpperCase()}
+                </div>
+              )}
             </div>
           </div>
 

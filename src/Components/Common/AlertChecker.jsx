@@ -104,13 +104,13 @@ const AlertChecker = () => {
                     // Alerts triggered! 
                     res.data.triggered.forEach(alert => {
                         toast((t) => (
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-yellow-100 rounded-lg">
-                                    <FaBell className="text-yellow-600" size={16} />
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className="p-1.5 md:p-2 bg-yellow-100 rounded-lg shrink-0">
+                                    <FaBell className="text-yellow-600 w-3 h-3 md:w-4 md:h-4" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-900">Price Alert Triggered!</p>
-                                    <p className="text-sm text-gray-700">
+                                    <p className="font-bold text-gray-900 text-xs md:text-sm">Price Alert Triggered!</p>
+                                    <p className="text-xs md:text-sm text-gray-700 leading-tight">
                                         {alert.coin_symbol.toUpperCase()} {alert.condition === 'above' ? 'passed' : 'dropped below'} ${alert.target_price.toLocaleString()}
                                     </p>
                                 </div>
@@ -118,13 +118,7 @@ const AlertChecker = () => {
                         ), { 
                             duration: 6000, 
                             position: 'top-right',
-                            style: {
-                                background: '#fff',
-                                color: '#333',
-                                border: '1px solid #e5e7eb',
-                                padding: '12px 16px',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            }
+                            className: '!max-w-[85vw] !p-2 md:!p-4 !bg-white !text-gray-900 !border !border-gray-200 !shadow-md !rounded-xl',
                         });
                     });
 

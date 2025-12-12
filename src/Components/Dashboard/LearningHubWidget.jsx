@@ -27,8 +27,8 @@ function LearningHub() {
   const TC = useMemo(() => ({
     // Container – unified with other widgets, no border
     bgContainer: isLight
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
 
     // Item (kept exactly like your version)
     bgItem: isLight
@@ -131,7 +131,7 @@ function LearningHub() {
   };
 
   return (
-    <div className={`rounded-xl p-4 h-full flex flex-col fade-in ${TC.bgContainer}`}>
+    <div className={`rounded-lg md:rounded-2xl p-3 md:p-4 h-full flex flex-col fade-in ${TC.bgContainer}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3 fade-in">
         <div className="flex items-center gap-2">

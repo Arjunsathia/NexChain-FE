@@ -17,15 +17,15 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
           {/* Hero Content */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center lg:text-left space-y-3 md:space-y-8 order-2 lg:order-1"
           >
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
               className={`inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase bg-white/5 text-[#A5B4FC] border border-white/10 backdrop-blur-md`}
             > 
               <span className="relative flex h-2 w-2">
@@ -67,7 +67,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
 
           {/* Hero Visual */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, x: 50 }}
+            initial={{ opacity: 0, scale: 0.5, x: 0 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.3 }}
             className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0"

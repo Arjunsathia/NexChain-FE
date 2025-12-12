@@ -10,8 +10,7 @@ import {
   FaCog,
   FaBars,
   FaTimes,
-  FaSignal,
-  FaSignOutAlt
+  FaSignal
 } from "react-icons/fa";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -31,8 +30,8 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
     // Navbar Container (Top Nav on Mobile, Wrapper on Desktop)
     bgNavbar: isLight 
-      ? "bg-white shadow-xl" 
-      : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-lg",
+      ? "bg-white shadow-sm" 
+      : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-md",
     
     // Header
     headerTitle: isLight ? "text-blue-600" : "text-cyan-400",
@@ -128,7 +127,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     <>
       {/* Fully Rounded Top Navigation Bar */}
       <nav className={`
-        ${TC.bgNavbar} shadow-lg sticky top-0 z-50 rounded-3xl mx-2 mt-2
+        ${TC.bgNavbar} sticky top-0 z-50 rounded-3xl mx-2 mt-2
         transition-all duration-500 ease-out
         ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}
       `}>
@@ -168,7 +167,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
         <div className={`
           transition-all duration-400 ease-in-out overflow-hidden
           ${TC.bgMenuPanel} rounded-b-3xl
-          ${(isOpen || isDesktop) ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
+          ${(isOpen || isDesktop) ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}
           lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-52 lg:max-h-screen lg:overflow-y-auto lg:translate-x-0 lg:rounded-3xl lg:m-2 lg:mt-2 lg:pt-3 lg:pb-4
         `}>
           <div className={`px-3 pt-3 pb-4 space-y-1 lg:pt-3 lg:pb-4 lg:space-y-1`}>
@@ -207,7 +206,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 {statsData.map((stat, index) => {
                     const statColor = isLight ? stat.color + "-700" : stat.color + "-400";
                     const statBg = isLight ? `bg-${stat.color}-100 border-${stat.color}-300` : `${stat.bg}-500/20 to-${stat.color}-600/20 border-opacity-40`;
-                    const statBorder = isLight ? `border-${stat.color}-300` : `${stat.border}-500/40`;
+                    // const statBorder = isLight ? `border-${stat.color}-300` : `${stat.border}-500/40`; // Unused var
 
                     return (
                         <div
@@ -236,25 +235,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </div>
             </div>
 
-            {/* Logout Button */}
-            <div className="mt-4 pt-4 border-t border-gray-200/10">
-                <button
-                className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
-                onClick={onLogout}
-                disabled={isLogoutLoading}
-                >
-                {isLogoutLoading ? (
-                    <>
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Logging out...</span>
-                    </>
-                ) : (
-                    <>
-                    <FaSignOutAlt /> Logout
-                    </>
-                )}
-                </button>
-            </div>
+
           </div>
         </div>
       </nav>

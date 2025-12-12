@@ -215,12 +215,12 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
           <DialogPanel 
             className={`
               relative transform overflow-hidden rounded-2xl ${TC.bgPanel}
-              transition-all duration-500 ease-out w-full max-w-md lg:max-w-lg
+              transition-all duration-500 ease-out w-[90vw] max-w-[340px] sm:max-w-lg
               ${isMounted ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}
             `}
           >
             {/* Header */}
-            <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${TC.bgHeader}`}>
+            <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b ${TC.bgHeader}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 flex items-center justify-center">
@@ -244,7 +244,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 space-y-3 sm:space-y-5">
               {loading ? (
                 <div className="flex justify-center items-center py-8 sm:py-12">
                   <div className={`flex items-center gap-2 sm:gap-3 ${TC.loadingText} text-sm sm:text-base`}>
@@ -253,10 +253,10 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4 sm:space-y-5">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Full-width Name */}
                   <div>
-                    <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>Full Name</Label>
+                    <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Full Name</Label>
                     <div className="relative">
                       <User className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                       <Input
@@ -264,7 +264,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Enter full name"
-                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                         required
                       />
                     </div>
@@ -272,7 +272,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
 
                   {/* Full-width Email */}
                   <div>
-                    <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>Email Address</Label>
+                    <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Email Address</Label>
                     <div className="relative">
                       <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                       <Input
@@ -281,7 +281,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="you@example.com"
-                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                         required
                       />
                     </div>
@@ -291,7 +291,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {/* Phone */}
                     <div>
-                      <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>Phone Number</Label>
+                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Phone Number</Label>
                       <div className="relative">
                         <Phone className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                         <Input
@@ -300,7 +300,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+1 (555) 000-0000"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                           required
                         />
                       </div>
@@ -308,7 +308,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
 
                     {/* Username */}
                     <div>
-                      <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>Username</Label>
+                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Username</Label>
                       <div className="relative">
                         <User className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                         <Input
@@ -316,7 +316,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                           value={formData.user_name}
                           onChange={handleChange}
                           placeholder="Choose username"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                           required
                         />
                       </div>
@@ -324,7 +324,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
 
                     {/* Password */}
                     <div>
-                      <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>
+                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>
                         Password {id && <span className={`${TC.subtitleText} text-xs`}>(leave blank to keep current)</span>}
                       </Label>
                       <div className="relative">
@@ -335,7 +335,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                           value={formData.password}
                           onChange={handleChange}
                           placeholder="••••••••"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                           required={!id}
                         />
                       </div>
@@ -354,7 +354,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                           value={formData.confirm_password}
                           onChange={handleChange}
                           placeholder="••••••••"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-10 sm:h-12 focus:border-cyan-500 transition-colors text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                           required={!id}
                         />
                       </div>
@@ -390,14 +390,14 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                 <Button
                   type="button"
                   onClick={handleModalClose}
-                  className={`px-4 sm:px-6 py-2 border rounded-lg sm:rounded-xl transition-all duration-200 text-xs sm:text-sm ${TC.btnCancel}`}
+                  className={`px-3 sm:px-4 py-2 border rounded-lg sm:rounded-xl transition-all duration-200 text-xs sm:text-sm ${TC.btnCancel}`}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className={`px-5 sm:px-8 py-2 font-semibold rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 text-xs sm:text-sm ${TC.btnSubmit}`}
+                  className={`px-4 sm:px-6 py-2 font-semibold rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 text-xs sm:text-sm ${TC.btnSubmit}`}
                 >
                   {submitting ? (
                     <div className="flex items-center gap-1 sm:gap-2">

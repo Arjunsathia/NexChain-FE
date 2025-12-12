@@ -70,58 +70,6 @@ function TradeModal({
   const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
   const [alertTargetPrice, setAlertTargetPrice] = useState("");
 
-  // 💡 Theme classes derived from isLight
-  const TC = useMemo(
-    () => ({
-      // General
-      bgModal: isLight
-        ? "bg-white/95 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-        : "bg-[#0B0E14]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
-      bgCard: isLight
-        ? "bg-white/60 border border-gray-200 shadow-sm backdrop-blur-sm"
-        : "bg-gray-800/40 border border-white/5 shadow-inner backdrop-blur-sm",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-300",
-      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-      // Inputs
-      inputBg: isLight
-        ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-gray-900 placeholder-gray-400 shadow-inner"
-        : "bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-white placeholder-gray-600 shadow-inner",
-
-      // TABS
-      bgTabBase: isLight
-        ? "bg-gray-50/80 backdrop-blur-sm"
-        : "bg-gray-900/50 backdrop-blur-sm",
-      borderTab: isLight ? "border-gray-200" : "border-gray-800",
-
-      // Header/Active Accent BG
-      bgCyanAccent: isLight
-        ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100"
-        : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
-      bgGreenAccent: isLight
-        ? "bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100"
-        : "bg-gradient-to-r from-emerald-900/20 to-green-900/20 border-b border-emerald-500/20",
-      bgRedAccent: isLight
-        ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100"
-        : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
-
-      // Pills (P&L)
-      bgGreenPill: isLight
-        ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-        : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
-      bgRedPill: isLight
-        ? "bg-red-100 text-red-700 border border-red-200"
-        : "bg-red-500/20 text-red-400 border border-red-500/30",
-
-      // Hover
-      hoverBorder: isLight
-        ? "hover:border-cyan-400 transition-colors duration-300"
-        : "hover:border-cyan-500/50 transition-colors duration-300",
-    }),
-    [isLight]
-  );
-
   const userHoldings = useMemo(() => {
     if (!coin || !purchasedCoins || purchasedCoins.length === 0) return null;
 
@@ -152,6 +100,72 @@ function TradeModal({
     () => (shouldShowHoldingsInfo ? activeTab === "deposit" : type === "buy"),
     [shouldShowHoldingsInfo, activeTab, type]
   );
+
+  // 💡 Theme classes derived from isLight and Operation Type
+  const TC = useMemo(
+    () => ({
+      // General
+      bgModal: isLight
+        ? "bg-white/95 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
+        : "bg-[#0B0E14]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
+      bgCard: isLight
+        ? "bg-white/60 border border-gray-200 shadow-sm backdrop-blur-sm"
+        : "bg-gray-800/40 border border-white/5 shadow-inner backdrop-blur-sm",
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-600" : "text-gray-300",
+      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+
+      // Inputs - Dynamic based on Buy/Sell
+      inputBg: isLight
+        ? `bg-gray-50 border-gray-200 focus:bg-white focus:border-${
+            isBuyOperation ? "emerald" : "red"
+          }-500 focus:ring-4 focus:ring-${
+            isBuyOperation ? "emerald" : "red"
+          }-500/10 text-gray-900 placeholder-gray-400 shadow-inner`
+        : `bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-${
+            isBuyOperation ? "emerald" : "red"
+          }-500 focus:ring-4 focus:ring-${
+            isBuyOperation ? "emerald" : "red"
+          }-500/10 text-white placeholder-gray-600 shadow-inner`,
+
+      // TABS
+      bgTabBase: isLight
+        ? "bg-gray-50/80 backdrop-blur-sm"
+        : "bg-gray-900/50 backdrop-blur-sm",
+      borderTab: isLight ? "border-gray-200" : "border-gray-800",
+
+      // Header/Active Accent BG
+      bgCyanAccent: isLight
+        ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100"
+        : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
+      bgGreenAccent: isLight
+        ? "bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100"
+        : "bg-gradient-to-r from-emerald-900/20 to-green-900/20 border-b border-emerald-500/20",
+      bgRedAccent: isLight
+        ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100"
+        : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
+
+      // Pills (P&L)
+      bgGreenPill: isLight
+        ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+        : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+      bgRedPill: isLight
+        ? "bg-red-100 text-red-700 border border-red-200"
+        : "bg-red-500/20 text-red-400 border border-red-500/30",
+
+      // Hover
+      hoverBorder: isLight
+        ? `hover:border-${
+            isBuyOperation ? "emerald" : "red"
+          }-400 transition-colors duration-300`
+        : `hover:border-${
+            isBuyOperation ? "emerald" : "red"
+          }-500/50 transition-colors duration-300`,
+    }),
+    [isLight, isBuyOperation]
+  );
+
+
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -328,14 +342,12 @@ function TradeModal({
         toast.success(
           `Set to maximum: ${maxCoins.toFixed(6)} ${coin.symbol?.toUpperCase()}`,
           {
+            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
             style: {
               background: "#DCFCE7",
               color: "#166534",
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
               borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "14px",
-              padding: "12px 16px",
               border: "none",
             },
             iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
@@ -357,14 +369,12 @@ function TradeModal({
           coin.symbol || coin.coinSymbol
         )?.toUpperCase()}`,
         {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#DCFCE7",
             color: "#166534",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
@@ -372,14 +382,12 @@ function TradeModal({
       );
     } else {
       toast.error("You don't have any holdings to sell", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -399,14 +407,12 @@ function TradeModal({
     async (tradeData) => {
       if (!user) {
         toast.error("Please login to trade", {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#FEE2E2",
             color: "#991B1B",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -433,13 +439,11 @@ function TradeModal({
             const res = await api.post("/alerts/create", alertData);
             if (res.data.success) {
                 toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`, {
+                    className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
                     style: {
                       background: "#DCFCE7",
                       color: "#166534",
                       boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                      fontWeight: "600",
-                      fontSize: "14px",
-                      padding: "12px 16px",
                       borderRadius: "8px",
                       border: "none",
                     },
@@ -510,13 +514,11 @@ function TradeModal({
                     toast.success(
                         `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
                         {
+                            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
                             style: {
                                 background: "#DCFCE7",
                                 color: "#166534",
                                 boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                                fontWeight: "600",
-                                fontSize: "14px",
-                                padding: "12px 16px",
                                 borderRadius: "8px",
                                 border: "none",
                             },
@@ -555,13 +557,11 @@ function TradeModal({
                 6
               )} ${symbol.toUpperCase()}`,
               {
+                className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
                 style: {
                   background: "#DCFCE7",
                   color: "#166534",
                   boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  padding: "12px 16px",
                   borderRadius: "8px",
                   border: "none",
                 },
@@ -607,14 +607,12 @@ function TradeModal({
           error.message ||
           "Trade failed. Please try again.";
         toast.error(errorMessage, {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#FEE2E2",
             color: "#991B1B",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -641,14 +639,12 @@ function TradeModal({
   const handleSubmit = async () => {
     if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
       toast.error("Please enter a valid amount", {
+        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
           border: "none",
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -665,14 +661,12 @@ function TradeModal({
 
       if (quantity <= 0) {
         toast.error("Please enter a valid amount to sell", {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#FEE2E2",
             color: "#991B1B",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -686,14 +680,12 @@ function TradeModal({
             coin.symbol || coin.coinSymbol
           )?.toUpperCase()} available`,
           {
+            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
             style: {
               background: "#FEE2E2",
               color: "#991B1B",
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
               borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "14px",
-              padding: "12px 16px",
               border: "none",
             },
             iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -704,14 +696,12 @@ function TradeModal({
 
       if (quantity < 0.000001) {
         toast.error("Minimum sell amount is 0.000001", {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#FEE2E2",
             color: "#991B1B",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -723,14 +713,12 @@ function TradeModal({
         toast.error(
           "No holdings found for this coin. Please refresh and try again.",
           {
+            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
             style: {
               background: "#FEE2E2",
               color: "#991B1B",
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
               borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "14px",
-              padding: "12px 16px",
               border: "none",
             },
             iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -747,14 +735,12 @@ function TradeModal({
       const quantity = parseFloat(coinAmount);
       if (quantity > maxAvailable) {
         toast.error("Insufficient balance for this purchase", {
+          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
           style: {
             background: "#FEE2E2",
             color: "#991B1B",
             boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
             border: "none",
           },
           iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
@@ -847,15 +833,15 @@ function TradeModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
         isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      } ${isLight ? "bg-black/30" : "bg-black/70"}`}
       onClick={handleBackdropClick}
     >
       <div
         className={`${
           TC.bgModal
-        } rounded-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden transition-all duration-300 ${
+        } rounded-2xl shadow-2xl w-[96vw] md:max-w-lg md:w-full mx-auto max-h-[85vh] md:max-h-[90vh] overflow-hidden transition-all duration-300 ${
           isVisible
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
@@ -883,7 +869,7 @@ function TradeModal({
           />
         )}
 
-        <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div className="p-2 sm:p-4 overflow-y-auto max-h-[calc(75vh-100px)] custom-scrollbar">
           {shouldShowHoldingsInfo && holdingsSummary && (
             <HoldingsInfo
               holdingsSummary={holdingsSummary}
@@ -936,20 +922,7 @@ function TradeModal({
             />
           )}
 
-          {/* Footer */}
-          <div className={`p-3 border-t mt-4 ${TC.borderTab} ${TC.bgCard}`}>
-            <div className="flex items-center justify-between text-xs">
-              <div className={`flex items-center gap-1 ${TC.textTertiary}`}>
-                <span className="text-cyan-600 font-bold">Live</span>
-                <span>• Updated every 60s</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></div>
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full absolute"></div>
-                <span className="text-green-600 font-bold ml-1">Real-time</span>
-              </div>
-            </div>
-          </div>
+ 
         </div>
       </div>
     </div>

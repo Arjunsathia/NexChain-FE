@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaExchangeAlt, FaBell } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import Sparkline from "./Sparkline";
-import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 
-const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal }) => {
-  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
-
-  const handleAlertClick = (e, coin) => {
-    e.stopPropagation();
-    setAlertModal({ show: true, coin });
-  };
+const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal, handleAlertClick }) => {
   return (
-    <div className={`hidden md:block rounded-2xl overflow-hidden fade-in ${TC.bgCard}`} style={{ animationDelay: "0.2s" }}>
+    <div className={`hidden md:block rounded-xl sm:rounded-2xl overflow-hidden fade-in ${TC.bgCard}`} style={{ animationDelay: "0.2s" }}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -180,11 +173,6 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
           </div>
         </div>
       </div>
-      <PriceAlertModal 
-        show={alertModal.show} 
-        onClose={() => setAlertModal({ show: false, coin: null })} 
-        coin={alertModal.coin} 
-      />
     </div>
   );
 };
