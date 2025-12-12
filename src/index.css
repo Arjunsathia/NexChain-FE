@@ -376,6 +376,13 @@ html.lenis, html.lenis body {
   transform-style: preserve-3d;
 }
 
+/* Theme Transition */
+.smooth-colors {
+  transition-property: background-color, border-color, color, fill, stroke, background-image;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 .perspective-1000 {
   perspective: 1000px;
 }

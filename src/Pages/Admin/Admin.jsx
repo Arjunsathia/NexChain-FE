@@ -43,7 +43,7 @@ function Admin() {
   };
 
   return (
-    <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}>
+    <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"} transition-colors duration-150`}>
       {/* Show Sidebar only on desktop - Fixed position */}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">

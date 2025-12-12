@@ -30,10 +30,10 @@ export default function MainLayout() {
     : "bg-gradient-to-tl from-white via-slate-50 to-blue-50"; // 💨 Subtle Premium Cool Gradient
 
   return (
-    <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
+    <div className={`min-h-screen flex flex-col ${backgroundClass} transition-colors duration-150`}>
       {/* 💡 Passing isDark and toggleDarkMode to Navbar */}
       <Navbar isDark={isDark} toggleDarkMode={toggleTheme} />
-      <main className="flex-1 p-2 sm:p-4">
+      <main className="flex-1 p-2 sm:p-4 transition-colors duration-150">
         <Outlet />
       </main>
       <Footer />

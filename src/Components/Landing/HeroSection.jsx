@@ -49,7 +49,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
 
             <div className="flex flex-col sm:flex-row gap-5 items-center justify-center lg:justify-start pt-4">
               <button
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
                 className={`group px-6 py-2.5 md:px-8 md:py-4 rounded-full font-bold text-sm tracking-wide transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${TC.btnPrimary}`}
               >
                 <span>Start Trade</span>

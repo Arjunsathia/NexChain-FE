@@ -159,7 +159,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
       <nav
         className={`
           ${TC.bgNavbar} ${TC.borderThemed} rounded-xl px-4 sm:px-6 py-3 my-2 mx-2 sm:mx-4
-          flex items-center justify-between gap-3 relative transition-all duration-700 ease-out fade-in
+          flex items-center justify-between gap-3 relative transition-all duration-200 ease-out fade-in
           ${
             isMounted
               ? "opacity-100 translate-y-0"
