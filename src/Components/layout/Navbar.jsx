@@ -7,7 +7,7 @@ import useRoleContext from "@/Context/RoleContext/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
 import api from "@/api/axiosConfig";
 
-const SERVER_URL = "http://localhost:5050";
+
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
@@ -26,58 +26,57 @@ export default function Navbar({ isDark, toggleDarkMode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const bellRef = useRef(null);
 
-  // 💡 Theme Classes Helper - BORDER ADDED (Subtle/Themed)
+  // 💡 Theme Classes Helper
   const TC = useMemo(() => ({
-    // Border Class (Removed)
+    // Border Class (Matched with Footer: border-none)
     borderThemed: "border-none",
     
-    // Base/Container Styles 
+    // Base/Container Styles (Matched with Footer)
     bgNavbar: isDarkMode
       ? "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20"
-      : "bg-white/80 backdrop-blur-xl shadow-sm sm:shadow-[0_2px_10px_rgba(0,0,0,0.06)]",
-    textBase: isDarkMode ? "text-gray-300" : "text-gray-700",
+      : "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]",
+    textBase: isDarkMode ? "text-gray-400" : "text-gray-600",
     
     // Hover/Interactive
     hoverBg: isDarkMode 
-      ? "hover:bg-gray-700/60 hover:shadow-lg hover:shadow-cyan-500/10" 
-      : "hover:bg-gray-100/80 hover:shadow-md",
+      ? "hover:bg-white/5 hover:text-white transition-colors" 
+      : "hover:bg-gray-100/80 hover:text-gray-900 transition-colors",
     
     // Icons & Mobile Toggle
-    iconBase: isDarkMode ? "text-gray-300" : "text-gray-700",
+    iconBase: isDarkMode ? "text-gray-400" : "text-gray-600",
     iconHover: isDarkMode ? "hover:text-cyan-400" : "hover:text-blue-600",
-    borderToggle: "", 
     
-    // Logo/Brand
-    brandGradient: isDarkMode ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-blue-600 to-cyan-700",
+    // Logo/Brand - (Now handled in JSX, but keeping gradient for mobile if needed)
+    brandGradient: "bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600",
     
     // Active Navigation Item
-    activeBg: isDarkMode ? "bg-cyan-600/20 shadow-lg shadow-cyan-500/20" : "bg-blue-100/70 shadow-md",
-    activeText: isDarkMode ? "text-cyan-400" : "text-blue-700",
+    activeBg: isDarkMode 
+      ? "bg-gradient-to-t from-cyan-900/60 via-cyan-800/40 to-cyan-500/10 border-b-2 border-cyan-400 text-cyan-300 shadow-[0_0_20px_-5px_rgba(6,182,212,0.4)]" 
+      : "bg-gradient-to-t from-blue-200/80 via-blue-100/50 to-blue-50/20 border-b-2 border-blue-500 text-blue-700 shadow-md",
+    activeText: isDarkMode ? "text-cyan-300 font-bold" : "text-blue-700 font-bold",
     
     // Profile Button
-    bgProfile: isDarkMode ? "from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700" : "from-blue-700 to-cyan-800 hover:from-blue-600 hover:to-cyan-700",
-    borderProfile: "", 
+    bgProfile: isDarkMode ? "from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 border border-white/10" : "from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 border border-gray-200",
     
     // Mobile Menu Drawer
-    bgDrawer: isDarkMode ? "bg-gray-900/95 backdrop-blur-xl shadow-2xl border-none" : "bg-white/95 backdrop-blur-xl shadow-2xl border-none",
+    bgDrawer: isDarkMode ? "bg-[#0B0E14]/95 backdrop-blur-xl border-r border-white/5" : "bg-white/95 backdrop-blur-xl border-r border-gray-100",
     
     // Mobile User Card
-    bgMobileCard: isDarkMode ? "bg-gray-800/50 shadow-inner" : "bg-gray-100/50 shadow-inner",
+    bgMobileCard: isDarkMode ? "bg-white/5 border border-white/5" : "bg-gray-50 border border-gray-100",
     textMobileRole: isDarkMode ? "text-cyan-400" : "text-blue-600",
     textMobileName: isDarkMode ? "text-white" : "text-gray-900",
-    textMobileEmail: isDarkMode ? "text-gray-400" : "text-gray-600",
+    textMobileEmail: isDarkMode ? "text-gray-400" : "text-gray-500",
     
     // Mobile Nav Item
     bgMobileNavHover: isDarkMode 
-      ? "hover:bg-gray-700/60 hover:text-white hover:shadow-lg hover:shadow-cyan-500/10" 
-      : "hover:bg-gray-100/60 hover:text-blue-700 hover:shadow-md",
-    textMobileNavInactive: isDarkMode ? "text-gray-300" : "text-gray-700",
+      ? "hover:bg-white/5 hover:text-white" 
+      : "hover:bg-gray-50 hover:text-gray-900",
+    textMobileNavInactive: isDarkMode ? "text-gray-400" : "text-gray-600",
 
     // Mobile Bottom Actions
     bgBottomAction: isDarkMode 
-      ? "bg-gray-800/50 hover:bg-gray-700/60 hover:shadow-lg text-white" 
-      : "bg-gray-100/50 hover:bg-gray-200/60 hover:shadow-md text-gray-800",
-    
+      ? "bg-white/5 hover:bg-white/10 text-white border border-white/5" 
+      : "bg-gray-100 hover:bg-gray-200 text-gray-800",
   }), [isDarkMode]);
 
   useEffect(() => {
@@ -158,7 +157,7 @@ export default function Navbar({ isDark, toggleDarkMode }) {
     <>
       <nav
         className={`
-          ${TC.bgNavbar} ${TC.borderThemed} rounded-xl px-4 sm:px-6 py-3 my-2 mx-2 sm:mx-4
+          ${TC.bgNavbar} ${TC.borderThemed} rounded-xl px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-2 my-2 mx-2 sm:mx-4
           flex items-center justify-between gap-3 relative transition-all duration-200 ease-out fade-in
           ${
             isMounted
@@ -202,34 +201,56 @@ export default function Navbar({ isDark, toggleDarkMode }) {
             aria-label="Go to home"
           >
             {/* Rocket Icon - Hidden on small screens, visible on sm and up */}
-            <div className="hidden sm:flex items-center justify-center fade-in">
-              <Rocket className={`h-6 w-6 ${TC.activeText} transform hover:scale-110 transition-transform duration-300 hover:rotate-12`} />
+            <div className={`hidden sm:flex items-center justify-center fade-in bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300`}>
+              <Rocket className="h-4 w-4 text-white" />
             </div>
-            <span className={`text-xl sm:text-2xl font-bold text-transparent bg-clip-text ${TC.brandGradient} fade-in`}>
-              NexChain
+            
+            <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"} font-outfit tracking-tight flex items-baseline relative`}>
+              <span>Ne</span>
+              <span className="text-3xl mx-0.5 font-black bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)] transform translate-y-[1px] inline-block">
+                X
+              </span>
+              <span>Chain</span>
             </span>
           </button>
         </div>
 
-        {/* Center: Full Desktop navigation (lg and up) */}
+        {/* Center: Full Desktop navigation (lg and up) - Water Fill Effect */}
         <div className={`hidden lg:flex items-center justify-center gap-1 text-sm font-medium ${TC.textBase} flex-1`}>
-          {navItems.map((item, index) => (
-            <button
-              key={item.path}
-              onClick={() => handleNavigate(item.path)}
-              className={`
-                cursor-pointer transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-xl mx-1 fade-in
-                transform hover:scale-105
-                ${
-                  isActive(item.path)
-                    ? `${TC.activeBg} ${TC.activeText}`
-                    : `${TC.hoverBg} ${TC.textBase} ${TC.iconHover}`
-                }
-              `}
-            >
-              {item.label}
-            </button>
-          ))}
+          {navItems.map((item, index) => {
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNavigate(item.path)}
+                className={`
+                  relative overflow-hidden group px-4 py-1.5 rounded-xl mx-0.5 lg:mx-1 transition-all duration-300
+                  ${active ? TC.activeBg : 'hover:shadow-md'}
+                `}
+              >
+                {/* Text Content - Ensures z-index is above the fill */}
+                <span className={`relative z-10 transition-colors duration-300 font-semibold ${active ? TC.activeText : `${TC.textBase} group-hover:${isDarkMode ? 'text-cyan-300' : 'text-blue-600'}`}`}>
+                  {item.label}
+                </span>
+
+                {/* Water Fill Overlay */}
+                {!active && (
+                  <span 
+                    className={`
+                      absolute bottom-0 left-0 w-full bg-gradient-to-t 
+                      ${isDarkMode ? 'from-cyan-900/40 via-cyan-800/20 to-transparent' : 'from-blue-200/60 via-blue-100/40 to-transparent'}
+                      h-0 group-hover:h-full transition-all duration-300 ease-in-out
+                    `}
+                  />
+                )}
+                
+                {/* Bottom Line (Cup base) - Optional subtle touch */}
+                {!active && (
+                   <span className={`absolute bottom-0 left-0 w-full h-[2px] ${isDarkMode ? 'bg-cyan-500/30' : 'bg-blue-400/30'} scale-x-0 group-hover:scale-x-100 transition-transform duration-300 delay-75`} />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Right: dark toggle, profile */}

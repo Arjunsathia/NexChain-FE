@@ -12,7 +12,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
   const fgParallaxY = useTransform(scrollY, [0, 500], [0, 50]);
 
   return (
-    <section className="min-h-screen flex items-center justify-center pt-16 pb-20 md:py-20 relative bg-transparent" ref={ref}>
+    <section className="min-h-screen flex items-center justify-center pt-32 pb-20 md:pt-40 md:pb-20 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
           {/* Hero Content */}

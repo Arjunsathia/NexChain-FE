@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FaSync } from "react-icons/fa";
-import axios from "axios";
+import { getData, updateById, deleteById } from "@/api/axiosConfig";
 import FeedbackStats from "@/Components/Admin/Feedback/FeedbackStats";
 import FeedbackFilters from "@/Components/Admin/Feedback/FeedbackFilters";
 import FeedbackTable from "@/Components/Admin/Feedback/FeedbackTable";
@@ -8,8 +8,6 @@ import FeedbackDetailsModal from "@/Components/Admin/Feedback/FeedbackDetailsMod
 import FeedbackDeleteModal from "@/Components/Admin/Feedback/FeedbackDeleteModal";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
-
-
 
 const AdminFeedback = () => {
   const isLight = useThemeCheck();
@@ -78,19 +76,19 @@ const AdminFeedback = () => {
     fetchFeedbacks();
     fetchStats();
   }, []);
-
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
       setContentLoaded(false);
       setError("");
-      const response = await axios.get("http://localhost:5050/api/feedback");
-      if (response.data && response.data.success) {
-        setFeedbacks(response.data.data || []);
+      const data = await getData("/feedback");
+      if (data && data.success) {
+        setFeedbacks(data.data || []);
       } else {
         throw new Error("Invalid response format");
       }
     } catch (error) {
+       // ... existing error handling ...
       console.error("❌ Error fetching feedbacks:", error);
       setError(
         "Failed to load feedback data. Please check if backend is running."
@@ -104,14 +102,14 @@ const AdminFeedback = () => {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5050/api/feedback/stats"
-      );
-      if (response.data && response.data.success) {
-        setStats(response.data.data || {});
+      const data = await getData("/feedback/stats");
+      if (data && data.success) {
+        setStats(data.data || {});
       }
     } catch (error) {
+      // ... fallback logic ...
       console.error("❌ Error fetching stats:", error);
+      // ... (keep fallback logic) ...
       const localStats = {
         total: feedbacks.length,
         today: feedbacks.filter((fb) => {
@@ -129,11 +127,8 @@ const AdminFeedback = () => {
 
   const updateFeedbackStatus = async (id, status) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5050/api/feedback/${id}`,
-        { status }
-      );
-      if (response.data.success) {
+      const data = await updateById("/feedback", id, { status });
+      if (data.success) {
         setFeedbacks((prev) =>
           prev.map((fb) => (fb._id === id ? { ...fb, status } : fb))
         );
@@ -147,11 +142,8 @@ const AdminFeedback = () => {
 
   const updateFeedbackNotes = async (id, adminNotes) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5050/api/feedback/${id}`,
-        { adminNotes }
-      );
-      if (response.data.success) {
+      const data = await updateById("/feedback", id, { adminNotes });
+      if (data.success) {
         setFeedbacks((prev) =>
           prev.map((fb) => (fb._id === id ? { ...fb, adminNotes } : fb))
         );
@@ -164,19 +156,14 @@ const AdminFeedback = () => {
     }
   };
 
-  const confirmDelete = (feedback) => {
-    setFeedbackToDelete(feedback);
-    setShowDeleteModal(true);
-  };
+  // ... 
 
   const deleteFeedback = async () => {
     if (!feedbackToDelete) return;
     try {
       setDeleteLoading(true);
-      const response = await axios.delete(
-        `http://localhost:5050/api/feedback/${feedbackToDelete._id}`
-      );
-      if (response.data.success) {
+      const data = await deleteById("/feedback", feedbackToDelete._id);
+      if (data.success) {
         setFeedbacks((prev) =>
           prev.filter((fb) => fb._id !== feedbackToDelete._id)
         );

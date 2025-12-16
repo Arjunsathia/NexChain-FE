@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { useTheme } from "@/Context/ThemeContext";
 
-const SERVER_URL = "http://localhost:5050";
+import { SERVER_URL } from "@/api/axiosConfig";
 
 const ProfileSettings = () => {
   const { user } = useUserContext();

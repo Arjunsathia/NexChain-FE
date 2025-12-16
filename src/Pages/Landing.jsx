@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 // Components
+import LenisScroll from "../Components/Common/LenisScroll";
 import InteractiveGridPattern from "../Components/Landing/Background";
 import HeroSection from "../Components/Landing/HeroSection";
+import LandingHeader from "../Components/Landing/LandingHeader";
 import { TC } from "../Components/Landing/theme";
 
 // Lazy Load Heavy Sections
@@ -112,6 +114,8 @@ export default function Landing() {
 
   return (
     <div className={`min-h-screen ${TC.bgPage} font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden relative`}>
+      <LenisScroll />
+      <LandingHeader isLoggedIn={isLoggedIn} scrollToFeatures={scrollToFeatures} />
       {/* GLOBAL FIXED BACKGROUND */}
       <MemoizedInteractiveGridPattern />
       
@@ -140,7 +144,7 @@ export default function Landing() {
       </SectionWrapper>
 
       {/* Market Overview Section */}
-      <SectionWrapper className="z-20 py-10 md:py-20">
+      <SectionWrapper id="market-section" className="z-20 py-10 md:py-20">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection 
             TC={TC} 
@@ -151,7 +155,7 @@ export default function Landing() {
       </SectionWrapper>
 
       {/* Testimonials */}
-      <SectionWrapper className="z-30 py-10 md:py-20">
+      <SectionWrapper id="testimonials-section" className="z-30 py-10 md:py-20">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedTestimonialsSection 
             TC={TC} 
@@ -162,7 +166,7 @@ export default function Landing() {
       </SectionWrapper>
 
       {/* CTA Section */}
-      <SectionWrapper className="z-30 pb-20">
+      <SectionWrapper id="contact-section" className="z-30 pb-20">
         <React.Suspense fallback={<div className="h-64 w-full" />}>
           <MemoizedCTASection 
             TC={TC} 

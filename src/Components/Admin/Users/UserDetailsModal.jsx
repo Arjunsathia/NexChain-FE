@@ -12,6 +12,7 @@ import {
   Coins,
   AlertTriangle,
 } from "lucide-react";
+import { SERVER_URL } from "@/api/axiosConfig";
 
 function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
   if (!selectedUser) return null;
@@ -37,7 +38,7 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
               >
                 {selectedUser.image ? (
                   <img 
-                    src={selectedUser.image.startsWith('http') ? selectedUser.image : `http://localhost:5050/uploads/${selectedUser.image}`} 
+                    src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} 
                     alt={selectedUser.name} 
                     className="w-full h-full object-cover"
                   />

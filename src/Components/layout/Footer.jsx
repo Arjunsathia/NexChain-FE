@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   FaGithub,
@@ -11,33 +11,11 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import { X } from "lucide-react"; 
-import axios from "axios";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
 import useUserContext from "@/Context/UserContext/useUserContext";
-
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
-
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: "http://localhost:5050", // Your backend port
-});
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 export default function Footer() {
   const isLight = useThemeCheck();
@@ -118,10 +96,11 @@ export default function Footer() {
         priority: "medium",
       };
 
-      // Submit feedback to database using axios directly
-      const response = await axios.post("http://localhost:5050/api/feedback", feedbackData);
+      // Submit feedback to database using centralized api
+      const response = await postForm("/feedback", feedbackData);
       
-      if (response.data && response.data.success) {
+      // postForm returns response.data already
+      if (response && (response.success || response._id)) { 
         setShowSuccess(true);
         
         setTimeout(() => {

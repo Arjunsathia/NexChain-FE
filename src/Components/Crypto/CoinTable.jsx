@@ -88,8 +88,8 @@ function CoinTable({ onTrade }) {
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     bgCard: isLight 
-      ? "bg-white hover:bg-gray-50/80 shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-      : "bg-gray-800/50 backdrop-blur-xl hover:bg-gray-700/50 shadow-xl shadow-black/20",
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     bgLoading: isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 text-cyan-400",
     bgTableHeader: isLight ? "border-b border-gray-300 bg-gray-100 text-gray-600" : "border-b border-gray-700 bg-gray-900/50 text-gray-400",
     bgTableFooter: isLight ? "bg-gray-100 border-t border-gray-300" : "bg-gray-900/50 border-t border-gray-700",
@@ -483,9 +483,9 @@ function CoinTable({ onTrade }) {
                   onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
                   className={`p-4 rounded-xl border ${
                     isLight 
-                      ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-100" 
-                      : "bg-gray-800/40 border-gray-700/50 hover:bg-gray-800/60"
-                  } cursor-pointer transition-all duration-300 group fade-in hover:scale-[1.01]`}
+                      ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50" 
+                      : "bg-gray-800/40 border-gray-700/50 hover:bg-gray-700/50"
+                  } cursor-pointer transition-all duration-300 group fade-in`}
                   style={{ animationDelay: `${0.5 + index * 0.1}s` }}
                 >
                   {/* Header with Star and Name */}
@@ -627,7 +627,9 @@ function CoinTable({ onTrade }) {
                       <tr
                         key={coin.id}
                         onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-                        className={`hover:bg-gray-50/50 dark:hover:bg-gray-800/30 cursor-pointer transition-all duration-200 group fade-in`}
+                        className={`cursor-pointer transition-all duration-200 group fade-in ${
+                          isLight ? "hover:bg-gray-50" : "hover:bg-gray-700/50"
+                        }`}
                         style={{ animationDelay: `${0.6 + index * 0.05}s` }}
                       >
                         {/* Star */}

@@ -12,7 +12,6 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "./Context/ThemeContext";
 
 import AlertChecker from "./Components/Common/AlertChecker";
-import LenisScroll from "./Components/Common/LenisScroll";
 import Preloader from "./Components/Common/Preloader";
  
 function App() {
@@ -48,7 +47,6 @@ function App() {
   
   return (
     <UserProvider>
-      <LenisScroll />
       <AnimatePresence mode="wait">
         {isLoading && <Preloader key="preloader" />}
       </AnimatePresence>

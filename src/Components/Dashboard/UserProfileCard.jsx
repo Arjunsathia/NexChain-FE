@@ -3,29 +3,8 @@ import { FaUser, FaWallet } from "react-icons/fa";
 import useUserContext from "@/Context/UserContext/useUserContext";
 import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
 
-const SERVER_URL = "http://localhost:5050";
-
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
+import { SERVER_URL } from "@/api/axiosConfig";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 function UserProfileCard() {
   const isLight = useThemeCheck();

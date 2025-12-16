@@ -7,7 +7,7 @@ import LatestUsers from "@/Components/Admin/Dashboard/LatestUsers";
 import PlatformHealth from "@/Components/Admin/Dashboard/PlatformHealth";
 import QuickActions from "@/Components/Admin/Dashboard/QuickActions";
 import { getData } from "@/api/axiosConfig";
-import axios from "axios";
+
 import useCoinContext from "@/Context/CoinContext/useCoinContext";
 import {
   FaUsers,
@@ -73,9 +73,9 @@ function AdminDashboard() {
 
     const fetchReports = async () => {
       try {
-        // Fetch feedback from the backend using axios directly
-        const res = await axios.get("http://localhost:5050/api/feedback");
-        const feedbackData = res?.data?.data ?? res?.data ?? [];
+        // Fetch feedback from the backend using centralized API
+        const res = await getData("/feedback");
+        const feedbackData = res?.data ?? res ?? [];
 
         // Filter and transform feedback into reports format
         const reportsFromFeedback = Array.isArray(feedbackData)

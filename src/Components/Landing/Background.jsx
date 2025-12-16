@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
-// =================================================================
-// DARK COSMIC BLOCKCHAIN BACKGROUND COMPONENT
-// =================================================================
-
 const DarkCosmicBlockchainBackground = React.memo(() => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -14,14 +10,11 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    // Optimize context: alpha: false is faster if we don't need transparency 
-    // (which we don't, since we fillRect the whole screen)
     const ctx = canvas.getContext('2d', { alpha: false }); 
     
     let width = window.innerWidth;
     let height = window.innerHeight;
     
-    // Function to cache the background gradient
     const updateGradient = () => {
       if (!ctx) return;
       const g = ctx.createRadialGradient(
@@ -48,7 +41,6 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       updateGradient();
     };
     
-    // Debounce resize if needed, but for now standard listener is okay if logic is light
     window.addEventListener('resize', handleResize);
     
     // Particle system containers
