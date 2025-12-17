@@ -16,11 +16,15 @@ const ChartSection = ({ coinId }) => {
       setLoading(true);
       try {
         const data = await getMarketChart(coinId, days);
-        if (data && data.prices) {
+        if (data && Array.isArray(data.prices)) {
           setSeries([{ name: "Price", data: data.prices }]);
+        } else {
+           console.warn("Chart data prices missing or invalid format", data);
+           setSeries([{ name: "Price", data: [] }]);
         }
       } catch (error) {
         console.error("Failed to fetch chart data", error);
+        setSeries([{ name: "Price", data: [] }]);
       } finally {
         setLoading(false);
       }

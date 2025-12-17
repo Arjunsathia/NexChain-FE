@@ -194,7 +194,7 @@ function CryptoList() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
           
           {/* Global Market Card (Inlined) */}
-          <div className={`rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0.1s' }}>
+          <div className={`rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
              <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4">
                 <FaGlobeAmericas size={80} />
              </div>
@@ -244,7 +244,7 @@ function CryptoList() {
           </div>
 
           {/* Trending Coins */}
-          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.05s' }}>
              {/* Using the Dashboard component directly but it might have its own border/style. 
                  The request implies a "new and minimal look", meaning standardising these.
                  TrendingCoins component has its own card wrapper. 
@@ -255,18 +255,18 @@ function CryptoList() {
           </div>
 
           {/* Top Gainers */}
-          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>
              <TopGainers />
           </div>
         </div>
 
         {/* 3. Main Coin List Section - Added 'fade-in' class */}
-        <div className="fade-in" style={{ animationDelay: '0.4s' }}>
+        <div className="fade-in" style={{ animationDelay: '0.15s' }}>
            <CoinTable onTrade={handleTrade} />
         </div>
 
         {/* 4. News Section - Added 'fade-in' class */}
-        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: '0.5s' }}>
+        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: '0.2s' }}>
           <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
             <FaFire className="text-orange-500" />
             Latest Crypto News

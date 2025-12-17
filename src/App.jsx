@@ -27,7 +27,7 @@ function App() {
         setIsLoading(false);
         // Mark as visited so it doesn't show again on refresh
         sessionStorage.setItem("hasVisited", "true");
-      }, 2500);
+      }, 1500);
 
       return () => clearTimeout(timer);
     }

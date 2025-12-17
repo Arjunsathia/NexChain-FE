@@ -8,7 +8,7 @@ const Preloader = () => {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05, filter: "blur(20px)" }}
-      transition={{ duration: 1, ease: "easeInOut" }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050505] text-white overflow-hidden"
     >
       {/* Background Ambience */}
@@ -29,7 +29,7 @@ const Preloader = () => {
                 "0 0 20px rgba(6,182,212,0.2)",
               ],
             }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 rounded-full bg-transparent"
           />
 
@@ -37,21 +37,21 @@ const Preloader = () => {
           <motion.div
             className="absolute inset-0 rounded-full border border-cyan-500/20 border-t-cyan-400"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
           
           {/* Middle Ring */}
           <motion.div
             className="absolute inset-2 rounded-full border border-blue-500/20 border-b-blue-400"
             animate={{ rotate: -360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
           />
 
           {/* Inner Ring */}
           <motion.div
             className="absolute inset-4 rounded-full border border-purple-500/20 border-l-purple-400"
             animate={{ rotate: 180 }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           />
 
           {/* Center Dot */}
@@ -63,11 +63,11 @@ const Preloader = () => {
           {letters.map((char, index) => (
             <motion.span
               key={index}
-              initial={{ y: 100, opacity: 0 }}
+              initial={{ y: 80, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{
-                duration: 0.8,
-                delay: 0.2 + index * 0.05,
+                duration: 0.5,
+                delay: 0.1 + index * 0.04,
                 ease: [0.215, 0.61, 0.355, 1],
               }}
               className="text-5xl md:text-6xl font-bold font-outfit tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-500"
@@ -79,9 +79,9 @@ const Preloader = () => {
 
         {/* Tagline */}
         <motion.div
-          initial={{ opacity: 0, letterSpacing: "1em" }}
+          initial={{ opacity: 0, letterSpacing: "0.8em" }}
           animate={{ opacity: 1, letterSpacing: "0.3em" }}
-          transition={{ duration: 1.5, delay: 1, ease: "easeOut" }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
           className="mt-4 text-xs font-medium text-cyan-500/80 uppercase"
         >
           The Future of Trading
@@ -92,7 +92,7 @@ const Preloader = () => {
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: "100%" }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
           />
         </div>

@@ -341,7 +341,7 @@ function AdminDashboard() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 fade-in" style={{ animationDelay: '0.1s' }}>
           {/* Chart */}
           <div className={`lg:col-span-2 ${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
             <div className="flex items-center justify-between mb-2 sm:mb-6">
@@ -393,7 +393,7 @@ function AdminDashboard() {
         </div>
 
         {/* Bottom Grid: Reports & Users */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 fade-in" style={{ animationDelay: '0.15s' }}>
           {/* Reports */}
           <RecentReports reports={reports} isLoading={isLoading} TC={TC} />
 

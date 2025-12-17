@@ -172,13 +172,13 @@ export default function Dashboard() {
         {/* 1. Profile */}
         <div
           className="fade-in"
-          style={{ animationDelay: "0.2s" }}
+          style={{ animationDelay: "0s" }}
         >
           <UserProfileCard />
         </div>
 
         {/* 2. Top Three Coins */}
-        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.05s" }}>
           <div className="space-y-1">
             <h2
               className={`text-lg font-bold mb-3 px-1 ${
@@ -199,37 +199,37 @@ export default function Dashboard() {
         </div>
 
         {/* Chart Section */}
-        <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
           <ChartSection coinId={selectedCoinId} />
         </div>
 
         {/* 3. Holdings */}
-        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.15s" }}>
           <PortfolioCard />
         </div>
 
         {/* 4. Watchlist & 5. Trending */}
         <div className="flex flex-col gap-4">
-          <div className="fade-in" style={{ animationDelay: "0.6s" }}>
+          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
             <WatchlistPreview />
           </div>
-          <div className="fade-in" style={{ animationDelay: "0.7s" }}>
+          <div className="fade-in" style={{ animationDelay: "0.25s" }}>
             <TrendingCoins />
           </div>
         </div>
 
         {/* 6. News Panel */}
-        <div className="fade-in" style={{ animationDelay: "0.8s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
           <NewsPanel />
         </div>
 
         {/* 7. Recent Trades */}
-        <div className="fade-in" style={{ animationDelay: "0.9s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.35s" }}>
           <RecentTradesCard />
         </div>
 
         {/* Learning Hub */}
-        <div className="fade-in" style={{ animationDelay: "1.0s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.4s" }}>
           <LearningHub />
         </div>
       </div>
@@ -241,19 +241,19 @@ export default function Dashboard() {
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${USERDATA_HEIGHT}`}
-              style={{ animationDelay: "0.2s" }}
+              style={{ animationDelay: "0s" }}
             >
               <UserProfileCard />
             </div>
             <div
               className={`fade-in ${PORTFOLIO_HEIGHT}`}
-              style={{ animationDelay: "0.3s" }}
+              style={{ animationDelay: "0.05s" }}
             >
               <PortfolioCard />
             </div>
             <div
               className={`fade-in ${TRADES_HEIGHT}`}
-              style={{ animationDelay: "0.4s" }}
+              style={{ animationDelay: "0.1s" }}
             >
               <RecentTradesCard />
             </div>
@@ -262,7 +262,7 @@ export default function Dashboard() {
           {/* Middle Section - Top Coins, Chart */}
           <div className="col-span-6 flex flex-col gap-6">
             {/* Top Coins Section */}
-            <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+            <div className="fade-in" style={{ animationDelay: "0.1s" }}>
               <TopCoins
                 topCoins={topCoins}
                 selectedCoinId={selectedCoinId}
@@ -276,7 +276,7 @@ export default function Dashboard() {
             {/* Chart Section (Restored to compact height) */}
             <div
               className={`fade-in ${CHART_HEIGHT}`}
-              style={{ animationDelay: "0.6s" }}
+              style={{ animationDelay: "0.15s" }}
             >
               <ChartSection coinId={selectedCoinId} />
             </div>
@@ -286,19 +286,19 @@ export default function Dashboard() {
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${WATCHLIST_HEIGHT}`}
-              style={{ animationDelay: "0.8s" }}
+              style={{ animationDelay: "0.15s" }}
             >
               <WatchlistPreview />
             </div>
             <div
               className={`fade-in ${TRENDING_HEIGHT}`}
-              style={{ animationDelay: "0.9s" }}
+              style={{ animationDelay: "0.2s" }}
             >
               <TrendingCoins />
             </div>
             <div
               className={`fade-in ${LEARNING_HUB_HEIGHT}`}
-              style={{ animationDelay: "1.0s" }}
+              style={{ animationDelay: "0.25s" }}
             >
               <LearningHub />
             </div>
@@ -306,7 +306,7 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom Section - News Panel (Follows immediately without gap) */}
-        <div className="fade-in" style={{ animationDelay: "0.7s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
           <NewsPanel />
         </div>
       </div>

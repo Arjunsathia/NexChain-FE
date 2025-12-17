@@ -52,7 +52,14 @@ function TrendingCoins() {
       setError(false);
       setLoading(true);
       const trendData = await getTrend();
-      const idsArray = trendData.coins.map((coin) => coin.item.id);
+      let idsArray = [];
+      if (trendData && Array.isArray(trendData.coins)) {
+          idsArray = trendData.coins.map((coin) => coin.item.id);
+      } else {
+          // If trendData.coins is missing or not array, force fallback
+          throw new Error("Invalid trend data format");
+      }
+      
       // Get slightly more to allow for scrolling if we want, but user wants minimal card
       const marketData = await getTrendingCoinMarketData(idsArray.slice(0, 10)); 
       setTrendingCoins(marketData);
