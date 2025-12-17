@@ -6,14 +6,16 @@ import PublicRoute from "./PublicRoute";
 import MainLayout from "@/Components/layout/MainLayout";
 import PublicLayout from "@/Components/layout/PublicLayout";
 
-// Lazy Load Pages for Performance
-const Landing = lazy(() => import("../Pages/Landing"));
-const AuthPages = lazy(() => import("../Pages/AuthPage"));
-const Dashboard = lazy(() => import("../Pages/Dashboard"));
-const CryptoList = lazy(() => import("../Pages/CryptoList"));
-const PortfolioPage = lazy(() => import("@/Pages/PortfolioPage"));
-const Watchlist = lazy(() => import("@/Pages/Watchlist"));
-const LearningHub = lazy(() => import("@/Pages/LearningHub"));
+// Static Imports for Core Pages (Instant Switching)
+import Dashboard from "../Pages/Dashboard";
+import CryptoList from "../Pages/CryptoList";
+import PortfolioPage from "@/Pages/PortfolioPage";
+import Watchlist from "@/Pages/Watchlist";
+import LearningHub from "@/Pages/LearningHub";
+import Landing from "../Pages/Landing";
+import AuthPages from "../Pages/AuthPage";
+
+// Lazy Load Secondary/Admin Pages
 const CoinDetailsPage = lazy(() => import("@/Pages/CoinDetails/CoinDetailsPage"));
 const CoinPageOutlet = lazy(() => import("@/Pages/CoinDetails/CoinPageOutlet"));
 const User = lazy(() => import("@/Pages/UserProfile/User"));
@@ -28,6 +30,8 @@ const AdminCryptocurrencies = lazy(() => import("@/Pages/Admin/Cryptocurrencies"
 const AdminFeedback = lazy(() => import("@/Pages/Admin/Feedback"));
 const MarketInsights = lazy(() => import("@/Pages/Admin/MarketInsights"));
 const AdminSettings = lazy(() => import("@/Pages/Admin/Settings"));
+
+
 
 // Loading Fallback Component
 const PageLoader = () => (

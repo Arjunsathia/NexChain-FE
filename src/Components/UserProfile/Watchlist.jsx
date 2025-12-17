@@ -1,25 +1,11 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import { FaStar, FaExclamationTriangle, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 function Watchlist() {
   const isLight = useThemeCheck();

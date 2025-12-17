@@ -1,23 +1,7 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useEffect, useRef, memo, useState, useMemo } from 'react';
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            // Check if 'dark' class is present on the document element
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        // Observe changes to the 'class' attribute of the document element
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 function TradingViewWidget({ symbol = "BTCUSD" }) {
   const isLight = useThemeCheck();

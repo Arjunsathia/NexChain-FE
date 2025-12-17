@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import useCoinContext from '@/Context/CoinContext/useCoinContext';
+import useCoinContext from '@/hooks/useCoinContext';
 import { usePurchasedCoins } from './usePurchasedCoins';
 
 export const useLivePortfolio = () => {

@@ -1,3 +1,4 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   FaGraduationCap, 
@@ -17,21 +18,7 @@ import {
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-// Utility to check if light mode is active
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains('dark'));
-    });
-
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 function LearningHub() {
   const isLight = useThemeCheck();

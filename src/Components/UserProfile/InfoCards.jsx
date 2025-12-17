@@ -1,25 +1,11 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo, useState, useEffect } from "react";
 import { FaWallet, FaCoins, FaChartLine, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
+import useWalletContext from '@/hooks/useWalletContext';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { useLivePortfolio } from '@/hooks/useLivePortfolio';
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 function InfoCards() {
   const isLight = useThemeCheck();

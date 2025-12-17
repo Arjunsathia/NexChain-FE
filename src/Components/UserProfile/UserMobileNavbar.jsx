@@ -15,9 +15,9 @@ import {
   FaMoon,
   FaSun
 } from "react-icons/fa";
-import { useTheme } from "@/Context/ThemeContext";
-import useUserContext from '@/Context/UserContext/useUserContext';
-import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
+import { useTheme } from "@/hooks/useTheme";
+import useUserContext from '@/hooks/useUserContext';
+import useWalletContext from '@/hooks/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 

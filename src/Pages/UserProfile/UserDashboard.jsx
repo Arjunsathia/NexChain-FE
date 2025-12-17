@@ -6,7 +6,7 @@ import Watchlist from "@/Components/UserProfile/Watchlist";
 import { useCallback, useEffect, useState } from "react";
 import { getById } from "@/api/axiosConfig";
 import { useParams } from "react-router-dom";
-import useUserContext from '@/Context/UserContext/useUserContext';
+import useUserContext from '@/hooks/useUserContext';
 
 export default function Dashboard() {
   const { userId } = useParams();

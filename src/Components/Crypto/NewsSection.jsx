@@ -1,17 +1,8 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo } from "react";
 
 // Assuming useThemeCheck is available in this scope or imported
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = React.useState(!document.documentElement.classList.contains('dark'));
-    React.useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
-    return isLight;
-};
+
 
 const sampleNews = [
   {

@@ -1,6 +1,7 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
-import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
+import useWalletContext from "@/hooks/useWalletContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import PortfolioHeader from "@/Components/portfolio/PortfolioHeader";
 import PerformanceChart from "@/Components/portfolio/PerformanceChart";
@@ -14,22 +15,7 @@ import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
 
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 const PortfolioPage = () => {
   const isLight = useThemeCheck();

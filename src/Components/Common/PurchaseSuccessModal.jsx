@@ -1,29 +1,10 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Wallet, X } from "lucide-react";
 import Confetti from "react-confetti";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) => {
   const navigate = useNavigate();

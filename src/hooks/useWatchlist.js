@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getData } from '@/api/axiosConfig';
-import useUserContext from '@/Context/UserContext/useUserContext';
+import useUserContext from '@/hooks/useUserContext';
 
 export const useWatchlist = () => {
   const { user } = useUserContext();

@@ -1,308 +1,129 @@
-import React, { useMemo, useState, useEffect } from "react";
-import {
-  FaHistory,
-  FaExchangeAlt,
-  FaArrowRight,
-  FaArrowUp,
-  FaArrowDown,
-  FaMoneyBillWave,
-} from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import React, { useMemo } from "react";
+import useThemeCheck from "@/hooks/useThemeCheck";
+import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
+import { FaHistory, FaArrowUp, FaArrowDown, FaExchangeAlt } from "react-icons/fa";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
-
-function RecentTradesCard() {
+export default function RecentTradesCard() {
   const isLight = useThemeCheck();
-  const { transactionHistory, loading: transactionsLoading } =
-    usePurchasedCoins();
-  const navigate = useNavigate();
+  const { transactionHistory, loading } = usePurchasedCoins();
 
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  // 💡 Styles
+  const TC = useMemo(() => ({
+    bgContainer: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    
+    // Items
+    bgItem: isLight 
+      ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0" 
+      : "hover:bg-white/5 border-b border-gray-700/50 last:border-0",
+    
+    // Icons
+    bgBuyIcon: isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400",
+    bgSellIcon: isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400",
+    
+    // Values
+    textBuy: isLight ? "text-green-600" : "text-green-400",
+    textSell: isLight ? "text-red-600" : "text-red-400",
+  }), [isLight]);
 
-  const TC = useMemo(
-    () => ({
-      bgContainer: isLight
-        ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-      bgItem: isLight
-        ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30"
-        : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
-      borderItem: isLight ? "border-gray-300" : "border-gray-700/50",
-      bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-400/10",
-      textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
-      bgTradeIcon: (isBuy) =>
-        isBuy
-          ? isLight
-            ? "bg-green-100/70 text-green-600"
-            : "bg-green-500/20 text-green-400"
-          : isLight
-          ? "bg-red-100/70 text-red-600"
-          : "bg-red-500/20 text-red-400",
-      textPriceAccent: isLight ? "text-yellow-600/70" : "text-yellow-400/70",
-      textDateAccent: isLight ? "text-cyan-600/70" : "text-cyan-400/70",
-      textPLPositive: isLight ? "text-green-700" : "text-green-400",
-      textPLNegative: isLight ? "text-red-700" : "text-red-400",
-      bgPLPositive: isLight ? "bg-green-100/50" : "bg-green-500/20",
-      bgPLNegative: isLight ? "bg-red-100/50" : "bg-red-500/20",
-      bgLoading: isLight ? "bg-gray-200" : "bg-gray-700",
-      bgEmpty: isLight
-        ? "bg-gray-100/70 border-gray-300"
-        : "bg-gray-700/30 border-gray-600",
-      textEmpty: isLight ? "text-gray-500" : "text-gray-400",
-      bgFooterButton: isLight
-        ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500"
-        : "bg-gray-700/50 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400",
-      textFooterButton: isLight ? "text-cyan-600" : "text-cyan-400",
-      textHoverAccent: isLight
-        ? "group-hover:text-cyan-700"
-        : "group-hover:text-cyan-300",
-    }),
-    [isLight]
-  );
-
-  // Recent transactions (last 4)
-  const recentTransactions = useMemo(() => {
+  // Process and sort transactions
+  const recentTrades = useMemo(() => {
     if (!transactionHistory) return [];
-    return transactionHistory
-      .sort(
-        (a, b) =>
-          new Date(b.transactionDate || b.purchase_date) -
-          new Date(a.transactionDate || a.purchase_date)
-      )
-      .slice(0, 4);
+    return [...transactionHistory]
+      .sort((a, b) => new Date(b.transactionDate || b.purchase_date) - new Date(a.transactionDate || a.purchase_date))
+      .slice(0, 4); // Limit to top 4 to fit height
   }, [transactionHistory]);
 
-  const handleViewAllTrades = () => {
-    navigate("/portfolio");
-  };
-
-  const formatDateTime = (dateString) => {
+  const formatTime = (dateString) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+        return new Date(dateString).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
     } catch {
-      return "Recent";
+        return "";
     }
   };
 
-  return (
-    <div
-      className={`
-        rounded-lg md:rounded-2xl p-3 md:p-4 h-full flex flex-col gap-4 fade-in
-        ${TC.bgContainer}
-        ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
-      `}
-      style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}
-    >
-      <div className="fade-in flex-1 min-h-0 flex flex-col">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${TC.bgIcon}`}>
-              <FaHistory className={TC.textIcon + " text-sm"} />
-            </div>
-            <h2 className="text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              Recent Trades
-            </h2>
-          </div>
-        </div>
+  if (loading) {
+    return (
+       <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
+         <div className="flex items-center gap-2 mb-3">
+            <Skeleton circle width={24} height={24} />
+            <Skeleton width={100} />
+         </div>
+         <div className="space-y-3">
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+         </div>
+       </div>
+    );
+  }
 
-        {transactionsLoading ? (
-          <div className="space-y-2 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div key={idx} className="flex items-center gap-2 p-2 fade-in">
-                <div
-                  className={`w-6 h-6 rounded ${TC.bgLoading} animate-pulse`}
-                ></div>
-                <div className="flex-1 space-y-1.5">
-                  <div
-                    className={`w-24 h-3 ${TC.bgLoading} rounded animate-pulse`}
-                  ></div>
-                  <div
-                    className={`w-20 h-2 ${TC.bgLoading} rounded animate-pulse`}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : recentTransactions.length === 0 ? (
-          <div
-            className={`text-center py-4 flex flex-col items-center justify-center gap-2 rounded-xl border flex-1 fade-in ${TC.bgEmpty}`}
-          >
-            <div className={`p-2 rounded-full ${TC.bgIcon}`}>
-              <FaExchangeAlt className={TC.textIcon + " text-base"} />
-            </div>
-            <p className={`text-xs ${TC.textEmpty}`}>No recent trades</p>
+  return (
+    <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
+      {/* Header */}
+      <div className="px-4 pt-3 flex items-center justify-between mb-2">
+        <h3 className={`font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2`}>
+           <FaHistory className="text-blue-500" />
+           Recent Trades
+        </h3>
+        {recentTrades.length > 0 && (
+            <span className={`text-[10px] ${TC.textSecondary} px-2 py-0.5 rounded-full border ${isLight ? "border-gray-200" : "border-gray-700"}`}>
+                Last {recentTrades.length}
+            </span>
+        )}
+      </div>
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-thin">
+        {recentTrades.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
+             <div className={`p-3 rounded-full mb-2 ${isLight ? "bg-gray-100" : "bg-gray-700"}`}>
+                <FaExchangeAlt />
+             </div>
+             <p className={`text-xs ${TC.textSecondary}`}>No transactions yet</p>
           </div>
         ) : (
-          <div className="flex-1 min-h-0 flex flex-col">
-            {/* Scrollable transactions list */}
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-2">
-              {recentTransactions.map((transaction, index) => {
-                const isBuy = transaction.type === "buy";
-
-                return (
-                  <div
-                    key={transaction._id || `tx-${index}`}
-                    className={`flex items-center gap-2 p-2 rounded-lg border hover:border-cyan-600/30 transition-all duration-200 cursor-pointer group fade-in ${TC.bgItem}`}
-                    onClick={() => navigate("/portfolio")}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isBuy ? TC.bgTradeIcon(true) : TC.bgTradeIcon(false)
-                      }`}
-                    >
-                      {isBuy ? (
-                        <FaArrowUp className="text-sm" />
-                      ) : (
-                        <FaArrowDown className="text-sm" />
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={`font-semibold text-xs truncate ${TC.textPrimary}`}
-                          >
-                            {transaction.coinName || transaction.coin_name}
-                          </p>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span
-                              className={`text-xs ${TC.textSecondary}`}
-                            >
-                              {transaction.coinSymbol?.toUpperCase()}
-                            </span>
-                            <span
-                              className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                                isBuy ? TC.bgPLPositive : TC.bgPLNegative
-                              }`}
-                            >
-                              {isBuy ? "Bought" : "Sold"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <p
-                            className={`font-bold text-xs ${
-                              isBuy ? TC.textPLPositive : TC.textPLNegative
-                            }`}
-                          >
-                            {isBuy ? "+" : "-"}
-                            {(transaction.quantity || 0).toFixed(4)}
-                          </p>
-                          <p className={`text-xs ${TC.textSecondary}`}>
-                            $
-                            {(
-                              transaction.totalValue ||
-                              transaction.total_cost ||
-                              0
-                            ).toLocaleString("en-IN", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`flex items-center justify-between text-xs ${TC.textSecondary} pt-1 border-t ${TC.borderItem}`}
-                      >
-                        <div className="flex items-center gap-1">
-                          <FaMoneyBillWave
-                            className={TC.textPriceAccent + " text-xs"}
-                          />
-                          $
-                          {(
-                            transaction.price ||
-                            transaction.coin_price_usd ||
-                            0
-                          ).toLocaleString("en-IN", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits:
-                              (transaction.price ||
-                                transaction.coin_price_usd ||
-                                0) < 1
-                                ? 6
-                                : 2,
-                          })}
-                        </div>
-                        <span className="flex items-center gap-1">
-                          <FaExchangeAlt
-                            className={TC.textDateAccent + " text-xs"}
-                          />
-                          {formatDateTime(
-                            transaction.transactionDate ||
-                              transaction.purchase_date
-                          )}
-                        </span>
-                      </div>
-                    </div>
+          recentTrades.map((tx, i) => {
+            const isBuy = tx.type === 'buy';
+            return (
+              <div 
+                key={i} 
+                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${TC.bgItem}`}
+              >
+                  {/* Left: Icon + Coin */}
+                  <div className="flex items-center gap-3">
+                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${isBuy ? TC.bgBuyIcon : TC.bgSellIcon}`}>
+                        {isBuy ? <FaArrowUp /> : <FaArrowDown />}
+                     </div>
+                     <div>
+                        <p className={`text-xs font-bold ${TC.textPrimary}`}>
+                           {tx.coinSymbol?.toUpperCase() || "COIN"}
+                        </p>
+                        <p className={`text-[10px] ${TC.textSecondary}`}>
+                           {formatTime(tx.transactionDate || tx.purchase_date)}
+                        </p>
+                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
-        {/* View All Trades Button */}
-        <button
-          onClick={handleViewAllTrades}
-          className={`
-            w-full mt-3 text-xs font-semibold py-2 rounded-lg transition-all duration-200 
-            flex items-center justify-center gap-1 group fade-in border 
-            ${TC.bgFooterButton} 
-            ${TC.textFooterButton}
-            ${TC.textHoverAccent}
-          `}
-        >
-          View All Trades
-          <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-transform duration-200" />
-        </button>
+                  {/* Right: Amount + Value */}
+                  <div className="text-right">
+                     <p className={`text-xs font-bold ${isBuy ? TC.textBuy : TC.textSell}`}>
+                        {isBuy ? "+" : "-"}{tx.quantity?.toFixed(4)}
+                     </p>
+                     <p className={`text-[10px] ${TC.textSecondary}`}>
+                        ${(tx.totalValue || tx.total_cost || 0).toLocaleString()}
+                     </p>
+                  </div>
+              </div>
+            );
+          })
+        )}
       </div>
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }
-
-export default RecentTradesCard;

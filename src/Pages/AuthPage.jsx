@@ -9,7 +9,7 @@ import { login, postForm } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import InteractiveGridPattern from "@/Components/Landing/Background"; // Import from Landing
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 
 // =================================================================
 // MAIN AUTH PAGE COMPONENT

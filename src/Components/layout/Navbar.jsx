@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, User, ChevronRight, Rocket, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import useUserContext from "@/Context/UserContext/useUserContext";
-import useRoleContext from "@/Context/RoleContext/useRoleContext";
+import useUserContext from "@/hooks/useUserContext";
+import useRoleContext from "@/hooks/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
 import api from "@/api/axiosConfig";
 

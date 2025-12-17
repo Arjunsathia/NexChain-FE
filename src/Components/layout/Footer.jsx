@@ -14,7 +14,7 @@ import { X } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 export default function Footer() {

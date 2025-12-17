@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FaUser, FaLock, FaGlobe, FaBell, FaIdCard, FaSave } from "react-icons/fa";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import ProfileSettings from "@/Components/Settings/ProfileSettings";
 import SecuritySettings from "@/Components/Settings/SecuritySettings";
 import PreferenceSettings from "@/Components/Settings/PreferenceSettings";
 import NotificationSettings from "@/Components/Settings/NotificationSettings";
 import KYCVerification from "@/Components/Settings/KYCVerification";
 
-import { useTheme } from "@/Context/ThemeContext";
+import { useTheme } from "@/hooks/useTheme";
 
 const Settings = () => {
   const { isDark } = useTheme();

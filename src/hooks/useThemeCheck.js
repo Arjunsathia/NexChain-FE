@@ -1,13 +1,8 @@
-import { useTheme } from "@/Context/ThemeContext";
+import { useSelector } from "react-redux";
 
 const useThemeCheck = () => {
-  try {
-    const { isDark } = useTheme();
-    return !isDark;
-  } catch (e) {
-    // Fallback if used outside provider (though unlikely in this app)
-    return !document.documentElement.classList.contains("dark");
-  }
+  const isDark = useSelector((state) => state.theme?.isDark);
+  return !isDark;
 };
 
 export default useThemeCheck;

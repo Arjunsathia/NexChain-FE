@@ -1,9 +1,10 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
+import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
 
 // Sub-components
@@ -14,27 +15,7 @@ import HoldingsActions from "../TradeModal/HoldingsActions";
 import TransactionForm from "../TradeModal/TransactionForm";
 import PurchaseSuccessModal from "./PurchaseSuccessModal";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 function TradeModal({
   show,

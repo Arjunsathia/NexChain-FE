@@ -66,6 +66,9 @@ export default function Dashboard() {
     fetchTopCoins();
   }, []);
 
+  // Buffer for WebSocket updates
+  const bufferRef = useRef({});
+
   // WebSocket setup for live data
   useEffect(() => {
     if (topCoins.length === 0) return;
@@ -78,12 +81,25 @@ export default function Dashboard() {
 
     if (!symbols) return;
 
+    // Flush buffer to state every 1.5s
+    const intervalId = setInterval(() => {
+      if (Object.keys(bufferRef.current).length > 0) {
+        setLiveData((prev) => ({
+          ...prev,
+          ...bufferRef.current,
+        }));
+        bufferRef.current = {}; // Clear buffer after update? 
+        // Actually, better to keep providing latest data. 
+        // But if we clear, we ensure we only update if NEW data came in.
+        // Let's NOT clear, but only update if something changed? 
+        // Simple merge is fine.
+      }
+    }, 1500);
+
     try {
       ws.current = new WebSocket(
         `wss://stream.binance.com:9443/stream?streams=${symbols}`
       );
-
-
 
       ws.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -97,22 +113,12 @@ export default function Dashboard() {
             const newPrice = parseFloat(data.data.c);
             const newChange = parseFloat(data.data.P);
 
-            // Only update if data actually changed
-            const currentData = liveDataRef.current[coinId];
-            if (
-              !currentData ||
-              currentData.price !== newPrice ||
-              currentData.change !== newChange
-            ) {
-              setLiveData((prev) => ({
-                ...prev,
-                [coinId]: {
-                  price: newPrice,
-                  change: newChange,
-                  isPositive: newChange >= 0,
-                },
-              }));
-            }
+            // Update buffer with latest data
+            bufferRef.current[coinId] = {
+              price: newPrice,
+              change: newChange,
+              isPositive: newChange >= 0,
+            };
           }
         }
       };
@@ -126,6 +132,7 @@ export default function Dashboard() {
     }
 
     return () => {
+      clearInterval(intervalId);
       if (ws.current) {
         ws.current.close();
       }

@@ -1,31 +1,12 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { FaBell, FaTimes, FaChevronUp, FaChevronDown, FaEdit } from "react-icons/fa";
 import toast from "react-hot-toast";
 import api from "@/api/axiosConfig";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 const PriceAlertModal = ({ show, onClose, coin }) => {
   const isLight = useThemeCheck();

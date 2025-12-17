@@ -1,29 +1,10 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaCrown, FaTrophy, FaAward, FaCoins } from "react-icons/fa";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 // Memoized Bento Coin Card Component (Dual Mode)
 const BentoCoinCard = React.memo(
@@ -33,7 +14,7 @@ const BentoCoinCard = React.memo(
     const TC = useMemo(
       () => ({
         textPrimary: isLight ? "text-gray-900" : "text-white",
-        textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
         // Skeleton
         skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
@@ -41,62 +22,45 @@ const BentoCoinCard = React.memo(
 
         // P/L pill
         bgPLPositive: isLight
-          ? "bg-green-100 text-green-700 border-green-300"
-          : "bg-green-500/20 text-green-400 border-green-500/30",
+          ? "text-green-600 bg-green-100/50"
+          : "text-green-400 bg-green-500/10",
         bgPLNegative: isLight
-          ? "bg-red-100 text-red-700 border-red-300"
-          : "bg-red-500/20 text-red-400 border-red-500/30",
+          ? "text-red-600 bg-red-100/50"
+          : "text-red-400 bg-red-500/10",
 
-        // Rank colors
-        rankGold: isLight ? "text-yellow-600" : "text-yellow-400",
-        rankSilver: isLight ? "text-gray-500" : "text-gray-300",
-        rankBronze: isLight ? "text-orange-600" : "text-orange-400",
-
-        // Base card (used mainly for skeleton fallback)
+        // Base card (Matched to RecentTrades/Portfolio minimal glass)
         bgBase: isLight
-          ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
-          : "bg-gray-800/70 shadow-xl shadow-black/30 backdrop-blur-md border border-gray-800",
+          ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
+          : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
 
-        // Selected state: subtle cyan ring + soft shadow
-        ringSelected: isLight
-          ? "ring-1 ring-cyan-500 shadow-md shadow-cyan-500/20"
-          : "ring-1 ring-cyan-400 shadow-md shadow-cyan-400/15",
+        // Selected state: Minimal border focus, less colorful bg
+        selectedState: isLight
+          ? "bg-white/95 border-cyan-400 shadow-md ring-1 ring-cyan-100 scale-[1.02]"
+          : "bg-gray-800 border-cyan-500/50 shadow-md ring-1 ring-cyan-500/20 scale-[1.02]",
 
-        // Hover effect: no border, just soft scale + shadow
+        // Hover effect
         hoverEffect: isLight
-          ? "hover:scale-[1.02] hover:shadow-[0_6px_20px_rgba(8,145,178,0.18)]"
-          : "hover:scale-[1.02] hover:shadow-[0_6px_20px_rgba(34,211,238,0.22)]",
-
-        // Inner hover text
-        textHover: isLight
-          ? "group-hover:text-cyan-700"
-          : "group-hover:text-cyan-400",
-
+          ? "hover:bg-white/90 hover:border-gray-300"
+          : "hover:bg-gray-800/80 hover:border-gray-600",
+        
         // Price color
-        priceColor: isLight ? "text-cyan-700" : "text-cyan-400",
+        priceColor: isLight ? "text-gray-900" : "text-white",
 
-        // Icon circle (keep a subtle border)
-        bgIconCircle: isLight
-          ? "bg-white border border-gray-200"
-          : "bg-gray-800 border border-gray-700",
-
-        // Rank accent backgrounds (no borders, just bg)
-        rankAccent: (idx) => {
-          // Uniform styling for all top coins (no rank-specific bg)
-          return isLight
-            ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
-            : "bg-gray-800/70 shadow-xl shadow-black/30 backdrop-blur-md border border-gray-800";
-        },
+        // Icons
+        rankIconColor: (idx) => {
+             if (idx === 0) return "text-yellow-500";
+             if (idx === 1) return "text-gray-400";
+             if (idx === 2) return "text-orange-500";
+             return isLight ? "text-cyan-600" : "text-cyan-400";
+        }
       }),
       [isLight]
     );
 
     const formatPrice = useCallback((price) => {
       if (price === null || price === undefined) return "Loading...";
-
       const numPrice = typeof price === "number" ? price : parseFloat(price);
       if (isNaN(numPrice)) return "Loading...";
-
       return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -130,75 +94,28 @@ const BentoCoinCard = React.memo(
     const displayChange = getDisplayChange();
     const isPositive = getIsPositive();
 
-    // Card styling: NO border, only bg + shadow
-    const getCardStyling = () => {
-      const base = `rounded-lg md:rounded-2xl transition-all duration-300`; // border removed
-      const accent = TC.rankAccent(index);
-      return `${base} ${accent}`;
-    };
-
     // Icons based on rank
     const getPositionIcon = () => {
+      const colorClass = TC.rankIconColor(index);
       switch (index) {
-        case 0:
-          return <FaCrown className={`w-3.5 h-3.5 ${TC.rankGold}`} />;
-        case 1:
-          return <FaTrophy className={`w-3.5 h-3.5 ${TC.rankSilver}`} />;
-        case 2:
-          return <FaAward className={`w-3.5 h-3.5 ${TC.rankBronze}`} />;
-        default:
-          return <FaCoins className={`w-3.5 h-3.5 ${TC.priceColor}`} />;
+        case 0: return <FaCrown className={`w-3 h-3 ${colorClass}`} />;
+        case 1: return <FaTrophy className={`w-3 h-3 ${colorClass}`} />;
+        case 2: return <FaAward className={`w-3 h-3 ${colorClass}`} />;
+        default: return <FaCoins className={`w-3 h-3 ${colorClass}`} />;
       }
-    };
-
-    // Sizes
-    const getCardSizeClasses = () => {
-      if (isMobile) {
-        return "w-full h-auto p-3";
-      }
-      return "w-full h-32 p-3 md:p-4";
     };
 
     if (isLoading) {
       return (
-        <div className={`${getCardStyling()} ${getCardSizeClasses()} ${TC.bgBase}`}>
+        <div className={`rounded-xl p-3 flex flex-col justify-between h-28 ${TC.bgBase}`}>
           <div className="flex items-center gap-2 mb-2">
-            <Skeleton
-              circle
-              width={32}
-              height={32}
-              baseColor={TC.skeletonBase}
-              highlightColor={TC.skeletonHighlight}
-            />
+            <Skeleton circle width={32} height={32} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
             <div className="flex-1">
-              <Skeleton
-                width={50}
-                height={14}
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-                className="mb-1"
-              />
-              <Skeleton
-                width={35}
-                height={10}
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-              />
+              <Skeleton width={50} height={14} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
+              <Skeleton width={35} height={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
             </div>
           </div>
-          <Skeleton
-            width={70}
-            height={16}
-            baseColor={TC.skeletonBase}
-            highlightColor={TC.skeletonHighlight}
-            className="mb-1"
-          />
-          <Skeleton
-            width={50}
-            height={12}
-            baseColor={TC.skeletonBase}
-            highlightColor={TC.skeletonHighlight}
-          />
+          <Skeleton width={70} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} className="mb-1" />
         </div>
       );
     }
@@ -207,76 +124,37 @@ const BentoCoinCard = React.memo(
       <div
         onClick={() => onSelect(coin.id)}
         className={`
-          relative cursor-pointer fade-in
-          ${getCardStyling()}
-          ${TC.textPrimary}
-          ${isSelected ? TC.ringSelected : TC.hoverEffect}
-          ${getCardSizeClasses()}
-          group
+          relative cursor-pointer fade-in rounded-xl p-3 h-28 flex flex-col justify-between transition-all duration-200
+          ${isSelected ? TC.selectedState : `${TC.bgBase} ${TC.hoverEffect}`}
         `}
         style={{ animationDelay: `${0.3 + index * 0.1}s` }}
       >
-        {/* Content */}
-        <div className="relative z-10 w-full h-full flex flex-col justify-between">
-          {/* Header with Icon and Symbol */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="relative flex-shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
                 <img
                   src={coin.image}
                   alt={coin.name}
-                  className={`w-8 h-8 rounded-full transition-transform duration-300 border ${
-                    isLight ? "border-gray-300" : "border-gray-600"
-                  }`}
+                  className="w-8 h-8 rounded-full object-cover"
                 />
-                <div
-                  className={`absolute -top-1 -right-1 rounded-full p-0.5 ${TC.bgIconCircle}`}
-                >
-                  {getPositionIcon()}
+                <div>
+                   <h3 className={`font-bold text-sm leading-tight ${TC.textPrimary}`}>{coin.symbol.toUpperCase()}</h3>
+                   <p className={`text-[10px] ${TC.textSecondary} truncate max-w-[80px]`}>{coin.name}</p>
                 </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3
-                  className={`font-semibold text-sm transition-colors truncate ${TC.textPrimary} ${TC.textHover}`}
-                >
-                  {coin.symbol.toUpperCase()}
-                </h3>
-                <p className={`text-xs truncate ${TC.textSecondary}`}>
-                  {coin.name}
-                </p>
-              </div>
             </div>
-            {/* Rank Number (Visible only on desktop/tablet) */}
-            <div
-              className={`text-sm font-semibold ${TC.textSecondary}`}
-            >
-              #{index + 1}
+            <div className={`p-1 rounded-full bg-opacity-10 ${index === 0 ? "bg-yellow-500/10" : "bg-gray-500/10"}`}>
+               {getPositionIcon()}
             </div>
-          </div>
+        </div>
 
-          {/* Price and Change */}
-          <div className="flex items-end justify-between mt-2">
-            <div className="min-w-0 flex-1">
-              <p
-                className={`text-lg font-bold transition-colors truncate ${TC.priceColor} ${TC.textHover}`}
-              >
-                {displayPrice}
-              </p>
+        {/* Price & Change */}
+        <div className="mt-2">
+            <p className={`text-lg font-bold ${TC.priceColor}`}>{displayPrice}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isPositive ? TC.bgPLPositive : TC.bgPLNegative}`}>
+                   {isPositive ? "+" : ""}{Math.abs(displayChange).toFixed(2)}%
+                </span>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div
-                className={`
-                  inline-flex items-center px-2 py-1 rounded-full
-                  text-xs font-semibold border
-                  transition-colors duration-200
-                  ${isPositive ? TC.bgPLPositive : TC.bgPLNegative}
-                `}
-              >
-                {isPositive ? "+" : "-"}
-                {Math.abs(displayChange).toFixed(1)}%
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );

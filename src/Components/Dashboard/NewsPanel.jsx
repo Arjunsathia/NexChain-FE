@@ -1,180 +1,118 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { FaNewspaper, FaArrowRight } from "react-icons/fa";
+import useThemeCheck from '@/hooks/useThemeCheck';
+import React, { useMemo } from "react";
+import { FaNewspaper, FaExternalLinkAlt, FaClock } from "react-icons/fa";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
+const sampleNews = [
+  {
+    id: 1,
+    title: "Bitcoin Wavers After Trump Says He's 'Not Planning' to Fire Fed Chair",
+    image: "https://www.reuters.com/resizer/v2/36GOW2O6FFKOXDYJZZO2TNBBQQ.jpg?auth=f44d122577fc3b59d4a8b0f0210ca9a47838f1815552f8142cffd57295627e96&width=1200&quality=80",
+    source: "Decrypt",
+    time: "23 minutes ago",
+    link: "#"
+  },
+  {
+    id: 2,
+    title: "Crypto Bills Squeak Through After Dramatic Standoff on House Floor",
+    image: "https://img.etimg.com/thumb/msid-122527431,width-630,resizemode-4,imgsize-1185433/crypto-news-today-live-16-jul-2025.jpg",
+    source: "Decrypt",
+    time: "25 minutes ago",
+    link: "#"
+  },
+  {
+    id: 3,
+    title: "Three US crypto bills clear procedural vote after initial failure",
+    image: "https://www.livemint.com/lm-img/img/2025/07/14/600x338/stablecoin_1752227240523_1752227247414_1752509439267.jpeg",
+    source: "Cointelegraph",
+    time: "36 minutes ago",
+    link: "#"
+  },
+  {
+    id: 4,
+    title: "Roger Ver sues Spain to block US extradition",
+    image: "https://images.news18.com/ibnlive/uploads/2025/05/news18-1-10-2025-05-3033bed1f22a910042b74da348fcd302-16x9.png?impolicy=website&width=640&height=360",
+    source: "The Block",
+    time: "37 minutes ago",
+    link: "#"
+  },
+];
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains('dark'));
-    });
-
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
-
-function NewsPanel() {
+export default function NewsPanel() {
   const isLight = useThemeCheck();
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
-  // 💡 Theme Classes Helper (UPDATED: no border on container, stronger shadow in light mode)
   const TC = useMemo(() => ({
-    // Main container: no border here
     bgContainer: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
-
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-    bgIcon: isLight ? "p-1.5 bg-purple-100 rounded-lg" : "p-1.5 bg-purple-400/10 rounded-lg",
-    iconColor: isLight ? "text-purple-600" : "text-purple-400",
-    
-    // News Items (no border color here, border handled separately via border-l-2)
-    bgItem: isLight
-      ? "bg-gray-100/70 hover:bg-gray-200/90"
-      : "bg-gray-700/30 hover:bg-gray-700/50",
-
     textSource: isLight ? "text-cyan-600" : "text-cyan-400",
-    textTime: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Footer Button (Light cyan hover)
-    bgFooterButton: isLight 
-      ? "bg-gray-200 border-gray-300 hover:bg-cyan-100/70 hover:border-cyan-500"
-      : "bg-gray-700/30 border-gray-600 hover:bg-cyan-900/40 hover:border-cyan-400",
-
-    borderFooter: isLight ? "border-gray-300" : "border-gray-700",
-
-    textFooterButton: isLight ? "text-cyan-600" : "text-cyan-400",
-    textHoverAccent: isLight 
-      ? "group-hover:text-cyan-700"
-      : "group-hover:text-cyan-300",
+    // List item styles
+    bgItem: isLight 
+      ? "hover:bg-gray-50 border-b border-gray-100" 
+      : "hover:bg-white/5 border-b border-gray-700/50",
+    
+    iconColor: isLight ? "text-cyan-600" : "text-cyan-400",
+    bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-400/10",
   }), [isLight]);
 
-  const newsItems = [
-    {
-      title: "Bitcoin ETF Approval Boosts Market Confidence",
-      source: "Crypto Daily",
-      time: "2 hours ago"
-    },
-    {
-      title: "Ethereum Upgrade Significantly Reduces Gas Fees",
-      source: "Blockchain News",
-      time: "5 hours ago"
-    },
-    {
-      title: "Major Exchange Announces Zero Trading Fees Campaign",
-      source: "Finance Times",
-      time: "1 day ago"
-    },
-    {
-      title: "Solana Network Achieves Record Transaction Speed",
-      source: "Tech Crypto",
-      time: "3 hours ago"
-    },
-    {
-      title: "Regulatory Framework Update for Digital Assets",
-      source: "Crypto Policy",
-      time: "6 hours ago"
-    },
-    {
-      title: "DeFi Protocol Reaches $1B Total Value Locked",
-      source: "DeFi News",
-      time: "8 hours ago"
-    }
-  ];
-
   return (
-    <div
-      className={`
-        rounded-lg md:rounded-2xl p-3 md:p-4 h-full flex flex-col fade-in
-        ${TC.bgContainer}
-        ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
-      `}
-      style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}
-    >
+    <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 fade-in ${TC.bgContainer}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 fade-in">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className={TC.bgIcon}>
-            <FaNewspaper className={TC.iconColor + " text-sm"} />
+          <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
+            <FaNewspaper className={TC.iconColor} />
           </div>
-          <h2 className="text-base font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-            Crypto News
+          <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            Market News
           </h2>
         </div>
+        <button className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isLight ? "border-gray-300 hover:bg-gray-100" : "border-gray-600 hover:bg-gray-700"} ${TC.textSecondary}`}>
+           View All
+        </button>
       </div>
-      
-      {/* Scrollable News List */}
-      <div className="flex-1 min-h-0">
-        <div className="h-full overflow-y-auto scrollbar-hide grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {newsItems.map((news, index) => (
-            <div 
-              key={index} 
-              className={`
-                border-l-2 pl-3 py-2 rounded-r-lg
-                transition-all duration-200 cursor-pointer group fade-in
-                flex flex-col justify-between h-full
-                ${TC.bgItem}
-                ${isLight ? "border-purple-600 hover:border-cyan-600" : "border-purple-500 hover:border-cyan-500"}
-              `}
-              style={{ animationDelay: `${0.2 + index * 0.05}s` }}
-            >
-              <h3
-                className={`
-                  font-semibold text-xs mb-1.5 transition-colors
-                  line-clamp-2 leading-tight
-                  ${TC.textPrimary}
-                  ${isLight ? "group-hover:text-cyan-700" : "group-hover:text-cyan-300"}
-                `}
-              >
-                {news.title}
-              </h3>
-              <div className="flex justify-between items-center text-xs mt-auto">
-                <span className={`text-xs ${TC.textSource}`}>{news.source}</span>
-                <span className={`text-xs ${TC.textTime}`}>{news.time}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Footer (Button with light cyan hover) */}
-      <button 
-        className={`
-          w-full mt-3 text-xs font-semibold py-2 rounded-lg transition-all duration-200 
-          flex items-center justify-center gap-1 group fade-in border 
-          ${TC.bgFooterButton} 
-          ${TC.textFooterButton}
-          ${TC.textHoverAccent} 
-        `}
-      >
-        View All News
-        <FaArrowRight className="text-xs group-hover:translate-x-0.5 transition-transform duration-200" />
-      </button>
 
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+      {/* List Layout */}
+      <div className="flex flex-col gap-2">
+        {sampleNews.map((news, index) => (
+          <div
+            key={news.id}
+            className={`
+              group flex items-start gap-4 p-3 rounded-xl transition-all duration-200 cursor-pointer
+              ${isLight ? "hover:shadow-sm" : ""}
+              ${index !== sampleNews.length - 1 ? TC.bgItem : "hover:bg-gray-50 dark:hover:bg-white/5"}
+            `}
+          >
+            {/* Image Thumbnail */}
+            <div className="relative w-24 h-16 flex-shrink-0 overflow-hidden rounded-lg">
+               <img
+                  src={news.image}
+                  alt={news.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+               />
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+               <h3 className={`font-semibold text-sm mb-1 leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
+                  {news.title}
+               </h3>
+               
+               <div className="flex items-center justify-between mt-1">
+                  <span className={`text-[10px] uppercase font-bold tracking-wider ${TC.textSource}`}>
+                     {news.source}
+                  </span>
+                  <div className={`flex items-center gap-1 text-[10px] ${TC.textSecondary}`}>
+                     <FaClock className="text-[10px]" />
+                     {news.time}
+                  </div>
+               </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
-
-export default NewsPanel;

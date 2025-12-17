@@ -1,9 +1,11 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
 import TrendingCoins from "@/Components/Crypto/TrendingCoins";
+
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -13,22 +15,7 @@ import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 function CryptoList() {
   const isLight = useThemeCheck();
@@ -57,6 +44,7 @@ function CryptoList() {
   const [alertModal, setAlertModal] = useState({
     show: false,
     coin: null,
+    type: "buy",
   });
 
   // 💡 Theme Classes Helper
@@ -69,9 +57,9 @@ function CryptoList() {
     // Backgrounds
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     bgCard: isLight 
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100" 
+      : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/80 backdrop-blur-md shadow-md border-b border-gray-800",
     
     // Accents
     accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
@@ -86,7 +74,7 @@ function CryptoList() {
     bgPillNegative: isLight ? "bg-red-100 text-red-700 border-red-200" : "bg-red-500/10 text-red-400 border-red-500/20",
     
     // Icons
-    iconBg: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",
+    iconBg: isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400",
     
   }), [isLight]);
 
@@ -135,6 +123,7 @@ function CryptoList() {
     setAlertModal({
       show: false,
       coin: null,
+      type: "buy",
     });
   }, []);
 
@@ -200,55 +189,72 @@ function CryptoList() {
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-8 space-y-8">
         
-        {/* 2. Bento Grid Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+        {/* 2. Three Cards Section (Global, Trending, Gainers) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
           
-          {/* Global Market Card (Large) - Added 'fade-in' class */}
-          <div className={`lg:col-span-4 rounded-lg md:rounded-2xl p-3 md:p-6 transition-all duration-300 hover:shadow-lg ${TC.bgCard} group fade-in h-full flex flex-col justify-between`} style={{ transitionDelay: '0.1s' }}>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div className="flex items-center gap-2">
-                <div className={`p-2 rounded-lg ${isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400"}`}>
-                  <FaGlobeAmericas />
+          {/* Global Market Card (Inlined) */}
+          <div className={`rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard}`}>
+             <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4">
+                <FaGlobeAmericas size={80} />
+             </div>
+             
+             <div>
+                <div className="flex items-center gap-2 mb-4">
+                   <div className={`p-2 rounded-lg ${TC.iconBg}`}>
+                      <FaGlobeAmericas className="text-lg" />
+                   </div>
+                   <h3 className={`font-bold text-lg ${TC.textPrimary}`}>Global Market</h3>
                 </div>
-                <h3 className="text-sm sm:text-base font-bold">Global Market</h3>
-              </div>
-              {!loading && (
-                <span className={`text-xs font-bold px-2 py-1 rounded-full border ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)}`}>
-                  {globalData?.market_cap_change_percentage_24h_usd >= 0 ? "+" : ""}
-                  {globalData?.market_cap_change_percentage_24h_usd?.toFixed(2)}%
-                </span>
-              )}
-            </div>
 
-            <div className="space-y-4 sm:space-y-6 flex-1 flex flex-col justify-center">
-              <div>
-                <p className={`text-xs sm:text-sm mb-1 ${TC.textTertiary}`}>Total Market Cap</p>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  {loading ? <Skeleton width={180} height={36} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
-                </h2>
-              </div>
-              
-              <div className="h-10 sm:h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
-                 {/* Decorative Sparkline Placeholder or Real Graph */}
-                 {loading ? <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : <SparklineGraph />}
-              </div>
+                <div className="space-y-1 mb-6">
+                   <p className={`text-sm font-medium ${TC.textSecondary}`}>Total Market Cap</p>
+                   <div className="flex items-end gap-3">
+                      <h2 className={`text-3xl font-bold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={140} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
+                      </h2>
+                      {!loading && (
+                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)} flex items-center`}>
+                           {globalData?.market_cap_change_percentage_24h_usd >= 0 ? "+" : ""}
+                           {globalData?.market_cap_change_percentage_24h_usd?.toFixed(2)}%
+                        </span>
+                      )}
+                   </div>
+                </div>
 
-              <div className="pt-4 border-t border-gray-200/10 flex justify-between items-center text-xs sm:text-sm">
-                 <span className={TC.textSecondary}>24h Volume</span>
-                 <span className={`font-mono font-semibold ${TC.textPrimary}`}>
-                    {loading ? <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
-                 </span>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <p className={`text-xs ${TC.textSecondary} mb-1`}>24h Volume</p>
+                      <p className={`font-semibold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={80} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
+                      </p>
+                   </div>
+                   <div>
+                      <p className={`text-xs ${TC.textSecondary} mb-1`}>BTC Dominance</p>
+                      <p className={`font-semibold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={60} /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
+                      </p>
+                   </div>
+                </div>
+             </div>
+
+             <div className="mt-4 h-16 w-full opacity-60">
+                 {!loading && <SparklineGraph color={isLight ? "#4f46e5" : "#6366f1"} />}
+             </div>
           </div>
 
-          {/* Trending Coins (Medium) - Added 'fade-in' class */}
-          <div className="lg:col-span-4 flex flex-col h-full fade-in" style={{ transitionDelay: '0.2s' }}>
+          {/* Trending Coins */}
+          <div className="flex flex-col h-full fade-in" style={{ transitionDelay: '0.2s' }}>
+             {/* Using the Dashboard component directly but it might have its own border/style. 
+                 The request implies a "new and minimal look", meaning standardising these.
+                 TrendingCoins component has its own card wrapper. 
+                 Since we can't easily strip its styles without modifying it heavily, 
+                 we ensure it sits nicely in the grid.
+             */}
              <TrendingCoins />
           </div>
 
-          {/* Top Gainers (Medium) - Added 'fade-in' class */}
-          <div className="lg:col-span-4 flex flex-col h-full fade-in" style={{ transitionDelay: '0.3s' }}>
+          {/* Top Gainers */}
+          <div className="flex flex-col h-full fade-in" style={{ transitionDelay: '0.3s' }}>
              <TopGainers />
           </div>
         </div>

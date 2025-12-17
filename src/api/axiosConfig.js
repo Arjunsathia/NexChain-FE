@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3";
+const COINGECKO_BASE_URL = "/api/coingecko";
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5050/api";
 export const SERVER_URL = API_BASE_URL.replace('/api', '');
 

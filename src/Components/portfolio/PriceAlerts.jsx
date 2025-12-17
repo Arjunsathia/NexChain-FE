@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaBell, FaTrash, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import api from '@/api/axiosConfig';
-import useUserContext from '@/Context/UserContext/useUserContext';
+import useUserContext from '@/hooks/useUserContext';
 import toast from 'react-hot-toast';
 
 const PriceAlerts = ({ isLight, livePrices }) => {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FaIdCard, FaCheckCircle, FaTimesCircle, FaSpinner, FaUpload } from 'react-icons/fa';
 import api from '@/api/axiosConfig';
-import useUserContext from '@/Context/UserContext/useUserContext';
+import useUserContext from '@/hooks/useUserContext';
 import toast from 'react-hot-toast';
-import { useTheme } from '@/Context/ThemeContext';
+import { useTheme } from '@/hooks/useTheme';
 
 const KYCVerification = () => {
   const { user } = useUserContext();

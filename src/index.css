@@ -313,9 +313,47 @@
 }
 
 
-/* Smooth transitions for all elements */
-* {
+/* Smooth theme transitions */
+body {
+  transition-property: background-color, color, background, border-color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Smooth theme transitions - Targeted for Performance */
+body, 
+div, 
+span, 
+p, 
+h1, h2, h3, h4, h5, h6,
+button, 
+input, 
+textarea, 
+select, 
+option, 
+a, 
+li, 
+ul, 
+ol, 
+table, 
+tr, 
+td, 
+th,
+nav, 
+footer, 
+header, 
+aside, 
+section, 
+article {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Exclude elements that shouldn't transition or cause layout variations */
+img, video, canvas {
+  transition-property: opacity, filter;
+  transition-duration: 200ms;
 }
 
 /* Custom scrollbar styling */

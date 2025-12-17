@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FaSearch } from "react-icons/fa";
-import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import useCoinContext from "@/hooks/useCoinContext";
 import CryptoStats from "@/Components/Admin/Cryptocurrencies/CryptoStats";
 import CryptoTable from "@/Components/Admin/Cryptocurrencies/CryptoTable";
 import CryptoDetailsModal from "@/Components/Admin/Cryptocurrencies/CryptoDetailsModal";

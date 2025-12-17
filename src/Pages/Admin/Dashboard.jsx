@@ -8,7 +8,7 @@ import PlatformHealth from "@/Components/Admin/Dashboard/PlatformHealth";
 import QuickActions from "@/Components/Admin/Dashboard/QuickActions";
 import { getData } from "@/api/axiosConfig";
 
-import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import useCoinContext from "@/hooks/useCoinContext";
 import {
   FaUsers,
   FaCoins,

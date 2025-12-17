@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FaShieldAlt, FaQrcode, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
-import useUserContext from "@/Context/UserContext/useUserContext";
-import { useTheme } from "@/Context/ThemeContext";
+import useUserContext from "@/hooks/useUserContext";
+import { useTheme } from "@/hooks/useTheme";
 
 const SecuritySettings = () => {
   const { user } = useUserContext();

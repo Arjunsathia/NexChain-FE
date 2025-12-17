@@ -1,7 +1,8 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { deleteWatchList, getData } from "@/api/axiosConfig";
-import useUserContext from "@/Context/UserContext/useUserContext";
-import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import useUserContext from "@/hooks/useUserContext";
+import useCoinContext from "@/hooks/useCoinContext";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 
 import { Outlet, useNavigate } from "react-router-dom";
@@ -19,20 +20,7 @@ import WatchlistMobileCards from "../Components/Watchlist/WatchlistMobileCards";
 import WatchlistPagination from "../Components/Watchlist/WatchlistPagination";
 import RemoveConfirmationModal from "../Components/Watchlist/RemoveConfirmationModal";
 
-// Utility to check if light mode is active
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 const Watchlist = () => {
   const isLight = useThemeCheck();
@@ -73,7 +61,7 @@ const Watchlist = () => {
     bgStatsCard: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-gray-900/80 backdrop-blur-md shadow-md",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/80 backdrop-blur-md shadow-md border-b border-gray-800",
     skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);

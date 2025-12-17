@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaLock, FaSave } from "react-icons/fa";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import toast from "react-hot-toast";
 
-import { useTheme } from "@/Context/ThemeContext";
+import { useTheme } from "@/hooks/useTheme";
 
 import { SERVER_URL } from "@/api/axiosConfig";
 

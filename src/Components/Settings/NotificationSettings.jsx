@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import { useTheme } from "@/Context/ThemeContext";
+import { useTheme } from "@/hooks/useTheme";
 
 const NotificationSettings = () => {
   const { isDark } = useTheme();

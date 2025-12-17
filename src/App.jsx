@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./Routes/AppRoutes";
-import { CoinProvider } from "./Context/CoinContext/CoinProvider";
-import { UserProvider } from "./Context/UserContext/UserProvider";
-import { RoleProvider } from "./Context/RoleContext/RoleProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import WalletProvider from "./Context/WalletContext/WalletProvider";
-import PortfolioProvider from "./Context/PortfolioContext/PortfolioProvider";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 import { AnimatePresence } from "framer-motion";
-
-import { ThemeProvider } from "./Context/ThemeContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import AlertChecker from "./Components/Common/AlertChecker";
 import Preloader from "./Components/Common/Preloader";
+import DataLoader from "./Components/Common/DataLoader";
+import ThemeSync from "./Components/Common/ThemeSync";
  
 function App() {
   const [isLoading, setIsLoading] = useState(() => {
@@ -36,39 +33,30 @@ function App() {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60, // Data remains fresh for 1 minute
-        gcTime: 1000 * 60 * 10, // Cache remains for 10 minutes
+        staleTime: 1000 * 60,
+        gcTime: 1000 * 60 * 10,
         retry: 1,
         refetchOnWindowFocus: false,
-        refetchOnMount: false, // Prevents refetching immediately if data is fresh
       },
     },
   }));
-  
+
   return (
-    <UserProvider>
-      <AnimatePresence mode="wait">
-        {isLoading && <Preloader key="preloader" />}
-      </AnimatePresence>
-      <AlertChecker />
+    <Provider store={store}>
+      <ThemeSync />
       <QueryClientProvider client={queryClient}>
-        <RoleProvider>
-          <CoinProvider>
-            <WalletProvider>
-              <PortfolioProvider>
-                <ThemeProvider>
-                  <BrowserRouter>
-                    <div className="min-h-screen bg-background text-foreground">
-                      <AppRoutes />
-                    </div>
-                  </BrowserRouter>
-                </ThemeProvider>
-              </PortfolioProvider>
-            </WalletProvider>
-          </CoinProvider>
-        </RoleProvider>
+        <DataLoader />
+        <AnimatePresence mode="wait">
+          {isLoading && <Preloader key="preloader" />}
+        </AnimatePresence>
+        <AlertChecker />
+        <BrowserRouter>
+          <div className="min-h-screen bg-background text-foreground">
+            <AppRoutes />
+          </div>
+        </BrowserRouter>
       </QueryClientProvider>
-    </UserProvider>
+    </Provider>
   );
 }
 

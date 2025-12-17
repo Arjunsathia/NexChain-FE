@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import useUserContext from '@/Context/UserContext/useUserContext';
+import useUserContext from '@/hooks/useUserContext';
 import api from '@/api/axiosConfig';
 import toast from 'react-hot-toast';
 import { FaBell } from 'react-icons/fa';

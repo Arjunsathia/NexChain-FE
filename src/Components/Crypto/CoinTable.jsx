@@ -1,30 +1,14 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
-import useCoinContext from "@/Context/CoinContext/useCoinContext";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useCoinContext from "@/hooks/useCoinContext";
+import useUserContext from "@/hooks/useUserContext";
 import { useNavigate } from "react-router-dom";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import toast from "react-hot-toast";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    // Default to checking the document element class list
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        // Observe changes to the 'class' attribute of the root HTML element
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 
 // Enhanced sparkline chart with color based on price change

@@ -1,3 +1,4 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, {
   useEffect,
   useState,
@@ -9,10 +10,10 @@ import { useParams } from "react-router-dom";
 import { getCoinById } from "@/api/coinApis";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
-import useUserContext from "@/Context/UserContext/useUserContext";
+import useUserContext from "@/hooks/useUserContext";
 import TradeModal from "@/Components/Common/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import useCoinContext from "@/Context/CoinContext/useCoinContext";
+import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
@@ -26,25 +27,7 @@ import AdditionalStats from "@/Components/CoinDetails/AdditionalStats";
 import QuickLinks from "@/Components/CoinDetails/QuickLinks";
 
 
-// Utility to check if light mode is active
-const useThemeCheck = () => {
-  const [isLight, setIsLight] = useState(
-    !document.documentElement.classList.contains("dark")
-  );
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsLight(!document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  return isLight;
-};
 
 function CoinDetailsPage() {
   const isLight = useThemeCheck();

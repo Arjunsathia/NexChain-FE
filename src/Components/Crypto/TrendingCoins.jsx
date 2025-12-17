@@ -4,19 +4,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
-// Assuming useThemeCheck is available in this scope or imported
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = React.useState(!document.documentElement.classList.contains('dark'));
-    React.useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
-    return isLight;
-};
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 function TrendingCoins() {
   const isLight = useThemeCheck();

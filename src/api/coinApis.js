@@ -95,3 +95,20 @@ export const getGlobalMarketStats = async () => {
     throw error;
   }
 };
+
+// ✅ Get specific coin market chart data (history)
+export const getMarketChart = async (id, days = 7) => {
+  try {
+    const response = await coinGecko.get(`/coins/${id}/market_chart`, {
+      params: {
+        vs_currency: "usd",
+        days,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching market chart:", error.message);
+    throw error;
+  }
+};
+

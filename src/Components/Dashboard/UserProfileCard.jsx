@@ -1,102 +1,87 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { FaUser, FaWallet } from "react-icons/fa";
-import useUserContext from "@/Context/UserContext/useUserContext";
-import { useWalletContext } from "@/Context/WalletContext/useWalletContext";
-
-import { SERVER_URL } from "@/api/axiosConfig";
+import React from "react";
+import { useSelector } from "react-redux";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useUserContext from "@/hooks/useUserContext";
+import { FaUserCircle, FaCheckCircle, FaWallet } from "react-icons/fa";
 
-function UserProfileCard() {
+export default function UserProfileCard() {
   const isLight = useThemeCheck();
   const { user } = useUserContext();
-  const { balance } = useWalletContext();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const TC = useMemo(
-    () => ({
-      bgContainer: isLight
-        ? "bg-white shadow-sm sm:shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border border-gray-800",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-      bgItem: isLight
-        ? "bg-gray-100/50 border-gray-300 hover:bg-gray-100 hover:border-cyan-600/30"
-        : "bg-gray-700/30 border-gray-600 hover:bg-gray-700/50 hover:border-cyan-400/30",
-      bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-400/10",
-      textIcon: isLight ? "text-cyan-600" : "text-cyan-400",
-      textWallet: isLight ? "text-green-700" : "text-green-400",
-    }),
-    [isLight]
-  );
-
-  const getUserImage = (user) => {
-    if (!user?.image) return null;
-    return user.image.startsWith('http') ? user.image : `${SERVER_URL}/${user.image}`;
-  };
+  const { balance } = useSelector((state) => state.wallet);
 
   return (
-    <div
+    <div 
       className={`
-        rounded-lg md:rounded-2xl p-3 md:p-4 h-full flex flex-col gap-4 fade-in
-        ${TC.bgContainer}
-        ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
+        p-3 rounded-xl shadow-lg h-full flex flex-col justify-center
+        transition-all duration-300
+        ${isLight 
+          ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100" 
+          : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50"
+        }
       `}
-      style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}
     >
-      <div className="fade-in">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${TC.bgIcon}`}>
-              <FaUser className={TC.textIcon + " text-sm"} />
-            </div>
-            <h2 className="text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              Profile
-            </h2>
+      <div className="flex items-center gap-3">
+        {/* Avatar */}
+        <div className="relative">
+          <div 
+            className={`
+              w-12 h-12 rounded-xl flex items-center justify-center 
+              text-white font-bold text-lg shadow-lg transform hover:scale-105 transition-transform duration-300
+              ${isLight 
+                ? "bg-gradient-to-br from-blue-500 to-cyan-400" 
+                : "bg-gradient-to-br from-blue-600 to-cyan-600"
+              }
+            `}
+          >
+            {user?.name ? user.name.charAt(0).toUpperCase() : <FaUserCircle size={24} />}
+          </div>
+          {/* Status Indicator */}
+          <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-0.5">
+             <FaCheckCircle className="text-green-500 text-sm" />
           </div>
         </div>
 
-        <div
-          className={`flex items-center gap-3 p-3 rounded-xl border hover:border-cyan-600/30 transition-all duration-200 group ${TC.bgItem}`}
-        >
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-sm flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-200 overflow-hidden">
-            {getUserImage(user) ? (
-              <img 
-                src={getUserImage(user)} 
-                alt={user.name} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              user?.name?.charAt(0)?.toUpperCase() || "U"
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className={`font-semibold text-xs truncate ${TC.textPrimary}`}>
-              {user?.name || "User"}
-            </h3>
-            <p className={`text-xs truncate mt-0.5 ${TC.textSecondary}`}>
-              {user?.email || "user@example.com"}
-            </p>
-          </div>
-          <div className="text-right">
-            <div
-              className={`flex items-center gap-1 text-xs mb-1 ${TC.textSecondary}`}
-            >
-              <FaWallet className={TC.textIcon + " text-xs"} />
-              Balance
-            </div>
-            <p className={`font-bold text-xs ${TC.textWallet}`}>
-              ${balance?.toLocaleString("en-IN")}
-            </p>
+        {/* User Details */}
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-bold text-base truncate ${isLight ? "text-gray-900" : "text-white"}`}>
+            {user?.name || "Guest User"}
+          </h3>
+          
+          <div className="flex items-center gap-2 mt-0.5">
+             <span 
+                className={`
+                  px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border
+                  ${isLight 
+                    ? "bg-blue-50 text-blue-600 border-blue-100" 
+                    : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                  }
+                `}
+             >
+                {user?.role || "Trader"}
+             </span>
+             <span className={`text-xs ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+                • Verified
+             </span>
           </div>
         </div>
+      </div>
+
+      {/* Wallet Balance (Replaces ID/Email) */}
+      <div className={`mt-4 pt-3 border-t ${isLight ? "border-gray-200" : "border-gray-700"}`}>
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 opacity-80">
+              <div className={`p-1.5 rounded-lg ${isLight ? "bg-cyan-100 text-cyan-600" : "bg-cyan-400/10 text-cyan-400"}`}>
+                 <FaWallet className="text-xs" />
+              </div>
+              <span className={`text-xs font-medium ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+                Available Balance
+              </span>
+            </div>
+            <div className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}>
+               ${balance?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+         </div>
       </div>
     </div>
   );
 }
-
-export default UserProfileCard;

@@ -15,8 +15,8 @@ import {
   FaCog
 } from "react-icons/fa";
 import { logout } from "@/api/axiosConfig";
-import useUserContext from '@/Context/UserContext/useUserContext';
-import { useWalletContext } from '@/Context/WalletContext/useWalletContext';
+import useUserContext from '@/hooks/useUserContext';
+import useWalletContext from '@/hooks/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 

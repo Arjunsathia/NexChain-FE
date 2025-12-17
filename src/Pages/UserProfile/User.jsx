@@ -1,25 +1,11 @@
+import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "@/Components/UserProfile/Sidebar";
 import UserMobileNavbar from "@/Components/UserProfile/UserMobileNavbar";
 import { logout } from "@/api/axiosConfig";
 
-// Utility to check if light mode is active based on global class
-const useThemeCheck = () => {
-    const [isLight, setIsLight] = useState(!document.documentElement.classList.contains('dark'));
 
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsLight(!document.documentElement.classList.contains('dark'));
-        });
-
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isLight;
-};
 
 export default function User() {
   const navigate = useNavigate();
