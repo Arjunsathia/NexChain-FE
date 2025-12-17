@@ -1,5 +1,6 @@
 import React from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
+import { SERVER_URL } from "@/api/axiosConfig";
 
 function UsersTable({
   currentUsers,
@@ -48,7 +49,7 @@ function UsersTable({
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-xs sm:text-base flex-shrink-0 overflow-hidden">
                       {user.image ? (
                         <img 
-                          src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
+                          src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} 
                           alt={user.name} 
                           className="w-full h-full object-cover"
                         />

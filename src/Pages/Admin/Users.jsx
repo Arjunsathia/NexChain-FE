@@ -102,19 +102,18 @@ const Users = () => {
     try {
       setDeleteLoading(true);
       
-      // Try Strategy 1: Standard REST DELETE /users/:id using _id
+      // Try Strategy 1: Standard REST DELETE /users/:id using .id (UUID) as preferred by backend
       try {
-        await deleteById("/users", userToDelete._id);
+        // Prefer .id (UUID) if available, otherwise fallback to _id
+        const targetId = userToDelete.id || userToDelete._id;
+        await deleteById("/users", targetId);
       } catch (err1) {
         console.warn("Delete Strategy 1 failed:", err1);
         
-        // Try Strategy 2: REST DELETE /users/:id using .id property if different
-        if (userToDelete.id && userToDelete.id !== userToDelete._id) {
-           await deleteById("/users", userToDelete.id);
-        } else {
-           // If Strategy 2 is not applicable or failed, try Strategy 3
-           throw err1; 
-        }
+        // Try Strategy 2: If we tried .id and it failed, maybe try _id explicitly if different?
+        // Or if we tried _id and it failed, try .id?
+        // Actually, let's just fall through to manual fallback if the primary ID failed.
+        throw err1; 
       }
       
       toast.success("User deleted successfully", {
@@ -331,7 +330,7 @@ const Users = () => {
         open={showUserForm}
         handleClose={() => setShowUserForm(false)}
         fetchData={fetchUsers}
-        id={editingUser?._id}
+        id={editingUser?.id}
       />
     </div>
   );

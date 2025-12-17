@@ -2,6 +2,8 @@ import React from "react";
 import { FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+import { SERVER_URL } from "@/api/axiosConfig";
+
 function LatestUsers({ users, isLoading, TC }) {
   const navigate = useNavigate();
 
@@ -42,7 +44,7 @@ function LatestUsers({ users, isLoading, TC }) {
                 <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-[10px] sm:text-sm font-bold text-white shadow-lg flex-shrink-0 overflow-hidden">
                   {user.image ? (
                     <img 
-                      src={user.image.startsWith('http') ? user.image : `http://localhost:5050/uploads/${user.image}`} 
+                      src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} 
                       alt={user.name} 
                       className="w-full h-full object-cover"
                     />

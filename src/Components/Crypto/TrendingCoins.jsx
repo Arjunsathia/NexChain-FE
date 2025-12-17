@@ -1,5 +1,5 @@
 import { getTrend, getTrendingCoinMarketData } from "@/api/coinApis";
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaExclamationTriangle } from "react-icons/fa";
@@ -10,8 +10,11 @@ function TrendingCoins() {
   const isLight = useThemeCheck();
   const [loading, setLoading] = useState(false);
   const [coins, setCoins] = useState([]);
+  const [livePrices, setLivePrices] = useState({});
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const ws = useRef(null);
+  const bufferRef = useRef({});
 
   const TC = useMemo(() => ({
     bgContainer: isLight 
@@ -29,21 +32,31 @@ function TrendingCoins() {
 
   const fetchTrendingCoins = useCallback(async () => {
     setLoading(true);
-    setError(null); // reset on fetch
+    setError(null);
     try {
       const trendData = await getTrend();
-      const idsArray = Array.isArray(trendData.coins)
+      let idsArray = Array.isArray(trendData.coins)
         ? trendData.coins.slice(0, 5).map((coin) => coin.item.id)
         : [];
 
-      if (idsArray.length === 0)
-        throw new Error("No valid trending coins found.");
+      if (idsArray.length === 0) {
+         // Fallback to known majors if trend is empty
+         idsArray = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
+      }
 
       const marketData = await getTrendingCoinMarketData(idsArray);
       setCoins(marketData);
     } catch (err) {
-      console.error("Failed to fetch trending coins", err);
-      setError("Unable to load trending coins. Please try again later.");
+      console.warn("Primary trending fetch failed, using fallback...", err);
+      // Fallback mechanism
+      try {
+        const fallbackIds = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
+        const marketData = await getTrendingCoinMarketData(fallbackIds);
+        setCoins(marketData);
+      } catch (fallbackErr) {
+        console.error("Fallback failed", fallbackErr);
+        setError("Unable to load trending coins.");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,6 +65,77 @@ function TrendingCoins() {
   useEffect(() => {
     fetchTrendingCoins();
   }, [fetchTrendingCoins]);
+
+  // WebSocket Logic
+  useEffect(() => {
+    if (coins.length === 0) return;
+
+    // Map coin IDs to Binance tickers
+    const symbolMap = {
+      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
+      cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
+      "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt",
+      stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt",
+      "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt",
+      tron: "trxusdt", avalanche: "avaxusdt", shiba: "shibusdt", toncoin: "tonusdt"
+    };
+    
+    // Reverse map for incoming data
+    const symbolToId = Object.entries(symbolMap).reduce((acc, [key, val]) => {
+      acc[val] = key;
+      return acc;
+    }, {});
+
+    const streams = coins
+      .map(c => symbolMap[c.id] ? `${symbolMap[c.id]}@ticker` : null)
+      .filter(Boolean)
+      .join('/');
+
+    if (!streams) return;
+
+    ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.data) {
+        const stream = message.stream; // e.g., 'btcusdt@ticker'
+        const symbol = stream.split('@')[0];
+        const coinId = symbolToId[symbol];
+
+        if (coinId) {
+           bufferRef.current[coinId] = {
+             price: parseFloat(message.data.c),
+             change: parseFloat(message.data.P), // 24h change %
+           };
+        }
+      }
+    };
+
+    // Buffer flush interval
+    const interval = setInterval(() => {
+      if (Object.keys(bufferRef.current).length > 0) {
+        setLivePrices(prev => ({ ...prev, ...bufferRef.current }));
+        bufferRef.current = {};
+      }
+    }, 1500);
+
+    return () => {
+      clearInterval(interval);
+      if (ws.current) ws.current.close();
+    };
+  }, [coins]);
+
+  // Merge static data with live updates
+  const displayedCoins = useMemo(() => {
+    return coins.map(coin => {
+      const live = livePrices[coin.id];
+      return {
+        ...coin,
+        current_price: live ? live.price : coin.current_price,
+        price_change_percentage_24h_in_currency: live ? live.change : coin.price_change_percentage_24h_in_currency || coin.price_change_percentage_24h
+      };
+    });
+  }, [coins, livePrices]);
 
   return (
     <div className={`rounded-lg md:rounded-2xl p-3 md:p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
@@ -84,14 +168,14 @@ function TrendingCoins() {
               </li>
             ))}
         </ul>
-      ) : error || coins.length === 0 ? (
+      ) : error || displayedCoins.length === 0 ? (
         <div className={`text-center mt-4 flex flex-col items-center justify-center gap-2 fade-in ${TC.textError}`} style={{ animationDelay: "0.3s" }}>
           <FaExclamationTriangle className="text-3xl" />
           <p className="text-sm">{error || "No trending coins found."}</p>
         </div>
       ) : (
         <ul className="flex-1 flex flex-col justify-between">
-          {coins.map((coin, index) => (
+          {displayedCoins.map((coin, index) => (
             <li
               key={coin.id}
               className={`flex justify-between items-center text-sm ${TC.textPrimary} border-b ${TC.borderList} last:border-b-0 pb-2 fade-in`}
@@ -99,7 +183,7 @@ function TrendingCoins() {
             >
               <span
                 className={`flex items-center gap-2 cursor-pointer ${TC.textHover} transition-colors`}
-                onClick={() => navigate(`/coin/${coin.id}`)}
+                onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
               >
                 <img
                   src={coin.image}
@@ -111,13 +195,13 @@ function TrendingCoins() {
 
               <span
                 className={
-                  coin.price_change_percentage_1h_in_currency < 0
-                    ? `${TC.textAccentRed} font-semibold`
-                    : `${TC.textAccentGreen} font-semibold`
+                  (coin.price_change_percentage_24h_in_currency || 0) < 0
+                    ? `${TC.textAccentRed} font-semibold transition-colors duration-300`
+                    : `${TC.textAccentGreen} font-semibold transition-colors duration-300`
                 }
               >
-                ${coin.current_price.toLocaleString()} (
-                {coin.price_change_percentage_1h_in_currency?.toFixed(2)}%)
+                ${coin.current_price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} (
+                {coin.price_change_percentage_24h_in_currency?.toFixed(2)}%)
               </span>
             </li>
           ))}
