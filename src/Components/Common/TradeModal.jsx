@@ -256,6 +256,8 @@ function TradeModal({
       setOrderType("market");
       setIsAlertMode(false);
       setAlertTargetPrice(price);
+    } else {
+      setIsVisible(false);
     }
   }, [show, coin, type, shouldShowHoldingsInfo]);
 
@@ -796,7 +798,7 @@ function TradeModal({
     }
   };
 
-  if (!show || !coin) return null;
+  if (!coin) return null;
   
   if (successData) {
     return (
@@ -815,7 +817,7 @@ function TradeModal({
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-        isVisible ? "opacity-100" : "opacity-0"
+        isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       } ${isLight ? "bg-black/30" : "bg-black/70"}`}
       onClick={handleBackdropClick}
     >

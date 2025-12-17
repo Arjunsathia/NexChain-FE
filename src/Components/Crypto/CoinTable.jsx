@@ -213,6 +213,37 @@ function CoinTable({ onTrade }) {
         : [...prev, coinId]
     );
 
+    // Show toast immediately (Optimistic Feedback)
+    if (isCurrentlyInWatchlist) {
+      toast.success("Coin removed from watchlist!", {
+        style: {
+          background: "#FEF2F2",
+          color: "#991B1B",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          border: "none",
+        },
+        iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
+      });
+    } else {
+      toast.success("Coin added to watchlist!", {
+        style: {
+          background: "#FEFCE8",
+          color: "#854D0E",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          border: "none",
+        },
+        iconTheme: { primary: "#EAB308", secondary: "#FFFFFF" },
+      });
+    }
+
     const postData = {
       user_id: user.id,
       id: coinData?.id,
@@ -231,47 +262,17 @@ function CoinTable({ onTrade }) {
     setSubmitting(true);
     try {
       if (isCurrentlyInWatchlist) {
-        // Remove from watchlist
+        // Background API call - Remove
         await deleteWatchList("/watchlist/remove", {
           id: coinId,
           user_id: user.id,
         });
-        toast.success("Coin removed from watchlist!", {
-          // 💡 Adjust toast styles for dual mode
-          style: {
-            background: "#FEF2F2", // Light red
-            color: "#991B1B", // Dark red
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            border: "none",
-          },
-          iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
-        });
       } else {
-        // Add to watchlist
+        // Background API call - Add
         await postForm("/watchlist/add", postData);
-        toast.success("Coin added to watchlist!", {
-          // 💡 Adjust toast styles for dual mode
-          style: {
-            background: "#FEFCE8", // Light yellow/gold
-            color: "#854D0E", // Dark gold/brown
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            border: "none", // Removed border as requested
-          },
-          iconTheme: {
-            primary: "#EAB308", // Gold icon
-            secondary: "#FFFFFF",
-          },
-        });
       }
-      // Refresh watchlist data
+      
+      // Silently refresh data to stay in sync
       await fetchWatchlist();
     } catch (err) {
       console.error("Watchlist operation failed:", err);
@@ -281,7 +282,7 @@ function CoinTable({ onTrade }) {
           ? [...prev, coinId]
           : prev.filter(id => id !== coinId)
       );
-      toast.error("Operation failed. Please try again.", {
+      toast.error("Operation failed. Reverting changes.", {
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
@@ -480,10 +481,10 @@ function CoinTable({ onTrade }) {
                           e.stopPropagation();
                           toggleWishlist(coin.id, coin);
                         }}
-                        disabled={submitting || loadingWatchlist}
+                        
                         className="flex-shrink-0"
                       >
-                        {submitting || loadingWatchlist ? (
+                        {false ? (
                           <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                         ) : coin.isInWatchlist ? (
                           <FaStar className={`${TC.starFilled} text-xl hover:scale-110 transition-transform`} />
@@ -620,11 +621,11 @@ function CoinTable({ onTrade }) {
                         <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => toggleWishlist(coin.id, coin)}
-                            disabled={submitting || loadingWatchlist}
+                            
                             className="flex justify-center w-full fade-in"
                             style={{ animationDelay: `${0.6 + index * 0.05 + 0.02}s` }}
                           >
-                            {submitting || loadingWatchlist ? (
+                            {false ? (
                               <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                             ) : coin.isInWatchlist ? (
                               <FaStar className={`${TC.starFilled} hover:scale-110 transition-transform`} />

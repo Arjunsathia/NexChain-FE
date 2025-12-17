@@ -110,13 +110,14 @@ function CryptoList() {
     }
   }, []);
 
+
+
   // Handler for closing modal
   const handleCloseModal = useCallback(() => {
-    setTradeModal({
+    setTradeModal(prev => ({
+      ...prev,
       show: false,
-      coin: null,
-      type: "buy",
-    });
+    }));
   }, []);
 
   const handleCloseAlertModal = useCallback(() => {

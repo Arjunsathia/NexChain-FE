@@ -9,8 +9,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AlertChecker from "./Components/Common/AlertChecker";
 import Preloader from "./Components/Common/Preloader";
 import DataLoader from "./Components/Common/DataLoader";
-import ThemeSync from "./Components/Common/ThemeSync";
- 
+import { initTheme } from "@/utils/theme-manager";
+
+// Initialize theme as early as possible
+initTheme();
+
 function App() {
   const [isLoading, setIsLoading] = useState(() => {
     // Check if we've already shown the preloader in this session
@@ -43,7 +46,6 @@ function App() {
 
   return (
     <Provider store={store}>
-      <ThemeSync />
       <QueryClientProvider client={queryClient}>
         <DataLoader />
         <AnimatePresence mode="wait">

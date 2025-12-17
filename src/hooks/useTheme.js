@@ -1,15 +1,19 @@
-import { useSelector, useDispatch } from "react-redux";
-import { toggleTheme } from "@/redux/slices/themeSlice";
 import { useCallback } from "react";
+import { toggleTheme, getInitialTheme } from "@/utils/theme-manager";
 
 export const useTheme = () => {
-  const { isDark } = useSelector((state) => state.theme);
-  const dispatch = useDispatch();
+  // We don't track state here to avoid re-renders. 
+  // If a component truly needs to know the theme for JS logic (charts), 
+  // it should use a specific hook that listens to mutation observer or event.
+  // But for simple toggling, this is sufficient.
   
-  const toggleThemeFunc = useCallback(() => dispatch(toggleTheme()), [dispatch]);
+  const toggleThemeFunc = useCallback(() => {
+    toggleTheme();
+  }, []);
 
   return {
-    isDark,
-    toggleTheme: toggleThemeFunc
+    toggleTheme: toggleThemeFunc,
+    // Provide a getter but note it won't trigger re-renders on change
+    getCurrentTheme: getInitialTheme
   };
 };

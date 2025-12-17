@@ -1,39 +1,33 @@
 import React from "react";
 import { FaGlobe, FaMoon, FaSun } from "react-icons/fa";
 import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 const PreferenceSettings = () => {
-  const { isDark, toggleTheme } = useTheme();
-
-  // Theme Classes
-  const containerClass = `rounded-xl p-4 border ${
-    isDark ? "bg-gray-700/30 border-gray-700" : "bg-gray-50 border-gray-200"
-  }`;
-  const textPrimary = isDark ? "text-white" : "text-gray-900";
-  const textSecondary = isDark ? "text-gray-400" : "text-gray-500";
-  const buttonClass = `p-2 rounded-lg transition-colors ${
-    isDark 
-      ? "bg-gray-700 text-yellow-400 hover:bg-gray-600" 
-      : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-  }`;
+  const { toggleTheme } = useTheme();
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h2 className={`text-xl font-bold mb-6 flex items-center gap-2 ${textPrimary}`}>
+      <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
         <FaGlobe className="text-cyan-500" /> Preferences
       </h2>
       
-      <div className={containerClass}>
+      <div className="rounded-xl p-4 border bg-gray-50 border-gray-200 dark:bg-gray-700/30 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className={`font-semibold ${textPrimary}`}>Dark Mode</h3>
-            <p className={`text-sm ${textSecondary}`}>Toggle application theme</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Dark Mode</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Toggle application theme</p>
           </div>
           <button
             onClick={toggleTheme}
-            className={buttonClass}
+            className="p-2 rounded-lg transition-colors !bg-gray-100 text-gray-600 hover:bg-gray-200 dark:!bg-gray-800 dark:text-yellow-400 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
           >
-            {isDark ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
+            <div className="show-in-light">
+                <FaMoon className="text-xl" />
+            </div>
+            <div className="show-in-dark">
+                <FaSun className="text-xl" />
+            </div>
           </button>
         </div>
       </div>

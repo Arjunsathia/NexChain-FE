@@ -1,8 +1,32 @@
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
+import { getInitialTheme } from "@/utils/theme-manager";
 
 const useThemeCheck = () => {
-  const isDark = useSelector((state) => state.theme?.isDark);
-  return !isDark;
+  const [isLight, setIsLight] = useState(() => {
+    // Check local storage or DOM
+    if (typeof window !== "undefined") {
+        return (document.documentElement.getAttribute("data-theme") || getInitialTheme()) === 'light';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        setIsLight(currentTheme === 'light');
+    };
+
+    window.addEventListener('theme-change', handleThemeChange);
+    // Also listen to storage events for multi-tab sync
+    window.addEventListener('storage', handleThemeChange);
+
+    return () => {
+        window.removeEventListener('theme-change', handleThemeChange);
+        window.removeEventListener('storage', handleThemeChange);
+    };
+  }, []);
+
+  return isLight;
 };
 
 export default useThemeCheck;

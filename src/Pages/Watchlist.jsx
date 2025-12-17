@@ -167,9 +167,9 @@ const Watchlist = () => {
     return { paginatedCoins, totalPages };
   }, [filteredCoins, currentPage]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (shouldLoad = true) => {
     if (!userId) return;
-    setLoading(true);
+    if (shouldLoad) setLoading(true);
     try {
       const res = await getData("/watchlist", { user_id: userId });
       setWatchlistData(res || []);
@@ -190,7 +190,7 @@ const Watchlist = () => {
       });
       setWatchlistData([]);
     } finally {
-      setLoading(false);
+      if (shouldLoad) setLoading(false);
     }
   }, [userId]);
 
@@ -200,9 +200,14 @@ const Watchlist = () => {
 
   const handleRemoveConfirm = useCallback(async () => {
     if (!removeModal.coin || !userId) return;
-    setLoading(true);
+    
+    // Optimistic Update: Remove item immediately from UI
+    const coinIdToRemove = removeModal.coin.id;
+    setWatchlistData(prev => prev.filter(item => item.id !== coinIdToRemove));
+    setRemoveModal({ show: false, coin: null });
+
     try {
-      await deleteWatchList("/watchlist/remove", { id: removeModal.coin?.id, user_id: userId });
+      await deleteWatchList("/watchlist/remove", { id: coinIdToRemove, user_id: userId });
       toast.success("Removed from watchlist!", {
         style: {
           background: "#DCFCE7", // Light green
@@ -217,7 +222,8 @@ const Watchlist = () => {
         iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
       });
 
-      fetchData();
+      // Silent refresh to ensure sync
+      fetchData(false);
     } catch (err) {
       console.error("Failed to remove from watchlist:", err);
       toast.error("Failed to remove coin", {
@@ -233,9 +239,8 @@ const Watchlist = () => {
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
       });
-    } finally {
-      setLoading(false);
-      setRemoveModal({ show: false, coin: null });
+      // Revert optimistic update by hard refreshing
+      fetchData(true);
     }
   }, [removeModal.coin, userId, fetchData]);
 
