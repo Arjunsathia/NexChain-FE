@@ -21,7 +21,7 @@ export const fetchPurchasedCoins = createAsyncThunk("portfolio/fetchPurchasedCoi
   try {
     const response = await getData(`/purchases/${userId}`);
     if (response.success) {
-      const purchases = response.purchases || [];
+      const purchases = Array.isArray(response.purchases) ? response.purchases : [];
       return purchases.map(coin => ({
         id: coin._id || coin.id,
         coinId: coin.coin_id || coin.coinId,

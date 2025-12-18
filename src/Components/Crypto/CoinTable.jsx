@@ -48,7 +48,7 @@ function CoinTable({ onTrade }) {
   const { user } = useUserContext();
   const { coins: initialCoins, coinsLoading } = useCoinContext();
   const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
-  const [coins, setCoins] = useState(initialCoins);
+  const [coins, setCoins] = useState(Array.isArray(initialCoins) ? initialCoins : []);
   const [watchlist, setWatchlist] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
@@ -95,7 +95,7 @@ function CoinTable({ onTrade }) {
 
   // Initialize coins from context
   useEffect(() => {
-    if (initialCoins.length > 0) {
+    if (Array.isArray(initialCoins) && initialCoins.length > 0) {
       setCoins(initialCoins.slice(0, 100)); // Limit to 100 coins for WebSocket
     }
   }, [initialCoins]);
@@ -315,6 +315,9 @@ function CoinTable({ onTrade }) {
 
   // Filter coins based on search term
   const filteredCoins = useMemo(() => {
+    // 🛡️ Safety Guard
+    if (!Array.isArray(coins)) return [];
+
     if (!searchTerm) return coins;
     
     const term = searchTerm.toLowerCase();
@@ -326,9 +329,20 @@ function CoinTable({ onTrade }) {
 
   // Enhanced coins with watchlist status and user holdings
   const enhancedCoins = useMemo(() => {
+    // 🛡️ Safety Guard: Ensure arrays
+    if (!Array.isArray(filteredCoins)) {
+        console.warn("CoinTable: filteredCoins is not an array", filteredCoins);
+        return [];
+    }
+    
+    const safePurchasedCoins = Array.isArray(purchasedCoins) ? purchasedCoins : [];
+    if (!Array.isArray(purchasedCoins)) {
+         console.warn("CoinTable: purchasedCoins is not an array! Check portfolioSlice.", purchasedCoins);
+    }
+
     return filteredCoins.map(coin => {
       const isInWatchlist = watchlist.includes(coin.id);
-      const userHolding = purchasedCoins.find(
+      const userHolding = safePurchasedCoins.find(
         pc => pc.coin_id === coin.id || pc.id === coin.id
       );
       

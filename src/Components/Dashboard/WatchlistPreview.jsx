@@ -60,7 +60,16 @@ function WatchlistPreview() {
       setError(false);
       try {
         const res = await getData("/watchlist", { user_id: userId });
-        setWatchlistData(res || []);
+        // Handle various response formats (array, { data: [] }, { watchlist: [] })
+        let list = [];
+        if (Array.isArray(res)) {
+          list = res;
+        } else if (res && Array.isArray(res.data)) {
+          list = res.data;
+        } else if (res && Array.isArray(res.watchlist)) {
+            list = res.watchlist;
+        }
+        setWatchlistData(list);
       } catch (err) {
         console.error("Failed to fetch watchlist preview:", err);
         setError(true);

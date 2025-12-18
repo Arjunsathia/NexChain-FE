@@ -50,11 +50,16 @@ export default function Dashboard() {
       try {
         setLoading(true);
         const data = await getCoins();
-        const topThree = data.slice(0, 3);
-        setTopCoins(topThree);
-
-        if (topThree.length > 0) {
-          setSelectedCoinId(topThree[0].id);
+        if (Array.isArray(data)) {
+          const topThree = data.slice(0, 3);
+          setTopCoins(topThree);
+          
+          if (topThree.length > 0) {
+            setSelectedCoinId(topThree[0].id);
+          }
+        } else {
+           console.warn("Top coins data is not an array:", data);
+           setTopCoins([]);
         }
       } catch (error) {
         console.error("Failed to load coins", error);

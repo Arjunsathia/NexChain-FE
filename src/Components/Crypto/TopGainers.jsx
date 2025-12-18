@@ -31,7 +31,12 @@ function TopGainers() {
       setLoading(true);
       try {
         const data = await getTopGainers();
-        setGainers(data.slice(0, 5)); // Optional: show only top 5
+        if (Array.isArray(data)) {
+          setGainers(data.slice(0, 5));
+        } else {
+           console.warn("Top gainers data is not an array:", data);
+           setGainers([]);
+        }
       } catch (error) {
         console.error("Failed to fetch top gainers:", error);
         setGainers([]);
