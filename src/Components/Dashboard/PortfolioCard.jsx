@@ -83,6 +83,9 @@ function PortfolioCard() {
 
   // Merge Live Data
   const allCoins = useMemo(() => {
+    // 🛡️ Safety Guard
+    if (!Array.isArray(groupedHoldings)) return [];
+
     return groupedHoldings.map((coin) => {
       const liveData = livePrices[coin.coinId];
       const currentPrice = liveData ? liveData.current_price : (coin.currentPrice || 0);

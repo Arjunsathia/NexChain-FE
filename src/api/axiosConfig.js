@@ -1,12 +1,31 @@
 import axios from "axios";
 
-const COINGECKO_BASE_URL = "/api/coingecko";
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5050/api";
+// Use Vite proxy in development, direct URL in production to avoid Vercel 404/fallback issues
+const COINGECKO_BASE_URL = import.meta.env.DEV 
+  ? "/api/coingecko" 
+  : "https://api.coingecko.com/api/v3";
+  
 export const SERVER_URL = API_BASE_URL.replace('/api', '');
 
 export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,
 });
+
+// 🛡️ HARDENED: Interceptor to prevent HTML injection (Vercel Fallbacks)
+coinGecko.interceptors.response.use(
+  (response) => {
+    const contentType = response.headers["content-type"];
+    if (contentType && !contentType.includes("application/json")) {
+      console.warn("⚠️ API Warning: Received non-JSON response from CoinGecko proxy (likely HTML fallback). Blocking.");
+      return Promise.reject(new Error("Invalid API response format (expected JSON)"));
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Create axios instance
 const api = axios.create({

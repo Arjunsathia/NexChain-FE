@@ -11,8 +11,8 @@ export const usePurchasedCoins = () => {
   };
 
   return {
-    purchasedCoins,
-    transactionHistory,
+    purchasedCoins: Array.isArray(purchasedCoins) ? purchasedCoins : [],
+    transactionHistory: Array.isArray(transactionHistory) ? transactionHistory : [],
     loading,
     error,
     refetch,

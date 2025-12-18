@@ -144,7 +144,10 @@ function WatchlistPreview() {
     return () => { if (ws.current) ws.current.close(); };
   }, [watchlistData]);
 
+  // Merge Live Coins
   const mergedCoins = useMemo(() => {
+    if (!Array.isArray(watchlistData)) return [];
+    
     return watchlistData.map((coin) => ({
       ...coin,
       ...(livePrices[coin.id] || {}),

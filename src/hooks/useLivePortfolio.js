@@ -8,7 +8,12 @@ export const useLivePortfolio = () => {
 
   // Merge purchased coins with live market data
   const livePortfolio = useMemo(() => {
-    if (!purchasedCoins || purchasedCoins.length === 0 || !liveCoins || liveCoins.length === 0) {
+    // 🛡️ Safety Guard: Ensure both inputs are valid arrays
+    if (!Array.isArray(purchasedCoins) || !Array.isArray(liveCoins)) {
+      return [];
+    }
+    
+    if (purchasedCoins.length === 0 || liveCoins.length === 0) {
       return [];
     }
 

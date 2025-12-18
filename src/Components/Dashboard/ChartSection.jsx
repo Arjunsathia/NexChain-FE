@@ -9,28 +9,46 @@ const ChartSection = ({ coinId }) => {
   const [loading, setLoading] = useState(false);
   const [days, setDays] = useState(1); // 1 = 24h
 
+  // 🛡️ Strict Data Validation Helper
+  const validateData = (data) => {
+      if (!data || typeof data !== "object") return false;
+      if (!Array.isArray(data.prices)) return false;
+      if (data.prices.length === 0) return true; // Empty array is technically valid "no data"
+      
+      // Check first and last item to ensure structure is [timestamp, price]
+      const first = data.prices[0];
+      return Array.isArray(first) && first.length === 2 && typeof first[0] === "number" && !isNaN(first[1]);
+  };
+
   // Fetch Chart Data
   useEffect(() => {
+    let active = true; // Prevent race conditions
+
     const fetchChart = async () => {
       if (!coinId) return;
       setLoading(true);
+      
       try {
         const data = await getMarketChart(coinId, days);
-        if (data && Array.isArray(data.prices)) {
-          setSeries([{ name: "Price", data: data.prices }]);
-        } else {
-           console.warn("Chart data prices missing or invalid format", data);
-           setSeries([{ name: "Price", data: [] }]);
+        
+        if (active) {
+            if (validateData(data)) {
+                setSeries([{ name: "Price", data: data.prices }]);
+            } else {
+                console.warn(`Chart data validation failed for ${coinId}. API might be returning malformed data.`);
+                setSeries([{ name: "Price", data: [] }]);
+            }
         }
       } catch (error) {
         console.error("Failed to fetch chart data", error);
-        setSeries([{ name: "Price", data: [] }]);
+        if (active) setSeries([{ name: "Price", data: [] }]);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchChart();
+    return () => { active = false; };
   }, [coinId, days]);
 
   // Chart Options

@@ -127,6 +127,9 @@ function TrendingCoins() {
 
   // Merge static data with live updates
   const displayedCoins = useMemo(() => {
+    // 🛡️ Safety Guard
+    if (!Array.isArray(coins)) return [];
+    
     return coins.map(coin => {
       const live = livePrices[coin.id];
       return {
