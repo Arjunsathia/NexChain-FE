@@ -17,7 +17,7 @@ function FeedbackDetailsModal({
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${TC.modalOverlay}`}
     >
       <div
-        className={`w-[90vw] max-w-[320px] sm:max-w-2xl rounded-2xl overflow-hidden ${TC.modalContent} animate-in fade-in zoom-in duration-300`}
+        className={`w-[90vw] max-w-[320px] sm:max-w-2xl lg:max-w-4xl rounded-2xl overflow-hidden ${TC.modalContent} animate-in fade-in zoom-in duration-300`}
       >
         <div className={`px-4 py-3 sm:p-6 flex justify-between items-center`}>
           <h2 className={`text-lg sm:text-xl font-bold ${TC.textPrimary}`}>

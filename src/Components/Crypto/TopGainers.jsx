@@ -85,7 +85,7 @@ function TopGainers() {
             >
               <span
                 className={`flex items-center gap-2 cursor-pointer ${TC.textHover} transition-colors`}
-                onClick={() => navigate(`/coin/${coin.id}`)}
+                onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
               >
                 <img
                   src={coin.image}

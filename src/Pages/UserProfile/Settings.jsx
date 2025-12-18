@@ -8,9 +8,11 @@ import NotificationSettings from "@/Components/Settings/NotificationSettings";
 import KYCVerification from "@/Components/Settings/KYCVerification";
 
 import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 const Settings = () => {
-  const { isDark } = useTheme();
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
   const [activeTab, setActiveTab] = useState("profile");
   const { user } = useUserContext();
   const [loading, setLoading] = useState(true);

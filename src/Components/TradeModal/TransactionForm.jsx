@@ -40,7 +40,7 @@ const TransactionForm = ({
   setStopPrice,
 }) => {
   return (
-    <div className="space-y-3 md:space-y-4 fade-in">
+    <div className="space-y-3 md:space-y-4">
       {/* Mode Toggles */}
       <div className="flex gap-2 mb-4">
           <div className={`flex-1 flex p-1.5 rounded-xl ${isLight ? "bg-gray-100 border border-gray-200/60" : "bg-gray-800/80 border border-white/5"}`}>
@@ -66,7 +66,7 @@ const TransactionForm = ({
 
       {/* Alert Mode UI */}
       {isAlertMode ? (
-        <div className="glow-fade space-y-4">
+        <div className="space-y-4">
             {/* ... existing alert UI ... */}
             <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 text-center">
                 <FaBell className="text-3xl text-yellow-500 mx-auto mb-2" />
@@ -98,7 +98,7 @@ const TransactionForm = ({
         <>
             {/* Stop Price Input */}
             {(orderType === 'stop_limit' || orderType === 'stop_market') && (
-                <div className="glow-fade">
+                <div>
                 <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
                     <FaExchangeAlt className="text-red-500" />
                     Stop Price (USD)
@@ -115,7 +115,7 @@ const TransactionForm = ({
 
             {/* Limit Price Input */}
             {(orderType === 'limit' || orderType === 'stop_limit') && (
-                <div className="glow-fade">
+                <div>
                 <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
                     <FaExchangeAlt className="text-purple-500" />
                     Limit Price (USD)
@@ -133,7 +133,7 @@ const TransactionForm = ({
             {/* Amount Inputs */}
             <div className="grid grid-cols-2 gap-3">
                 {/* ... existing amount inputs ... */}
-                <div className="glow-fade" style={{ animationDelay: "100ms" }}>
+                <div>
                 <label
                     className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}
                 >
@@ -172,7 +172,7 @@ const TransactionForm = ({
                     </div>
                 </div>
                 </div>
-                <div className="glow-fade" style={{ animationDelay: "200ms" }}>
+                <div>
                 <label
                     className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}
                 >
@@ -191,8 +191,7 @@ const TransactionForm = ({
 
             {/* Available Balance Info */}
             <div
-                className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border glow-fade ${isBuyOperation ? "hover:border-emerald-500/50" : "hover:border-red-500/50"} transition-all duration-300 ${TC.bgCard}`}
-                style={{ animationDelay: "300ms" }}
+                className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border ${isBuyOperation ? "hover:border-emerald-500/50" : "hover:border-red-500/50"} transition-all duration-300 ${TC.bgCard}`}
             >
                 <div className="flex items-center gap-1">
                 <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} text-xs animate-pulse`} />
@@ -221,8 +220,7 @@ const TransactionForm = ({
 
             {/* Trading Details */}
             <div
-                className={`p-3 md:p-4 rounded-xl space-y-3 glow-fade transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
-                style={{ animationDelay: "400ms" }}
+                className={`p-3 md:p-4 rounded-xl space-y-3 transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
             >
                 <h4
                 className={`text-sm font-bold mb-2 flex items-center gap-2 ${TC.textSecondary}`}
@@ -301,18 +299,17 @@ const TransactionForm = ({
               )
         }
         className={`w-full py-3.5 px-4 font-bold text-sm rounded-xl 
-                    transition-all duration-300 
+                    transition-all duration-200 
                     disabled:opacity-50 disabled:cursor-not-allowed 
                     flex items-center justify-center gap-2 
-                    hover:scale-[1.02] active:scale-[0.98] group glow-fade shadow-lg hover:shadow-xl
+                    group
                     ${
                       isAlertMode
-                        ? "bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white shadow-yellow-500/30 hover:shadow-yellow-500/50"
+                        ? "bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white"
                         : isBuyOperation
-                            ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50"
-                            : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-red-500/30 hover:shadow-red-500/50"
+                            ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white"
+                            : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white"
                     }`}
-        style={{ animationDelay: "500ms" }}
       >
         {isSubmitting ? (
           <>
@@ -348,8 +345,7 @@ const TransactionForm = ({
 
       {/* Help Text */}
       <div
-        className={`flex items-center gap-2 text-xs rounded px-2 py-1 border glow-fade ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
-        style={{ animationDelay: "600ms" }}
+        className={`flex items-center gap-2 text-xs rounded px-2 py-1 border ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
       >
         <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} flex-shrink-0 text-xs animate-pulse`} />
         <span className={TC.textTertiary}>

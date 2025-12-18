@@ -158,6 +158,13 @@ const AdminFeedback = () => {
 
   // ... 
 
+  // ... 
+
+  const confirmDelete = (feedback) => {
+    setFeedbackToDelete(feedback);
+    setShowDeleteModal(true);
+  };
+
   const deleteFeedback = async () => {
     if (!feedbackToDelete) return;
     try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/Components/Admin/Sidebar";
 import MobileNavbar from "@/Components/Admin/MobileNavbar";
@@ -6,6 +6,12 @@ import { logout } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
+
+const AdminLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+  </div>
+);
 
 function Admin() {
   const navigate = useNavigate();
@@ -66,8 +72,10 @@ function Admin() {
         )}
         
         {/* Page content - Scrollable area */}
-        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
-          <Outlet />
+        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-4">
+          <Suspense fallback={<AdminLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
     </div>

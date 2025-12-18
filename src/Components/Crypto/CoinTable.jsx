@@ -418,7 +418,7 @@ function CoinTable({ onTrade }) {
     });
   }, [totalPages, currentPage, TC]);
 
-  if (coinsLoading) {
+  if (coinsLoading && coins.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className={`rounded-xl p-8 text-center fade-in ${TC.bgLoading}`}>
@@ -479,7 +479,7 @@ function CoinTable({ onTrade }) {
               {paginatedCoins.map((coin, index) => (
                 <div
                   key={coin.id}
-                  onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+                  onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
                   className={`p-4 rounded-xl border ${
                     isLight 
                       ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50" 
@@ -625,7 +625,7 @@ function CoinTable({ onTrade }) {
                     {paginatedCoins.map((coin, index) => (
                       <tr
                         key={coin.id}
-                        onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+                        onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
                         className={`cursor-pointer transition-all duration-200 group fade-in ${
                           isLight ? "hover:bg-gray-50" : "hover:bg-gray-700/50"
                         }`}

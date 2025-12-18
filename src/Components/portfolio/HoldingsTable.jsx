@@ -19,7 +19,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
     // Card Background (aligned with other components – no border)
     bgCard: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      : "bg-gray-800/50 backdrop-blur-md shadow-xl shadow-black/20",
 
     // Table Header Background
     bgHeader: isLight
@@ -125,10 +125,9 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
               <tr
                 key={coin.coinId}
                 className={`
-                  transition-all duration-200 cursor-pointer group fade-in
+                  transition-all duration-200 cursor-pointer group
                   ${TC.bgHover}
                 `}
-                style={{ animationDelay: `${0.1 + index * 0.05}s` }}
               >
                 {/* Alert Icon */}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
@@ -245,7 +244,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                       e.stopPropagation();
                       onTrade(coin);
                     }}
-                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-md"
+                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2"
                     title="Trade"
                   >
                     <FaExchangeAlt className="text-xs" />

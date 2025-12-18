@@ -154,7 +154,7 @@ function WatchlistPreview() {
     })).filter(Boolean);
   }, [watchlistData, livePrices]);
 
-  if (loading) {
+  if (loading && watchlistData.length === 0) {
      return (
         <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
              <div className="flex items-center gap-2 mb-3">

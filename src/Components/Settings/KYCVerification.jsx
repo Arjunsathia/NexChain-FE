@@ -3,11 +3,12 @@ import { FaIdCard, FaCheckCircle, FaTimesCircle, FaSpinner, FaUpload } from 'rea
 import api from '@/api/axiosConfig';
 import useUserContext from '@/hooks/useUserContext';
 import toast from 'react-hot-toast';
-import { useTheme } from '@/hooks/useTheme';
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 const KYCVerification = () => {
   const { user } = useUserContext();
-  const { isDark } = useTheme();
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
   const [status, setStatus] = useState('loading');
   const [formData, setFormData] = useState({
     fullName: '',

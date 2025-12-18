@@ -163,7 +163,7 @@ const PortfolioPage = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
+    const timer = setTimeout(() => setIsMounted(true), 10);
     return () => clearTimeout(timer);
   }, []);
 
@@ -206,7 +206,7 @@ const PortfolioPage = () => {
         {/* 4. Holdings Table */}
         <div className="space-y-4 fade-in" style={{ animationDelay: "0.3s" }}>
           <div className="flex items-center justify-between">
-             <h2 className="text-2xl font-bold flex items-center gap-2">
+             <h2 className={`text-2xl font-bold flex items-center gap-2 ${TC.textPrimary}`}>
                <FaChartLine className="text-cyan-500" />
                Your Assets
              </h2>

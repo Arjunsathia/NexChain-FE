@@ -10,11 +10,8 @@ import {
   FaCog,
   FaUserShield,
 } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
-
-
 
 function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
@@ -68,8 +65,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     return () => clearTimeout(timer);
   }, []);
 
-
-
   const menus = [
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
     { name: "Users", path: "/admin/users", icon: FaUsers },
@@ -101,7 +96,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         }
         .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
-
       {/* Mobile Version */}
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
@@ -133,8 +127,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               </Link>
             ))}
           </nav>
-
-
         </div>
       </div>
 
@@ -220,13 +212,9 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             ))}
           </div>
         </div>
-
-
       </aside>
     </>
-
-
   );
 }
 
-export default Sidebar;
+export default React.memo(Sidebar);

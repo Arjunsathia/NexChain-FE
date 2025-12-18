@@ -247,6 +247,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
             paddingAngle={2}
             label={renderCustomLabel}
             labelLine={false}
+            isAnimationActive={false}
           >
             {distributionData.map((entry, index) => (
               <Cell 

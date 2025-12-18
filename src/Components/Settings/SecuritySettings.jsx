@@ -3,11 +3,12 @@ import { FaShieldAlt, FaQrcode, FaCheckCircle, FaTimesCircle } from "react-icons
 import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
-import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 const SecuritySettings = () => {
   const { user } = useUserContext();
-  const { isDark } = useTheme();
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
   const [security, setSecurity] = useState({
     twoFactor: user?.twoFactorEnabled || false,
   });

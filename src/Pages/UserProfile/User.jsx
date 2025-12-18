@@ -1,5 +1,5 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "@/Components/UserProfile/Sidebar";
 import UserMobileNavbar from "@/Components/UserProfile/UserMobileNavbar";
@@ -7,8 +7,16 @@ import { logout } from "@/api/axiosConfig";
 
 
 
+
+const UserLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+  </div>
+);
+
 export default function User() {
   const navigate = useNavigate();
+
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -67,7 +75,9 @@ export default function User() {
         
         {/* Page content - Scrollable area */}
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
-          <Outlet />
+          <Suspense fallback={<UserLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
     </div>

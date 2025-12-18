@@ -3,13 +3,14 @@ import { FaUser, FaEnvelope, FaLock, FaSave } from "react-icons/fa";
 import useUserContext from "@/hooks/useUserContext";
 import toast from "react-hot-toast";
 
-import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 import { SERVER_URL } from "@/api/axiosConfig";
 
 const ProfileSettings = () => {
   const { user } = useUserContext();
-  const { isDark } = useTheme();
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
   const [formData, setFormData] = useState({
     name: "",
     user_name: "",

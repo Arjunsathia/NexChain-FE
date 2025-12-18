@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { getCoinById } from "@/api/coinApis";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
@@ -26,23 +26,35 @@ import CoinStats from "@/Components/CoinDetails/CoinStats";
 import AdditionalStats from "@/Components/CoinDetails/AdditionalStats";
 import QuickLinks from "@/Components/CoinDetails/QuickLinks";
 
-
-
-
 function CoinDetailsPage() {
   const isLight = useThemeCheck();
   const { coinId } = useParams();
+  const location = useLocation();
+  const passedCoin = location.state?.coin;
+  
+  const { user } = useUserContext();
+  const { purchasedCoins } = usePurchasedCoins();
+  const { coins: liveCoins } = useCoinContext();
+
+  // ⚡ FAST LOAD: Find live coin data immediately from context
+  const liveCoin = useMemo(() => {
+    if (!Array.isArray(liveCoins)) return null;
+    return liveCoins.find((c) => c.id === coinId);
+  }, [liveCoins, coinId]);
+
+  // Initial loading state is true ONLY if we don't have partial data
+  const [loading, setLoading] = useState(!liveCoin && !passedCoin);
   const [coin, setCoin] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
   const [livePrice, setLivePrice] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+  
+  // ⚡ DEFER HEAVY WIDGETS: Don't block navigation
+  const [widgetsReady, setWidgetsReady] = useState(false);
+  
   const ws = useRef(null);
-
-  const { user } = useUserContext();
-  const { purchasedCoins } = usePurchasedCoins();
-  const { coins: liveCoins } = useCoinContext();
 
   // Theme Classes
   const TC = useMemo(
@@ -61,15 +73,22 @@ function CoinDetailsPage() {
     [isLight]
   );
 
-  // Mount animation
+  // Mount animation + Deferred widgets
   useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(timer);
+    // Immediate fade in
+    const timer = setTimeout(() => setIsMounted(true), 10);
+    // Defer heavy widgets processing - Reduced to 50ms for near-instant feel
+    const widgetTimer = setTimeout(() => setWidgetsReady(true), 50);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(widgetTimer);
+    };
   }, []);
 
   // Check if user has holdings
   const userHoldings = useMemo(() => {
-    if (!coinId || !purchasedCoins || purchasedCoins.length === 0) return null;
+    if (!coinId || !purchasedCoins || !Array.isArray(purchasedCoins)) return null;
     return purchasedCoins.find((holding) => holding.coinId === coinId);
   }, [coinId, purchasedCoins]);
 
@@ -79,10 +98,67 @@ function CoinDetailsPage() {
     );
   }, [userHoldings]);
 
-  // Find live coin data
-  const liveCoin = useMemo(() => {
-    return liveCoins.find((c) => c.id === coinId);
-  }, [liveCoins, coinId]);
+  // ⚡ SMART MERGE: Prefer full details, fallback to passed state, then context data
+  const displayCoin = useMemo(() => {
+    // 1. If we have the full detailed coin, use it.
+    if (coin) return coin;
+
+    // 2. If we have passed state (from navigation), use it immediately.
+    if (passedCoin) {
+        // Construct a safe market_data object by merging existing (if any) with defaults
+        const existingMarket = passedCoin.market_data || {};
+        const flatData = passedCoin; // The passed object itself often has flat props (current_price etc)
+
+        return {
+             ...passedCoin,
+             image: typeof passedCoin.image === 'string' 
+                ? { large: passedCoin.image, small: passedCoin.image, thumb: passedCoin.image } 
+                : (passedCoin.image || {}),
+             market_data: {
+                current_price: { usd: existingMarket.current_price?.usd || flatData.current_price || 0 },
+                price_change_percentage_24h: existingMarket.price_change_percentage_24h || flatData.price_change_percentage_24h || 0,
+                market_cap: { usd: existingMarket.market_cap?.usd || flatData.market_cap || 0 },
+                total_volume: { usd: existingMarket.total_volume?.usd || flatData.total_volume || 0 },
+                high_24h: { usd: existingMarket.high_24h?.usd || flatData.high_24h || 0 }, 
+                low_24h: { usd: existingMarket.low_24h?.usd || flatData.low_24h || 0 },
+                price_change_24h: existingMarket.price_change_24h || flatData.price_change_24h || 0,
+                // Add defaults for AdditionalStats to prevent issues
+                ath: { usd: existingMarket.ath?.usd || flatData.ath || 0 },
+                atl: { usd: existingMarket.atl?.usd || flatData.atl || 0 },
+                ath_date: { usd: existingMarket.ath_date?.usd || flatData.ath_date || null },
+                atl_date: { usd: existingMarket.atl_date?.usd || flatData.atl_date || null },
+                circulating_supply: existingMarket.circulating_supply || flatData.circulating_supply || 0,
+                total_supply: existingMarket.total_supply || flatData.total_supply || 0,
+                max_supply: existingMarket.max_supply || flatData.max_supply || 0,
+             }
+        }
+    }
+    
+    // 3. Fallback: If we have liveCoin (from list context), construct a minimal valid object
+    if (liveCoin) {
+       return {
+         ...liveCoin,
+         name: liveCoin.name,
+         symbol: liveCoin.symbol,
+         image: typeof liveCoin.image === 'string'
+            ? { large: liveCoin.image, small: liveCoin.image, thumb: liveCoin.image }
+            : (liveCoin.image || {}),
+         market_data: {
+            current_price: { usd: liveCoin.current_price || 0 },
+            price_change_percentage_24h: liveCoin.price_change_percentage_24h || 0,
+            market_cap: { usd: liveCoin.market_cap || 0 },
+            total_volume: { usd: liveCoin.total_volume || 0 },
+            high_24h: { usd: liveCoin.high_24h || 0 },
+            low_24h: { usd: liveCoin.low_24h || 0 },
+            // Defaults for safety
+            ath: { usd: 0 }, atl: { usd: 0 },
+            ath_date: { usd: null }, atl_date: { usd: null },
+            circulating_supply: 0, total_supply: 0, max_supply: 0
+         }
+       }
+    }
+    return null;
+  }, [coin, passedCoin, liveCoin]);
 
   // Get symbol for WebSocket
   const coinSymbol = useMemo(() => {
@@ -99,26 +175,30 @@ function CoinDetailsPage() {
       litecoin: "ltcusdt",
       chainlink: "linkusdt",
     };
-    return symbolMap[coinId] || `${coin?.symbol}usdt`.toLowerCase();
-  }, [coinId, coin]);
+    return symbolMap[coinId] || (displayCoin?.symbol ? `${displayCoin.symbol}usdt`.toLowerCase() : null);
+  }, [coinId, displayCoin]);
 
   // WebSocket for live price
   useEffect(() => {
     if (!coinSymbol) return;
 
-    const wsUrl = `wss://stream.binance.com:9443/ws/${coinSymbol}@ticker`;
-    ws.current = new WebSocket(wsUrl);
-
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setLivePrice({
-        price: parseFloat(data.c),
-        change24h: parseFloat(data.P),
-        high24h: parseFloat(data.h),
-        low24h: parseFloat(data.l),
-        volume24h: parseFloat(data.v) * parseFloat(data.c),
-      });
-    };
+    try {
+        const wsUrl = `wss://stream.binance.com:9443/ws/${coinSymbol}@ticker`;
+        ws.current = new WebSocket(wsUrl);
+    
+        ws.current.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          setLivePrice({
+            price: parseFloat(data.c),
+            change24h: parseFloat(data.P),
+            high24h: parseFloat(data.h),
+            low24h: parseFloat(data.l),
+            volume24h: parseFloat(data.v) * parseFloat(data.c),
+          });
+        };
+    } catch(e) {
+        console.warn("WS Connection failed", e);
+    }
 
     return () => {
       if (ws.current) ws.current.close();
@@ -129,15 +209,15 @@ function CoinDetailsPage() {
   const checkWatchlistStatus = useCallback(async () => {
     if (!user?.id || !coinId) return;
 
-    setLoadingWatchlist(true);
+    // Don't show global loader for this aux check
     try {
       const res = await getData("/watchlist", { user_id: user.id });
-      const watchlistIds = (res || []).map((item) => item.id || item.coin_id);
+      // Safety check
+      const list = Array.isArray(res) ? res : (res?.data || res?.watchlist || []);
+      const watchlistIds = list.map((item) => item.id || item.coin_id);
       setIsInWatchlist(watchlistIds.includes(coinId));
     } catch (err) {
       console.error("Failed to fetch watchlist status", err);
-    } finally {
-      setLoadingWatchlist(false);
     }
   }, [user?.id, coinId]);
 
@@ -147,17 +227,20 @@ function CoinDetailsPage() {
 
   // Fetch coin details
   const fetchCoin = useCallback(async () => {
-    setLoading(true);
+    // If we don't have ANY data, show loading.
+    // If we have liveCoin, this runs in background!
+    if (!liveCoin) setLoading(true);
+    
     try {
       const res = await getCoinById(coinId);
       setCoin(res?.data ?? res);
     } catch (err) {
       console.error("Error fetching coin", err);
-      setCoin(null);
+      if (!liveCoin) setCoin(null); // Only clear if no fallback
     } finally {
       setLoading(false);
     }
-  }, [coinId]);
+  }, [coinId, liveCoin]);
 
   useEffect(() => {
     if (!coinId) return;
@@ -171,112 +254,109 @@ function CoinDetailsPage() {
   });
 
   const handleTrade = useCallback(() => {
-    if (!coin || !user) {
-      alert("Please login to trade cryptocurrency");
+    if (!user) {
+      toast.error("Please login to trade");
       return;
     }
 
-    const tradeCoin = liveCoin || {
-      ...coin,
-      current_price: livePrice?.price || coin?.market_data?.current_price?.usd,
-      image: coin.image?.large,
-      symbol: coin.symbol,
-      name: coin.name,
-      id: coin.id,
-    };
+    const tradeCoin = displayCoin || liveCoin; 
+    
+    if(!tradeCoin) return;
 
     setTradeModal({ show: true, coin: tradeCoin, type: "buy" });
-  }, [coin, user, liveCoin, livePrice]);
+  }, [displayCoin, user, liveCoin]);
 
   // Watchlist toggle with backend integration
   const toggleWatchlist = useCallback(async () => {
     if (!user?.id) {
-      toast.error("Please login to manage watchlist", {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
-      return;
+        toast.error("Please login to manage watchlist", {
+          style: {
+            background: "#FEE2E2",
+            color: "#991B1B",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            borderRadius: "8px",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            border: "none",
+          },
+          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+        });
+        return;
     }
 
-    if (!coin) return;
+    if (!displayCoin) return;
 
     const wasInWatchlist = isInWatchlist;
 
     // Optimistic update
     setIsInWatchlist(!wasInWatchlist);
+    
+    // Show toast immediately (Optimistic Feedback)
+    if (wasInWatchlist) {
+      toast.success("Removed from watchlist!", {
+        style: {
+          background: "#FEF2F2",
+          color: "#991B1B",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          border: "none",
+        },
+        iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
+      });
+    } else {
+      toast.success("Added to watchlist!", {
+        style: {
+          background: "#FEFCE8",
+          color: "#854D0E",
+          fontWeight: "600",
+          fontSize: "14px",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          border: "none",
+        },
+        iconTheme: { primary: "#EAB308", secondary: "#FFFFFF" },
+      });
+    }
+
+    const coinData = displayCoin; 
+    const currentP = livePrice?.price || coinData.market_data?.current_price?.usd || coinData.current_price;
 
     const postData = {
       user_id: user.id,
-      id: coin.id,
-      image: coin.image?.large || coin.image?.small,
-      symbol: coin.symbol,
-      name: coin.name,
-      current_price: livePrice?.price || coin.market_data?.current_price?.usd,
+      id: coinData.id,
+      image: coinData.image?.large || coinData.image?.small || coinData.image,
+      symbol: coinData.symbol,
+      name: coinData.name,
+      current_price: currentP,
       price_change_percentage_24h:
-        livePrice?.change24h || coin.market_data?.price_change_percentage_24h,
-      market_cap: coin.market_data?.market_cap?.usd,
-      total_volume: livePrice?.volume24h || coin.market_data?.total_volume?.usd,
+        livePrice?.change24h || coinData.market_data?.price_change_percentage_24h || coinData.price_change_percentage_24h,
+      market_cap: coinData.market_data?.market_cap?.usd || coinData.market_cap,
+      total_volume: livePrice?.volume24h || coinData.market_data?.total_volume?.usd || coinData.total_volume,
       sparkline_in_7d: { price: [] },
     };
 
     setLoadingWatchlist(true);
     try {
       if (wasInWatchlist) {
-        // Remove from watchlist
         await deleteWatchList("/watchlist/remove", {
           id: coinId,
           user_id: user.id,
         });
-        toast.success("Removed from watchlist!", {
-          style: {
-            background: "#DCFCE7", // Light green
-            color: "#166534", // Dark green
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            border: "none",
-          },
-          iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-        });
-
+        // Removed duplicate toast here as we showed it optimistically earlier
       } else {
-        // Add to watchlist
         await postForm("/watchlist/add", postData);
-        toast.success("Added to watchlist!", {
-          style: {
-            background: "#FEFCE8", // Light yellow/gold
-            color: "#854D0E", // Dark gold/brown
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            border: "none",
-          },
-          iconTheme: {
-            primary: "#EAB308", // Gold icon
-            secondary: "#FFFFFF",
-          },
-        });
+        // Removed duplicate toast here as we showed it optimistically earlier
       }
-      // Refresh watchlist status
       await checkWatchlistStatus();
     } catch (err) {
       console.error("Watchlist operation failed:", err);
-      // Revert optimistic update on error
       setIsInWatchlist(wasInWatchlist);
-      toast.error("Operation failed. Please try again.", {
+      toast.error("Operation failed.", {
         style: {
           background: "#FEE2E2",
           color: "#991B1B",
@@ -295,10 +375,9 @@ function CoinDetailsPage() {
   }, [
     isInWatchlist,
     user?.id,
-    coin,
+    displayCoin,
     coinId,
     livePrice,
-    isLight,
     checkWatchlistStatus,
   ]);
 
@@ -321,33 +400,37 @@ function CoinDetailsPage() {
     return Number(value).toLocaleString("en-US");
   }, []);
 
-  if (loading || !coin) {
+  // ⚡ IF NO DATA AT ALL: Show Skeleton
+  if (loading && !displayCoin) {
     return (
       <div
-        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-500 ${
+        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${
           isMounted ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className={`rounded-2xl ${TC.bgCard} p-6`}>
-              <Skeleton
-                height={200}
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-                borderRadius="1rem"
-              />
-            </div>
-          ))}
+           {/* Optimized Skeleton Layout */}
+           <div className={`rounded-2xl ${TC.bgCard} p-6 h-[200px]`}>
+              <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="1rem" />
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className={`col-span-2 rounded-2xl ${TC.bgCard} h-[500px] p-6`}>
+                    <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                </div>
+                <div className={`col-span-1 rounded-2xl ${TC.bgCard} h-[500px] p-6`}>
+                    <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                </div>
+           </div>
         </div>
       </div>
     );
   }
 
   const currentPrice =
-    livePrice?.price || coin.market_data?.current_price?.usd || 0;
+    livePrice?.price || displayCoin?.market_data?.current_price?.usd || 0;
   const priceChange24h =
-    livePrice?.change24h || coin.market_data?.price_change_percentage_24h || 0;
+    livePrice?.change24h || displayCoin?.market_data?.price_change_percentage_24h || 0;
   const isPositive = priceChange24h >= 0;
 
   return (
@@ -359,7 +442,7 @@ function CoinDetailsPage() {
       >
         {/* Sticky Header */}
         <CoinHeader
-          coin={coin}
+          coin={displayCoin}
           currentPrice={currentPrice}
           priceChange24h={priceChange24h}
           isPositive={isPositive}
@@ -377,7 +460,7 @@ function CoinDetailsPage() {
 
           {/* Stats Grid */}
           <CoinStats
-            coin={coin}
+            coin={displayCoin}
             livePrice={livePrice}
             formatCurrency={formatCurrency}
             TC={TC}
@@ -388,20 +471,26 @@ function CoinDetailsPage() {
           <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
             {/* Left Column - Chart */}
             <div className="contents lg:block lg:col-span-8 lg:space-y-6">
-              {/* TradingView Chart */}
+              {/* TradingView Chart - ⚡ DEFERRED LOAD */}
               <div
                 className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
-                style={{ animationDelay: "0.3s" }}
+                style={{ animationDelay: "0.1s" }}
               >
-                <TradingViewWidget
-                  symbol={coin.symbol?.toUpperCase() + "USDT"}
-                  theme={isLight ? "light" : "dark"}
-                />
+                {widgetsReady ? (
+                     <TradingViewWidget
+                        symbol={displayCoin?.symbol?.toUpperCase() + "USDT"}
+                        theme={isLight ? "light" : "dark"}
+                     />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <Skeleton height="100%" width="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                    </div>
+                )}
               </div>
 
               {/* Additional Stats */}
               <AdditionalStats
-                coin={coin}
+                coin={displayCoin}
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
                 TC={TC}
@@ -409,22 +498,34 @@ function CoinDetailsPage() {
               />
 
               {/* Quick Links */}
-              <QuickLinks coin={coin} TC={TC} isLight={isLight} />
+              <QuickLinks coin={displayCoin} TC={TC} isLight={isLight} />
             </div>
 
-            {/* Right Column - Order Book & Trade History */}
+            {/* Right Column - Order Book & Trade History - ⚡ DEFERRED LOAD */}
             <div className="contents lg:block lg:col-span-4 lg:space-y-6">
               <div
                 className="fade-in order-2 h-[350px] md:h-[450px]"
-                style={{ animationDelay: "0.6s" }}
+                style={{ animationDelay: "0.2s" }}
               >
-                <OrderBook symbol={coinSymbol} />
+                 {widgetsReady ? (
+                    <OrderBook symbol={coinSymbol} />
+                 ) : (
+                    <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
+                         <Skeleton count={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                    </div>
+                 )}
               </div>
               <div
                 className="fade-in order-3 h-[350px] md:h-[450px]"
-                style={{ animationDelay: "0.7s" }}
+                style={{ animationDelay: "0.3s" }}
               >
-                <TradeHistory symbol={coinSymbol} />
+                {widgetsReady ? (
+                   <TradeHistory symbol={coinSymbol} />
+                ) : (
+                   <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
+                        <Skeleton count={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                   </div>
+                )}
               </div>
             </div>
           </div>
@@ -432,10 +533,11 @@ function CoinDetailsPage() {
       </div>
 
       {/* Trade Modal */}
+      {/* Trade Modal */}
       <TradeModal
         show={tradeModal.show}
-        onClose={() => setTradeModal({ show: false, coin: null, type: "buy" })}
-        coin={tradeModal.coin}
+        onClose={() => setTradeModal((prev) => ({ ...prev, show: false }))}
+        coin={tradeModal.coin || displayCoin}
         type={tradeModal.type}
         purchasedCoins={purchasedCoins}
       />

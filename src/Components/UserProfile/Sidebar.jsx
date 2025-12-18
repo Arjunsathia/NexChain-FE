@@ -96,11 +96,10 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
   );
 };
 
-export default function Sidebar({ onLogout, isLogoutLoading }) {
+function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isMounted, setIsMounted] = useState(false);
   const { user } = useUserContext();
   const { balance } = useWalletContext();
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
@@ -144,12 +143,7 @@ export default function Sidebar({ onLogout, isLogoutLoading }) {
   }), [isLight]);
 
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -237,7 +231,6 @@ export default function Sidebar({ onLogout, isLogoutLoading }) {
         }
         .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
-
       {/* Mobile Version */}
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
@@ -298,7 +291,6 @@ export default function Sidebar({ onLogout, isLogoutLoading }) {
           hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
           transition-all duration-500 ease-out sticky top-4
           ${TC.bgSidebar}
-          ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
         `}
       >
         {/* Header */}
@@ -411,3 +403,5 @@ export default function Sidebar({ onLogout, isLogoutLoading }) {
     </>
   );
 }
+
+export default React.memo(Sidebar);

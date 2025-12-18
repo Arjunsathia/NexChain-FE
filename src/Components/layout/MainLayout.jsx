@@ -29,6 +29,8 @@ export default function MainLayout() {
     }
   }, [fetchUsers, isLoggedIn, navigate, fetchRole]);
 
+  const pageKey = location.pathname.startsWith("/admin") ? "admin" : location.pathname.startsWith("/user") ? "user" : location.pathname;
+
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
       {/* Background Layers for Smooth Transition via CSS Opacity */}
@@ -45,7 +47,7 @@ export default function MainLayout() {
       
       <main className="flex-1 p-2 sm:p-4 transition-colors duration-300">
         <motion.div
-          key={location.pathname}
+          key={pageKey}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.1 }}

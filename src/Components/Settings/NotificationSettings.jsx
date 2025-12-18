@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 const NotificationSettings = () => {
-  const { isDark } = useTheme();
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
     pushNotifications: false,

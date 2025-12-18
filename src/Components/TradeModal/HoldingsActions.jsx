@@ -24,22 +24,20 @@ const HoldingsActions = ({
           <button
             onClick={() => setActiveTab("deposit")}
             className="py-2 px-3 bg-green-600 hover:bg-green-700 text-white 
-                       rounded-lg transition-all duration-300 font-bold 
-                       flex flex-col items-center gap-1 shadow-md
-                       hover:scale-105 group"
+                       rounded-lg transition-colors duration-200 font-bold 
+                       flex flex-col items-center gap-1 group"
           >
-            <FaArrowUp className="text-lg group-hover:-translate-y-1 transition-transform duration-300" />
+            <FaArrowUp className="text-lg group-hover:-translate-y-1 transition-transform duration-200" />
             <span className="text-xs">Deposit</span>
           </button>
 
           <button
             onClick={() => setActiveTab("withdraw")}
             className="py-2 px-3 bg-red-600 hover:bg-red-700 text-white 
-                       rounded-lg transition-all duration-300 font-bold 
-                       flex flex-col items-center gap-1 shadow-md
-                       hover:scale-105 group"
+                       rounded-lg transition-colors duration-200 font-bold 
+                       flex flex-col items-center gap-1 group"
           >
-            <FaArrowDown className="text-lg group-hover:translate-y-1 transition-transform duration-300" />
+            <FaArrowDown className="text-lg group-hover:translate-y-1 transition-transform duration-200" />
             <span className="text-xs">Withdraw</span>
           </button>
         </div>

@@ -111,7 +111,9 @@ const portfolioSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchPurchasedCoins.pending, (state) => {
-        state.loading = true;
+        if (state.purchasedCoins.length === 0) {
+          state.loading = true;
+        }
       })
       .addCase(fetchPurchasedCoins.fulfilled, (state, action) => {
         state.loading = false;

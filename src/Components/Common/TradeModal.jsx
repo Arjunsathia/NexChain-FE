@@ -85,10 +85,10 @@ function TradeModal({
   // 💡 Theme classes derived from isLight and Operation Type
   const TC = useMemo(
     () => ({
-      // General
+      // General - Reduced blur for performance
       bgModal: isLight
-        ? "bg-white/95 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-        : "bg-[#0B0E14]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
+        ? "bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
+        : "bg-[#0B0E14]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
       bgCard: isLight
         ? "bg-white/60 border border-gray-200 shadow-sm backdrop-blur-sm"
         : "bg-gray-800/40 border border-white/5 shadow-inner backdrop-blur-sm",
@@ -134,14 +134,14 @@ function TradeModal({
         ? "bg-red-100 text-red-700 border border-red-200"
         : "bg-red-500/20 text-red-400 border border-red-500/30",
 
-      // Hover
+      // Hover - Optimized transition
       hoverBorder: isLight
         ? `hover:border-${
             isBuyOperation ? "emerald" : "red"
-          }-400 transition-colors duration-300`
+          }-400 transition-colors duration-200`
         : `hover:border-${
             isBuyOperation ? "emerald" : "red"
-          }-500/50 transition-colors duration-300`,
+          }-500/50 transition-colors duration-200`,
     }),
     [isLight, isBuyOperation]
   );
@@ -151,13 +151,13 @@ function TradeModal({
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       setIsVisible(false);
-      setTimeout(onClose, 300);
+      setTimeout(onClose, 200); // Faster close
     }
   };
 
   const handleClose = () => {
     setIsVisible(false);
-    setTimeout(onClose, 300);
+    setTimeout(onClose, 200); // Faster close
   };
 
   const holdingsSummary = useMemo(() => {
@@ -232,11 +232,12 @@ function TradeModal({
       setCoinAmount("");
       setSlippage(1.0);
       setIsSubmitting(false);
-      setIsVisible(false);
+      setIsVisible(false); // Ensure it starts hidden for animation
       setSuccessData(null);
       setIsAlertMode(initialAlertMode || false);
 
-      setTimeout(() => setIsVisible(true), 10);
+      // Simple, reliable timeout for animation start
+      const timer = setTimeout(() => setIsVisible(true), 10);
 
       if (shouldShowHoldingsInfo) {
         setActiveTab("details");
@@ -256,15 +257,17 @@ function TradeModal({
       setOrderType("market");
       setIsAlertMode(false);
       setAlertTargetPrice(price);
+      
+      return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
   }, [show, coin, type, shouldShowHoldingsInfo]);
 
   // Force update when purchased coins change
-  useEffect(() => {
-    setForceUpdate((prev) => prev + 1);
-  }, [purchasedCoins]);
+  // useEffect(() => {
+  //   setForceUpdate((prev) => prev + 1);
+  // }, [purchasedCoins]);
 
 
 
@@ -816,7 +819,7 @@ function TradeModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
         isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       } ${isLight ? "bg-black/30" : "bg-black/70"}`}
       onClick={handleBackdropClick}
@@ -824,10 +827,10 @@ function TradeModal({
       <div
         className={`${
           TC.bgModal
-        } rounded-2xl shadow-2xl w-[96vw] md:max-w-lg md:w-full mx-auto max-h-[85vh] md:max-h-[90vh] overflow-hidden transition-all duration-300 ${
+        } rounded-2xl shadow-2xl w-[96vw] md:max-w-lg md:w-full mx-auto max-h-[85vh] md:max-h-[90vh] overflow-hidden transition-all duration-200 ease-out origin-center ${
           isVisible
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 translate-y-4"
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95"
         }`}
       >
         <TradeModalHeader
@@ -912,4 +915,4 @@ function TradeModal({
   );
 }
 
-export default TradeModal;
+export default React.memo(TradeModal);
