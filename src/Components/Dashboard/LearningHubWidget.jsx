@@ -1,6 +1,6 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo } from "react";
-import { FaRobot, FaCommentDots, FaArrowRight } from "react-icons/fa";
+import { FaGraduationCap, FaCommentDots, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 
 export default function LearningHubWidget() {
@@ -23,11 +23,11 @@ export default function LearningHubWidget() {
     <div className={`rounded-xl p-3 h-full flex flex-col justify-between ${TC.bgCard}`}>
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg ${TC.iconBg}`}>
-          <FaRobot className="text-sm" />
+          <FaGraduationCap className="text-sm" />
         </div>
         <div>
-           <h3 className={`font-bold text-sm leading-tight ${TC.textPrimary}`}>AI Assistant</h3>
-           <p className={`text-[10px] ${TC.textSecondary}`}>24/7 Crypto Support</p>
+           <h3 className={`font-bold text-sm leading-tight ${TC.textPrimary}`}>Learning Hub</h3>
+           <p className={`text-[10px] ${TC.textSecondary}`}>Educational Resources</p>
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export default function LearningHubWidget() {
         <div className="flex items-start gap-2">
            <div className={`p-1.5 rounded-br-xl rounded-tr-xl rounded-bl-xl bg-gray-100 dark:bg-gray-700/50`}>
               <p className={`text-[11px] leading-relaxed line-clamp-2 ${TC.textSecondary}`}>
-                 Hello! Ask me anything about market trends or coin analysis. 🤖
+                 Master crypto fundamentals and trading strategies. 📚
               </p>
            </div>
         </div>
@@ -45,7 +45,7 @@ export default function LearningHubWidget() {
         onClick={() => navigate('/learning')} 
         className={`w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${TC.bgButton}`}
       >
-        Start Chat <FaArrowRight className="text-[10px]" />
+        Go to Learning Hub <FaArrowRight className="text-[10px]" />
       </button>
     </div>
   );

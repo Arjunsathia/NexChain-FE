@@ -69,12 +69,34 @@ const MarketInsights = () => {
   }, []);
 
   const fetchMarketData = async () => {
-    try {
+    // 1. Check Cache for Instant Load
+    const cacheKey = "marketInsightsData_v1";
+    const cached = localStorage.getItem(cacheKey);
+    let hasCachedData = false;
+
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        // Use cache if less than 5 minutes old to prevent API spam, 
+        // OR always use it for immediate display and update in background?
+        // Let's use it for immediate display.
+        setMarketData(data);
+        calculateGlobalStats(data);
+        hasCachedData = true;
+        setContentLoaded(true); // Show content immediately
+      } catch (e) {
+        console.error("Cache parse error", e);
+      }
+    }
+
+    if (!hasCachedData) {
       setLoading(true);
-      setContentLoaded(false);
-      // Fetch CoinGecko Data
+    }
+
+    try {
+      // 2. Fetch Fresh Data (reduced to 50 for speed)
       const response = await fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h,7d"
+        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h,7d"
       );
 
       if (!response.ok) {
@@ -88,8 +110,41 @@ const MarketInsights = () => {
       }
 
       setMarketData(data);
+      calculateGlobalStats(data);
+      
+      // Update Cache
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
 
-      // Calculate Global Stats
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+      if (!hasCachedData) {
+         toast.error("Failed to fetch market data.", {
+             style: {
+               background: "#FEE2E2",
+               color: "#991B1B",
+               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+               borderRadius: "8px",
+               fontWeight: "600",
+               fontSize: "14px",
+               padding: "12px 16px",
+               border: "none",
+             },
+             iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+           });
+           setMarketData([]); 
+      }
+    } finally {
+      setLoading(false);
+      if (!hasCachedData) {
+         setTimeout(() => setContentLoaded(true), 100);
+      }
+    }
+  };
+
+  const calculateGlobalStats = (data) => {
       const totalMarketCap = data.reduce(
         (acc, coin) => acc + coin.market_cap,
         0
@@ -98,10 +153,11 @@ const MarketInsights = () => {
         (acc, coin) => acc + coin.total_volume,
         0
       );
+      // Simple dominance approx based on Top 50
       const btcDominance =
         (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
         100;
-
+        
       setGlobalStats({
         marketCap: totalMarketCap,
         volume: totalVolume,
@@ -110,26 +166,6 @@ const MarketInsights = () => {
           (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
             100 || 0,
       });
-    } catch (error) {
-      console.error("Error fetching market data:", error);
-      toast.error("Failed to fetch market data. Please try again later.", {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
-      setMarketData([]); // Fallback to empty array
-    } finally {
-      setLoading(false);
-      setTimeout(() => setContentLoaded(true), 300);
-    }
   };
 
   const formatCurrency = (value) => {

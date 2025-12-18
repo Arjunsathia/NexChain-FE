@@ -60,10 +60,8 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
     >
       {/* Top CTA Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-12 md:mb-20">
-        <div className={`rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-16 relative overflow-hidden ${TC.bgCTA || 'bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-white/5'}`}>
-          {/* Background Glows */}
-          <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-blue-500/20 blur-[80px] md:blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-purple-500/20 blur-[80px] md:blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+        <div className={`rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-16 relative overflow-hidden ${TC.bgCTA || 'bg-gradient-to-br from-indigo-900/60 to-slate-900/60 border border-white/5 backdrop-blur-md'}`}>
+          {/* Background Glows REMOVED for smoother scroll performance as requested */}
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 text-center md:text-left">
             <div className="max-w-2xl">

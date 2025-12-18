@@ -101,12 +101,12 @@ function PortfolioCard() {
      return (
         <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
              <div className="flex items-center gap-2 mb-3">
-                <Skeleton circle width={24} height={24} />
-                <Skeleton width={100} />
+                <Skeleton circle width={24} height={24} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
+                <Skeleton width={100} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
              </div>
              <div className="space-y-2">
-                <Skeleton height={50} />
-                <Skeleton height={50} />
+                <Skeleton height={50} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
+                <Skeleton height={50} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
              </div>
         </div>
      );
@@ -126,7 +126,7 @@ function PortfolioCard() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {allCoins.length === 0 ? (
           <div className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty}`}>
              <div className={`p-3 rounded-full mb-2 ${isLight ? "bg-white" : "bg-gray-700"}`}>

@@ -19,14 +19,10 @@ const testimonials = [
 const TestimonialCard = ({ testimonial, TC, isMobile }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.03, rotateY: 3, rotateX: 1, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }} 
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }} 
       className={`
-          ${TC.bgTestimonial} rounded-2xl md:rounded-3xl ${isMobile ? 'p-3 min-w-[260px]' : 'p-4 md:p-6 min-w-[250px] md:min-w-[320px]'} transition-all duration-500 group flex-shrink-0 relative overflow-hidden
-          hover:shadow-3xl hover:border-opacity-100 backdrop-blur-sm transform-style-preserve-3d cursor-pointer
-          border-2 border-transparent
-          before:content-[''] before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-500
-          ${TC.bgTestimonialGlow}
+          ${TC.bgTestimonial} rounded-2xl md:rounded-3xl ${isMobile ? 'p-3 min-w-[260px]' : 'p-4 md:p-6 min-w-[250px] md:min-w-[320px]'} transition-all duration-300 group flex-shrink-0 relative overflow-hidden
+          hover:shadow-2xl border border-transparent hover:border-white/10 cursor-pointer
         `}
     >
       <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-xl opacity-15 ${TC.bgTestimonialAccent}`}></div>
@@ -37,15 +33,14 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
             key={i}
             className={`w-3 h-3 md:w-4 md:h-4 transition-all duration-300 ${
               i < testimonial.rating
-                ? "text-yellow-400 fill-yellow-400 group-hover:scale-110"
+                ? "text-yellow-400 fill-yellow-400"
                 : TC.textStarInactive
             }`}
-            style={{ transitionDelay: `${i * 50}ms` }}
           />
         ))}
       </div>
 
-      <p className={`text-xs md:text-sm leading-snug mb-3 md:mb-4 line-clamp-4 transition-colors duration-300 ${TC.textMessage} relative z-10 font-medium font-manrope`}>
+      <p className={`text-xs md:text-sm leading-snug mb-3 md:mb-4 line-clamp-4 ${TC.textMessage} relative z-10 font-medium font-manrope`}>
         "{testimonial.message}"
       </p>
 
@@ -66,15 +61,17 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
 };
 
 const TestimonialCarousel = ({ TC, isMobile }) => {
-  const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials, ...testimonials, ...testimonials], []);
-  const duration = 60;
+  // Reduce duplication to 3x which is usually sufficient for smooth looping without excessive DOM size
+  const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials, ...testimonials], []);
+  const duration = 50;
 
   return (
-    <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
+    <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_5%,white_95%,transparent)]">
       <div className="py-6">
         <motion.div
-          className="flex gap-4 md:gap-8 w-max"
-          animate={{ x: "-50%" }}
+          className="flex gap-4 md:gap-8 w-max will-change-transform"
+          animate={{ x: "-33.33%" }} 
+          initial={{ x: "0%" }}
           transition={{ repeat: Infinity, ease: "linear", duration: duration }}
         >
           {duplicatedTestimonials.map((testimonial, index) => (

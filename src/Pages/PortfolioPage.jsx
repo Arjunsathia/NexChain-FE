@@ -183,8 +183,18 @@ const PortfolioPage = () => {
           />
         </div>
 
-        {/* 3. Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.2s" }}>
+        {/* 4. Holdings Table (Moved Up) */}
+        <div className="space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
+          <HoldingsTable 
+            isLight={isLight} 
+            holdings={mergedHoldings} 
+            loading={portfolioLoading} 
+            onTrade={handleTrade} 
+          />
+        </div>
+
+        {/* 3. Charts Section (Moved Down) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.3s" }}>
           <div className="lg:col-span-2">
             <PerformanceChart 
               isLight={isLight} 
@@ -201,22 +211,6 @@ const PortfolioPage = () => {
               loading={portfolioLoading} 
             />
           </div>
-        </div>
-
-        {/* 4. Holdings Table */}
-        <div className="space-y-4 fade-in" style={{ animationDelay: "0.3s" }}>
-          <div className="flex items-center justify-between">
-             <h2 className={`text-2xl font-bold flex items-center gap-2 ${TC.textPrimary}`}>
-               <FaChartLine className="text-cyan-500" />
-               Your Assets
-             </h2>
-          </div>
-          <HoldingsTable 
-            isLight={isLight} 
-            holdings={mergedHoldings} 
-            loading={portfolioLoading} 
-            onTrade={handleTrade} 
-          />
         </div>
 
         {/* 5. Open Orders */}

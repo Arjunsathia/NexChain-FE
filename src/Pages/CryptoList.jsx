@@ -189,7 +189,7 @@ function CryptoList() {
   </div>
 </div>
 
-      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
         
         {/* 2. Three Cards Section (Global, Trending, Gainers) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
@@ -213,7 +213,7 @@ function CryptoList() {
                    <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>Total Market Cap</p>
                    <div className="flex items-end gap-2 sm:gap-3">
                       <h2 className={`text-xl sm:text-3xl font-bold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={100} className="sm:w-[140px]" /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
+                         {loading ? <Skeleton width={100} className="sm:w-[140px]" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
                       </h2>
                       {!loading && (
                         <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)} flex items-center`}>
@@ -228,13 +228,13 @@ function CryptoList() {
                    <div>
                       <p className={`text-[10px] sm:text-xs ${TC.textSecondary} mb-0.5 sm:mb-1`}>24h Volume</p>
                       <p className={`text-sm sm:text-base font-semibold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={60} className="sm:w-[80px]" /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
+                         {loading ? <Skeleton width={60} className="sm:w-[80px]" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
                       </p>
                    </div>
                    <div>
                       <p className={`text-[10px] sm:text-xs ${TC.textSecondary} mb-0.5 sm:mb-1`}>BTC Dominance</p>
                       <p className={`text-sm sm:text-base font-semibold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={40} className="sm:w-[60px]" /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
+                         {loading ? <Skeleton width={40} className="sm:w-[60px]" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
                       </p>
                    </div>
                 </div>

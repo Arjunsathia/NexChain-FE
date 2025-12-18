@@ -1,7 +1,7 @@
 import { coinGecko } from "./axiosConfig";
 
 // ✅ Get list of coins with market data
-export const getCoins = async () => {
+export const getCoins = async (customParams = {}) => {
   try {
     const response = await coinGecko.get("/coins/markets", {
       params: {
@@ -11,6 +11,7 @@ export const getCoins = async () => {
         page: 1,
         sparkline: true,
         price_change_percentage: "1h,24h,7d",
+        ...customParams,
       },
     });
     return response.data;

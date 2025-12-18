@@ -185,7 +185,7 @@ function WatchlistPreview() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {error ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
              <div className={`p-2 rounded-full mb-2 bg-yellow-100 text-yellow-600`}>

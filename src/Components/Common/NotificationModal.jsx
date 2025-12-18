@@ -4,8 +4,12 @@ import { FaBell, FaTrash, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckC
 import api from '@/api/axiosConfig';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import useThemeCheck from '@/hooks/useThemeCheck';
 
-const NotificationModal = ({ isOpen, onClose, isDark, triggerRef }) => {
+const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
+  const isLight = useThemeCheck();
+  const isDark = !isLight;
+
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
@@ -102,25 +106,25 @@ const NotificationModal = ({ isOpen, onClose, isDark, triggerRef }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-2xl border z-[9999] overflow-hidden ${
+            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${
               isDark 
-                ? 'bg-gray-900 text-white border-gray-700 shadow-[0_0_50px_rgba(0,0,0,0.5)]' 
-                : 'bg-white text-gray-900 border-gray-200 shadow-[0_0_50px_rgba(0,0,0,0.1)]'
+                ? 'bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]' 
+                : 'bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
             }`}
             ref={modalRef}
             style={{ pointerEvents: 'auto' }}
           >
             {/* Header */}
-            <div className={`p-3 md:p-4 border-b flex justify-between items-center backdrop-blur-md ${
-              isDark ? 'bg-gray-900/95 border-gray-800' : 'bg-white/95 border-gray-100'
+            <div className={`p-3 md:p-4 border-b flex justify-between items-center ${
+              isDark ? 'border-gray-700/50 bg-gray-900/50' : 'border-gray-100 bg-white/50'
             }`}>
               <div className="flex items-center gap-2">
-                <div className={`p-2 rounded-lg ${isDark ? 'bg-cyan-900/20' : 'bg-cyan-50'}`}>
+                <div className={`p-2 rounded-xl ${isDark ? 'bg-cyan-500/10' : 'bg-cyan-50'}`}>
                   <FaBell className="text-cyan-500" />
                 </div>
                 <h3 className={`font-bold text-base md:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Notifications</h3>
-                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-                  isDark ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
                 }`}>
                   {notifications.length}
                 </span>
@@ -128,8 +132,8 @@ const NotificationModal = ({ isOpen, onClose, isDark, triggerRef }) => {
               {notifications.length > 0 && (
                 <button
                   onClick={handleClearAll}
-                  className={`text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                    isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                  className={`text-xs text-red-500 hover:text-red-400 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                    isDark ? 'hover:bg-red-500/10' : 'hover:bg-red-50'
                   }`}
                 >
                   <FaTrash className="text-[10px]" /> Clear All
@@ -138,7 +142,7 @@ const NotificationModal = ({ isOpen, onClose, isDark, triggerRef }) => {
             </div>
 
             {/* List */}
-            <div className={`max-h-[60vh] md:max-h-[450px] overflow-y-auto custom-scrollbar ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+            <div className={`max-h-[60vh] md:max-h-[450px] overflow-y-auto custom-scrollbar bg-transparent`}>
               {loading ? (
                 <div className="p-12 text-center">
                   <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>

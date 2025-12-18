@@ -51,13 +51,13 @@ export default function RecentTradesCard() {
     return (
        <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
          <div className="flex items-center gap-2 mb-3">
-            <Skeleton circle width={24} height={24} />
-            <Skeleton width={100} />
+            <Skeleton circle width={24} height={24} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
+            <Skeleton width={100} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
          </div>
          <div className="space-y-3">
-            <Skeleton height={40} />
-            <Skeleton height={40} />
-            <Skeleton height={40} />
+            <Skeleton height={40} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
+            <Skeleton height={40} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
+            <Skeleton height={40} baseColor={isLight ? "#e5e7eb" : "#2c303a"} highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"} />
          </div>
        </div>
     );
@@ -79,7 +79,7 @@ export default function RecentTradesCard() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {recentTrades.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
              <div className={`p-3 rounded-full mb-2 ${isLight ? "bg-gray-100" : "bg-gray-700"}`}>

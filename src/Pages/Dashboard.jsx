@@ -47,19 +47,38 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchTopCoins = async () => {
+      // 🚀 Optimistic Load: Check cache first
+      const cachedData = localStorage.getItem("dashboardTopCoins");
+      if (cachedData) {
+        try {
+           const parsed = JSON.parse(cachedData);
+           if (Array.isArray(parsed) && parsed.length > 0) {
+             setTopCoins(parsed);
+             setSelectedCoinId(parsed[0].id);
+             setLoading(false); // Immediate display
+           }
+        } catch (e) { console.error("Cache parse error", e); }
+      }
+
       try {
-        setLoading(true);
-        const data = await getCoins();
+        if (!cachedData) setLoading(true);
+        
+        // Optimize: Only fetch top 5 instead of 100
+        const data = await getCoins({ per_page: 5 });
+        
         if (Array.isArray(data)) {
           const topThree = data.slice(0, 3);
           setTopCoins(topThree);
+          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree)); // Update cache
           
           if (topThree.length > 0) {
-            setSelectedCoinId(topThree[0].id);
+             // Only auto-select if we haven't selected one yet (or if we just loaded)
+             // Check if current selectedCoinId is still valid or just keep existing logic
+             if (!cachedData) setSelectedCoinId(topThree[0].id);
           }
         } else {
            console.warn("Top coins data is not an array:", data);
-           setTopCoins([]);
+           if (!cachedData) setTopCoins([]);
         }
       } catch (error) {
         console.error("Failed to load coins", error);
