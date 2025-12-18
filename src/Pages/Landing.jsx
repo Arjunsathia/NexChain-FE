@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import LenisScroll from "../Components/Common/LenisScroll";
 import InteractiveGridPattern from "../Components/Landing/Background";
 import HeroSection from "../Components/Landing/HeroSection";
-import LandingHeader from "../Components/Landing/LandingHeader";
 import { TC } from "../Components/Landing/theme";
 
 // Lazy Load Heavy Sections
@@ -115,7 +114,7 @@ export default function Landing() {
   return (
     <div className={`min-h-screen ${TC.bgPage} font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden relative`}>
       <LenisScroll />
-      <LandingHeader isLoggedIn={isLoggedIn} scrollToFeatures={scrollToFeatures} />
+
       {/* GLOBAL FIXED BACKGROUND */}
       <MemoizedInteractiveGridPattern />
       

@@ -15,7 +15,7 @@ import {
   FaMoon,
   FaSun
 } from "react-icons/fa";
-import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from '@/hooks/useUserContext';
 import useWalletContext from '@/hooks/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
@@ -23,8 +23,7 @@ import { useWatchlist } from '@/hooks/useWatchlist';
 
 
 function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
-  const { isDark, toggleTheme } = useTheme();
-  const isLight = !isDark;
+  const isLight = useThemeCheck();
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);

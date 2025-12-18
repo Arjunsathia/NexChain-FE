@@ -72,7 +72,7 @@ function Admin() {
         )}
         
         {/* Page content - Scrollable area */}
-        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-4">
+        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4">
           <Suspense fallback={<AdminLoader />}>
             <Outlet />
           </Suspense>

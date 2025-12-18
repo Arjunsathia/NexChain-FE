@@ -7,9 +7,11 @@ import useRoleContext from "@/hooks/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
 import api from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
+import useThemeCheck from "@/hooks/useThemeCheck";
 
 export default function Navbar() {
   const { toggleTheme } = useTheme(); 
+  const isLight = useThemeCheck();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUserContext();
@@ -195,25 +197,34 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Dark mode toggle - CSS Based State with Background Swap */}
+          {/* Dark Mode Toggle - Perfect Compact Design */}
           <button
             onClick={toggleTheme}
             className={`
-              relative w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/50
-              bg-[var(--card-bg)] border border-[var(--card-border)] transition-colors duration-300
-              flex items-center
+              relative w-12 h-6 rounded-full transition-all duration-500 ease-out
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)]
+              ${isLight 
+                ? 'bg-gradient-to-r from-sky-300 to-blue-500 focus:ring-sky-400/50' 
+                : 'bg-gradient-to-r from-slate-700 to-indigo-900 focus:ring-indigo-400/50'}
+              shadow-md hover:shadow-lg hover:scale-105
             `}
-            title="Toggle Dark Mode"
+            title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            aria-label="Toggle theme"
           >
+            {/* Sliding Knob */}
             <div
-              className="w-4 h-4 bg-white dark:bg-gray-200 rounded-full shadow-sm flex items-center justify-center toggle-knob"
+              className={`
+                absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md
+                transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+                flex items-center justify-center
+                ${isLight ? 'translate-x-0.5' : 'translate-x-[26px]'}
+              `}
             >
-              <div className="show-in-light">
-                <Sun size={12} className="text-yellow-500" />
-              </div>
-              <div className="show-in-dark">
-                <Moon size={12} className="text-blue-600" />
-              </div>
+              {isLight ? (
+                <Sun size={12} className="text-amber-500 fill-amber-500" />
+              ) : (
+                <Moon size={12} className="text-indigo-600 fill-indigo-600" />
+              )}
             </div>
           </button>
 
@@ -263,10 +274,16 @@ export default function Navbar() {
               <div className={`h-full p-6 flex flex-col items-center`}>
                 <div className="w-full flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <Rocket className={`h-6 w-6 text-[var(--primary)]`} />
-                    <h2 className={`text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600`}>
-                      NexChain
-                    </h2>
+                    <div className="flex items-center justify-center bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20">
+                      <Rocket className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)] font-outfit tracking-tight flex items-baseline relative">
+                      <span>Ne</span>
+                      <span className="text-3xl mx-0.5 font-black bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)] transform translate-y-[1px] inline-block">
+                        X
+                      </span>
+                      <span>Chain</span>
+                    </span>
                   </div>
                   <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-xl hover:bg-[var(--nav-hover-bg)] text-[var(--nav-text)]`}>
                     <X size={20} />

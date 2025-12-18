@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   FaTwitter, 
@@ -122,12 +123,12 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
               <ul className="space-y-2 md:space-y-4">
                 {column.links.map((link, linkIdx) => (
                   <li key={linkIdx}>
-                    <a 
-                      href={link.path} 
+                    <Link 
+                      to={link.path} 
                       className={`text-[10px] md:text-sm ${TC.textSecondary} hover:text-cyan-400 transition-colors duration-200 block`}
                     >
                       {link.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

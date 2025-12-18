@@ -5,6 +5,7 @@ import { useEffect, Suspense } from "react";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
 import { motion } from "framer-motion";
+import ChatbotWidget from "@/Components/Common/ChatbotWidget";
 
 const LayoutLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -60,6 +61,9 @@ export default function MainLayout() {
       </main>
       
       <Footer />
+      
+      {/* Floating Chatbot Widget */}
+      <ChatbotWidget />
     </div>
   );
 }

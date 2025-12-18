@@ -149,6 +149,7 @@ function CryptoList() {
      <div 
   // This header already uses its own animation classes and will fade in with the main content
   className={`
+    hidden sm:block
     sticky top-2 z-40 
     max-w-7xl mx-auto 
     rounded-xl shadow-md
@@ -194,27 +195,28 @@ function CryptoList() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
           
           {/* Global Market Card (Inlined) */}
-          <div className={`rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
-             <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4">
-                <FaGlobeAmericas size={80} />
+          {/* Global Market Card (Inlined) */}
+          <div className={`rounded-lg sm:rounded-2xl p-3 sm:p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
+             <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
+                <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
              </div>
              
              <div>
-                <div className="flex items-center gap-2 mb-4">
-                   <div className={`p-2 rounded-lg ${TC.iconBg}`}>
-                      <FaGlobeAmericas className="text-lg" />
+                <div className="flex items-center gap-2 mb-2 sm:mb-4">
+                   <div className={`p-1.5 sm:p-2 rounded-lg ${TC.iconBg}`}>
+                      <FaGlobeAmericas className="text-base sm:text-lg" />
                    </div>
-                   <h3 className={`font-bold text-lg ${TC.textPrimary}`}>Global Market</h3>
+                   <h3 className={`font-bold text-base sm:text-lg ${TC.textPrimary}`}>Global Market</h3>
                 </div>
 
-                <div className="space-y-1 mb-6">
-                   <p className={`text-sm font-medium ${TC.textSecondary}`}>Total Market Cap</p>
-                   <div className="flex items-end gap-3">
-                      <h2 className={`text-3xl font-bold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={140} /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
+                <div className="space-y-0.5 sm:space-y-1 mb-3 sm:mb-6">
+                   <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>Total Market Cap</p>
+                   <div className="flex items-end gap-2 sm:gap-3">
+                      <h2 className={`text-xl sm:text-3xl font-bold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={100} className="sm:w-[140px]" /> : `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`}
                       </h2>
                       {!loading && (
-                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)} flex items-center`}>
+                        <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)} flex items-center`}>
                            {globalData?.market_cap_change_percentage_24h_usd >= 0 ? "+" : ""}
                            {globalData?.market_cap_change_percentage_24h_usd?.toFixed(2)}%
                         </span>
@@ -222,23 +224,23 @@ function CryptoList() {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                    <div>
-                      <p className={`text-xs ${TC.textSecondary} mb-1`}>24h Volume</p>
-                      <p className={`font-semibold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={80} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
+                      <p className={`text-[10px] sm:text-xs ${TC.textSecondary} mb-0.5 sm:mb-1`}>24h Volume</p>
+                      <p className={`text-sm sm:text-base font-semibold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={60} className="sm:w-[80px]" /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
                       </p>
                    </div>
                    <div>
-                      <p className={`text-xs ${TC.textSecondary} mb-1`}>BTC Dominance</p>
-                      <p className={`font-semibold ${TC.textPrimary}`}>
-                         {loading ? <Skeleton width={60} /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
+                      <p className={`text-[10px] sm:text-xs ${TC.textSecondary} mb-0.5 sm:mb-1`}>BTC Dominance</p>
+                      <p className={`text-sm sm:text-base font-semibold ${TC.textPrimary}`}>
+                         {loading ? <Skeleton width={40} className="sm:w-[60px]" /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
                       </p>
                    </div>
                 </div>
              </div>
 
-             <div className="mt-4 h-16 w-full opacity-60">
+             <div className="mt-2 sm:mt-4 h-12 sm:h-16 w-full opacity-60">
                  {!loading && <SparklineGraph color={isLight ? "#4f46e5" : "#6366f1"} />}
              </div>
           </div>

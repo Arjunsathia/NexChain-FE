@@ -292,7 +292,7 @@ function AdminDashboard() {
         }`}
       >
         {/* Stat Cards / Skeleton (shown in the same place) */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-6">
           {isLoading ? (
             // skeleton cards
             [...Array(4)].map((_, i) => (

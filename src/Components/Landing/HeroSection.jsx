@@ -12,7 +12,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
   const fgParallaxY = useTransform(scrollY, [0, 500], [0, 50]);
 
   return (
-    <section className="min-h-screen flex items-center justify-center pt-32 pb-20 md:pt-40 md:pb-20 relative bg-transparent" ref={ref}>
+    <section className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
           {/* Hero Content */}
@@ -52,7 +52,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
                 onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
                 className={`group px-6 py-2.5 md:px-8 md:py-4 rounded-full font-bold text-sm tracking-wide transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${TC.btnPrimary}`}
               >
-                <span>Start Trade</span>
+                <span>Start Trading</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
 

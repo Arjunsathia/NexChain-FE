@@ -66,19 +66,19 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
 };
 
 const TestimonialCarousel = ({ TC, isMobile }) => {
-  const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials], []);
-  const duration = 50;
+  const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials, ...testimonials, ...testimonials], []);
+  const duration = 60;
 
   return (
     <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
       <div className="py-6">
         <motion.div
-          className="flex gap-4 md:gap-8"
-          animate={{ x: [0, -3200] }}
-          transition={{ x: { repeat: Infinity, repeatType: "loop", duration: duration, ease: "linear" } }}
+          className="flex gap-4 md:gap-8 w-max"
+          animate={{ x: "-50%" }}
+          transition={{ repeat: Infinity, ease: "linear", duration: duration }}
         >
           {duplicatedTestimonials.map((testimonial, index) => (
-            <TestimonialCard key={`top-${index}`} testimonial={testimonial} TC={TC} isMobile={isMobile} />
+            <TestimonialCard key={`testimonial-${index}`} testimonial={testimonial} TC={TC} isMobile={isMobile} />
           ))}
         </motion.div>
       </div>
