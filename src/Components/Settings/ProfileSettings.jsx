@@ -151,7 +151,7 @@ const ProfileSettings = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`${inputClass} pl-10`}
+                className={`${inputClass} pl-10 sm:pl-10`}
               />
             </div>
           </div>

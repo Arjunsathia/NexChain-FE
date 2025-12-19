@@ -33,10 +33,10 @@ const BentoCoinCard = React.memo(
           ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
           : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
 
-        // Selected state: Minimal border focus, less colorful bg
+        // Selected state: Premium style with gradient, transparency, and glow
         selectedState: isLight
-          ? "bg-white/95 border-cyan-400 shadow-md ring-1 ring-cyan-100 scale-[1.02]"
-          : "bg-gray-800 border-cyan-500/50 shadow-md ring-1 ring-cyan-500/20 scale-[1.02]",
+          ? "bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20 scale-105 z-10"
+          : "bg-gradient-to-br from-gray-800 to-gray-800/80 border border-cyan-400 shadow-xl shadow-cyan-500/10 ring-2 ring-cyan-400/20 scale-105 z-10",
 
         // Hover effect
         hoverEffect: isLight

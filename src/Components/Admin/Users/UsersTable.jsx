@@ -10,6 +10,7 @@ function UsersTable({
   setEditingUser,
   setShowUserForm,
   confirmDelete,
+  mainAdminId,
 }) {
   return (
     <div className={`${TC.bgCard} rounded-2xl overflow-hidden`}>
@@ -102,42 +103,50 @@ function UsersTable({
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
                   <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => setSelectedUser(user)}
-                      className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                        isLight
-                          ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          : "bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white"
-                      }`}
-                      title="View Details"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingUser(user);
-                        setShowUserForm(true);
-                      }}
-                      className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                        isLight
-                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                          : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                      }`}
-                      title="Edit User"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => confirmDelete(user)}
-                      className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                        isLight
-                          ? "bg-red-50 text-red-600 hover:bg-red-100"
-                          : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                      }`}
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {user._id === mainAdminId ? (
+                         <span className={`text-[10px] uppercase font-bold tracking-wider py-1 px-2 rounded-md ${isLight ? "bg-gray-100 text-gray-400" : "bg-white/5 text-gray-500"}`}>
+                            Protected
+                         </span>
+                    ) : (
+                        <>
+                            <button
+                            onClick={() => setSelectedUser(user)}
+                            className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                                isLight
+                                ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                : "bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white"
+                            }`}
+                            title="View Details"
+                            >
+                            <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                            onClick={() => {
+                                setEditingUser(user);
+                                setShowUserForm(true);
+                            }}
+                            className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                                isLight
+                                ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                            }`}
+                            title="Edit User"
+                            >
+                            <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                            onClick={() => confirmDelete(user)}
+                            className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                                isLight
+                                ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                            }`}
+                            title="Delete"
+                            >
+                            <Trash2 className="w-4 h-4" />
+                            </button>
+                        </>
+                    )}
                   </div>
                 </td>
               </tr>

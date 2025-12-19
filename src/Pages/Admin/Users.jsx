@@ -67,7 +67,19 @@ const Users = () => {
       const response = await getData("/users");
       // Robustly handle different response structures
       const usersData = response?.users ?? response?.data ?? (Array.isArray(response) ? response : []);
-      setUsers(Array.isArray(usersData) ? usersData : []);
+      setUsers(Array.isArray(usersData) ? usersData.sort((a, b) => {
+        // 1. Roles: Admin first
+        if (a.role === 'admin' && b.role !== 'admin') return -1;
+        if (a.role !== 'admin' && b.role === 'admin') return 1;
+
+        // 2. If both are admins, sort by createdAt ascending (Oldest first)
+        if (a.role === 'admin' && b.role === 'admin') {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+
+        // 3. If both are users, sort by createdAt descending (Newest first)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }) : []);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to fetch users", {
@@ -90,6 +102,16 @@ const Users = () => {
       setTimeout(() => setContentLoaded(true), 300); 
     }
   };
+
+  // Determine Main Admin ID (Oldest Admin)
+  const mainAdminId = useMemo(() => {
+    if (!users.length) return null;
+    const admins = users.filter(u => u.role === 'admin');
+    if (!admins.length) return null;
+    // Sort admins by creation time ascending to find the first one
+    const sortedAdmins = [...admins].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    return sortedAdmins[0]?._id;
+  }, [users]);
 
   const handleDelete = async () => {
     if (!userToDelete) return;
@@ -283,6 +305,7 @@ const Users = () => {
             setEditingUser={setEditingUser} 
             setShowUserForm={setShowUserForm} 
             confirmDelete={confirmDelete} 
+            mainAdminId={mainAdminId}
           />
 
           {/* Pagination */}
