@@ -34,7 +34,7 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
-      {/* Background Layers for Smooth Transition via CSS Opacity */}
+      {}
       <div 
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
         style={{ background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)" }}
@@ -62,7 +62,7 @@ export default function MainLayout() {
       
       <Footer />
       
-      {/* Floating Chatbot Widget */}
+      {}
       <ChatbotWidget />
     </div>
   );

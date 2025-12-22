@@ -9,7 +9,7 @@ export default function RecentTradesCard() {
   const isLight = useThemeCheck();
   const { transactionHistory, loading } = usePurchasedCoins();
 
-  // 💡 Styles
+  
   const TC = useMemo(() => ({
     bgContainer: isLight
       ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
@@ -17,26 +17,26 @@ export default function RecentTradesCard() {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Items
+    
     bgItem: isLight 
       ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0" 
       : "hover:bg-white/5 border-b border-gray-700/50 last:border-0",
     
-    // Icons
+    
     bgBuyIcon: isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400",
     bgSellIcon: isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400",
     
-    // Values
+    
     textBuy: isLight ? "text-green-600" : "text-green-400",
     textSell: isLight ? "text-red-600" : "text-red-400",
   }), [isLight]);
 
-  // Process and sort transactions
+  
   const recentTrades = useMemo(() => {
     if (!transactionHistory) return [];
     return [...transactionHistory]
       .sort((a, b) => new Date(b.transactionDate || b.purchase_date) - new Date(a.transactionDate || a.purchase_date))
-      .slice(0, 4); // Limit to top 4 to fit height
+      .slice(0, 4); 
   }, [transactionHistory]);
 
   const formatTime = (dateString) => {
@@ -65,7 +65,7 @@ export default function RecentTradesCard() {
 
   return (
     <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
-      {/* Header */}
+      {}
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className={`font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2`}>
            <FaHistory className="text-blue-500" />
@@ -78,7 +78,7 @@ export default function RecentTradesCard() {
         )}
       </div>
 
-      {/* List */}
+      {}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {recentTrades.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
@@ -95,7 +95,7 @@ export default function RecentTradesCard() {
                 key={i} 
                 className={`flex items-center justify-between p-2 rounded-lg transition-colors ${TC.bgItem}`}
               >
-                  {/* Left: Icon + Coin */}
+                  {}
                   <div className="flex items-center gap-3">
                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${isBuy ? TC.bgBuyIcon : TC.bgSellIcon}`}>
                         {isBuy ? <FaArrowUp /> : <FaArrowDown />}
@@ -110,7 +110,7 @@ export default function RecentTradesCard() {
                      </div>
                   </div>
 
-                  {/* Right: Amount + Value */}
+                  {}
                   <div className="text-right">
                      <p className={`text-xs font-bold ${isBuy ? TC.textBuy : TC.textSell}`}>
                         {isBuy ? "+" : "-"}{tx.quantity?.toFixed(4)}

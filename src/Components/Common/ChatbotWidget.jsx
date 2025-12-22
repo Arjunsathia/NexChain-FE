@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageCircle } from 'lucide-react';
 import useThemeCheck from '@/hooks/useThemeCheck';
 
-// Custom SVG Icon matching the user's request (Robot box with antenna and smile)
+
 const CustomBotIcon = ({ className }) => (
   <svg 
     viewBox="0 0 24 24" 
@@ -18,31 +18,29 @@ const CustomBotIcon = ({ className }) => (
     <path d="M12 22L12 24L8 24L10.5 22H12Z" transform="translate(4,0)" />
   </svg>
 );
-// Actually the provided image has a speech bubble tail. Let me redraw to match the image exactly.
-// The image is: Robot head bubble.
-// Antenna on top. Ears on side. Smile. Eyes.
-// And a tail at bottom left/right.
+
+
+
+
 
 const RobotIcon = ({ className }) => (
   <svg viewBox="0 0 100 100" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-     {/* Antenna */}
+     {}
      <circle cx="50" cy="15" r="6" />
      <rect x="48" y="15" width="4" height="15" rx="1" />
      
-     {/* Side Ears */}
+     {}
      <path d="M12 45 H18 V65 H12 C10 65 8 63 8 61 V49 C8 47 10 45 12 45 Z" />
      <path d="M82 45 H88 C90 45 92 47 92 49 V61 C92 63 90 65 88 65 H82 V45 Z" />
      
-     {/* Face/Head (Rounded Rect) */}
+     {}
      <rect x="18" y="28" width="64" height="50" rx="12" />
      
-     {/* Eyes */}
-     <circle cx="38" cy="48" r="6" fill="white" />{/* Eye holes are usually negative space or white. I'll make them white on black/filled robot. The user's robot is black with white features. */}
-     <circle cx="38" cy="48" r="6" fill="#000000" fillOpacity="0" className="text-current opacity-0" /> {/* Trick to inherit color if needed, but here we want "knockout" look. 
-     If the robot is FILLED, the eyes should be transparent or background color.
-     Since the icon text-white on gradient, the "knockout" parts should be transparent. */}
+     {}
+     <circle cx="38" cy="48" r="6" fill="white" />{}
+     <circle cx="38" cy="48" r="6" fill="#000000" fillOpacity="0" className="text-current opacity-0" /> {}
      
-     {/* Redrawing properly as a Masked SVG or Compound Path for single color fill */}
+     {}
      <path fillRule="evenodd" clipRule="evenodd" d="
        M50 10 A6 6 0 1 1 50 22 A6 6 0 0 1 50 10 Z 
        M48 22 H52 V28 H48 V22 Z
@@ -57,22 +55,22 @@ const RobotIcon = ({ className }) => (
      />
   </svg>
 );
-// The path for eyes/mouth needs to be subtracted if using fill.
-// Let's rely on a simpler compound path approach where holes are counter-clockwise or using fill-rule.
+
+
 
 const SmartBotIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    {/* Body/Head with tail */}
+    {}
     <path fillRule="evenodd" clipRule="evenodd" d="M12 4C12.55 4 13 4.45 13 5V6H18C20.21 6 22 7.79 22 10V17C22 19.21 20.21 21 18 21H14L10 24V21H6C3.79 21 2 19.21 2 17V10C2 7.79 3.79 6 6 6H11V5C11 4.45 11.45 4 12 4ZM8.5 13C9.33 13 10 12.33 10 11.5C10 10.67 9.33 10 8.5 10C7.67 10 7 10.67 7 11.5C7 12.33 7.67 13 8.5 13ZM15.5 13C16.33 13 17 12.33 17 11.5C17 10.67 16.33 10 15.5 10C14.67 10 14 10.67 14 11.5C14 12.33 14.67 13 15.5 13ZM8 15.5C8 15.5 10 18.5 12 18.5C14 18.5 16 15.5 16 15.5H8Z" />
-    {/* Antenna ball */}
+    {}
     <circle cx="12" cy="2.5" r="1.5" />
-    {/* Ears */}
+    {}
     <path d="M22 11H23C23.55 11 24 11.45 24 12V15C24 15.55 23.55 16 23 16H22V11Z" />
     <path d="M2 11H1C0.45 11 0 11.45 0 12V15C0 15.55 0.45 16 1 16H2V11Z" />
   </svg>
 );
-// This SVG mimics the "Robot Chat" look. 
-// Head (Rounded Rect with speech tail) + Antenna + Ears + Eyes + Smile.
+
+
 
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +98,7 @@ const ChatbotWidget = () => {
     setMessages([...messages, newMessage]);
     setInputValue('');
 
-    // Simulate bot response
+    
     setTimeout(() => {
       const botResponse = {
         id: messages.length + 2,
@@ -121,7 +119,7 @@ const ChatbotWidget = () => {
 
   return (
     <>
-      {/* Floating Button - Minimal Design with Gradient */}
+      {}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`
@@ -142,7 +140,7 @@ const ChatbotWidget = () => {
         <SmartBotIcon className="w-7 h-7 text-white" />
       </motion.button>
 
-      {/* Chat Window */}
+      {}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -160,7 +158,7 @@ const ChatbotWidget = () => {
               flex flex-col overflow-hidden
             `}
           >
-            {/* Header */}
+            {}
             <div className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -179,7 +177,7 @@ const ChatbotWidget = () => {
               </button>
             </div>
 
-            {/* Messages Area */}
+            {}
             <div className={`
               flex-1 overflow-y-auto p-4 space-y-4
               ${isLight ? 'bg-gray-50' : 'bg-gray-800/50'}
@@ -211,7 +209,7 @@ const ChatbotWidget = () => {
               ))}
             </div>
 
-            {/* Input Area */}
+            {}
             <div className={`
               p-4 border-t
               ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900 border-gray-700'}

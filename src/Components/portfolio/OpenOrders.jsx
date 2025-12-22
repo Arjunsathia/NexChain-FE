@@ -26,7 +26,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000); // Poll every 10s
+    const interval = setInterval(fetchOrders, 10000); 
     return () => clearInterval(interval);
   }, [user]);
 
@@ -55,7 +55,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
     }
   };
 
-  // Monitor Prices
+  
   useEffect(() => {
     if (!orders.length || !livePrices) return;
 
@@ -66,7 +66,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
       if (priceData && priceData.current_price) {
         const currentPrice = priceData.current_price;
         
-        // STOP ORDERS
+        
         if (order.category === 'stop_limit' || order.category === 'stop_market') {
             if (order.type === 'buy' && currentPrice >= order.stop_price) {
                 handleExecute(order._id, currentPrice);
@@ -74,7 +74,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
                 handleExecute(order._id, currentPrice);
             }
         }
-        // LIMIT ORDERS
+        
         else if (order.category === 'limit') {
             if (order.type === 'buy' && currentPrice <= order.limit_price) {
                 handleExecute(order._id, currentPrice);
@@ -91,7 +91,7 @@ const OpenOrders = ({ isLight, livePrices }) => {
       const res = await api.put(`/orders/cancel/${orderId}`);
       if (res.data.success) {
         toast.success("Order cancelled successfully");
-        fetchOrders(); // Refresh list
+        fetchOrders(); 
       }
     } catch (error) {
       toast.error("Failed to cancel order");

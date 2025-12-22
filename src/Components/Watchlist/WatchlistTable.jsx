@@ -46,7 +46,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                 }`}
                 style={{ animationDelay: `${0.3 + index * 0.05}s` }}
               >
-                {/* Alert Icon */}
+                {}
                 <td className="py-4 px-6 text-center">
                   <button
                     onClick={(e) => handleAlertClick(e, coin)}
@@ -60,7 +60,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   </button>
                 </td>
 
-                {/* Coin Info */}
+                {}
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <img 
@@ -79,7 +79,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   </div>
                 </td>
 
-                {/* Price */}
+                {}
                 <td className={`py-4 px-6 text-right ${TC.textPrimary}`}>
                   <div className="font-semibold text-base">
                     ${coin.current_price?.toLocaleString("en-IN", { 
@@ -89,7 +89,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   </div>
                 </td>
 
-                {/* 24h Change */}
+                {}
                 <td className="py-4 px-6 text-right">
                   <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold text-sm ${
                     (coin.price_change_percentage_24h || 0) >= 0
@@ -101,7 +101,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   </div>
                 </td>
 
-                {/* Market Cap */}
+                {}
                 <td className={`py-4 px-6 text-right font-medium ${TC.textSecondary}`}>
                   ${(coin.market_cap || 0) >= 1e12 
                     ? ((coin.market_cap || 0) / 1e12).toFixed(2) + "T"
@@ -112,7 +112,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                     : (coin.market_cap || 0).toLocaleString("en-IN")}
                 </td>
 
-                {/* 7d Trend */}
+                {}
                 <td className="py-4 px-6">
                   <div className="flex justify-center">
                     <Sparkline 
@@ -124,7 +124,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   </div>
                 </td>
 
-                {/* Holdings */}
+                {}
                 <td className="py-4 px-6 text-center">
                   {coin.userHolding ? (
                     <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold ${
@@ -137,7 +137,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
                   )}
                 </td>
 
-                {/* Actions */}
+                {}
                 <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-center gap-2">
                     <button
@@ -163,7 +163,7 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
         </table>
       </div>
 
-      {/* Table Footer */}
+      {}
       <div className={`px-6 py-4 border-t ${isLight ? "bg-gray-50 border-gray-200" : "bg-gray-900/50 border-gray-700"}`}>
         <div className={`flex justify-between items-center text-sm ${TC.textSecondary}`}>
           <span>Showing {coins.length} coins</span>

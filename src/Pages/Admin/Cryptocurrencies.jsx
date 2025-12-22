@@ -13,18 +13,18 @@ const AdminCryptocurrencies = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCoin, setSelectedCoin] = useState(null);
-  const [contentLoaded, setContentLoaded] = useState(false); // New state for animation
+  const [contentLoaded, setContentLoaded] = useState(false); 
   const coinsPerPage = 10;
 
   useEffect(() => {
-    // Simulate loading/data fetch completion for animation
+    
     const timer = setTimeout(() => {
       setContentLoaded(true);
-    }, 50); // Small delay to ensure component mounts before animating
+    }, 50); 
     return () => clearTimeout(timer);
   }, []);
 
-  // Premium Theme Classes - Matches User Dashboard
+  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -46,7 +46,7 @@ const AdminCryptocurrencies = () => {
       modalOverlay: "bg-black/80 backdrop-blur-sm",
       modalContent: isLight ? "bg-white shadow-2xl" : "bg-[#0a0b14] shadow-2xl shadow-black/50",
 
-      // Gradient matching the Dashboard component: from-cyan-400 to-blue-500
+      
       headerGradient: "from-cyan-400 to-blue-500",
     }),
     [isLight]
@@ -81,12 +81,12 @@ const AdminCryptocurrencies = () => {
   };
 
   return (
-    // Applied Dashboard's inner content div for max width and responsive padding
+    
     <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          {/* Applied Dashboard's Heading Style */}
+          {}
           <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
             Cryptocurrencies
           </h1>
@@ -110,10 +110,10 @@ const AdminCryptocurrencies = () => {
         }`}
       >
 
-        {/* Stats Cards */}
+        {}
         <CryptoStats coins={coins} TC={TC} />
 
-        {/* Coins Table */}
+        {}
         <CryptoTable
           currentCoins={currentCoins}
           TC={TC}
@@ -128,7 +128,7 @@ const AdminCryptocurrencies = () => {
 
       </div>
 
-      {/* Coin Details Modal */}
+      {}
       <CryptoDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}

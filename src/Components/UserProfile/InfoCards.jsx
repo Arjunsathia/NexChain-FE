@@ -13,17 +13,17 @@ function InfoCards() {
   const { watchlist } = useWatchlist();
   const { groupedHoldings, portfolioSummary } = useLivePortfolio();
 
-  // 💡 Theme Classes Helper
+
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight 
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
+    bgCard: isLight
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
-    
+
     textGreen: isLight ? "text-green-700" : "text-green-400",
     textRed: isLight ? "text-red-700" : "text-red-400",
     textGray: isLight ? "text-gray-700" : "text-gray-400",
@@ -32,10 +32,10 @@ function InfoCards() {
 
 
   const portfolioStats = useMemo(() => {
-    // Use groupedHoldings from useLivePortfolio for accurate count
+
     const uniqueCoins = groupedHoldings?.length || 0;
-    
-    // Use portfolioSummary for accurate portfolio values
+
+
     const totalInvested = portfolioSummary?.remainingInvestment || 0;
     const currentValue = portfolioSummary?.totalCurrentValue || 0;
     const profitLoss = portfolioSummary?.totalProfitLoss || 0;
@@ -93,9 +93,9 @@ function InfoCards() {
   const formatValue = (value, format) => {
     switch (format) {
       case "currency":
-        return `$${(value || 0).toLocaleString('en-IN', { 
-          minimumFractionDigits: 2, 
-          maximumFractionDigits: 2 
+        return `$${(value || 0).toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
         })}`;
       case "number":
         return value.toString();
@@ -105,9 +105,9 @@ function InfoCards() {
   };
 
   const formatTrendValue = (value) => {
-    return `$${Math.abs(value || 0).toLocaleString('en-IN', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return `$${Math.abs(value || 0).toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     })}`;
   };
 
@@ -123,7 +123,7 @@ function InfoCards() {
 
   const getTrendText = (trend, trendValue) => {
     if (trend === null) return null;
-    
+
     return (
       <div className="flex flex-col items-end">
         <div className="flex items-center gap-1">
@@ -145,7 +145,7 @@ function InfoCards() {
         const Icon = card.icon;
         const trendColor = getTrendColor(card.trend);
         const trendText = getTrendText(card.trend, card.trendValue);
-        
+
         return (
           <div
             key={idx}
@@ -162,11 +162,11 @@ function InfoCards() {
                 </div>
               )}
             </div>
-            
+
             <p className={`text-base sm:text-lg font-bold mb-0.5 sm:mb-1 transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
               {formatValue(card.value, card.format)}
             </p>
-            
+
             <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>
               {card.title}
             </p>

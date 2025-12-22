@@ -7,7 +7,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 
 import ErrorBoundary from "./Components/Common/ErrorBoundary";
 
-// ...
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ErrorBoundary>

@@ -24,7 +24,7 @@ function Admin() {
     const checkScreenSize = () => {
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      // Close mobile menu when switching to desktop
+      
       if (desktop && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
@@ -50,16 +50,16 @@ function Admin() {
 
   return (
     <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"} transition-colors duration-150`}>
-      {/* Show Sidebar only on desktop - Fixed position */}
+      {}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}
       
-      {/* Main content area */}
+      {}
       <div className="flex-1 flex flex-col min-h-screen relative min-w-0">
-        {/* Show MobileNavbar only on small and medium screens */}
+        {}
         {!isDesktop && (
           <div className="sticky top-0 z-50">
             <MobileNavbar
@@ -71,7 +71,7 @@ function Admin() {
           </div>
         )}
         
-        {/* Page content - Scrollable area */}
+        {}
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4">
           <Suspense fallback={<AdminLoader />}>
             <Outlet />

@@ -16,7 +16,7 @@ function Watchlist() {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -24,31 +24,31 @@ function Watchlist() {
     
     bgCard: isLight ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
-    // Header
+    
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
     iconColor: isLight ? "text-blue-600" : "text-cyan-400",
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
 
-    // Skeleton
+    
     bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
 
-    // Activity Item
+    
     bgItem: isLight ? "bg-gray-100/70 border-none hover:bg-gray-100 shadow-sm" : "bg-gray-700/30 border-none hover:bg-gray-700/50 shadow-inner",
     textItemHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
     
-    // Status/Value Colors
+    
     textPositive: isLight ? "text-green-700" : "text-green-400",
     textNegative: isLight ? "text-red-700" : "text-red-400",
 
-    // Error State
+    
     bgErrorIcon: isLight ? "bg-yellow-100" : "bg-yellow-500/10",
     textErrorIcon: isLight ? "text-yellow-700" : "text-yellow-500",
     
-    // Action Button
+    
     btnAction: isLight ? "text-blue-600 hover:text-blue-500 bg-gray-100 hover:bg-gray-200 border-none shadow-sm" : "text-cyan-400 hover:text-cyan-300 bg-gray-700/50 hover:bg-gray-600/50 border-none shadow-inner",
     
-    // Footer
+    
     borderFooter: isLight ? "border-gray-300/50" : "border-gray-700/50",
     textFooterLink: isLight ? "text-blue-600 hover:text-blue-500" : "text-cyan-400 hover:text-cyan-300",
 
@@ -86,7 +86,7 @@ function Watchlist() {
 
   return (
     <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full flex flex-col fade-in`}>
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between mb-2 sm:mb-4 fade-in">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
@@ -103,7 +103,7 @@ function Watchlist() {
         </div>
       </div>
 
-      {/* Content */}
+      {}
       <div className="flex-1">
         {loading ? (
           <div className="space-y-3">
@@ -185,7 +185,7 @@ function Watchlist() {
         )}
       </div>
 
-      {/* Footer */}
+      {}
       {!loading && !error && displayCoins.length > 0 && totalCoins > 4 && (
         <div className={`flex items-center justify-between pt-2 mt-2 sm:pt-3 sm:mt-3 ${TC.borderFooter} text-[10px] sm:text-sm ${TC.textSecondary} fade-in`}>
           <span>Showing 4 of {totalCoins}</span>

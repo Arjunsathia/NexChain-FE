@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function PublicLayout() {
   const [isDark, setIsDark] = useState(true);
 
-  // 💡 Function to toggle Dark Mode globally
+  
   const toggleDarkMode = () => {
     setIsDark(prevIsDark => {
       const newIsDark = !prevIsDark;
@@ -19,16 +19,16 @@ export default function PublicLayout() {
     });
   };
 
-  // Set initial theme based on state
+  
   useEffect(() => {
     document.documentElement.classList.add("dark");
     localStorage.setItem("theme", "dark");
   }, []);
 
-  // 💡 Gradient classes switched based on isDark state
+  
   const backgroundClass = isDark
-    ? "bg-gradient-to-br from-black via-[#0b182d] to-black" // Original Dark Gradient
-    : "bg-gradient-to-tl from-white via-slate-50 to-blue-50"; // 💨 Subtle Premium Cool Gradient
+    ? "bg-gradient-to-br from-black via-[#0b182d] to-black" 
+    : "bg-gradient-to-tl from-white via-slate-50 to-blue-50"; 
 
   return (
     <div className={`min-h-screen flex flex-col ${backgroundClass} text-white`}>

@@ -21,18 +21,18 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         width / 2, height / 2, 0,
         width / 2, height / 2, Math.max(width, height) / 2
       );
-      g.addColorStop(0, '#111827'); // Gray 900 Center
-      g.addColorStop(0.7, '#020617'); // Slate 950
-      g.addColorStop(1, '#000000'); // Black Edges
+      g.addColorStop(0, '#111827'); 
+      g.addColorStop(0.7, '#020617'); 
+      g.addColorStop(1, '#000000'); 
       gradientRef.current = g;
     };
 
-    // Set canvas size and gradient
+    
     canvas.width = width;
     canvas.height = height;
     updateGradient();
     
-    // Handle resize
+    
     const handleResize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
@@ -43,13 +43,13 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
     
     window.addEventListener('resize', handleResize);
     
-    // Particle system containers
+    
     const particles = [];
     const networkNodes = [];
     const networkLines = [];
     const lightFlares = [];
     
-    // Initialize particles - REDUCED COUNT (30 is plenty for mobile/desktop background)
+    
     for (let i = 0; i < 30; i++) { 
       particles.push({
         x: Math.random() * width,
@@ -62,7 +62,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       });
     }
     
-    // Initialize network nodes - REDUCED COUNT (8 is cleaner)
+    
     for (let i = 0; i < 8; i++) { 
       networkNodes.push({
         x: Math.random() * width,
@@ -75,9 +75,9 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       });
     }
     
-    // Create network connections - Optimized logic
+    
     networkNodes.forEach((node, i) => {
-      // Find closest nodes
+      
       const distances = networkNodes.map((other, j) => ({
         index: j,
         distance: Math.sqrt((node.x - other.x) ** 2 + (node.y - other.y) ** 2)
@@ -85,7 +85,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       
       distances.sort((a, b) => a.distance - b.distance);
       
-      // Connect to 1-2 nearest neighbors
+      
       const numConnections = Math.floor(Math.random() * 2) + 1;
       for (let j = 1; j <= numConnections && j < distances.length; j++) {
         if (!node.connections.includes(distances[j].index)) {
@@ -109,7 +109,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       }
     });
     
-    // Initialize light flares - Minimal
+    
     for (let i = 0; i < 2; i++) { 
       lightFlares.push({
         x: Math.random() * width,
@@ -121,24 +121,24 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
       });
     }
     
-    // Animation loop
+    
     const animate = () => {
       if (!ctx || !gradientRef.current) {
         animationRef.current = requestAnimationFrame(animate);
         return;
       }
 
-      // Clear with CACHED gradient
+      
       ctx.fillStyle = gradientRef.current;
       ctx.fillRect(0, 0, width, height);
       
-      // Update and draw particles
+      
       particles.forEach(particle => {
         const moveSpeed = particle.speed * (particle.layer + 1);
         particle.x += Math.cos(particle.direction) * moveSpeed;
         particle.y += Math.sin(particle.direction) * moveSpeed;
         
-        // Wrap around screen
+        
         if (particle.x < -10) particle.x = width + 10;
         if (particle.x > width + 10) particle.x = -10;
         if (particle.y < -10) particle.y = height + 10;
@@ -150,7 +150,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         ctx.fill();
       });
       
-      // Update and draw network nodes
+      
       networkNodes.forEach(node => {
         node.pulse += node.pulseSpeed;
         node.x = node.baseX + Math.sin(node.pulse * 0.5) * 1.0; 
@@ -158,7 +158,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         
         const pulseSize = 2.0 + Math.sin(node.pulse) * 1.0; 
         
-        // Draw glow
+        
         const g = ctx.createRadialGradient(
           node.x, node.y, 0,
           node.x, node.y, pulseSize * 3.0
@@ -171,14 +171,14 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         ctx.fillStyle = g;
         ctx.fill();
         
-        // Draw core
+        
         ctx.beginPath();
         ctx.arc(node.x, node.y, pulseSize, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(165, 180, 252, ${0.6 + Math.sin(node.pulse) * 0.2})`; 
         ctx.fill();
       });
       
-      // Update and draw network lines
+      
       networkLines.forEach(line => {
         line.pulse += line.pulseSpeed;
         const fromNode = networkNodes[line.from];
@@ -203,7 +203,7 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
         ctx.stroke();
       });
       
-      // Draw rotating light flares
+      
       lightFlares.forEach(flare => {
         flare.rotation += flare.rotationSpeed;
         ctx.save();
@@ -243,9 +243,9 @@ const DarkCosmicBlockchainBackground = React.memo(() => {
   );
 });
 
-// =================================================================
-// SUB-COMPONENTS
-// =================================================================
+
+
+
 
 const GridBeam = React.memo(({ delay = 0, duration = 4, top, left, vertical = false }) => (
   <motion.div
@@ -277,13 +277,13 @@ const GridBeam = React.memo(({ delay = 0, duration = 4, top, left, vertical = fa
 const InteractiveGridPattern = React.memo(({ className = "" }) => {
   return (
     <div className={`fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full bg-[#02040a] ${className}`}> 
-      {/* Dark Cosmic Blockchain Background */}
+      {}
       <DarkCosmicBlockchainBackground />
       
-      {/* Subtle noise texture with very low opacity */}
+      {}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.01]"></div>
 
-      {/* FEWER shooting stars for minimal look */}
+      {}
       <>
         <GridBeam top="15%" delay={0} duration={7} />
         <GridBeam top="65%" delay={2} duration={8} />

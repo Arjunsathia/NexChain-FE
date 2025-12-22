@@ -7,13 +7,13 @@ export const getInitialTheme = () => {
         }
         return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
-    return "dark"; // Default
+    return "dark"; 
 };
 
 export const applyTheme = (theme) => {
     const root = document.documentElement;
     root.setAttribute("data-theme", theme);
-    // Also toggle class for backward compatibility if needed, though config uses attribute now
+    
     if (theme === 'dark') {
         root.classList.add('dark');
     } else {
@@ -30,7 +30,7 @@ export const toggleTheme = () => {
     window.dispatchEvent(new Event('theme-change'));
 };
 
-// Initialize theme immediately
+
 export const initTheme = () => {
     const theme = getInitialTheme();
     applyTheme(theme);

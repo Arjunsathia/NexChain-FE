@@ -13,7 +13,7 @@ const TradeModalHeader = ({
   TC,
   handleClose,
 }) => {
-  // Dynamic header accent classes
+  
   const headerAccentClass = (() => {
     if (shouldShowHoldingsInfo && activeTab === "details")
       return TC.bgCyanAccent;

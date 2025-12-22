@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
 import { jwtDecode } from "jwt-decode";
-import { refreshBalance } from "./walletSlice"; // To update balance after purchase
+import { refreshBalance } from "./walletSlice"; 
 
 const getUserId = () => {
     const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
@@ -16,7 +16,7 @@ const getUserId = () => {
 
 export const fetchPurchasedCoins = createAsyncThunk("portfolio/fetchPurchasedCoins", async (_, { rejectWithValue }) => {
   const userId = getUserId();
-  if (!userId) return []; // Return empty if no user
+  if (!userId) return []; 
 
   try {
     const response = await getData(`/purchases/${userId}`);
@@ -33,7 +33,7 @@ export const fetchPurchasedCoins = createAsyncThunk("portfolio/fetchPurchasedCoi
         fees: coin.fees || 0,
         image: coin.image || coin.logo,
         purchaseDate: coin.purchaseDate || coin.createdAt,
-        remainingInvestment: coin.totalCost, // Simplified for now, backend might track this
+        remainingInvestment: coin.totalCost, 
         totalQuantity: coin.quantity
       }));
     } else {
@@ -67,9 +67,9 @@ export const addPurchase = createAsyncThunk("portfolio/addPurchase", async (purc
         const finalPurchaseData = { ...purchaseData, user_id: userId };
         const response = await postForm('/purchases/buy', finalPurchaseData);
         if (response.success) {
-            dispatch(refreshBalance()); // Update wallet balance
-            dispatch(fetchPurchasedCoins()); // Refresh portfolio
-            dispatch(fetchTransactionHistory()); // Refresh history
+            dispatch(refreshBalance()); 
+            dispatch(fetchPurchasedCoins()); 
+            dispatch(fetchTransactionHistory()); 
             return response;
         } else {
             return rejectWithValue(response.error);

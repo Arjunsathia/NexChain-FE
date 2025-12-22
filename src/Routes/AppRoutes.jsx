@@ -6,7 +6,7 @@ import PublicRoute from "./PublicRoute";
 import MainLayout from "@/Components/layout/MainLayout";
 import PublicLayout from "@/Components/layout/PublicLayout";
 
-// Static Imports for Core Pages (Instant Switching)
+
 import Dashboard from "../Pages/Dashboard";
 import CryptoList from "../Pages/CryptoList";
 import PortfolioPage from "@/Pages/PortfolioPage";
@@ -15,14 +15,14 @@ import LearningHub from "@/Pages/LearningHub";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
 
-// Lazy Load Secondary/Admin Pages
+
 const CoinDetailsPage = lazy(() => import("@/Pages/CoinDetails/CoinDetailsPage"));
 const CoinPageOutlet = lazy(() => import("@/Pages/CoinDetails/CoinPageOutlet"));
 const User = lazy(() => import("@/Pages/UserProfile/User"));
 const UserDashboard = lazy(() => import("@/Pages/UserProfile/UserDashboard"));
 const UserSettings = lazy(() => import("@/Pages/UserProfile/Settings"));
 
-// Admin Pages
+
 const Admin = lazy(() => import("@/Pages/Admin/Admin"));
 const AdminDashboard = lazy(() => import("@/Pages/Admin/Dashboard"));
 const Users = lazy(() => import("@/Pages/Admin/Users"));
@@ -33,7 +33,7 @@ const AdminSettings = lazy(() => import("@/Pages/Admin/Settings"));
 
 
 
-// Loading Fallback Component
+
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
@@ -44,7 +44,7 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Public Landing Page */}
+        {}
         <Route element={<PublicRoute />}>
           <Route path="/" index element={<Landing />} />
           <Route element={<PublicLayout />}>
@@ -52,12 +52,12 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
-        {/* Auth/Public Routes */}
+        {}
         <Route element={<AuthRoute />}>
           <Route path="/auth" element={<AuthPages />} />
         </Route>
 
-        {/* Protected Routes */}
+        {}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />

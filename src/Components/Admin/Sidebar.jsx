@@ -18,13 +18,13 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
 
-  // 💡 Theme Classes Helper - Matches User Dashboard
+  
   const TC = useMemo(() => ({
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Backgrounds & Borders
+    
     bgSidebar: isLight 
       ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
@@ -32,29 +32,29 @@ function Sidebar({ onLogout, isLogoutLoading }) {
       ? "bg-white shadow-md" 
       : "bg-gray-800/90 backdrop-blur-md",
 
-    // Header Colors
+    
     headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
     headerTitle: isLight ? "text-gray-900" : "text-white",
 
-    // Menu Item Base
+    
     menuItemBase: isLight 
       ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
       : "text-gray-400 hover:bg-white/5 hover:text-white",
 
-    // Menu Item Active
+    
     menuItemActive: isLight 
       ? "bg-blue-50 text-blue-700 shadow-sm" 
       : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
     
-    // Icons
+    
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
     iconInactive: isLight ? "text-gray-400" : "text-gray-500",
     
-    // Stats
+    
     bgStatCard: isLight ? "bg-gray-50" : "bg-gray-900/50",
     bgStatItem: isLight ? "bg-white shadow-sm" : "bg-black/20",
     
-    // Logout
+    
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
   }), [isLight]);
 
@@ -96,7 +96,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         }
         .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
-      {/* Mobile Version */}
+      {}
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
@@ -130,7 +130,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
       </div>
 
-      {/* Desktop Sidebar */}
+      {}
       <aside
         className={`
           hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
@@ -139,7 +139,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
         `}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
           <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
             <FaUserShield className="text-white text-xl" />
@@ -150,7 +150,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {/* Navigation */}
+        {}
         <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
           {menus.map((item, index) => (
             <Link
@@ -175,14 +175,14 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                 </span>
               </div>
               
-              {/* Active Indicator */}
+              {}
               {isActive(item.path) && (
                 <div className="flex items-center gap-2">
                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
                 </div>
               )}
               
-              {/* Hover Glow Effect */}
+              {}
               {!isActive(item.path) && (
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               )}
@@ -190,7 +190,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ))}
         </nav>
 
-        {/* Bottom Stats Card */}
+        {}
         <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>System Status</span>

@@ -19,7 +19,7 @@ const Settings = () => {
   const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
-    // Simulate initial loading
+    
     const timer = setTimeout(() => {
       setLoading(false);
       setTimeout(() => setContentLoaded(true), 300);
@@ -27,7 +27,7 @@ const Settings = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Theme Classes
+  
   const TC = useMemo(() => ({
     textPrimary: isDark ? "text-white" : "text-gray-900",
     textSecondary: isDark ? "text-gray-400" : "text-gray-600",
@@ -58,7 +58,7 @@ const Settings = () => {
 
   return (
     <div className={`flex-1 w-full max-w-full overflow-x-hidden p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}` }>
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="px-2 py-2"> 
           <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
@@ -70,7 +70,7 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {}
       <div className={`flex w-full max-w-full overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
         {tabs.map((tab) => (
           <button
@@ -87,7 +87,7 @@ const Settings = () => {
         ))}
       </div>
 
-      {/* Loading Skeleton */}
+      {}
       {loading ? (
         <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
           <div className="space-y-6">
@@ -103,7 +103,7 @@ const Settings = () => {
           </div>
         </div>
       ) : (
-        /* Content */
+        
         <div 
           className={`transition-all duration-500 ease-in-out ${
             contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'

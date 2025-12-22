@@ -48,7 +48,7 @@ const ProfileSettings = () => {
     }
 
     try {
-      // Create plain object for JSON request
+      
       const updateData = {
         name: formData.name,
         user_name: formData.user_name,
@@ -61,7 +61,7 @@ const ProfileSettings = () => {
         updateData.confirmPassword = formData.confirmPassword;
       }
 
-      // Use fetch for reliable file upload
+      
       const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
       
       const response = await fetch(`${SERVER_URL}/api/users/${user.id}`, {
@@ -82,9 +82,9 @@ const ProfileSettings = () => {
 
       if (data.user) {
         toast.success("Profile updated successfully");
-        // Update local storage to reflect changes
+        
         localStorage.setItem("NEXCHAIN_USER", JSON.stringify(data.user));
-        // Reload to update context and navbar image
+        
         window.location.reload();
       }
     } catch (error) {
@@ -95,7 +95,7 @@ const ProfileSettings = () => {
     }
   };
 
-  // Input Class Helper
+  
   const inputClass = `w-full px-3 sm:px-4 py-2 rounded-lg border outline-none transition-all focus:ring-2 focus:ring-cyan-500 ${
     isDark 
       ? "bg-gray-700 text-white border-gray-600 placeholder-gray-400" 

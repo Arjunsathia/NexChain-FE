@@ -26,7 +26,7 @@ export default function User() {
     const checkScreenSize = () => {
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      // Close mobile menu when switching to desktop
+      
       if (desktop && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
@@ -52,16 +52,16 @@ export default function User() {
 
   return (
     <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}>
-      {/* Show Sidebar only on desktop - Fixed position */}
+      {}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}
       
-      {/* Main content area */}
+      {}
       <div className="flex-1 flex flex-col min-h-screen relative w-full overflow-x-hidden">
-        {/* Show MobileNavbar only on small and medium screens */}
+        {}
         {!isDesktop && (
           <div className="sticky top-0 z-50">
             <UserMobileNavbar
@@ -73,7 +73,7 @@ export default function User() {
           </div>
         )}
         
-        {/* Page content - Scrollable area */}
+        {}
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
           <Suspense fallback={<UserLoader />}>
             <Outlet />

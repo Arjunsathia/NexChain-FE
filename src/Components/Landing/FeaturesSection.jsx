@@ -27,7 +27,7 @@ const FeaturesSection = forwardRef(({ TC, sectionVariants }, ref) => {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-12 items-start">
-          {/* Feature Tabs */}
+          {}
           <div className="lg:col-span-5 grid grid-cols-1 gap-4">
             {featuresList.map((feature, index) => (
               <div
@@ -64,10 +64,10 @@ const FeaturesSection = forwardRef(({ TC, sectionVariants }, ref) => {
             ))}
           </div>
 
-          {/* Feature Visual - Optimized Display */}
+          {}
           <div className="lg:col-span-7 h-[300px] md:h-[500px] relative">
             <div className="w-full h-full rounded-3xl bg-[#0a0f1e] border border-white/10 p-6 relative overflow-hidden shadow-2xl flex items-center justify-center">
-                {/* Background Pattern */}
+                {}
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff33_1px,transparent_1px)] [background-size:16px_16px]" />
 
                 <AnimatePresence mode="wait">

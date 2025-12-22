@@ -1,7 +1,7 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo } from "react";
 
-// Assuming useThemeCheck is available in this scope or imported
+
 
 
 const sampleNews = [

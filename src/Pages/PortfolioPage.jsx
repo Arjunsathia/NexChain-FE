@@ -26,14 +26,14 @@ const PortfolioPage = () => {
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
 
-  // Trade Modal State
+  
   const [tradeModal, setTradeModal] = useState({
     show: false,
     coin: null,
     type: "buy",
   });
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -42,7 +42,7 @@ const PortfolioPage = () => {
     iconBg: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",
   }), [isLight]);
 
-  // WebSocket for Live Prices
+  
   useEffect(() => {
     if (!groupedHoldings || groupedHoldings.length === 0) return;
 
@@ -59,7 +59,7 @@ const PortfolioPage = () => {
 
     const streams = symbols.join('/');
     let lastUpdate = 0;
-    const THROTTLE_MS = 2000; // Update max once every 2 seconds
+    const THROTTLE_MS = 2000; 
 
     try {
       if (ws.current) ws.current.close();
@@ -70,7 +70,7 @@ const PortfolioPage = () => {
 
       ws.current.onmessage = (event) => {
         const now = Date.now();
-        if (now - lastUpdate < THROTTLE_MS) return; // Skip update if throttled
+        if (now - lastUpdate < THROTTLE_MS) return; 
 
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
@@ -105,7 +105,7 @@ const PortfolioPage = () => {
     };
   }, [groupedHoldings]);
 
-  // Merge Live Data with Holdings
+  
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];
     
@@ -131,7 +131,7 @@ const PortfolioPage = () => {
     });
   }, [groupedHoldings, livePrices]);
 
-  // Calculate Live Summary
+  
   const liveSummary = useMemo(() => {
     const totalCurrentValue = mergedHoldings.reduce((sum, coin) => sum + (coin.totalCurrentValue || 0), 0);
     const totalInvested = mergedHoldings.reduce((sum, coin) => sum + (coin.remainingInvestment || 0), 0);
@@ -146,7 +146,7 @@ const PortfolioPage = () => {
     };
   }, [mergedHoldings]);
 
-  // Find Top Performer
+  
   const topPerformer = useMemo(() => {
     if (!mergedHoldings || mergedHoldings.length === 0) return null;
     return [...mergedHoldings].sort((a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0))[0];
@@ -155,8 +155,8 @@ const PortfolioPage = () => {
   const handleTrade = useCallback((coin) => {
     setTradeModal({
       show: true,
-      coin: { ...coin, id: coin.coinId }, // Ensure ID is set correctly for modal
-      type: "buy", // Default to buy, modal can switch
+      coin: { ...coin, id: coin.coinId }, 
+      type: "buy", 
     });
   }, []);
 
@@ -172,7 +172,7 @@ const PortfolioPage = () => {
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
         
-        {/* 2. Summary Cards */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.1s" }}>
           <PortfolioHeader 
             isLight={isLight} 
@@ -183,7 +183,7 @@ const PortfolioPage = () => {
           />
         </div>
 
-        {/* 4. Holdings Table (Moved Up) */}
+        {}
         <div className="space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
           <HoldingsTable 
             isLight={isLight} 
@@ -193,7 +193,7 @@ const PortfolioPage = () => {
           />
         </div>
 
-        {/* 3. Charts Section (Moved Down) */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.3s" }}>
           <div className="lg:col-span-2">
             <PerformanceChart 
@@ -213,21 +213,21 @@ const PortfolioPage = () => {
           </div>
         </div>
 
-        {/* 5. Open Orders */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.35s" }}>
            <OpenOrders isLight={isLight} livePrices={livePrices} />
         </div>
 
 
 
-        {/* 7. Recent Activity */}
+        {}
         <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: "0.4s" }}>
            <TransactionHistory />
         </div>
 
       </div>
 
-      {/* Trade Modal */}
+      {}
       <TradeModal
         show={tradeModal.show}
         onClose={() => setTradeModal({ ...tradeModal, show: false })}

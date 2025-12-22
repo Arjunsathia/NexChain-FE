@@ -23,7 +23,7 @@ function LatestUsers({ users, isLoading, TC }) {
           View All
         </button>
       </div>
-      {/* Scrollable user list - max 10 users, hidden scrollbar */}
+      {}
       <div className="max-h-[400px] overflow-y-auto scrollbar-hide space-y-2 sm:space-y-3">
         {isLoading ? (
           <>

@@ -30,7 +30,7 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch unread count
+  
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -38,7 +38,7 @@ export default function Navbar() {
         const count = res.data.filter(n => !n.isRead).length;
         setUnreadCount(count);
       } catch (error) {
-        // console.error("Failed to fetch notifications", error);
+        
       }
     };
     if (user) {
@@ -48,14 +48,14 @@ export default function Navbar() {
     }
   }, [user]);
 
-  // Close mobile UI when route changes
+  
   useEffect(() => {
     if (isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
     }
   }, [location.pathname]);
 
-  // Close with Escape key for better UX
+  
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -108,9 +108,9 @@ export default function Navbar() {
         `}
         style={{ animationDelay: "0.1s" }}
       >
-        {/* Left: menu button (mobile & tablet) + logo */}
+        {}
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Mobile & Tablet Menu Toggle */}
+          {}
           <button
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMobileMenuOpen((s) => !s)}
@@ -135,7 +135,7 @@ export default function Navbar() {
             className="flex items-center gap-3 focus:outline-none transition-transform duration-300 hover:scale-105 fade-in"
             aria-label="Go to home"
           >
-            {/* Rocket Icon */}
+            {}
             <div className={`hidden sm:flex items-center justify-center fade-in bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300`}>
               <Rocket className="h-4 w-4 text-white" />
             </div>
@@ -150,7 +150,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Center: Full Desktop navigation */}
+        {}
         <div className={`hidden lg:flex items-center justify-center gap-1 text-sm font-medium text-[var(--nav-text)] flex-1`}>
           {navItems.map((item) => {
             const active = isActive(item.path);
@@ -171,10 +171,10 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Right: dark toggle, profile */}
+        {}
         <div className="flex items-center gap-2 flex-shrink-0">
           
-          {/* Notification Bell */}
+          {}
           <div className="relative">
             <button
               ref={bellRef}
@@ -197,7 +197,7 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Dark Mode Toggle - Perfect Compact Design */}
+          {}
           <button
             onClick={toggleTheme}
             className={`
@@ -211,7 +211,7 @@ export default function Navbar() {
             title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
             aria-label="Toggle theme"
           >
-            {/* Sliding Knob */}
+            {}
             <div
               className={`
                 absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md
@@ -228,7 +228,7 @@ export default function Navbar() {
             </div>
           </button>
 
-          {/* Profile avatar */}
+          {}
           <button
             onClick={() => {
               if (user?.id) {
@@ -251,7 +251,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu overlay */}
+      {}
       <AnimatePresence mode="wait">
         {isMobileMenuOpen && (
           <>

@@ -21,58 +21,58 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    // Navbar Container (Top Nav on Mobile, Wrapper on Desktop)
+    
     bgNavbar: isLight 
       ? "bg-white shadow-sm" 
       : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-md",
     
-    // Header
+    
     headerTitle: isLight ? "text-blue-600" : "text-cyan-400",
 
-    // Toggle Button (Mobile)
+    
     btnToggleBase: isLight 
       ? "text-gray-700 bg-gray-100 hover:text-gray-900 hover:bg-gray-200" 
       : "text-gray-300 bg-gray-800/50 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600",
     btnToggleActive: "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105 rotate-90",
 
-    // Mobile Menu Panel (Hidden menu on mobile, Sidebar on desktop)
+    
     bgMenuPanel: isLight
       ? "bg-white lg:bg-gray-50"
       : "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-950 lg:bg-gray-900",
     
-    // Links Container
+    
     borderLinkContainer: isLight ? "border-gray-300" : "border-cyan-500/30",
 
-    // Link Item Base
+    
     linkBase: isLight
       ? "text-gray-700 bg-gray-50 hover:bg-gray-100 hover:shadow-md"
       : "text-gray-300 bg-gray-800/40 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-cyan-600/20 hover:text-white",
       
-    // Link Item Active
+    
     linkActive: isLight
       ? "bg-blue-100/50 text-blue-700 shadow-md"
       : "bg-gradient-to-r from-cyan-600/30 to-blue-600/30 text-cyan-300 shadow-md backdrop-blur-sm",
     
-    // Link Icon Colors
+    
     linkIconBase: isLight ? "text-gray-600" : "text-gray-400",
     linkIconActive: isLight ? "text-blue-600" : "text-cyan-400",
     linkIconBg: isLight ? "bg-gray-200" : "bg-white/10",
 
-    // Stats Section
+    
     bgStatsSection: isLight ? "bg-gray-100/70" : "bg-gray-800/30",
     textStatsHeader: isLight ? "text-blue-600" : "text-cyan-400",
 
-    // Footer
+    
     bgFooter: isLight ? "bg-gray-100/50" : "bg-gray-800/30",
     textFooter: isLight ? "text-gray-600" : "text-gray-400",
-    // Logout
+    
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
   }), [isLight]);
 
@@ -108,12 +108,12 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     return location.pathname.startsWith(path);
   }, [location.pathname]);
 
-  // Close mobile menu when route changes
+  
   useEffect(() => {
     if (isOpen && !isDesktop) {
       onToggle();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [location.pathname]);
 
   const statsData = [
@@ -125,7 +125,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
   return (
     <>
-      {/* Fully Rounded Top Navigation Bar */}
+      {}
       <nav className={`
         ${TC.bgNavbar} sticky top-0 z-50 rounded-3xl mx-2 mt-2
         transition-all duration-500 ease-out
@@ -133,7 +133,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
       `}>
         <div className="px-3 sm:px-4 lg:ml-52 lg:px-4">
           <div className="flex justify-between items-center h-12">
-            {/* Compact Logo and Title */}
+            {}
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>
@@ -143,7 +143,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </div>
             </div>
 
-            {/* Compact mobile menu button */}
+            {}
             <button
               onClick={onToggle}
               className={`
@@ -163,7 +163,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {/* Fully Rounded Mobile Navigation Menu / Desktop Sidebar Panel */}
+        {}
         <div className={`
           transition-all duration-400 ease-in-out overflow-hidden
           ${TC.bgMenuPanel} rounded-b-3xl
@@ -171,12 +171,12 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-52 lg:max-h-screen lg:overflow-y-auto lg:translate-x-0 lg:rounded-3xl lg:m-2 lg:mt-2 lg:pt-3 lg:pb-4
         `}>
           <div className={`px-3 pt-3 pb-4 space-y-1 lg:pt-3 lg:pb-4 lg:space-y-1`}>
-            {/* Compact Navigation Items */}
+            {}
             {menus.map((item, index) => (
               <Link
                 key={index}
                 to={item.path}
-                onClick={!isDesktop ? onToggle : undefined} // Close on mobile navigation
+                onClick={!isDesktop ? onToggle : undefined} 
                 className={`
                   flex items-center gap-2 px-3 py-2.5 rounded-2xl
                   text-xs font-medium transition-all duration-150 transform
@@ -196,7 +196,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </Link>
             ))}
 
-            {/* Compact Quick Stats Section (Desktop Sidebar Only) */}
+            {}
             <div className={`pt-3 pb-2 mt-2 hidden lg:block`}>
               <h3 className={`text-xs font-semibold ${TC.textStatsHeader} mb-2 uppercase tracking-wider flex items-center justify-center rounded-full ${TC.bgStatsSection} px-2 py-1 mx-auto w-fit`}>
                 <FaSignal className="mr-1 text-xs" />
@@ -206,7 +206,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 {statsData.map((stat, index) => {
                     const statColor = isLight ? stat.color + "-700" : stat.color + "-400";
                     const statBg = isLight ? `bg-${stat.color}-100 border-${stat.color}-300` : `${stat.bg}-500/20 to-${stat.color}-600/20 border-opacity-40`;
-                    // const statBorder = isLight ? `border-${stat.color}-300` : `${stat.border}-500/40`; // Unused var
+                    
 
                     return (
                         <div
@@ -226,7 +226,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </div>
             </div>
             
-            {/* Compact Footer */}
+            {}
             <div className={`pt-2 mt-2`}>
               <div className={`text-center space-y-0.5 rounded-xl p-2 ${TC.bgFooter}`}>
                 <p className={`text-xs font-semibold ${TC.textFooter}`}>

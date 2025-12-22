@@ -12,39 +12,39 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
     setAlertModal({ show: true, coin });
   };
   const TC = useMemo(() => ({
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Card Background (aligned with other components – no border)
+    
     bgCard: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-md shadow-xl shadow-black/20",
 
-    // Table Header Background
+    
     bgHeader: isLight
       ? "bg-gray-100 border-b border-gray-200"
       : "bg-gray-800/70 border-b border-gray-700",
     
-    // Table Row Hover
+    
     bgHover: isLight ? "hover:bg-gray-50" : "hover:bg-gray-700/50",
     
-    // Skeleton Colors
+    
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
     
-    // P&L Colors
+    
     textPositive: isLight ? "text-green-600" : "text-green-400",
     textNegative: isLight ? "text-red-600" : "text-red-400",
     
-    // Action Button Colors
+    
     bgButton: isLight
       ? "bg-blue-500/10 text-blue-600 hover:bg-blue-600"
       : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500",
     textButtonHover: "hover:text-white",
   }), [isLight]);
 
-  // Loading State
+  
   if (loading) {
     return (
       <div
@@ -74,7 +74,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
     );
   }
 
-  // Empty State
+  
   if (!holdings || holdings.length === 0) {
     return (
       <div
@@ -90,7 +90,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
     );
   }
 
-  // Main Table
+  
   return (
     <div
       className={`
@@ -129,7 +129,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   ${TC.bgHover}
                 `}
               >
-                {/* Alert Icon */}
+                {}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
                   <button
                     onClick={(e) => handleAlertClick(e, coin)}
@@ -143,7 +143,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   </button>
                 </td>
 
-                {/* Asset */}
+                {}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     <img
@@ -160,7 +160,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   </div>
                 </td>
 
-                {/* Price */}
+                {}
                 <td
                   className={`
                     px-4 sm:px-6 py-3 sm:py-4 text-right text-sm font-medium
@@ -173,7 +173,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   })}
                 </td>
 
-                {/* Balance */}
+                {}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                   <div className={`font-medium ${TC.textPrimary} text-sm`}>
                     {coin.totalQuantity?.toFixed(4)}
@@ -183,7 +183,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   </div>
                 </td>
 
-                {/* Value */}
+                {}
                 <td
                   className={`
                     px-4 sm:px-6 py-3 sm:py-4 text-right font-bold text-sm
@@ -196,7 +196,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   })}
                 </td>
 
-                {/* 24h Change */}
+                {}
                 <td
                   className={`
                     px-4 sm:px-6 py-3 sm:py-4 text-right font-semibold text-sm
@@ -212,7 +212,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   {coin.priceChange24h?.toFixed(2)}%
                 </td>
 
-                {/* PnL */}
+                {}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                   <div
                     className={`
@@ -237,7 +237,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
                   </div>
                 </td>
 
-                {/* Actions */}
+                {}
                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
                   <button
                     onClick={(e) => {
@@ -258,7 +258,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade }) => {
         </table>
       </div>
       
-      {/* Mobile Card View */}
+      {}
       <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
         {holdings.map((coin, index) => (
           <div 

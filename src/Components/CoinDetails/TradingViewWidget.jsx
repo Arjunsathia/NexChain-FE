@@ -7,10 +7,10 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   const isLight = useThemeCheck();
   const container = useRef();
   
-  // Memoize theme-dependent options
+  
   const widgetOptions = useMemo(() => {
       const theme = isLight ? "light" : "dark";
-      // Transparent black/dark background for dark theme, transparent white/light for light theme
+      
       const backgroundColor = theme === "dark" ? "rgba(15, 15, 15, 0)" : "rgba(255, 255, 255, 0)";
       const gridColor = theme === "dark" ? "rgba(242, 242, 242, 0.06)" : "rgba(50, 50, 50, 0.1)";
 
@@ -24,7 +24,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   useEffect(() => {
     const containerElement = container.current;
     
-    // Clear previous widget
+    
     if (containerElement) {
       containerElement.innerHTML = '';
     }
@@ -34,13 +34,13 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
     script.type = "text/javascript";
     script.async = true;
     
-    // Inject dynamic options based on the theme
+    
     script.innerHTML = JSON.stringify({
       "autosize": true,
       "symbol": `BINANCE:${symbol.toUpperCase()}`,
       "interval": "D",
       "timezone": "Etc/UTC",
-      "theme": widgetOptions.theme, // Dynamic theme
+      "theme": widgetOptions.theme, 
       "style": "1",
       "locale": "en",
       "enable_publishing": false,
@@ -49,7 +49,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       "hide_top_toolbar": false,
       "hide_legend": false,
       "save_image": false,
-      "backgroundColor": widgetOptions.backgroundColor, // Dynamic background
+      "backgroundColor": widgetOptions.backgroundColor, 
       "gridColor": widgetOptions.gridColor,
       "support_host": "https://www.tradingview.com"
     });
@@ -63,7 +63,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         containerElement.innerHTML = '';
       }
     };
-  }, [symbol, widgetOptions]); // Re-run effect when symbol or widgetOptions change
+  }, [symbol, widgetOptions]); 
 
   return (
     <div className="tradingview-widget-container h-full w-full" ref={container}>

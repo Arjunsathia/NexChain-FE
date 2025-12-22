@@ -1,6 +1,6 @@
 import { coinGecko } from "./axiosConfig";
 
-// ✅ Get list of coins with market data
+
 export const getCoins = async (customParams = {}) => {
   try {
     const response = await coinGecko.get("/coins/markets", {
@@ -21,7 +21,7 @@ export const getCoins = async (customParams = {}) => {
   }
 };
 
-// ✅ Get trending coins (search/trending)
+
 export const getTrend = async () => {
   try {
     const response = await coinGecko.get("/search/trending");
@@ -32,10 +32,10 @@ export const getTrend = async () => {
   }
 };
 
-// ✅ Get trending coin market data by IDs
+
 export const getTrendingCoinMarketData = async (idsArray) => {
   try {
-    const ids = idsArray.join(","); // Convert array to comma-separated string
+    const ids = idsArray.join(","); 
     const response = await coinGecko.get("/coins/markets", {
       params: {
         vs_currency: "usd",
@@ -50,7 +50,7 @@ export const getTrendingCoinMarketData = async (idsArray) => {
   }
 };
 
-// ✅ Get top 5 gainers by 24h percentage change
+
 export const getTopGainers = async () => {
   try {
     const response = await coinGecko.get("/coins/markets", {
@@ -75,7 +75,7 @@ export const getTopGainers = async () => {
   }
 };
 
-// ✅ Get full coin info by ID
+
 export const getCoinById = async (id) => {
   try {
     const response = await coinGecko.get(`/coins/${id}`);
@@ -86,7 +86,7 @@ export const getCoinById = async (id) => {
   }
 };
 
-// ✅ Get global crypto market stats
+
 export const getGlobalMarketStats = async () => {
   try {
     const response = await coinGecko.get("/global");
@@ -97,7 +97,7 @@ export const getGlobalMarketStats = async () => {
   }
 };
 
-// ✅ Get specific coin market chart data (history)
+
 export const getMarketChart = async (id, days = 7) => {
   try {
     const response = await coinGecko.get(`/coins/${id}/market_chart`, {

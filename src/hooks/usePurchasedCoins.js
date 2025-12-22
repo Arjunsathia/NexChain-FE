@@ -16,8 +16,8 @@ export const usePurchasedCoins = () => {
     loading,
     error,
     refetch,
-    refreshPurchasedCoins: () => dispatch(fetchPurchasedCoins()), // Alias
-    refreshTransactionHistory: () => dispatch(fetchTransactionHistory()), // Alias
+    refreshPurchasedCoins: () => dispatch(fetchPurchasedCoins()), 
+    refreshTransactionHistory: () => dispatch(fetchTransactionHistory()), 
     addPurchase: async (data) => {
         try {
             const res = await dispatch(addPurchase(data)).unwrap();

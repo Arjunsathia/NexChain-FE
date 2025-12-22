@@ -14,7 +14,7 @@ import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-// WebSocket symbols mapping
+
 const coinToSymbol = {
   bitcoin: "btcusdt",
   ethereum: "ethusdt",
@@ -35,19 +35,19 @@ export default function Dashboard() {
   const ws = useRef(null);
   const liveDataRef = useRef({});
 
-  // Handler for selecting coin for chart
+  
   const handleCoinClick = (coinId) => {
     setSelectedCoinId(coinId);
   };
 
-  // Update ref when liveData changes
+  
   useEffect(() => {
     liveDataRef.current = liveData;
   }, [liveData]);
 
   useEffect(() => {
     const fetchTopCoins = async () => {
-      // 🚀 Optimistic Load: Check cache first
+      
       const cachedData = localStorage.getItem("dashboardTopCoins");
       if (cachedData) {
         try {
@@ -55,7 +55,7 @@ export default function Dashboard() {
            if (Array.isArray(parsed) && parsed.length > 0) {
              setTopCoins(parsed);
              setSelectedCoinId(parsed[0].id);
-             setLoading(false); // Immediate display
+             setLoading(false); 
            }
         } catch (e) { console.error("Cache parse error", e); }
       }
@@ -63,17 +63,17 @@ export default function Dashboard() {
       try {
         if (!cachedData) setLoading(true);
         
-        // Optimize: Only fetch top 5 instead of 100
+        
         const data = await getCoins({ per_page: 5 });
         
         if (Array.isArray(data)) {
           const topThree = data.slice(0, 3);
           setTopCoins(topThree);
-          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree)); // Update cache
+          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree)); 
           
           if (topThree.length > 0) {
-             // Only auto-select if we haven't selected one yet (or if we just loaded)
-             // Check if current selectedCoinId is still valid or just keep existing logic
+             
+             
              if (!cachedData) setSelectedCoinId(topThree[0].id);
           }
         } else {
@@ -90,10 +90,10 @@ export default function Dashboard() {
     fetchTopCoins();
   }, []);
 
-  // Buffer for WebSocket updates
+  
   const bufferRef = useRef({});
 
-  // WebSocket setup for live data
+  
   useEffect(() => {
     if (topCoins.length === 0) return;
 
@@ -105,18 +105,18 @@ export default function Dashboard() {
 
     if (!symbols) return;
 
-    // Flush buffer to state every 1.5s
+    
     const intervalId = setInterval(() => {
       if (Object.keys(bufferRef.current).length > 0) {
         setLiveData((prev) => ({
           ...prev,
           ...bufferRef.current,
         }));
-        bufferRef.current = {}; // Clear buffer after update? 
-        // Actually, better to keep providing latest data. 
-        // But if we clear, we ensure we only update if NEW data came in.
-        // Let's NOT clear, but only update if something changed? 
-        // Simple merge is fine.
+        bufferRef.current = {}; 
+        
+        
+        
+        
       }
     }, 1500);
 
@@ -137,7 +137,7 @@ export default function Dashboard() {
             const newPrice = parseFloat(data.data.c);
             const newChange = parseFloat(data.data.P);
 
-            // Update buffer with latest data
+            
             bufferRef.current[coinId] = {
               price: newPrice,
               change: newChange,
@@ -163,19 +163,19 @@ export default function Dashboard() {
     };
   }, [topCoins]);
 
-  // --- Large Screen Sidebar Item Heights (Perfectly Aligned with Compact Chart) ---
+  
 
-  // FIX: Compact Profile
+  
   const USERDATA_HEIGHT = "h-[150px]";
 
-  // FIX: Redistribute remaining space (Total Target Height: ~764px)
-  const CHART_HEIGHT = "h-[620px]"; // Restored to original, more compact height
+  
+  const CHART_HEIGHT = "h-[620px]"; 
 
-  // New height calculations to balance the 764px middle column height
+  
   const PORTFOLIO_HEIGHT = "h-[300px]";
   const TRADES_HEIGHT = "h-[266px]";
 
-  // Right sidebar balancing the left side
+  
   const WATCHLIST_HEIGHT = "h-[280px]";
   const TRENDING_HEIGHT = "h-[250px]";
   const LEARNING_HUB_HEIGHT = "h-[186px]";
@@ -191,9 +191,9 @@ export default function Dashboard() {
       }`}
       style={{ animationDelay: "0.1s" }}
     >
-      {/* Mobile & Medium Layout (Gaps reduced to 4) */}
+      {}
       <div className="xl:hidden flex flex-col gap-4">
-        {/* 1. Profile */}
+        {}
         <div
           className="fade-in"
           style={{ animationDelay: "0s" }}
@@ -201,7 +201,7 @@ export default function Dashboard() {
           <UserProfileCard />
         </div>
 
-        {/* 2. Top Three Coins */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.05s" }}>
           <div className="space-y-1">
             <h2
@@ -222,17 +222,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Chart Section */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.1s" }}>
           <ChartSection coinId={selectedCoinId} />
         </div>
 
-        {/* 3. Holdings */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.15s" }}>
           <PortfolioCard />
         </div>
 
-        {/* 4. Watchlist & 5. Trending */}
+        {}
         <div className="flex flex-col gap-4">
           <div className="fade-in" style={{ animationDelay: "0.2s" }}>
             <WatchlistPreview />
@@ -242,26 +242,26 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 6. News Panel */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.3s" }}>
           <NewsPanel />
         </div>
 
-        {/* 7. Recent Trades */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.35s" }}>
           <RecentTradesCard />
         </div>
 
-        {/* Learning Hub */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.4s" }}>
           <LearningHub />
         </div>
       </div>
 
-      {/* Large Screen Layout (xl: 1280px+) - Perfectly Spaced and Aligned */}
+      {}
       <div className="hidden xl:flex flex-col gap-6">
         <div className="grid grid-cols-12 gap-6 items-start">
-          {/* Left Sidebar - Profile, Portfolio, Recent Trades (Normalized Heights) */}
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${USERDATA_HEIGHT}`}
@@ -283,9 +283,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Middle Section - Top Coins, Chart */}
+          {}
           <div className="col-span-6 flex flex-col gap-6">
-            {/* Top Coins Section */}
+            {}
             <div className="fade-in" style={{ animationDelay: "0.1s" }}>
               <TopCoins
                 topCoins={topCoins}
@@ -297,7 +297,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Chart Section (Restored to compact height) */}
+            {}
             <div
               className={`fade-in ${CHART_HEIGHT}`}
               style={{ animationDelay: "0.15s" }}
@@ -306,7 +306,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right Sidebar - Watchlist, Trending, Learning Hub (Normalized Heights) */}
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${WATCHLIST_HEIGHT}`}
@@ -329,7 +329,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Section - News Panel (Follows immediately without gap) */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.2s" }}>
           <NewsPanel />
         </div>

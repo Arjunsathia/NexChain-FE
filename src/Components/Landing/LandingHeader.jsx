@@ -8,10 +8,10 @@ const LandingHeader = ({ isLoggedIn }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Handle scroll effect - Visible only at the top (Hero Section)
+  
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50); // scrolled is true when we go DOWN
+      setScrolled(window.scrollY > 50); 
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -34,7 +34,7 @@ const LandingHeader = ({ isLoggedIn }) => {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           
-          {/* Logo */}
+          {}
           <div 
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="flex items-center gap-3 cursor-pointer group pointer-events-auto"
@@ -51,7 +51,7 @@ const LandingHeader = ({ isLoggedIn }) => {
             </span>
           </div>
 
-          {/* Action Button - Contact */}
+          {}
           <div className="hidden md:block pointer-events-auto">
             <button
               onClick={scrollToContact}
@@ -62,7 +62,7 @@ const LandingHeader = ({ isLoggedIn }) => {
             </button>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {}
           <button 
             className="md:hidden text-gray-300 hover:text-white transition-colors"
             onClick={() => setMobileMenuOpen(true)}
@@ -72,7 +72,7 @@ const LandingHeader = ({ isLoggedIn }) => {
         </div>
       </motion.header>
 
-      {/* Mobile Menu Overlay */}
+      {}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

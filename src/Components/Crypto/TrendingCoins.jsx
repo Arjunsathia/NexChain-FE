@@ -40,7 +40,7 @@ function TrendingCoins() {
         : [];
 
       if (idsArray.length === 0) {
-         // Fallback to known majors if trend is empty
+         
          idsArray = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
       }
 
@@ -48,7 +48,7 @@ function TrendingCoins() {
       setCoins(marketData);
     } catch (err) {
       console.warn("Primary trending fetch failed, using fallback...", err);
-      // Fallback mechanism
+      
       try {
         const fallbackIds = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
         const marketData = await getTrendingCoinMarketData(fallbackIds);
@@ -66,11 +66,11 @@ function TrendingCoins() {
     fetchTrendingCoins();
   }, [fetchTrendingCoins]);
 
-  // WebSocket Logic
+  
   useEffect(() => {
     if (coins.length === 0) return;
 
-    // Map coin IDs to Binance tickers
+    
     const symbolMap = {
       bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
       cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
@@ -80,7 +80,7 @@ function TrendingCoins() {
       tron: "trxusdt", avalanche: "avaxusdt", shiba: "shibusdt", toncoin: "tonusdt"
     };
     
-    // Reverse map for incoming data
+    
     const symbolToId = Object.entries(symbolMap).reduce((acc, [key, val]) => {
       acc[val] = key;
       return acc;
@@ -98,20 +98,20 @@ function TrendingCoins() {
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.data) {
-        const stream = message.stream; // e.g., 'btcusdt@ticker'
+        const stream = message.stream; 
         const symbol = stream.split('@')[0];
         const coinId = symbolToId[symbol];
 
         if (coinId) {
            bufferRef.current[coinId] = {
              price: parseFloat(message.data.c),
-             change: parseFloat(message.data.P), // 24h change %
+             change: parseFloat(message.data.P), 
            };
         }
       }
     };
 
-    // Buffer flush interval
+    
     const interval = setInterval(() => {
       if (Object.keys(bufferRef.current).length > 0) {
         setLivePrices(prev => ({ ...prev, ...bufferRef.current }));
@@ -125,9 +125,9 @@ function TrendingCoins() {
     };
   }, [coins]);
 
-  // Merge static data with live updates
+  
   const displayedCoins = useMemo(() => {
-    // 🛡️ Safety Guard
+    
     if (!Array.isArray(coins)) return [];
     
     return coins.map(coin => {

@@ -17,8 +17,8 @@ export const useUserId = () => {
 
   const localStorageUser = getLocalStorageUser();
   
-  // Priority: Context user -> LocalStorage user
-  // Handle both 'id' and '_id' fields
+  
+  
   const userId = user?.id || user?._id || localStorageUser?.id || localStorageUser?._id;
   
 

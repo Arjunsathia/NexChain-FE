@@ -10,33 +10,33 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
   const ws = useRef(null);
   const tradesRef = useRef([]);
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400", // Used for time
+    textTertiary: isLight ? "text-gray-500" : "text-gray-400", 
 
     bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     borderHeader: isLight ? "border-gray-300/50" : "border-gray-700/50",
 
-    // Header/Title
+    
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
     
-    // Live Indicator
+    
     bgLive: isLight ? "bg-green-100 border-none text-green-700" : "bg-green-400/10 border-none text-green-400",
     textLiveDot: isLight ? "bg-green-700" : "bg-green-400",
 
-    // Trade Colors
+    
     textBuy: isLight ? "text-green-700" : "text-green-400",
     textSell: isLight ? "text-red-700" : "text-red-400",
     
     bgBuyHover: isLight ? 'hover:bg-green-500/10' : 'hover:bg-green-500/5',
     bgSellHover: isLight ? 'hover:bg-red-500/10' : 'hover:bg-red-500/5',
 
-    // Row Text
+    
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
     
-    // Empty State Text
+    
     textEmpty: isLight ? "text-gray-500" : "text-gray-400",
     
   }), [isLight]);
@@ -84,7 +84,7 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
     const isBuy = !trade.isBuyerMaker;
     const priceColor = isBuy ? TC.textBuy : TC.textSell;
     const bgColor = isBuy ? TC.bgBuyHover : TC.bgSellHover;
-    const arrowColor = priceColor; // Use the same color for the arrow as the price
+    const arrowColor = priceColor; 
     
     return (
       <div

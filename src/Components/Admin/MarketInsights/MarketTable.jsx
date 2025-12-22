@@ -151,7 +151,7 @@ function MarketTable({
         </table>
       </div>
 
-      {/* Pagination Controls */}
+      {}
       {filteredData.length > itemsPerPage && (
         <div className="flex justify-center items-center gap-2 mt-6">
           <button
@@ -170,7 +170,7 @@ function MarketTable({
             {Array.from({
               length: Math.ceil(filteredData.length / itemsPerPage),
             }).map((_, i) => {
-              // Show limited page numbers for better UX
+              
               if (
                 i + 1 === 1 ||
                 i + 1 === Math.ceil(filteredData.length / itemsPerPage) ||

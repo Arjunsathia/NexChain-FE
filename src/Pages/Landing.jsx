@@ -2,19 +2,19 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-// Components
+
 import LenisScroll from "../Components/Common/LenisScroll";
 import InteractiveGridPattern from "../Components/Landing/Background";
 import HeroSection from "../Components/Landing/HeroSection";
 import { TC } from "../Components/Landing/theme";
 
-// Lazy Load Heavy Sections
+
 const FeaturesSection = React.lazy(() => import("../Components/Landing/FeaturesSection"));
 const MarketOverviewSection = React.lazy(() => import("../Components/Landing/MarketOverviewSection"));
 const TestimonialsSection = React.lazy(() => import("../Components/Landing/TestimonialsSection"));
 const CTASection = React.lazy(() => import("../Components/Landing/CTASection"));
 
-// Section Animation Variants - Smoother Fade Up
+
 const sectionVariants = {
   hidden: { opacity: 0, y: 40 },
   visible: { 
@@ -24,7 +24,7 @@ const sectionVariants = {
   }
 };
 
-// Standard Section Wrapper
+
 const SectionWrapper = ({ children, className, id }) => {
   return (
     <motion.section 
@@ -40,7 +40,7 @@ const SectionWrapper = ({ children, className, id }) => {
   );
 };
 
-// Memoize imported components
+
 const MemoizedHeroSection = React.memo(HeroSection);
 const MemoizedFeaturesSection = React.memo(FeaturesSection);
 const MemoizedMarketOverviewSection = React.memo(MarketOverviewSection);
@@ -54,13 +54,13 @@ export default function Landing() {
   const [livePrices, setLivePrices] = useState({});
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check Login Status
+  
   useEffect(() => {
     const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
     setIsLoggedIn(!!token);
   }, []);
 
-  // Check Mobile Status
+  
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -68,7 +68,7 @@ export default function Landing() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Live Prices Simulation (Optimized Interval)
+  
   useEffect(() => {
     const initialPrices = {
       bitcoin: { price: 43250.00, change: 2.4 },
@@ -86,9 +86,9 @@ export default function Landing() {
         const newPrices = { ...prev };
         let hasChanges = false;
         
-        // Randomly update subset of prices each tick to look organic but save react cycles
+        
         Object.keys(newPrices).forEach(key => {
-          if (Math.random() > 0.3) return; // Skip 30% of updates
+          if (Math.random() > 0.3) return; 
           hasChanges = true;
           const change = (Math.random() - 0.5) * (newPrices[key].price * 0.002);
           newPrices[key].price += change;
@@ -104,7 +104,7 @@ export default function Landing() {
   }, []);
 
   const scrollToFeatures = useCallback(() => {
-    // Smooth scroll to features
+    
     const element = document.getElementById('features-section');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -115,14 +115,14 @@ export default function Landing() {
     <div className={`min-h-screen ${TC.bgPage} font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden relative`}>
       <LenisScroll />
 
-      {/* GLOBAL FIXED BACKGROUND */}
+      {}
       <MemoizedInteractiveGridPattern />
       
-      {/* Background Glows - Fixed position to avoid scroll recalculations */}
+      {}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-cyan-400 pointer-events-none z-0" />
       <div className="fixed bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-blue-500 pointer-events-none z-0" />
       
-      {/* Hero Section */}
+      {}
       <div className="relative z-10">
         <MemoizedHeroSection 
           navigate={navigate} 
@@ -132,7 +132,7 @@ export default function Landing() {
         />
       </div>
 
-      {/* Features Section */}
+      {}
       <SectionWrapper id="features-section" className="z-10 py-10 md:py-20"> 
         <React.Suspense fallback={<div className="h-screen w-full flex items-center justify-center text-slate-500">Loading Features...</div>}>
           <MemoizedFeaturesSection 
@@ -142,7 +142,7 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {/* Market Overview Section */}
+      {}
       <SectionWrapper id="market-section" className="z-20 py-10 md:py-20">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection 
@@ -153,7 +153,7 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {/* Testimonials */}
+      {}
       <SectionWrapper id="testimonials-section" className="z-30 py-10 md:py-20">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedTestimonialsSection 
@@ -164,7 +164,7 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {/* CTA Section */}
+      {}
       <SectionWrapper id="contact-section" className="z-30 pb-20">
         <React.Suspense fallback={<div className="h-64 w-full" />}>
           <MemoizedCTASection 

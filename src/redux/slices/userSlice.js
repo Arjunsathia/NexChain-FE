@@ -16,7 +16,7 @@ const getInitialUser = () => {
   return {};
 };
 
-// Async thunk to fetch user
+
 export const fetchUser = createAsyncThunk("user/fetchUser", async (_, { rejectWithValue }) => {
   const storedToken = localStorage.getItem("NEXCHAIN_USER_TOKEN");
   if (!storedToken) return rejectWithValue("No token found");

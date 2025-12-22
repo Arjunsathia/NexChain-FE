@@ -6,9 +6,9 @@ export const useLivePortfolio = () => {
   const { coins: liveCoins } = useCoinContext();
   const { purchasedCoins, loading, error, refetch } = usePurchasedCoins();
 
-  // Merge purchased coins with live market data
+  
   const livePortfolio = useMemo(() => {
-    // 🛡️ Safety Guard: Ensure both inputs are valid arrays
+    
     if (!Array.isArray(purchasedCoins) || !Array.isArray(liveCoins)) {
       return [];
     }
@@ -63,7 +63,7 @@ export const useLivePortfolio = () => {
     });
   }, [purchasedCoins, liveCoins]);
 
-  // Group holdings by coin (aggregate same coins)
+  
   const groupedHoldings = useMemo(() => {
     if (!livePortfolio || livePortfolio.length === 0) return [];
     

@@ -18,7 +18,7 @@ const WatchlistHeader = ({ TC, isLight, searchTerm, setSearchTerm }) => {
             </div>
           </div>
 
-          {/* Search */}
+          {}
           <div className="relative w-full md:w-64">
             <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textSecondary} text-xs md:text-sm`} />
             <input

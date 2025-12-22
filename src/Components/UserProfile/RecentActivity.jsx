@@ -9,7 +9,7 @@ function RecentActivity() {
   const isLight = useThemeCheck();
   const { purchasedCoins, transactionHistory, loading } = usePurchasedCoins();
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -17,19 +17,19 @@ function RecentActivity() {
     
     bgCard: isLight ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     
-    // Header
+    
     bgIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
     iconColor: isLight ? "text-blue-600" : "text-cyan-400",
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
 
-    // Skeleton
+    
     bgSkeleton: isLight ? "bg-gray-200" : "bg-gray-700",
 
-    // Activity Item
+    
     bgItem: isLight ? "bg-gray-100/70 border-none hover:bg-gray-100 shadow-sm" : "bg-gray-700/30 border-none hover:bg-gray-700/50 shadow-inner",
     textItemHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
     
-    // Status (Buy/Sell)
+    
     bgBuy: isLight ? "bg-green-100 text-green-700 border-none" : "bg-green-500/20 text-green-400 border-none",
     bgSell: isLight ? "bg-red-100 text-red-700 border-none" : "bg-red-500/20 text-red-400 border-none",
     
@@ -37,10 +37,10 @@ function RecentActivity() {
     textSellValue: isLight ? "text-red-700" : "text-red-400",
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
 
-    // Icon Border
+    
     iconBorder: isLight ? "border-white" : "border-gray-800",
 
-    // Empty State
+    
     bgEmptyIcon: isLight ? "bg-blue-100" : "bg-cyan-400/10",
     textEmptyIcon: isLight ? "text-blue-600" : "text-cyan-400",
 
@@ -49,9 +49,9 @@ function RecentActivity() {
   const recentActivities = useMemo(() => {
     const allActivities = [];
     
-    // Assuming purchasedCoins contains purchase history or current holdings
+    
     purchasedCoins.forEach(coin => {
-      // Create a 'buy' activity for each holding
+      
       allActivities.push({
         type: 'buy',
         coinName: coin.coinName,
@@ -66,7 +66,7 @@ function RecentActivity() {
 
     if (transactionHistory) {
       transactionHistory.forEach(transaction => {
-        // Add actual transactions (buy/sell)
+        
         allActivities.push({
           type: transaction.type || 'buy',
           coinName: transaction.coinName || transaction.coin_name,
@@ -80,7 +80,7 @@ function RecentActivity() {
       });
     }
 
-    // Filter to remove duplicates if necessary and sort
+    
     const uniqueActivities = allActivities.reduce((acc, current) => {
         const x = acc.find(item => item.id === current.id);
         if (!x) {
@@ -123,7 +123,7 @@ function RecentActivity() {
 
   return (
     <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full fade-in`}>
-      {/* Header */}
+      {}
       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4 fade-in">
         <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
           <FaHistory className={`${TC.iconColor} text-base sm:text-lg`} />
@@ -138,7 +138,7 @@ function RecentActivity() {
         </div>
       </div>
       
-      {/* Content */}
+      {}
       <div className="space-y-2 sm:space-y-3">
         {recentActivities.length === 0 ? (
           <div className="text-center py-6 flex flex-col items-center justify-center gap-3 h-full fade-in">

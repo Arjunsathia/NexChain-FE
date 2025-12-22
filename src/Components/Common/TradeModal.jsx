@@ -7,7 +7,7 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
 
-// Sub-components
+
 import TradeModalHeader from "../TradeModal/TradeModalHeader";
 import TradeModalTabs from "../TradeModal/TradeModalTabs";
 import HoldingsInfo from "../TradeModal/HoldingsInfo";
@@ -42,12 +42,12 @@ function TradeModal({
   const [forceUpdate, setForceUpdate] = useState(0);
   const [successData, setSuccessData] = useState(null);
 
-  // Limit/Stop Order State
-  const [orderType, setOrderType] = useState("market"); // 'market', 'limit', 'stop_limit'
+  
+  const [orderType, setOrderType] = useState("market"); 
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
-  // Alert State
+  
   const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
   const [alertTargetPrice, setAlertTargetPrice] = useState("");
 
@@ -82,10 +82,10 @@ function TradeModal({
     [shouldShowHoldingsInfo, activeTab, type]
   );
 
-  // 💡 Theme classes derived from isLight and Operation Type
+  
   const TC = useMemo(
     () => ({
-      // General - Reduced blur for performance
+      
       bgModal: isLight
         ? "bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
         : "bg-[#0B0E14]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
@@ -96,7 +96,7 @@ function TradeModal({
       textSecondary: isLight ? "text-gray-600" : "text-gray-300",
       textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-      // Inputs - Dynamic based on Buy/Sell
+      
       inputBg: isLight
         ? `bg-gray-50 border-gray-200 focus:bg-white focus:border-${
             isBuyOperation ? "emerald" : "red"
@@ -109,13 +109,13 @@ function TradeModal({
             isBuyOperation ? "emerald" : "red"
           }-500/10 text-white placeholder-gray-600 shadow-inner`,
 
-      // TABS
+      
       bgTabBase: isLight
         ? "bg-gray-50/80 backdrop-blur-sm"
         : "bg-gray-900/50 backdrop-blur-sm",
       borderTab: isLight ? "border-gray-200" : "border-gray-800",
 
-      // Header/Active Accent BG
+      
       bgCyanAccent: isLight
         ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100"
         : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
@@ -126,7 +126,7 @@ function TradeModal({
         ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100"
         : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
 
-      // Pills (P&L)
+      
       bgGreenPill: isLight
         ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
         : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
@@ -134,7 +134,7 @@ function TradeModal({
         ? "bg-red-100 text-red-700 border border-red-200"
         : "bg-red-500/20 text-red-400 border border-red-500/30",
 
-      // Hover - Optimized transition
+      
       hoverBorder: isLight
         ? `hover:border-${
             isBuyOperation ? "emerald" : "red"
@@ -151,13 +151,13 @@ function TradeModal({
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       setIsVisible(false);
-      setTimeout(onClose, 200); // Faster close
+      setTimeout(onClose, 200); 
     }
   };
 
   const handleClose = () => {
     setIsVisible(false);
-    setTimeout(onClose, 200); // Faster close
+    setTimeout(onClose, 200); 
   };
 
   const holdingsSummary = useMemo(() => {
@@ -232,11 +232,11 @@ function TradeModal({
       setCoinAmount("");
       setSlippage(1.0);
       setIsSubmitting(false);
-      setIsVisible(false); // Ensure it starts hidden for animation
+      setIsVisible(false); 
       setSuccessData(null);
       setIsAlertMode(initialAlertMode || false);
 
-      // Simple, reliable timeout for animation start
+      
       const timer = setTimeout(() => setIsVisible(true), 10);
 
       if (shouldShowHoldingsInfo) {
@@ -252,7 +252,7 @@ function TradeModal({
         coin.market_data?.current_price?.usd ||
         0;
       setCurrentPrice(price);
-      setLimitPrice(price); // Default limit price to current price
+      setLimitPrice(price); 
       setStopPrice(price);
       setOrderType("market");
       setIsAlertMode(false);
@@ -264,10 +264,10 @@ function TradeModal({
     }
   }, [show, coin, type, shouldShowHoldingsInfo]);
 
-  // Force update when purchased coins change
-  // useEffect(() => {
-  //   setForceUpdate((prev) => prev + 1);
-  // }, [purchasedCoins]);
+  
+  
+  
+  
 
 
 
@@ -305,7 +305,7 @@ function TradeModal({
     const value = e.target.value;
     setLimitPrice(value);
     
-    // Update USD amount based on new price and existing coin amount
+    
     if (coinAmount && value > 0) {
         const price = parseFloat(value);
         const calculatedUSD = parseFloat(coinAmount) * price;
@@ -314,12 +314,12 @@ function TradeModal({
   };
 
   const setMaxAmount = () => {
-    const maxCoins = maxAvailable; // Note: maxAvailable logic might need adjustment for Limit Buy (USD balance / limitPrice)
+    const maxCoins = maxAvailable; 
     if (maxCoins > 0) {
       setCoinAmount(maxCoins.toFixed(8));
       const calculatedUSD = maxCoins * effectivePrice;
       setUsdAmount(calculatedUSD.toFixed(2));
-// ... rest of setMaxAmount
+
 
       const isSellMode = shouldShowHoldingsInfo
         ? activeTab === "withdraw"
@@ -409,7 +409,7 @@ function TradeModal({
       const { type, symbol, coinAmount, total, coinData } = tradeData;
 
       try {
-        // ALERT LOGIC
+        
         if (isAlertMode) {
             const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
             const alertData = {
@@ -442,7 +442,7 @@ function TradeModal({
             }
         }
 
-        // LIMIT & STOP ORDER LOGIC
+        
         if (orderType === "limit" || orderType === "stop_limit") {
             const orderData = {
                 user_id: user.id,
@@ -450,8 +450,8 @@ function TradeModal({
                 coin_symbol: symbol,
                 coin_name: coinData.name || coinData.coinName,
                 coin_image: coinData.image,
-                type: type, // 'buy' or 'sell'
-                category: orderType, // 'limit' or 'stop_limit'
+                type: type, 
+                category: orderType, 
                 limit_price: parseFloat(limitPrice),
                 stop_price: orderType === 'stop_limit' ? parseFloat(stopPrice) : undefined,
                 quantity: parseFloat(coinAmount)
@@ -475,7 +475,7 @@ function TradeModal({
                 throw new Error(res.data.error || "Failed to create order");
             }
         } else {
-            // MARKET ORDER LOGIC
+            
             if (isBuyOperation) {
                 if (!coinData) {
                     throw new Error("Coin data not found");
@@ -522,7 +522,7 @@ function TradeModal({
                     throw new Error(result.error || "Purchase failed");
                 }
             } else {
-          // SELL LOGIC
+          
           if (!coinData) {
             throw new Error("Coin data not found");
           }
@@ -755,18 +755,18 @@ function TradeModal({
         coinData: coin,
       });
 
-      // Check if this is the first purchase for this coin
+      
       const isFirstPurchase = !userHoldings || userHoldings.quantity === 0;
 
-      // If we are in "Holdings Info" mode (Portfolio page), we might want to skip the success modal
-      // as per user request "dont want the modal when i trade from the portfoilo page itself"
-      // The prop `showHoldingsInfo` is typically true when opened from Portfolio.
+      
+      
+      
       
       if (shouldShowHoldingsInfo) {
-          // toast.success("Transaction successful!");
+          
           handleClose();
       } else {
-          // Show success modal
+          
           setSuccessData({
             type: tradeType,
             coinName: coin.name || coin.coinName,

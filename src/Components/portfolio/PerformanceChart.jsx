@@ -7,46 +7,46 @@ import 'react-loading-skeleton/dist/skeleton.css';
 const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   const [timeRange, setTimeRange] = useState('7d');
 
-  // 💡 Theme Classes Helper - aligned with Admin theme / Sidebar style
+  
   const TC = useMemo(() => ({
-    // Card Background (matches Admin/Sidebar look, no border here)
+    
     bgContainer: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
-    // Range Button Styling
+    
     bgRangeButtonActive: "bg-cyan-600 text-white",
     bgRangeButtonDefault: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-300",
     bgRangeContainer: isLight ? "bg-gray-100 border-gray-300" : "bg-gray-800 border-gray-700",
     
-    // Stat Card Background (inner cards can keep subtle borders)
+    
     bgStatCard: isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/5",
     
-    // P&L Pill Styling
+    
     bgPillPositive: isLight ? "bg-green-100 border-green-300" : "bg-green-500/10 border-green-500/30",
     bgPillNegative: isLight ? "bg-red-100 border-red-300" : "bg-red-500/10 border-red-500/30",
     textPositive: isLight ? "text-green-700" : "text-green-400",
     textNegative: isLight ? "text-red-700" : "text-red-400",
     
-    // Chart Styling
+    
     chartStroke: "#9CA3AF",
     chartGrid: isLight ? "#e5e7eb" : "#374151",
     
-    // Tooltip Styling
+    
     tooltipBg: isLight ? "bg-white border border-gray-300" : "bg-gray-800 border border-gray-700",
     tooltipTextPrimary: isLight ? "text-gray-900" : "text-white",
     tooltipTextSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Skeleton Colors
+    
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
   }), [isLight]);
 
-  // Calculate current metrics from props
+  
   const currentMetrics = useMemo(() => {
     let totalCurrentValue = 0;
     let totalInvestment = 0;
@@ -75,7 +75,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
     };
   }, [groupedHoldings, balance]);
 
-  // Generate performance data (simulated)
+  
   const performanceData = useMemo(() => {
     const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
     if (totalInvestment === 0) return [];

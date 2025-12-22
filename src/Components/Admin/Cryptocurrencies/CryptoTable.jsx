@@ -112,7 +112,7 @@ function CryptoTable({
         </table>
       </div>
 
-      {/* Pagination */}
+      {}
       {totalPages > 1 && (
         <div className="p-4 flex justify-center gap-2">
           <button

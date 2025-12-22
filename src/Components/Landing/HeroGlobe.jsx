@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-// =================================================================
-// HERO VISUAL: Premium 3D Holographic Globe
-// =================================================================
+
+
+
 
 const LATITUDE_LINES = [...Array(6)];
 const LONGITUDE_LINES = [...Array(6)];
@@ -11,16 +11,16 @@ const LONGITUDE_LINES = [...Array(6)];
 const HeroGlobe = React.memo(() => {
   return (
     <div className="relative w-full h-full flex items-center justify-center perspective-[1000px]">
-      {/* Core Glow - Silver/White */}
+      {}
       <div className="absolute inset-0 bg-white/5 blur-[120px] rounded-full opacity-20 animate-pulse-slow"></div>
       
-      {/* Rotating Globe Container */}
+      {}
       <motion.div 
         className="relative w-[260px] h-[260px] md:w-[500px] md:h-[500px] preserve-3d will-change-transform"
         animate={{ rotateY: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       >
-        {/* Latitude Lines - Indigo */}
+        {}
         {LATITUDE_LINES.map((_, i) => (
           <div 
             key={`lat-${i}`}
@@ -32,7 +32,7 @@ const HeroGlobe = React.memo(() => {
           />
         ))}
         
-        {/* Longitude Lines - Indigo */}
+        {}
         {LONGITUDE_LINES.map((_, i) => (
           <div 
             key={`long-${i}`}
@@ -44,7 +44,7 @@ const HeroGlobe = React.memo(() => {
           />
         ))}
 
-        {/* Floating Particles (Orbiting) - White/Indigo */}
+        {}
         <motion.div 
           className="absolute inset-0 will-change-transform"
           animate={{ rotateZ: 360, rotateX: 360 }}
@@ -56,17 +56,17 @@ const HeroGlobe = React.memo(() => {
         </motion.div>
       </motion.div>
 
-      {/* Central NexChain Logo/Core - STATIC & PREMIUM COLOR */}
+      {}
       <div className="absolute z-10 w-32 h-32 md:w-48 md:h-48 bg-gradient-to-br from-[#0f172a] to-[#020202] rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(114,138,213,0.2)] border border-[#728AD5]/40">
          
-         {/* Inner Gradient Depth */}
+         {}
          <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#728AD5]/10 to-transparent opacity-40"></div>
 
          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Dashed Ring - Static */}
+            {}
             <div className="absolute inset-3 md:inset-4 border-2 border-dashed border-[#728AD5]/60 rounded-full"></div>
             
-            {/* NX Text */}
+            {}
             <div className="flex items-baseline justify-center text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#C7D2FE] via-[#728AD5] to-[#312E81] drop-shadow-lg font-manrope tracking-tighter">
               NE<span className="text-6xl md:text-8xl">X</span>
             </div>

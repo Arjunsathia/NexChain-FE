@@ -17,7 +17,7 @@ import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-// Extracted Components
+
 import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
 import OrderBook from "@/Components/CoinDetails/OrderBook";
 import TradeHistory from "@/Components/CoinDetails/TradeHistory";
@@ -36,13 +36,13 @@ function CoinDetailsPage() {
   const { purchasedCoins } = usePurchasedCoins();
   const { coins: liveCoins } = useCoinContext();
 
-  // ⚡ FAST LOAD: Find live coin data immediately from context
+  
   const liveCoin = useMemo(() => {
     if (!Array.isArray(liveCoins)) return null;
     return liveCoins.find((c) => c.id === coinId);
   }, [liveCoins, coinId]);
 
-  // Initial loading state is true ONLY if we don't have partial data
+  
   const [loading, setLoading] = useState(!liveCoin && !passedCoin);
   const [coin, setCoin] = useState(null);
   
@@ -51,12 +51,12 @@ function CoinDetailsPage() {
   const [livePrice, setLivePrice] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   
-  // ⚡ DEFER HEAVY WIDGETS: Don't block navigation
+  
   const [widgetsReady, setWidgetsReady] = useState(false);
   
   const ws = useRef(null);
 
-  // Theme Classes
+  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -73,11 +73,11 @@ function CoinDetailsPage() {
     [isLight]
   );
 
-  // Mount animation + Deferred widgets
+  
   useEffect(() => {
-    // Immediate fade in
+    
     const timer = setTimeout(() => setIsMounted(true), 10);
-    // Defer heavy widgets processing - Reduced to 50ms for near-instant feel
+    
     const widgetTimer = setTimeout(() => setWidgetsReady(true), 50);
     
     return () => {
@@ -86,7 +86,7 @@ function CoinDetailsPage() {
     };
   }, []);
 
-  // Check if user has holdings
+  
   const userHoldings = useMemo(() => {
     if (!coinId || !purchasedCoins || !Array.isArray(purchasedCoins)) return null;
     return purchasedCoins.find((holding) => holding.coinId === coinId);
@@ -98,16 +98,16 @@ function CoinDetailsPage() {
     );
   }, [userHoldings]);
 
-  // ⚡ SMART MERGE: Prefer full details, fallback to passed state, then context data
+  
   const displayCoin = useMemo(() => {
-    // 1. If we have the full detailed coin, use it.
+    
     if (coin) return coin;
 
-    // 2. If we have passed state (from navigation), use it immediately.
+    
     if (passedCoin) {
-        // Construct a safe market_data object by merging existing (if any) with defaults
+        
         const existingMarket = passedCoin.market_data || {};
-        const flatData = passedCoin; // The passed object itself often has flat props (current_price etc)
+        const flatData = passedCoin; 
 
         return {
              ...passedCoin,
@@ -122,7 +122,7 @@ function CoinDetailsPage() {
                 high_24h: { usd: existingMarket.high_24h?.usd || flatData.high_24h || 0 }, 
                 low_24h: { usd: existingMarket.low_24h?.usd || flatData.low_24h || 0 },
                 price_change_24h: existingMarket.price_change_24h || flatData.price_change_24h || 0,
-                // Add defaults for AdditionalStats to prevent issues
+                
                 ath: { usd: existingMarket.ath?.usd || flatData.ath || 0 },
                 atl: { usd: existingMarket.atl?.usd || flatData.atl || 0 },
                 ath_date: { usd: existingMarket.ath_date?.usd || flatData.ath_date || null },
@@ -134,7 +134,7 @@ function CoinDetailsPage() {
         }
     }
     
-    // 3. Fallback: If we have liveCoin (from list context), construct a minimal valid object
+    
     if (liveCoin) {
        return {
          ...liveCoin,
@@ -150,7 +150,7 @@ function CoinDetailsPage() {
             total_volume: { usd: liveCoin.total_volume || 0 },
             high_24h: { usd: liveCoin.high_24h || 0 },
             low_24h: { usd: liveCoin.low_24h || 0 },
-            // Defaults for safety
+            
             ath: { usd: 0 }, atl: { usd: 0 },
             ath_date: { usd: null }, atl_date: { usd: null },
             circulating_supply: 0, total_supply: 0, max_supply: 0
@@ -160,7 +160,7 @@ function CoinDetailsPage() {
     return null;
   }, [coin, passedCoin, liveCoin]);
 
-  // Get symbol for WebSocket
+  
   const coinSymbol = useMemo(() => {
     const symbolMap = {
       bitcoin: "btcusdt",
@@ -178,7 +178,7 @@ function CoinDetailsPage() {
     return symbolMap[coinId] || (displayCoin?.symbol ? `${displayCoin.symbol}usdt`.toLowerCase() : null);
   }, [coinId, displayCoin]);
 
-  // WebSocket for live price
+  
   useEffect(() => {
     if (!coinSymbol) return;
 
@@ -205,14 +205,14 @@ function CoinDetailsPage() {
     };
   }, [coinSymbol]);
 
-  // Fetch watchlist status
+  
   const checkWatchlistStatus = useCallback(async () => {
     if (!user?.id || !coinId) return;
 
-    // Don't show global loader for this aux check
+    
     try {
       const res = await getData("/watchlist", { user_id: user.id });
-      // Safety check
+      
       const list = Array.isArray(res) ? res : (res?.data || res?.watchlist || []);
       const watchlistIds = list.map((item) => item.id || item.coin_id);
       setIsInWatchlist(watchlistIds.includes(coinId));
@@ -225,10 +225,10 @@ function CoinDetailsPage() {
     checkWatchlistStatus();
   }, [checkWatchlistStatus]);
 
-  // Fetch coin details
+  
   const fetchCoin = useCallback(async () => {
-    // If we don't have ANY data, show loading.
-    // If we have liveCoin, this runs in background!
+    
+    
     if (!liveCoin) setLoading(true);
     
     try {
@@ -236,7 +236,7 @@ function CoinDetailsPage() {
       setCoin(res?.data ?? res);
     } catch (err) {
       console.error("Error fetching coin", err);
-      if (!liveCoin) setCoin(null); // Only clear if no fallback
+      if (!liveCoin) setCoin(null); 
     } finally {
       setLoading(false);
     }
@@ -266,7 +266,7 @@ function CoinDetailsPage() {
     setTradeModal({ show: true, coin: tradeCoin, type: "buy" });
   }, [displayCoin, user, liveCoin]);
 
-  // Watchlist toggle with backend integration
+  
   const toggleWatchlist = useCallback(async () => {
     if (!user?.id) {
         toast.error("Please login to manage watchlist", {
@@ -289,10 +289,10 @@ function CoinDetailsPage() {
 
     const wasInWatchlist = isInWatchlist;
 
-    // Optimistic update
+    
     setIsInWatchlist(!wasInWatchlist);
     
-    // Show toast immediately (Optimistic Feedback)
+    
     if (wasInWatchlist) {
       toast.success("Removed from watchlist!", {
         style: {
@@ -347,10 +347,10 @@ function CoinDetailsPage() {
           id: coinId,
           user_id: user.id,
         });
-        // Removed duplicate toast here as we showed it optimistically earlier
+        
       } else {
         await postForm("/watchlist/add", postData);
-        // Removed duplicate toast here as we showed it optimistically earlier
+        
       }
       await checkWatchlistStatus();
     } catch (err) {
@@ -400,7 +400,7 @@ function CoinDetailsPage() {
     return Number(value).toLocaleString("en-US");
   }, []);
 
-  // ⚡ IF NO DATA AT ALL: Show Skeleton
+  
   if (loading && !displayCoin) {
     return (
       <div
@@ -409,7 +409,7 @@ function CoinDetailsPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
-           {/* Optimized Skeleton Layout */}
+           {}
            <div className={`rounded-2xl ${TC.bgCard} p-6 h-[200px]`}>
               <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="1rem" />
            </div>
@@ -440,7 +440,7 @@ function CoinDetailsPage() {
           isMounted ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* Sticky Header */}
+        {}
         <CoinHeader
           coin={displayCoin}
           currentPrice={currentPrice}
@@ -458,7 +458,7 @@ function CoinDetailsPage() {
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
 
 
-          {/* Stats Grid */}
+          {}
           <CoinStats
             coin={displayCoin}
             livePrice={livePrice}
@@ -467,11 +467,11 @@ function CoinDetailsPage() {
             isLight={isLight}
           />
 
-          {/* Main Content Grid */}
+          {}
           <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
-            {/* Left Column - Chart */}
+            {}
             <div className="contents lg:block lg:col-span-8 lg:space-y-6">
-              {/* TradingView Chart - ⚡ DEFERRED LOAD */}
+              {}
               <div
                 className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
                 style={{ animationDelay: "0.1s" }}
@@ -488,7 +488,7 @@ function CoinDetailsPage() {
                 )}
               </div>
 
-              {/* Additional Stats */}
+              {}
               <AdditionalStats
                 coin={displayCoin}
                 formatNumber={formatNumber}
@@ -497,11 +497,11 @@ function CoinDetailsPage() {
                 isLight={isLight}
               />
 
-              {/* Quick Links */}
+              {}
               <QuickLinks coin={displayCoin} TC={TC} isLight={isLight} />
             </div>
 
-            {/* Right Column - Order Book & Trade History - ⚡ DEFERRED LOAD */}
+            {}
             <div className="contents lg:block lg:col-span-4 lg:space-y-6">
               <div
                 className="fade-in order-2 h-[350px] md:h-[450px]"
@@ -532,8 +532,8 @@ function CoinDetailsPage() {
         </div>
       </div>
 
-      {/* Trade Modal */}
-      {/* Trade Modal */}
+      {}
+      {}
       <TradeModal
         show={tradeModal.show}
         onClose={() => setTradeModal((prev) => ({ ...prev, show: false }))}

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5050/api";
-// Use Vite proxy in development, direct URL in production to avoid Vercel 404/fallback issues
+
 const COINGECKO_BASE_URL = import.meta.env.DEV 
   ? "/api/coingecko" 
   : "https://api.coingecko.com/api/v3";
@@ -12,7 +12,7 @@ export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,
 });
 
-// 🛡️ HARDENED: Interceptor to prevent HTML injection (Vercel Fallbacks)
+
 coinGecko.interceptors.response.use(
   (response) => {
     const contentType = response.headers["content-type"];
@@ -27,15 +27,15 @@ coinGecko.interceptors.response.use(
   }
 );
 
-// Create axios instance
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  // ❌ REMOVED 'headers' block here. 
-  // Axios will now automatically set 'multipart/form-data' when uploading images.
+  
+  
 });
 
-// Request Interceptor
+
 api.interceptors.request.use(
   (config) => {
     try {
@@ -51,7 +51,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor
+
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -62,7 +62,7 @@ api.interceptors.response.use(
   }
 );
 
-// --- API Methods (Keep these exactly as you had them) ---
+
 export const getData = async (url, params) => {
   try {
     const response = await api.get(url, params && { params });

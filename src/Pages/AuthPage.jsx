@@ -8,12 +8,12 @@ import { Mail, Lock, User, Phone, ArrowLeft, Rocket, ChevronRight, Sparkles, Eye
 import { login, postForm } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import InteractiveGridPattern from "@/Components/Landing/Background"; // Import from Landing
+import InteractiveGridPattern from "@/Components/Landing/Background"; 
 import useUserContext from "@/hooks/useUserContext";
 
-// =================================================================
-// MAIN AUTH PAGE COMPONENT
-// =================================================================
+
+
+
 
 const initialRegisterKeys = {
   name: "",
@@ -70,9 +70,9 @@ const AuthPage = () => {
     e.preventDefault();
     setLogging(true);
     try {
-      // Backend expects 'email' field, but we're collecting it as 'user_name' in the UI
+      
       const loginPayload = {
-        email: loginData.user_name, // Send user_name value as email
+        email: loginData.user_name, 
         password: loginData.password
       };
       const res = await login("/users/login", loginPayload);
@@ -88,7 +88,7 @@ const AuthPage = () => {
       if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
       if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
       
-      // Update Context State Immediately
+      
       await fetchUsers();
 
       toast.success(`Welcome back, ${res?.user?.name || "User"}!`, {
@@ -132,9 +132,9 @@ const AuthPage = () => {
           const res = await postForm("/users/verify-login-2fa", { user_id: userId, token: otp });
           
           if (res.token) localStorage.setItem("NEXCHAIN_USER_TOKEN", res.token);
-          if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user || res)); // Handle response structure
+          if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user || res)); 
           
-          // Update Context State Immediately
+          
           await fetchUsers();
 
           toast.success(`Welcome back!`);
@@ -153,7 +153,7 @@ const AuthPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Email Validation
+    
     if (!registerData.email || !registerData.email.includes("@")) {
       toast.error("Please enter a valid email address.", {
         className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
@@ -169,7 +169,7 @@ const AuthPage = () => {
       return;
     }
 
-    // Phone Validation
+    
     const hasNumber = /\d/.test(registerData.phone);
     if (!registerData.phone || !hasNumber) {
       toast.error("Please enter a valid phone number.", {
@@ -242,10 +242,10 @@ const AuthPage = () => {
         flex items-center justify-center min-h-screen bg-[#000108] text-white px-4 py-10 relative overflow-hidden
       `}
     >
-      {/* Use Landing Page Background */}
+      {}
       <InteractiveGridPattern />
       
-      {/* Background Glows (Matching Landing) */}
+      {}
       <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-cyan-400 pointer-events-none" /> 
       <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-blue-500 pointer-events-none" /> 
 
@@ -261,13 +261,13 @@ const AuthPage = () => {
             w-full border-0 bg-transparent shadow-none
           `}
         >
-          {/* Glass Card Container */}
+          {}
           <div className="relative rounded-3xl overflow-hidden bg-gray-950/40 backdrop-blur-xl border border-gray-800/50 shadow-2xl shadow-black/50">
-              {/* Top Highlight Line */}
+              {}
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
               
               <CardContent className="p-5 md:p-10">
-              {/* Header */}
+              {}
               <div className="text-center mb-6 md:mb-10">
                   <motion.div 
                       initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
@@ -284,7 +284,7 @@ const AuthPage = () => {
                   </p>
               </div>
 
-              {/* Tab Navigation */}
+              {}
               <div className="grid grid-cols-2 bg-gray-900/50 p-1 md:p-1.5 rounded-lg md:rounded-xl border border-gray-800/50 mb-6 relative w-full max-w-[240px] md:max-w-full mx-auto">
                   <motion.div 
                       className="absolute top-1 md:top-1.5 bottom-1 md:bottom-1.5 rounded-md md:rounded-lg bg-gray-800 shadow-sm"
@@ -310,7 +310,7 @@ const AuthPage = () => {
                   </button>
               </div>
 
-              {/* Forms */}
+              {}
                   <AnimatePresence mode="wait">
                       {twoFactorRequired ? (
                           <motion.form
@@ -573,7 +573,7 @@ const AuthPage = () => {
                   )}
               </AnimatePresence>
 
-              {/* Footer Actions */}
+              {}
               <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-800/50">
                   <button
                       className="flex items-center gap-2 text-gray-500 hover:text-cyan-400 transition-all duration-300 text-xs md:text-sm font-medium group"

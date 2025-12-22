@@ -4,7 +4,7 @@ import { FaChartPie, FaWallet, FaCoins, FaArrowUp, FaArrowDown } from "react-ico
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-// Function to get color based on symbol (same as Portfolio component)
+
 const getColorForSymbol = (symbol) => {
   const colors = ['#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
   if (!symbol) return colors[0];
@@ -14,35 +14,35 @@ const getColorForSymbol = (symbol) => {
 
 const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) => {
 
-  // 💡 Theme Classes Helper - aligned with other components
+  
   const TC = useMemo(() => ({
-    // Card Background (Matching PerformanceChart / PortfolioHeader / Sidebar)
+    
     bgContainer: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
 
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // P&L Pill Styling
+    
     bgPillPositive: isLight ? "bg-green-100 border-green-300" : "bg-green-500/10 border-green-500/30",
     bgPillNegative: isLight ? "bg-red-100 border-red-300" : "bg-red-500/10 border-red-500/30",
     
-    // Summary Card
+    
     bgSummaryCard: isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/5",
     borderSummary: isLight ? "border-gray-200" : "border-gray-700",
     
-    // Skeleton Colors
+    
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
     
-    // Chart specific colors
-    chartStroke: isLight ? "#F3F4F6" : "#1F2937", // Matches Portfolio component
+    
+    chartStroke: isLight ? "#F3F4F6" : "#1F2937", 
     pieLabelColor: isLight ? "#000000" : "#FFFFFF", 
     
-    // P&L text colors
+    
     textPositive: isLight ? "text-green-700" : "text-green-400",
     textNegative: isLight ? "text-red-700" : "text-red-400",
   }), [isLight]);
@@ -136,7 +136,7 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
     >
       <Header isLight={isLight} TC={TC} />
       
-      {/* Only show Profit/Loss if there are crypto holdings */}
+      {}
       {totalInvestment > 0 && (
         <ProfitLossSummary 
           isLight={isLight}
@@ -208,12 +208,12 @@ const ProfitLossSummary = ({ isLight, totalProfitLoss, totalProfitLossPercentage
 };
 
 const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
-  const strokeColor = isLight ? "#1F2937" : "#1F2937"; // Dark stroke for contrast
+  const strokeColor = isLight ? "#1F2937" : "#1F2937"; 
 
-  // Custom label component for external positioning with vibrant colors
+  
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 15; // Position labels outside the chart
+    const radius = outerRadius + 15; 
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -221,7 +221,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
       <text 
         x={x} 
         y={y} 
-        fill={isLight ? "#F59E0B" : "#F59E0B"} // Vibrant orange/yellow for labels
+        fill={isLight ? "#F59E0B" : "#F59E0B"} 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         className="font-bold"
@@ -236,7 +236,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
     <div className="w-full min-h-[220px] mb-4 flex-1 rounded-xl">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          {/* Pie chart with vibrant colors and external labels */}
+          {}
           <Pie
             data={distributionData}
             dataKey="value"
@@ -265,7 +265,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
   );
 };
 
-// Custom Tooltip component
+
 const CustomTooltip = ({ active, payload, isLight, TC, totalPortfolioValue }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;

@@ -9,7 +9,7 @@ function Highlights() {
   const isLight = useThemeCheck();
   const { coins } = useCoinContext();
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -24,7 +24,7 @@ function Highlights() {
     textItemHover: isLight ? "group-hover:text-green-700" : "group-hover:text-green-300",
     textValue: isLight ? "text-green-700" : "text-green-400",
     
-    // Price
+    
     textPrice: isLight ? "text-gray-800" : "text-gray-300",
   }), [isLight]);
 
@@ -38,7 +38,7 @@ function Highlights() {
 
   return (
     <div className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-5 h-full fade-in`}>
-      {/* Header */}
+      {}
       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4 fade-in">
         <div className={`p-1.5 sm:p-2 rounded-lg ${TC.bgIcon}`}>
           <FaFire className={`text-base sm:text-lg ${TC.iconColor}`} />
@@ -53,7 +53,7 @@ function Highlights() {
         </div>
       </div>
 
-      {/* Content */}
+      {}
       <div className="space-y-2 sm:space-y-3">
         {topGainers.map((coin, index) => (
           <div

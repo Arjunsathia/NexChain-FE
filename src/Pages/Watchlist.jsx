@@ -12,7 +12,7 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-// Components
+
 import WatchlistHeader from "../Components/Watchlist/WatchlistHeader";
 import WatchlistStats from "../Components/Watchlist/WatchlistStats";
 import WatchlistTable from "../Components/Watchlist/WatchlistTable";
@@ -51,7 +51,7 @@ const Watchlist = () => {
   const livePricesRef = useRef({});
   const itemsPerPage = 10;
 
-  // Theme Classes
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -66,7 +66,7 @@ const Watchlist = () => {
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
 
-  // Mount animation
+  
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
@@ -82,7 +82,7 @@ const Watchlist = () => {
         const liveCoin = liveCoins.find((coin) => coin.id === item.id);
         const livePriceData = livePrices[item.id];
         
-        // Match user holdings - purchasedCoins uses 'coinId' field
+        
         const userHolding = purchasedCoins.find(
           (pc) => pc.coinId === item.id
         );
@@ -104,7 +104,7 @@ const Watchlist = () => {
       .filter(Boolean);
   }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
 
-  // WebSocket for live prices
+  
   useEffect(() => {
     if (watchlistData.length === 0) return;
 
@@ -201,7 +201,7 @@ const Watchlist = () => {
   const handleRemoveConfirm = useCallback(async () => {
     if (!removeModal.coin || !userId) return;
     
-    // Optimistic Update: Remove item immediately from UI
+    
     const coinIdToRemove = removeModal.coin.id;
     setWatchlistData(prev => prev.filter(item => item.id !== coinIdToRemove));
     setRemoveModal({ show: false, coin: null });
@@ -210,8 +210,8 @@ const Watchlist = () => {
       await deleteWatchList("/watchlist/remove", { id: coinIdToRemove, user_id: userId });
       toast.success("Removed from watchlist!", {
         style: {
-          background: "#DCFCE7", // Light green
-          color: "#166534", // Dark green
+          background: "#DCFCE7", 
+          color: "#166534", 
           fontWeight: "600",
           fontSize: "14px",
           padding: "12px 16px",
@@ -222,7 +222,7 @@ const Watchlist = () => {
         iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
       });
 
-      // Silent refresh to ensure sync
+      
       fetchData(false);
     } catch (err) {
       console.error("Failed to remove from watchlist:", err);
@@ -239,7 +239,7 @@ const Watchlist = () => {
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
       });
-      // Revert optimistic update by hard refreshing
+      
       fetchData(true);
     }
   }, [removeModal.coin, userId, fetchData]);
@@ -264,7 +264,7 @@ const Watchlist = () => {
     [navigate]
   );
 
-  // Stats calculation
+  
   const stats = useMemo(() => {
     const totalValue = mergedCoins.reduce((sum, coin) => {
       const holding = coin.userHolding;
@@ -286,7 +286,7 @@ const Watchlist = () => {
       <main className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
         <Outlet />
 
-        {/* Header */}
+        {}
         <WatchlistHeader 
           TC={TC} 
           isLight={isLight} 
@@ -295,10 +295,10 @@ const Watchlist = () => {
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          {/* Stats Grid */}
+          {}
           <WatchlistStats stats={stats} TC={TC} isLight={isLight} />
 
-          {/* Coins Table / Loading / Empty State */}
+          {}
           {loading ? (
             <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
               <div className="p-8">
@@ -321,7 +321,7 @@ const Watchlist = () => {
             </div>
           ) : (
             <>
-              {/* Desktop Table */}
+              {}
               <WatchlistTable 
                 coins={paginatedCoins} 
                 TC={TC} 
@@ -332,7 +332,7 @@ const Watchlist = () => {
                 handleAlertClick={handleAlertClick}
               />
 
-              {/* Mobile Card View */}
+              {}
               <WatchlistMobileCards 
                 coins={paginatedCoins} 
                 TC={TC} 
@@ -345,7 +345,7 @@ const Watchlist = () => {
             </>
           )}
 
-          {/* Pagination */}
+          {}
           <WatchlistPagination 
             currentPage={currentPage} 
             totalPages={totalPages} 

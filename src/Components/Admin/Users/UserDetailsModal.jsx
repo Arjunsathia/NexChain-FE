@@ -21,11 +21,11 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${TC.modalOverlay}`}
     >
-      {/* Apply fade-in animation to the modal content as well */}
+      {}
       <div
         className={`w-[90vw] max-w-[340px] sm:max-w-lg rounded-xl overflow-hidden ${TC.modalContent} animate-in fade-in zoom-in duration-300`}
       >
-        {/* Modal Header */}
+        {}
         <div
           className={`p-4 flex justify-between items-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10`}
         >
@@ -68,9 +68,9 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
           </button>
         </div>
 
-        {/* Modal Body */}
+        {}
         <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-          {/* Contact Info */}
+          {}
           <div className="grid grid-cols-1 gap-2">
             <div className={`p-3 rounded-lg flex items-center justify-between ${TC.bgItem}`}>
               <div className="flex items-center gap-3 overflow-hidden">
@@ -114,7 +114,7 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
             </div>
           </div>
 
-          {/* Stats Overview */}
+          {}
           <div>
             <h3 className={`text-sm font-bold mb-3 flex items-center gap-1.5 ${TC.textPrimary}`}>
               <LineChart className="w-3.5 h-3.5 text-cyan-400" /> Investment Overview

@@ -9,7 +9,7 @@ import NewsPanel from "./NewsPanel";
 const DashboardSkeleton = () => {
   const isLight = useThemeCheck();
 
-  // 💡 Theme Classes for Skeleton
+  
   const TC = useMemo(
     () => ({
       skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
@@ -21,19 +21,19 @@ const DashboardSkeleton = () => {
     [isLight]
   );
 
-  // --- Large Screen Sidebar Item Heights (Perfectly Aligned with Compact Chart) ---
+  
 
-  // FIX: Compact Profile
+  
   const USERDATA_HEIGHT = "h-[150px]";
 
-  // FIX: Redistribute remaining space (Total Target Height: ~764px)
-  const CHART_HEIGHT = "h-[620px]"; // Restored to original, more compact height
+  
+  const CHART_HEIGHT = "h-[620px]"; 
 
-  // New height calculations to balance the 764px middle column height
+  
   const PORTFOLIO_HEIGHT = "h-[300px]";
   const TRADES_HEIGHT = "h-[266px]";
 
-  // Right sidebar balancing the left side
+  
   const WATCHLIST_HEIGHT = "h-[280px]";
   const TRENDING_HEIGHT = "h-[250px]";
   const LEARNING_HUB_HEIGHT = "h-[186px]";
@@ -44,9 +44,9 @@ const DashboardSkeleton = () => {
         isLight ? "text-gray-900" : "text-white"
       }`}
     >
-      {/* Mobile & Medium Layout Skeleton (Same as before) */}
+      {}
       <div className="xl:hidden flex flex-col gap-4">
-        {/* Compact Profile Skeleton for Small Screens */}
+        {}
         <div className="sm:hidden fade-in" style={{ animationDelay: "0.2s" }}>
           <div className={`rounded-xl p-4 h-20 ${TC.bgSkeletonItem}`}>
             <div className="flex items-center justify-between">
@@ -93,7 +93,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        {/* Top Coins Skeleton - Single column bento style */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.5s" }}>
           <div className="space-y-1">
             <Skeleton
@@ -156,7 +156,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        {/* Profile sections for Medium screens */}
+        {}
         <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((_, i) => (
             <div
@@ -184,7 +184,7 @@ const DashboardSkeleton = () => {
           ))}
         </div>
 
-        {/* Chart Skeleton - Visible on all screens */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.6s" }}>
           <div className={`rounded-xl p-6 h-96 ${TC.bgSkeletonItem}`}>
             <Skeleton
@@ -202,7 +202,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        {/* Widgets Skeleton */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((_, i) => (
             <div
@@ -229,7 +229,7 @@ const DashboardSkeleton = () => {
           ))}
         </div>
 
-        {/* News Skeleton */}
+        {}
         <div className="fade-in" style={{ animationDelay: "1.0s" }}>
           <div className={`rounded-xl p-6 h-64 ${TC.bgSkeletonItem}`}>
             <Skeleton
@@ -249,10 +249,10 @@ const DashboardSkeleton = () => {
         </div>
       </div>
 
-      {/* Large Screen Layout Skeleton */}
+      {}
       <div className="hidden xl:flex flex-col gap-6">
         <div className="grid grid-cols-12 gap-6 items-stretch">
-          {/* Left Sidebar Skeleton (Normalized Heights) */}
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${USERDATA_HEIGHT}`}
@@ -316,9 +316,9 @@ const DashboardSkeleton = () => {
             </div>
           </div>
 
-          {/* Middle Section Skeleton */}
+          {}
           <div className="col-span-6 flex flex-col gap-6">
-            {/* Top Coins Skeleton */}
+            {}
             <div className="fade-in" style={{ animationDelay: "0.5s" }}>
               <div className="grid grid-cols-3 gap-4">
                 {[1, 2, 3].map((_, i) => (
@@ -349,7 +349,7 @@ const DashboardSkeleton = () => {
               </div>
             </div>
 
-            {/* Chart Skeleton */}
+            {}
             <div
               className={`fade-in ${CHART_HEIGHT}`}
               style={{ animationDelay: "0.6s" }}
@@ -371,7 +371,7 @@ const DashboardSkeleton = () => {
             </div>
           </div>
 
-          {/* Right Sidebar Skeleton (Normalized Heights) */}
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${WATCHLIST_HEIGHT}`}
@@ -436,7 +436,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        {/* Bottom Section - News Panel (No Fixed Height) */}
+        {}
         <div className="fade-in" style={{ animationDelay: "0.7s" }}>
           <NewsPanel />
         </div>

@@ -7,22 +7,22 @@ const ChartSection = ({ coinId }) => {
   const isLight = useThemeCheck();
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [days, setDays] = useState(1); // 1 = 24h
+  const [days, setDays] = useState(1); 
 
-  // 🛡️ Strict Data Validation Helper
+  
   const validateData = (data) => {
       if (!data || typeof data !== "object") return false;
       if (!Array.isArray(data.prices)) return false;
-      if (data.prices.length === 0) return true; // Empty array is technically valid "no data"
+      if (data.prices.length === 0) return true; 
       
-      // Check first and last item to ensure structure is [timestamp, price]
+      
       const first = data.prices[0];
       return Array.isArray(first) && first.length === 2 && typeof first[0] === "number" && !isNaN(first[1]);
   };
 
-  // Fetch Chart Data
+  
   useEffect(() => {
-    let active = true; // Prevent race conditions
+    let active = true; 
 
     const fetchChart = async () => {
       if (!coinId) return;
@@ -51,7 +51,7 @@ const ChartSection = ({ coinId }) => {
     return () => { active = false; };
   }, [coinId, days]);
 
-  // Chart Options
+  
   const options = {
     chart: {
       type: "area",
@@ -147,12 +147,12 @@ const ChartSection = ({ coinId }) => {
       </div>
 
       <div className="w-full h-[350px] sm:h-[450px] lg:h-[560px] relative">
-        {/* Loader Overlay */}
+        {}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-[1px] z-10 rounded-xl transition-all duration-300">
              <div className="flex flex-col items-center gap-2">
                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                {/* <span className="text-xs font-medium text-blue-500">Updating...</span> */}
+                {}
              </div>
           </div>
         )}

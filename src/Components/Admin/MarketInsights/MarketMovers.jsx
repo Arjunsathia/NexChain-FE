@@ -11,7 +11,7 @@ function MarketMovers({
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-      {/* Top Gainers */}
+      {}
       <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h3
@@ -62,7 +62,7 @@ function MarketMovers({
         </div>
       </div>
 
-      {/* Top Losers */}
+      {}
       <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h3

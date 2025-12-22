@@ -12,7 +12,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const AdminFeedback = () => {
   const isLight = useThemeCheck();
 
-  // Premium Theme Classes - Matches User Dashboard
+  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -88,7 +88,7 @@ const AdminFeedback = () => {
         throw new Error("Invalid response format");
       }
     } catch (error) {
-       // ... existing error handling ...
+       
       console.error("❌ Error fetching feedbacks:", error);
       setError(
         "Failed to load feedback data. Please check if backend is running."
@@ -107,9 +107,9 @@ const AdminFeedback = () => {
         setStats(data.data || {});
       }
     } catch (error) {
-      // ... fallback logic ...
+      
       console.error("❌ Error fetching stats:", error);
-      // ... (keep fallback logic) ...
+      
       const localStats = {
         total: feedbacks.length,
         today: feedbacks.filter((fb) => {
@@ -156,9 +156,9 @@ const AdminFeedback = () => {
     }
   };
 
-  // ... 
+  
 
-  // ... 
+  
 
   const confirmDelete = (feedback) => {
     setFeedbackToDelete(feedback);
@@ -199,10 +199,10 @@ const AdminFeedback = () => {
     return matchesSearch && matchesStatus && matchesType && matchesPriority;
   });
 
-  // Loading Skeleton Component
+  
   const FeedbackSkeleton = () => (
     <div className="space-y-6">
-      {/* Stats Skeleton */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[...Array(4)].map((_, i) => (
           <div
@@ -212,10 +212,10 @@ const AdminFeedback = () => {
         ))}
       </div>
 
-      {/* Filters Skeleton */}
+      {}
       <div className={`${TC.bgCard} h-20 rounded-2xl animate-pulse`} />
 
-      {/* Table Skeleton */}
+      {}
       <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
         <div className="space-y-4">
           <div
@@ -236,7 +236,7 @@ const AdminFeedback = () => {
     <div
       className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
     >
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
@@ -278,10 +278,10 @@ const AdminFeedback = () => {
               : "opacity-0 translate-y-4"
           }`}
         >
-          {/* Stats Cards */}
+          {}
           <FeedbackStats stats={stats} TC={TC} />
 
-          {/* Filters */}
+          {}
           <FeedbackFilters
             filters={filters}
             setFilters={setFilters}
@@ -289,7 +289,7 @@ const AdminFeedback = () => {
             isLight={isLight}
           />
 
-          {/* Feedback List */}
+          {}
           <FeedbackTable
             filteredFeedbacks={filteredFeedbacks}
             TC={TC}
@@ -303,7 +303,7 @@ const AdminFeedback = () => {
         </div>
       )}
 
-      {/* View Modal */}
+      {}
       {showModal && (
         <FeedbackDetailsModal
           selectedFeedback={selectedFeedback}
@@ -316,7 +316,7 @@ const AdminFeedback = () => {
         />
       )}
 
-      {/* Delete Modal */}
+      {}
       <FeedbackDeleteModal
         showDeleteModal={showDeleteModal}
         setShowDeleteModal={setShowDeleteModal}

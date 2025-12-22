@@ -67,7 +67,7 @@ const HoldingsInfo = ({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
         ))}
       </div>
 
-      {/* Profit/Loss Section */}
+      {}
       <div
         className={`p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
           holdingsSummary.profitLoss >= 0

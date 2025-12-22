@@ -15,7 +15,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
     <section className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
-          {/* Hero Content */}
+          {}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -65,7 +65,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </div>
           </motion.div>
 
-          {/* Hero Visual */}
+          {}
           <motion.div
             initial={{ opacity: 0, scale: 0.5, x: 0 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -78,7 +78,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
         </motion.div>
       </div>
 
-      {/* Scroll Indicator */}
+      {}
       <PremiumScrollIndicator onClick={scrollToFeatures} TC={TC} />
     </section>
   );

@@ -72,7 +72,7 @@ const SecuritySettings = () => {
       }
   }
 
-  // Theme Classes
+  
   const containerClass = `rounded-xl p-6 border ${
     isDark ? "bg-gray-700/30 border-gray-700" : "bg-gray-50 border-gray-200"
   }`;
@@ -121,7 +121,7 @@ const SecuritySettings = () => {
           </div>
         </div>
 
-        {/* 2FA Setup Area */}
+        {}
         {showSetup && !security.twoFactor && (
             <div className={`mt-6 p-6 rounded-xl border animate-fade-in ${isDark ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"}`}>
                 <h4 className={`font-bold mb-4 flex items-center gap-2 ${textPrimary}`}>

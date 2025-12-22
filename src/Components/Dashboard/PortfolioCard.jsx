@@ -14,14 +14,14 @@ function PortfolioCard() {
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
   
-  // Fade-in mount effect
+  
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // 💡 Styles (Matching RecentTradesCard)
+  
   const TC = useMemo(() => ({
     bgContainer: isLight
       ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
@@ -29,12 +29,12 @@ function PortfolioCard() {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Items
+    
     bgItem: isLight 
       ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0" 
       : "hover:bg-white/5 border-b border-gray-700/50 last:border-0",
     
-    // P&L Colors
+    
     textProfit: isLight ? "text-green-600" : "text-green-400",
     textLoss: isLight ? "text-red-600" : "text-red-400",
     
@@ -42,7 +42,7 @@ function PortfolioCard() {
     bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
   }), [isLight]);
 
-  // WebSocket setup (Simplified for brevity, assuming mostly working)
+  
   useEffect(() => {
     if (groupedHoldings.length === 0) return;
     const symbolMap = {
@@ -81,9 +81,9 @@ function PortfolioCard() {
     return () => ws.current?.close();
   }, [groupedHoldings]);
 
-  // Merge Live Data
+  
   const allCoins = useMemo(() => {
-    // 🛡️ Safety Guard
+    
     if (!Array.isArray(groupedHoldings)) return [];
 
     return groupedHoldings.map((coin) => {
@@ -114,7 +114,7 @@ function PortfolioCard() {
 
   return (
     <div className={`p-1 rounded-xl h-full flex flex-col fade-in ${TC.bgContainer} ${isMounted ? "opacity-100" : "opacity-0"}`}>
-      {/* Header */}
+      {}
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
            <FaChartLine className="text-blue-500" />
@@ -125,7 +125,7 @@ function PortfolioCard() {
         </span>
       </div>
 
-      {/* List */}
+      {}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {allCoins.length === 0 ? (
           <div className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty}`}>
@@ -168,7 +168,7 @@ function PortfolioCard() {
         )}
       </div>
       
-      {/* Minimal Footer Link */}
+      {}
       {allCoins.length > 0 && (
           <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700/50 text-center">
              <button onClick={() => navigate("/portfolio")} className={`text-[10px] font-medium flex items-center justify-center gap-1 mx-auto transition-colors ${TC.textSecondary} hover:text-blue-500`}>

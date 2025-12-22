@@ -7,10 +7,10 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 function UserLineChart({ users = [], timeRange = 'Month' }) {
   const isLight = useThemeCheck();
 
-  // Generate chart data based on timeRange
+  
   const data = useMemo(() => {
     if (users.length === 0) {
-      // Mock data fallback
+      
       return timeRange === 'Week' 
         ? [
             { name: "Mon", users: 12 },
@@ -37,7 +37,7 @@ function UserLineChart({ users = [], timeRange = 'Month' }) {
     const result = [];
 
     if (timeRange === 'Week') {
-      // Last 7 days
+      
       const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const dailyCounts = {};
 
@@ -60,7 +60,7 @@ function UserLineChart({ users = [], timeRange = 'Month' }) {
         });
       }
     } else {
-      // Last 12 months (default)
+      
       const monthCounts = {};
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       
@@ -86,13 +86,13 @@ function UserLineChart({ users = [], timeRange = 'Month' }) {
     return result;
   }, [users, timeRange]);
 
-  // Theme-aware colors
+  
   const chartColors = useMemo(() => ({
-    stroke: isLight ? "#0ea5e9" : "#06b6d4", // sky-500 : cyan-500
+    stroke: isLight ? "#0ea5e9" : "#06b6d4", 
     fillStart: isLight ? "#0ea5e9" : "#06b6d4",
-    fillEnd: isLight ? "#ffffff" : "#0f172a", // white : slate-900
-    grid: isLight ? "#f1f5f9" : "#334155", // slate-100 : slate-700
-    axis: isLight ? "#94a3b8" : "#64748b", // slate-400 : slate-500
+    fillEnd: isLight ? "#ffffff" : "#0f172a", 
+    grid: isLight ? "#f1f5f9" : "#334155", 
+    axis: isLight ? "#94a3b8" : "#64748b", 
     tooltipBg: isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(15, 23, 42, 0.95)",
     tooltipText: isLight ? "#0f172a" : "#f8fafc",
     tooltipBorder: isLight ? "rgba(226, 232, 240, 0.8)" : "rgba(51, 65, 85, 0.8)",

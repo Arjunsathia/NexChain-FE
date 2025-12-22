@@ -10,7 +10,7 @@ const AlertChecker = () => {
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
 
-  // 1. Fetch Active Alerts
+  
   const fetchAlerts = async () => {
     if (!user?.id) return;
     try {
@@ -25,18 +25,18 @@ const AlertChecker = () => {
 
   useEffect(() => {
     fetchAlerts();
-    const interval = setInterval(fetchAlerts, 30000); // Refresh alerts every 30s
+    const interval = setInterval(fetchAlerts, 30000); 
     return () => clearInterval(interval);
   }, [user?.id]);
 
-  // 2. WebSocket Connection for Alerted Coins
+  
   useEffect(() => {
     if (!alerts.length) return;
 
-    // Get unique symbols
+    
     const symbols = [...new Set(alerts.map(a => {
-        // Map coinId to symbol if needed, or use stored symbol
-        // Assuming coin_symbol is stored as 'btc', 'eth' etc.
+        
+        
         return `${a.coin_symbol.toLowerCase()}usdt@ticker`; 
     }))].join('/');
 
@@ -50,14 +50,14 @@ const AlertChecker = () => {
       ws.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
-            const symbol = message.stream.replace('@ticker', '').replace('usdt', ''); // simplistic extraction
+            const symbol = message.stream.replace('@ticker', '').replace('usdt', ''); 
             const price = parseFloat(message.data.c);
             
-            // We need to map back to coin_id for the check
-            // The alert object has coin_id and coin_symbol. 
-            // We can update livePrices keyed by coin_id
             
-            // Find all alerts with this symbol to get their coin_ids
+            
+            
+            
+            
             const relevantAlerts = alerts.filter(a => a.coin_symbol.toLowerCase() === symbol);
             
             if (relevantAlerts.length) {
@@ -81,7 +81,7 @@ const AlertChecker = () => {
     };
   }, [alerts]);
 
-  // 3. Check Alerts Periodically
+  
   useEffect(() => {
     if (!alerts.length || Object.keys(livePrices).length === 0) return;
 
@@ -101,7 +101,7 @@ const AlertChecker = () => {
                 });
                 
                 if (res.data.success && res.data.triggered.length > 0) {
-                    // Alerts triggered! 
+                    
                     res.data.triggered.forEach(alert => {
                         toast((t) => (
                             <div className="flex items-center gap-2 md:gap-3">
@@ -122,8 +122,8 @@ const AlertChecker = () => {
                         });
                     });
 
-                    // Backend created notifications.
-                    // We should refresh alerts to remove the triggered ones from our local list
+                    
+                    
                     fetchAlerts();
                 }
             } catch (error) {
@@ -132,12 +132,12 @@ const AlertChecker = () => {
         }
     };
 
-    const timer = setInterval(checkTriggers, 10000); // Check every 10s
+    const timer = setInterval(checkTriggers, 10000); 
     return () => clearInterval(timer);
 
   }, [alerts, livePrices, user?.id]);
 
-  return null; // Invisible component
+  return null; 
 };
 
 export default AlertChecker;

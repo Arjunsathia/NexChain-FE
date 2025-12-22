@@ -26,9 +26,9 @@ export default function Footer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // 💡 Advanced Theme Classes Helper (Black Shadow Applied)
+  
   const TC = useMemo(() => ({
-    // Footer & Modal Base - Fluent Effect + Black Shadow
+    
     bgFooter: isLight 
       ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
@@ -40,24 +40,24 @@ export default function Footer() {
       ? "bg-gray-100/90 border-none" 
       : "bg-gradient-to-r from-gray-800 to-gray-900 border-none",
     
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-700" : "text-gray-300",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Disclaimer Accent (Matching Navbar's active color)
+    
     textDisclaimerAccent: isLight ? "text-blue-700" : "text-cyan-400",
     borderDisclaimer: isLight ? "border-gray-300/50" : "border-gray-700/50",
     
-    // Social Buttons - Added Ring for interactive effect
+    
     bgSocial: isLight 
       ? "bg-white/70 text-gray-500 hover:bg-blue-50/70 ring-2 ring-transparent hover:ring-blue-500/50 shadow-sm" 
       : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-cyan-400/50 shadow-sm",
     
-    // Input/Textarea
+    
     inputBg: isLight ? "bg-gray-100/70 text-gray-900 placeholder-gray-500 border-none shadow-inner" : "bg-gray-800/50 text-white placeholder-gray-500 border-none shadow-inner",
     
-    // Feedback Buttons (Type) - Uses Ring for active state
+    
     bgBtnFeedbackActive: isLight 
       ? "bg-blue-100/50 text-blue-700 shadow-md ring-2 ring-blue-500/50 border-none" 
       : "bg-cyan-600/20 text-cyan-400 shadow-lg ring-2 ring-cyan-400/50 border-none",
@@ -65,12 +65,12 @@ export default function Footer() {
       ? "bg-gray-100/50 text-gray-500 hover:text-gray-700 border-none" 
       : "bg-gray-800/50 text-gray-400 hover:text-white border-none",
     
-    // Cancel Button
+    
     bgBtnCancel: isLight 
       ? "bg-gray-100/70 text-gray-700 hover:bg-gray-200/90 ring-2 ring-transparent hover:ring-gray-400/50 border-none" 
       : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-gray-400/50 border-none",
 
-    // Primary Button (Cohesive Gradient)
+    
     bgPrimaryBtn: "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-cyan-500/25",
 
   }), [isLight]);
@@ -83,7 +83,7 @@ export default function Footer() {
 
     setIsSubmitting(true);
     try {
-      // Prepare feedback data
+      
       const feedbackData = {
         type: feedbackType,
         message: feedback.trim(),
@@ -96,10 +96,10 @@ export default function Footer() {
         priority: "medium",
       };
 
-      // Submit feedback to database using centralized api
+      
       const response = await postForm("/feedback", feedbackData);
       
-      // postForm returns response.data already
+      
       if (response && (response.success || response._id)) { 
         setShowSuccess(true);
         
@@ -141,10 +141,10 @@ export default function Footer() {
         `}
       >
         <div className="max-w-7xl mx-auto">
-          {/* Main Content: Disclaimer & Links */}
+          {}
           <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-8 mb-4 md:mb-8">
             
-            {/* Column 1-3: Disclaimer Section */}
+            {}
             <div className="col-span-3 md:col-span-3 lg:col-span-3">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                 <h3 className="text-sm sm:text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 sm:mb-4 flex items-center gap-2">
@@ -165,7 +165,7 @@ export default function Footer() {
               </motion.div>
             </div>
 
-            {/* Column 4: Quick Actions */}
+            {}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
                 <h4
                     className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
@@ -180,10 +180,10 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* Column 5: Feedback & Social */}
+            {}
             <div className="col-span-2 md:col-span-1 lg:col-span-1 space-y-6">
               
-              {/* Feedback Trigger */}
+              {}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
                 <button
                   onClick={() => setShowFeedback(true)}
@@ -194,7 +194,7 @@ export default function Footer() {
                 </button>
               </motion.div>
 
-              {/* Social Links */}
+              {}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
                 <h4
                   className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
@@ -238,7 +238,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Bottom Section: Copyright & Status Indicators */}
+          {}
           <div
             className={`pt-6 ${TC.borderDisclaimer} text-center`}
           >
@@ -272,7 +272,7 @@ export default function Footer() {
         </div>
       </motion.footer>
 
-      {/* Feedback Modal */}
+      {}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence> 
           {showFeedback && (
@@ -295,7 +295,7 @@ export default function Footer() {
               >
                 <div className={`rounded-xl shadow-2xl ${TC.bgModal} overflow-hidden`}>
                   
-                  {/* Success State */}
+                  {}
                   {showSuccess ? (
                     <motion.div
                       key="success"
@@ -316,9 +316,9 @@ export default function Footer() {
                       <div className="w-10 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto"></div>
                     </motion.div>
                   ) : (
-                    /* Normal Form State */
+                    
                     <motion.div key="form">
-                      {/* Header */}
+                      {}
                       <div
                         className={`px-4 py-3 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
                       >
@@ -348,9 +348,9 @@ export default function Footer() {
                         </div>
                       </div>
 
-                      {/* Form */}
+                      {}
                       <form onSubmit={handleSubmitFeedback} className="p-4 space-y-4">
-                        {/* Feedback Type */}
+                        {}
                         <div>
                           <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
                             Feedback Type
@@ -401,7 +401,7 @@ export default function Footer() {
                           </div>
                         </div>
 
-                        {/* Feedback Text */}
+                        {}
                         <div>
                           <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
                             Your Feedback
@@ -417,7 +417,7 @@ export default function Footer() {
                           />
                         </div>
 
-                        {/* Action Buttons */}
+                        {}
                         <div
                           className="flex gap-2 pt-1"
                         >

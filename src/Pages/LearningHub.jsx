@@ -154,7 +154,7 @@ function LearningHub() {
     <div className={`min-h-screen p-2 sm:p-4 lg:p-6`}>
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-6 sm:py-8">
         
-        {/* Hero Section */}
+        {}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -199,7 +199,7 @@ function LearningHub() {
 
 
 
-        {/* Category Filter & Search */}
+        {}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -227,7 +227,7 @@ function LearningHub() {
             })}
           </div>
 
-          {/* Search Bar */}
+          {}
           <div className="w-full lg:w-72">
             <div className="relative">
               <input
@@ -242,7 +242,7 @@ function LearningHub() {
           </div>
         </motion.div>
 
-        {/* Featured Courses */}
+        {}
         {selectedCategory === "all" && featuredCourses.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -262,7 +262,7 @@ function LearningHub() {
           </motion.div>
         )}
 
-        {/* All Courses */}
+        {}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -288,7 +288,7 @@ function LearningHub() {
   );
 }
 
-// Featured Course Card Component
+
 const CourseCardFeatured = ({ course, TC, isLight, delay }) => {
   const Icon = course.icon;
   
@@ -343,7 +343,7 @@ const CourseCardFeatured = ({ course, TC, isLight, delay }) => {
   );
 };
 
-// Regular Course Card Component
+
 const CourseCard = ({ course, TC, isLight, delay }) => {
   const Icon = course.icon;
   

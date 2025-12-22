@@ -12,7 +12,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const MarketInsights = () => {
   const isLight = useThemeCheck();
 
-  // Premium Theme Classes - Matches User Dashboard
+  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -60,7 +60,7 @@ const MarketInsights = () => {
   const [showTopGainers, setShowTopGainers] = useState(false);
   const [showTopLosers, setShowTopLosers] = useState(false);
 
-  // Pagination State
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
 
@@ -69,7 +69,7 @@ const MarketInsights = () => {
   }, []);
 
   const fetchMarketData = async () => {
-    // 1. Check Cache for Instant Load
+    
     const cacheKey = "marketInsightsData_v1";
     const cached = localStorage.getItem(cacheKey);
     let hasCachedData = false;
@@ -77,13 +77,13 @@ const MarketInsights = () => {
     if (cached) {
       try {
         const { data, timestamp } = JSON.parse(cached);
-        // Use cache if less than 5 minutes old to prevent API spam, 
-        // OR always use it for immediate display and update in background?
-        // Let's use it for immediate display.
+        
+        
+        
         setMarketData(data);
         calculateGlobalStats(data);
         hasCachedData = true;
-        setContentLoaded(true); // Show content immediately
+        setContentLoaded(true); 
       } catch (e) {
         console.error("Cache parse error", e);
       }
@@ -94,7 +94,7 @@ const MarketInsights = () => {
     }
 
     try {
-      // 2. Fetch Fresh Data (reduced to 50 for speed)
+      
       const response = await fetch(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h,7d"
       );
@@ -112,7 +112,7 @@ const MarketInsights = () => {
       setMarketData(data);
       calculateGlobalStats(data);
       
-      // Update Cache
+      
       localStorage.setItem(cacheKey, JSON.stringify({
         data,
         timestamp: Date.now()
@@ -153,7 +153,7 @@ const MarketInsights = () => {
         (acc, coin) => acc + coin.total_volume,
         0
       );
-      // Simple dominance approx based on Top 50
+      
       const btcDominance =
         (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
         100;
@@ -190,7 +190,7 @@ const MarketInsights = () => {
       coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination Logic
+  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
@@ -204,10 +204,10 @@ const MarketInsights = () => {
     .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
     .slice(0, 5);
 
-  // Loading Skeleton Component
+  
   const MarketSkeleton = () => (
     <div className="space-y-6">
-      {/* Global Stats Skeleton */}
+      {}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[...Array(4)].map((_, i) => (
           <div
@@ -217,7 +217,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {/* Market Movers Skeleton */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {[...Array(2)].map((_, i) => (
           <div
@@ -227,7 +227,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {/* Table Skeleton */}
+      {}
       <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
         <div className="space-y-4">
           <div
@@ -248,7 +248,7 @@ const MarketInsights = () => {
     <div
       className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
     >
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
@@ -287,14 +287,14 @@ const MarketInsights = () => {
               : "opacity-0 translate-y-4"
           }`}
         >
-          {/* Global Stats */}
+          {}
           <GlobalStats
             globalStats={globalStats}
             TC={TC}
             formatCompactNumber={formatCompactNumber}
           />
 
-          {/* Market Movers */}
+          {}
           <MarketMovers
             topGainers={topGainers}
             topLosers={topLosers}
@@ -304,7 +304,7 @@ const MarketInsights = () => {
             formatCurrency={formatCurrency}
           />
 
-          {/* Main Market Table */}
+          {}
           <MarketTable
             currentItems={currentItems}
             filteredData={filteredData}
@@ -322,7 +322,7 @@ const MarketInsights = () => {
         </div>
       )}
 
-      {/* Coin Details Modal */}
+      {}
       <MarketCoinDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}
@@ -332,7 +332,7 @@ const MarketInsights = () => {
         formatCompactNumber={formatCompactNumber}
       />
 
-      {/* Top Gainers Modal */}
+      {}
       {showTopGainers && (
         <CoinListModal
           title="Top Gainers (24h)"
@@ -349,7 +349,7 @@ const MarketInsights = () => {
         />
       )}
 
-      {/* Top Losers Modal */}
+      {}
       {showTopLosers && (
         <CoinListModal
           title="Top Losers (24h)"

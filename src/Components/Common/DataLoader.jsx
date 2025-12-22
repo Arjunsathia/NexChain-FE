@@ -13,7 +13,7 @@ const DataLoader = () => {
     dispatch(fetchUser());
     dispatch(fetchCoins());
     
-    // Interval for coins
+    
     const interval = setInterval(() => {
         dispatch(fetchCoins());
     }, 60000);

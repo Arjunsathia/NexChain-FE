@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
-import { jwtDecode } from "jwt-decode"; // Helper to get userId if needed
+import { jwtDecode } from "jwt-decode"; 
 
-// Helper to get userId directly if not passed (though passing it is cleaner)
+
 const getUserId = () => {
     const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
     if(token) {
@@ -60,7 +60,7 @@ const walletSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-        // Refresh Balance
+        
       .addCase(refreshBalance.pending, (state) => {
         state.loading = true;
       })
@@ -72,7 +72,7 @@ const walletSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Reset Balance
+      
       .addCase(resetBalance.pending, (state) => {
         state.loading = true;
       })

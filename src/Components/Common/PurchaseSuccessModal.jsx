@@ -60,7 +60,7 @@ const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) 
             : "bg-gray-800/90 backdrop-blur-xl border border-gray-700"
         }`}
       >
-        {/* Close Button */}
+        {}
         <button
           onClick={onClose}
           className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
@@ -73,7 +73,7 @@ const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) 
         </button>
 
         <div className="p-8 text-center space-y-6">
-          {/* Success Icon */}
+          {}
           <div className="relative inline-block">
             <div
               className={`absolute inset-0 rounded-full blur-xl opacity-50 ${
@@ -87,7 +87,7 @@ const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) 
             />
           </div>
 
-          {/* Title */}
+          {}
           <div>
             <h2
               className={`text-3xl font-bold mb-2 ${
@@ -105,7 +105,7 @@ const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) 
             </p>
           </div>
 
-          {/* Details Card */}
+          {}
           <div
             className={`rounded-2xl p-6 space-y-4 ${
               isLight ? "bg-gray-50" : "bg-gray-700/30"
@@ -180,7 +180,7 @@ const PurchaseSuccessModal = ({ show, onClose, data, isFirstPurchase = false }) 
             </div>
           </div>
 
-          {/* Actions */}
+          {}
           <div className="space-y-3 pt-4">
             <button
               onClick={handleGoToPortfolio}

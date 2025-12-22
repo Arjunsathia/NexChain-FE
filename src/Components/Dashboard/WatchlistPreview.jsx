@@ -19,14 +19,14 @@ function WatchlistPreview() {
   const ws = useRef(null);
   const livePricesRef = useRef({});
 
-  // 🔁 Fade-in mount effect
+  
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // 💡 Minimal Styles (Matching RecentTradesCard)
+  
   const TC = useMemo(() => ({
     bgContainer: isLight
       ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
@@ -34,12 +34,12 @@ function WatchlistPreview() {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Items
+    
     bgItem: isLight 
       ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0" 
       : "hover:bg-white/5 border-b border-gray-700/50 last:border-0",
     
-    // Values
+    
     textPricePositive: isLight ? "text-green-600" : "text-green-400",
     textPriceNegative: isLight ? "text-red-600" : "text-red-400",
     
@@ -60,7 +60,7 @@ function WatchlistPreview() {
       setError(false);
       try {
         const res = await getData("/watchlist", { user_id: userId });
-        // Handle various response formats (array, { data: [] }, { watchlist: [] })
+        
         let list = [];
         if (Array.isArray(res)) {
           list = res;
@@ -108,15 +108,15 @@ function WatchlistPreview() {
         if (message.stream && message.data) {
           const symbol = message.stream.replace("@ticker", "");
           const coinData = message.data;
-          // Simple reverse map match
+          
           const coinId = watchlistData.find(c => {
-             // simplified check for demo, ideally robust map again
-             const sMap = { bitcoin: "btcusdt", ethereum: "ethusdt" }; // reduced for brevity in logic
-             return true; // We rely on stored data logic usually, but here just updating what we can
+             
+             const sMap = { bitcoin: "btcusdt", ethereum: "ethusdt" }; 
+             return true; 
           })?.id; 
           
-          // Better logic: iterate known map again or just update by finding matching symbol in map
-          // To save space, standard implementation:
+          
+          
           const symbolToCoinId = {
             btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple",
             adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot",
@@ -144,7 +144,7 @@ function WatchlistPreview() {
     return () => { if (ws.current) ws.current.close(); };
   }, [watchlistData]);
 
-  // Merge Live Coins
+  
   const mergedCoins = useMemo(() => {
     if (!Array.isArray(watchlistData)) return [];
     
@@ -171,7 +171,7 @@ function WatchlistPreview() {
 
   return (
     <div className={`p-1 rounded-xl h-full flex flex-col fade-in ${TC.bgContainer} ${isMounted ? "opacity-100" : "opacity-0"}`}>
-      {/* Header */}
+      {}
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
            <FaStar className="text-cyan-500" />
@@ -184,7 +184,7 @@ function WatchlistPreview() {
         )}
       </div>
 
-      {/* List */}
+      {}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {error ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
@@ -237,7 +237,7 @@ function WatchlistPreview() {
         )}
       </div>
 
-       {/* Minimal Footer Link */}
+       {}
       {mergedCoins.length > 0 && (
           <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700/50 text-center">
              <button onClick={() => navigate("/watchlist")} className={`text-[10px] font-medium flex items-center justify-center gap-1 mx-auto transition-colors ${TC.textSecondary} hover:text-blue-500`}>

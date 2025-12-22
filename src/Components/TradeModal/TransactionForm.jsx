@@ -41,7 +41,7 @@ const TransactionForm = ({
 }) => {
   return (
     <div className="space-y-3 md:space-y-4">
-      {/* Mode Toggles */}
+      {}
       <div className="flex gap-2 mb-4">
           <div className={`flex-1 flex p-1.5 rounded-xl ${isLight ? "bg-gray-100 border border-gray-200/60" : "bg-gray-800/80 border border-white/5"}`}>
             {['market', 'limit', 'stop_limit', 'stop_market'].map((type) => (
@@ -64,10 +64,10 @@ const TransactionForm = ({
           </div>
       </div>
 
-      {/* Alert Mode UI */}
+      {}
       {isAlertMode ? (
         <div className="space-y-4">
-            {/* ... existing alert UI ... */}
+            {}
             <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 text-center">
                 <FaBell className="text-3xl text-yellow-500 mx-auto mb-2" />
                 <h3 className="font-bold text-yellow-700 dark:text-yellow-500">Set Price Alert</h3>
@@ -96,7 +96,7 @@ const TransactionForm = ({
         </div>
       ) : (
         <>
-            {/* Stop Price Input */}
+            {}
             {(orderType === 'stop_limit' || orderType === 'stop_market') && (
                 <div>
                 <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
@@ -113,7 +113,7 @@ const TransactionForm = ({
                 </div>
             )}
 
-            {/* Limit Price Input */}
+            {}
             {(orderType === 'limit' || orderType === 'stop_limit') && (
                 <div>
                 <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
@@ -130,9 +130,9 @@ const TransactionForm = ({
                 </div>
             )}
 
-            {/* Amount Inputs */}
+            {}
             <div className="grid grid-cols-2 gap-3">
-                {/* ... existing amount inputs ... */}
+                {}
                 <div>
                 <label
                     className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}
@@ -189,7 +189,7 @@ const TransactionForm = ({
                 </div>
             </div>
 
-            {/* Available Balance Info */}
+            {}
             <div
                 className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border ${isBuyOperation ? "hover:border-emerald-500/50" : "hover:border-red-500/50"} transition-all duration-300 ${TC.bgCard}`}
             >
@@ -218,7 +218,7 @@ const TransactionForm = ({
                 </span>
             </div>
 
-            {/* Trading Details */}
+            {}
             <div
                 className={`p-3 md:p-4 rounded-xl space-y-3 transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
             >
@@ -285,7 +285,7 @@ const TransactionForm = ({
         </>
       )}
 
-      {/* Action Button */}
+      {}
       <button
         onClick={handleSubmit}
         disabled={
@@ -343,7 +343,7 @@ const TransactionForm = ({
         )}
       </button>
 
-      {/* Help Text */}
+      {}
       <div
         className={`flex items-center gap-2 text-xs rounded px-2 py-1 border ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
       >

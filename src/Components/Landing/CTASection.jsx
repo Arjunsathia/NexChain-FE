@@ -58,10 +58,10 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
       viewport={{ once: true, margin: "-100px" }}
       variants={sectionVariants}
     >
-      {/* Top CTA Section */}
+      {}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-12 md:mb-20">
         <div className={`rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-16 relative overflow-hidden ${TC.bgCTA || 'bg-gradient-to-br from-indigo-900/60 to-slate-900/60 border border-white/5 backdrop-blur-md'}`}>
-          {/* Background Glows REMOVED for smoother scroll performance as requested */}
+          {}
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 text-center md:text-left">
             <div className="max-w-2xl">
@@ -85,14 +85,14 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
         </div>
       </div>
 
-      {/* Main Footer Content */}
+      {}
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-4 md:gap-12 lg:gap-8 mb-12 md:mb-16">
           
-          {/* Brand Column */}
+          {}
           <div className="col-span-3 md:col-span-2 lg:col-span-2 space-y-3 md:space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
             <div className="flex items-center gap-2">
-               {/* Logo Placeholder */}
+               {}
                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                   <span className="text-white font-bold text-lg md:text-xl">N</span>
                </div>
@@ -114,7 +114,7 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
             </div>
           </div>
 
-          {/* Links Columns */}
+          {}
           {footerLinks.map((column, idx) => (
             <div key={idx} className="col-span-1 text-center md:text-left">
               <h4 className={`font-bold mb-3 md:mb-6 text-sm md:text-base ${TC.textPrimary}`}>{column.title}</h4>
@@ -133,7 +133,7 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
             </div>
           ))}
 
-          {/* Newsletter Column */}
+          {}
           <div className="col-span-3 md:col-span-2 lg:col-span-1 text-center md:text-left">
             <h4 className={`font-bold mb-3 md:mb-6 text-sm md:text-base ${TC.textPrimary}`}>Stay Updated</h4>
             <div className="space-y-3 md:space-y-4 max-w-xs mx-auto md:mx-0">
@@ -154,7 +154,7 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {}
         <div className={`pt-6 md:pt-8 border-t ${TC.isLight ? 'border-gray-200' : 'border-white/5'} flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left`}>
           <p className={`text-xs md:text-sm ${TC.textSecondary}`}>
             © {new Date().getFullYear()} NexChain. All rights reserved.

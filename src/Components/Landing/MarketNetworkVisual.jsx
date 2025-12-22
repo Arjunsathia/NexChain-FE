@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bitcoin, Circle, TrendingUp, TrendingDown } from "lucide-react";
 
-// NEW: Market Network Visual Component (Moved from Hero & Enhanced)
+
 const MarketNetworkVisual = ({ livePrices }) => {
-  // Helper to safely get price data
+  
   const getPrice = (id) => livePrices && livePrices[id] ? livePrices[id].price : 0;
   const getChange = (id) => livePrices && livePrices[id] ? livePrices[id].change : 0;
   const format = (p) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: p < 1 ? 4 : 2 }).format(p);
 
-  // Coin Logos
+  
   const CoinLogo = ({ symbol, className }) => {
     switch (symbol) {
       case 'BTC': return <Bitcoin className={className} />;
@@ -48,7 +48,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
     }
   };
 
-  // Responsive check
+  
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -58,7 +58,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
   }, []);
 
   if (isMobile) {
-    // COMPACT MOBILE VIEW (Grid Layout)
+    
     return (
       <div className="w-full px-4 py-8 font-manrope">
         <div className="grid grid-cols-2 gap-3">
@@ -101,10 +101,10 @@ const MarketNetworkVisual = ({ livePrices }) => {
     );
   }
 
-  // DESKTOP VIEW (Advanced Network)
+  
   return (
     <div className="relative w-full h-[800px] flex items-center justify-center perspective-1000 overflow-visible font-manrope hidden md:flex">
-      {/* Advanced Radar Background */}
+      {}
       <div className="absolute inset-0 bg-[#728AD5]/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
          <div className="w-[600px] h-[600px] border border-[#728AD5]/10 rounded-full animate-[spin_60s_linear_infinite]" />
@@ -112,7 +112,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
          <div className="absolute w-[800px] h-[800px] border border-[#728AD5]/5 rounded-full border-dashed animate-[spin_100s_linear_infinite]" />
       </div>
       
-      {/* Connecting Data Lines (SVG) */}
+      {}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
         <defs>
           <linearGradient id="dataFlowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -128,7 +128,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
             </feMerge>
           </filter>
         </defs>
-        {/* Animated Data Paths */}
+        {}
         {[
           { x2: "15%", y2: "15%" }, { x2: "10%", y2: "45%" }, { x2: "15%", y2: "85%" },
           { x2: "85%", y2: "80%" }, { x2: "90%", y2: "25%" }, { x2: "50%", y2: "12%" }, { x2: "50%", y2: "88%" }
@@ -147,7 +147,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         ))}
       </svg>
 
-      {/* Central Hub - Reactor Style */}
+      {}
       <motion.div 
         initial={{ scale: 0.8, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
@@ -158,14 +158,14 @@ const MarketNetworkVisual = ({ livePrices }) => {
         <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#728AD5]/20 to-transparent animate-pulse" />
         <Bitcoin className="w-24 h-24 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] relative z-10" />
         
-        {/* Reactor Rings */}
+        {}
         <div className="absolute -inset-4 border-2 border-[#728AD5]/30 rounded-full border-t-transparent animate-spin-slow" />
         <div className="absolute -inset-8 border border-[#728AD5]/10 rounded-full border-b-transparent animate-[spin_8s_linear_infinite_reverse]" />
       </motion.div>
 
-      {/* Floating Cards Wrapper */}
+      {}
       
-      {/* Card 1: Top Left - Bitcoin */}
+      {}
       <motion.div 
         initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
         className="absolute top-[5%] left-[5%] md:left-[10%] z-30"
@@ -193,7 +193,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 2: Left Middle - Ethereum */}
+      {}
       <motion.div 
         initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
         className="absolute top-[40%] left-[-2%] md:left-[2%] z-20"
@@ -221,7 +221,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 3: Bottom Left - Cardano */}
+      {}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.6 }}
         className="absolute bottom-[10%] left-[10%] md:left-[15%] z-30"
@@ -249,7 +249,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 4: Bottom Right - Dogecoin */}
+      {}
       <motion.div 
         initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.8 }}
         className="absolute bottom-[15%] right-[5%] md:right-[15%] z-20"
@@ -277,7 +277,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 5: Top Right - Solana */}
+      {}
       <motion.div 
         initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 1.0 }}
         className="absolute top-[25%] right-[2%] md:right-[5%] z-30"
@@ -305,7 +305,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 6: Top Center - Ripple */}
+      {}
       <motion.div 
         initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 1.1 }}
         className="absolute top-[5%] left-[50%] -translate-x-1/2 z-20"
@@ -333,7 +333,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         </motion.div>
       </motion.div>
 
-      {/* Card 7: Bottom Center - Polkadot */}
+      {}
       <motion.div 
         initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 1.2 }}
         className="absolute bottom-[5%] left-[50%] -translate-x-1/2 z-20"

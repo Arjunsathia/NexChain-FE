@@ -7,7 +7,7 @@ const SparklineChart = ({ data, change }) => {
     index,
   }));
 
-  const strokeColor = change < 0 ? "#f87171" : "#4ade80"; // red or green
+  const strokeColor = change < 0 ? "#f87171" : "#4ade80"; 
 
   return (
     <ResponsiveContainer width="100%" height={40}>

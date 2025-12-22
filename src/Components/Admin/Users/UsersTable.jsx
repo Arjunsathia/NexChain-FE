@@ -45,8 +45,8 @@ function UsersTable({
               >
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Avatar */}
-                    {/* Avatar */}
+                    {}
+                    {}
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-xs sm:text-base flex-shrink-0 overflow-hidden">
                       {user.image ? (
                         <img 

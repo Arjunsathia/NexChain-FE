@@ -23,18 +23,18 @@ function CryptoList() {
   const [loading, setLoading] = useState(true);
   const { purchasedCoins } = usePurchasedCoins();
 
-  // START CHANGE: State for controlled main component fade-in
+  
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsMounted(true);
-    }, 100); // Small delay to ensure CSS classes load
+    }, 100); 
     return () => clearTimeout(timer);
   }, []);
-  // END CHANGE
+  
 
-  // Trade Modal state at the top level
+  
   const [tradeModal, setTradeModal] = useState({
     show: false,
     coin: null,
@@ -47,33 +47,33 @@ function CryptoList() {
     type: "buy",
   });
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
-    // General text colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    // Backgrounds
+    
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     bgCard: isLight 
       ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100" 
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
     bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/80 backdrop-blur-md shadow-md border-b border-gray-800",
     
-    // Accents
+    
     accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
     textAccent: isLight ? "text-blue-600" : "text-cyan-400",
     
-    // Skeleton Loaders
+    
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
     
-    // Pill Colors
+    
     bgPillPositive: isLight ? "bg-green-100 text-green-700 border-green-200" : "bg-green-500/10 text-green-400 border-green-500/20",
     bgPillNegative: isLight ? "bg-red-100 text-red-700 border-red-200" : "bg-red-500/10 text-red-400 border-red-500/20",
     
-    // Icons
+    
     iconBg: isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400",
     
   }), [isLight]);
@@ -94,7 +94,7 @@ function CryptoList() {
     fetchData();
   }, [fetchData]);
 
-  // Handler for trade button clicks from CoinTable
+  
   const handleTrade = useCallback((coin, options = {}) => {
     if (options.initialAlertMode) {
       setAlertModal({
@@ -112,7 +112,7 @@ function CryptoList() {
 
 
 
-  // Handler for closing modal
+  
   const handleCloseModal = useCallback(() => {
     setTradeModal(prev => ({
       ...prev,
@@ -128,12 +128,12 @@ function CryptoList() {
     });
   }, []);
 
-  // Determine pill classes based on value
+  
   const getPillClasses = (value) => {
     return value < 0 ? TC.bgPillNegative : TC.bgPillPositive;
   };
 
-  // Helper for compact number formatting
+  
   const formatCompactNumber = (number) => {
     return new Intl.NumberFormat("en-US", {
       notation: "compact",
@@ -142,12 +142,12 @@ function CryptoList() {
   };
 
   return (
-    // Applied transition to the main wrapper using isMounted state
+    
     <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
       
-      {/* 1. Header Section */}
+      {}
      <div 
-  // This header already uses its own animation classes and will fade in with the main content
+  
   className={`
     hidden sm:block
     sticky top-2 z-40 
@@ -170,7 +170,7 @@ function CryptoList() {
         </div>
       </div>
       
-      {/* Quick Global Stats (Visible on Desktop) */}
+      {}
       <div className="hidden md:flex items-center gap-6 text-sm">
         <div className="flex flex-col items-end">
           <span className={TC.textTertiary}>Market Cap</span>
@@ -191,11 +191,11 @@ function CryptoList() {
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
         
-        {/* 2. Three Cards Section (Global, Trending, Gainers) */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
           
-          {/* Global Market Card (Inlined) */}
-          {/* Global Market Card (Inlined) */}
+          {}
+          {}
           <div className={`rounded-lg sm:rounded-2xl p-3 sm:p-6 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
              <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
                 <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
@@ -245,29 +245,24 @@ function CryptoList() {
              </div>
           </div>
 
-          {/* Trending Coins */}
+          {}
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.05s' }}>
-             {/* Using the Dashboard component directly but it might have its own border/style. 
-                 The request implies a "new and minimal look", meaning standardising these.
-                 TrendingCoins component has its own card wrapper. 
-                 Since we can't easily strip its styles without modifying it heavily, 
-                 we ensure it sits nicely in the grid.
-             */}
+             {}
              <TrendingCoins />
           </div>
 
-          {/* Top Gainers */}
+          {}
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>
              <TopGainers />
           </div>
         </div>
 
-        {/* 3. Main Coin List Section - Added 'fade-in' class */}
+        {}
         <div className="fade-in" style={{ animationDelay: '0.15s' }}>
            <CoinTable onTrade={handleTrade} />
         </div>
 
-        {/* 4. News Section - Added 'fade-in' class */}
+        {}
         <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: '0.2s' }}>
           <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
             <FaFire className="text-orange-500" />
@@ -278,7 +273,7 @@ function CryptoList() {
 
       </div>
 
-      {/* Trade Modal */}
+      {}
       <TradeModal
         show={tradeModal.show}
         onClose={handleCloseModal}
@@ -287,7 +282,7 @@ function CryptoList() {
         purchasedCoins={purchasedCoins}
       />
 
-      {/* Price Alert Modal */}
+      {}
       <PriceAlertModal
         show={alertModal.show}
         onClose={handleCloseAlertModal}

@@ -6,7 +6,7 @@ import { FaCrown, FaTrophy, FaAward, FaCoins } from "react-icons/fa";
 
 
 
-// Memoized Bento Coin Card Component (Dual Mode)
+
 const BentoCoinCard = React.memo(
   ({ coin, index, isSelected, onSelect, isMobile, liveData, isLoading }) => {
     const isLight = useThemeCheck();
@@ -16,11 +16,11 @@ const BentoCoinCard = React.memo(
         textPrimary: isLight ? "text-gray-900" : "text-white",
         textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
-        // Skeleton
+        
         skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
         skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
 
-        // P/L pill
+        
         bgPLPositive: isLight
           ? "text-green-600 bg-green-100/50"
           : "text-green-400 bg-green-500/10",
@@ -28,25 +28,25 @@ const BentoCoinCard = React.memo(
           ? "text-red-600 bg-red-100/50"
           : "text-red-400 bg-red-500/10",
 
-        // Base card (Matched to RecentTrades/Portfolio minimal glass)
+        
         bgBase: isLight
           ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
           : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
 
-        // Selected state: Premium style with gradient, transparency, and glow
+        
         selectedState: isLight
           ? "bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20 scale-105 z-10"
           : "bg-gradient-to-br from-gray-800 to-gray-800/80 border border-cyan-400 shadow-xl shadow-cyan-500/10 ring-2 ring-cyan-400/20 scale-105 z-10",
 
-        // Hover effect
+        
         hoverEffect: isLight
           ? "hover:bg-white/90 hover:border-gray-300"
           : "hover:bg-gray-800/80 hover:border-gray-600",
         
-        // Price color
+        
         priceColor: isLight ? "text-gray-900" : "text-white",
 
-        // Icons
+        
         rankIconColor: (idx) => {
              if (idx === 0) return "text-yellow-500";
              if (idx === 1) return "text-gray-400";
@@ -94,7 +94,7 @@ const BentoCoinCard = React.memo(
     const displayChange = getDisplayChange();
     const isPositive = getIsPositive();
 
-    // Icons based on rank
+    
     const getPositionIcon = () => {
       const colorClass = TC.rankIconColor(index);
       switch (index) {
@@ -129,7 +129,7 @@ const BentoCoinCard = React.memo(
         `}
         style={{ animationDelay: `${0.3 + index * 0.1}s` }}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <img
@@ -147,7 +147,7 @@ const BentoCoinCard = React.memo(
             </div>
         </div>
 
-        {/* Price & Change */}
+        {}
         <div className="mt-2">
             <p className={`text-lg font-bold ${TC.priceColor}`}>{displayPrice}</p>
             <div className="flex items-center gap-2 mt-0.5">
@@ -163,10 +163,10 @@ const BentoCoinCard = React.memo(
 
 BentoCoinCard.displayName = "BentoCoinCard";
 
-// Memoized TopCoins Component (Dual Mode)
+
 const TopCoins = React.memo(
   ({ topCoins, selectedCoinId, setSelectedCoinId, isMobile, liveData, loading }) => {
-    // Determine container classes based on whether it's mobile or not
+    
     const containerClasses = useMemo(() => {
       return isMobile 
         ? "grid grid-cols-1 gap-3 w-full" 

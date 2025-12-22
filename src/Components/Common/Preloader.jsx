@@ -11,16 +11,16 @@ const Preloader = () => {
       transition={{ duration: 0.5, ease: "easeInOut" }}
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050505] text-white overflow-hidden"
     >
-      {/* Background Ambience */}
+      {}
       <div className="absolute inset-0">
         <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-purple-900/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
-        {/* Premium Spinner */}
+        {}
         <div className="relative w-24 h-24 mb-12">
-          {/* Core Glow */}
+          {}
           <motion.div
             animate={{
               boxShadow: [
@@ -33,32 +33,32 @@ const Preloader = () => {
             className="absolute inset-0 rounded-full bg-transparent"
           />
 
-          {/* Outer Ring */}
+          {}
           <motion.div
             className="absolute inset-0 rounded-full border border-cyan-500/20 border-t-cyan-400"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
           
-          {/* Middle Ring */}
+          {}
           <motion.div
             className="absolute inset-2 rounded-full border border-blue-500/20 border-b-blue-400"
             animate={{ rotate: -360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
           />
 
-          {/* Inner Ring */}
+          {}
           <motion.div
             className="absolute inset-4 rounded-full border border-purple-500/20 border-l-purple-400"
             animate={{ rotate: 180 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           />
 
-          {/* Center Dot */}
+          {}
           <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white shadow-[0_0_15px_white]" />
         </div>
 
-        {/* Text Reveal */}
+        {}
         <div className="flex overflow-hidden">
           {letters.map((char, index) => (
             <motion.span
@@ -77,7 +77,7 @@ const Preloader = () => {
           ))}
         </div>
 
-        {/* Tagline */}
+        {}
         <motion.div
           initial={{ opacity: 0, letterSpacing: "0.8em" }}
           animate={{ opacity: 1, letterSpacing: "0.3em" }}
@@ -87,7 +87,7 @@ const Preloader = () => {
           The Future of Trading
         </motion.div>
 
-        {/* Minimal Progress Bar */}
+        {}
         <div className="mt-16 w-32 h-[1px] bg-gray-800 relative overflow-hidden">
           <motion.div
             initial={{ x: "-100%" }}

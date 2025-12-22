@@ -48,7 +48,7 @@ export default function Dashboard() {
             : 'opacity-0 translate-y-4'
         }`}
       >
-        {/* Header Section */}
+        {}
         <header className="mb-6 py-2 px-2">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -66,10 +66,10 @@ export default function Dashboard() {
           </p>
         </header>
 
-        {/* Loading State */}
+        {}
         {isLoading ? (
           <div className="space-y-6">
-            {/* Info Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-gray-800/50 rounded-xl p-4">
@@ -81,7 +81,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Portfolio & Recent Activity Skeleton */}
+            {}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <div className="bg-gray-800/50 rounded-xl p-4 h-80">
                 <div className="animate-pulse">
@@ -102,18 +102,18 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          /* Actual Content when loaded */
+          
           <div className="space-y-6">
-            {/* Info Cards */}
+            {}
             <InfoCards />
 
-            {/* Portfolio & Recent Activity Section */}
+            {}
             <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <Portfolio />
               <RecentActivity />
             </section>
 
-            {/* Watchlist & Highlights Section */}
+            {}
             <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <Watchlist />
               <Highlights />

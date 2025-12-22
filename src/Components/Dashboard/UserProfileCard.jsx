@@ -21,7 +21,7 @@ export default function UserProfileCard() {
       `}
     >
       <div className="flex items-center gap-3">
-        {/* Avatar */}
+        {}
         <div className="relative">
           <div 
             className={`
@@ -35,13 +35,13 @@ export default function UserProfileCard() {
           >
             {user?.name ? user.name.charAt(0).toUpperCase() : <FaUserCircle size={24} />}
           </div>
-          {/* Status Indicator */}
+          {}
           <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-0.5">
              <FaCheckCircle className="text-green-500 text-sm" />
           </div>
         </div>
 
-        {/* User Details */}
+        {}
         <div className="flex-1 min-w-0">
           <h3 className={`font-bold text-base truncate ${isLight ? "text-gray-900" : "text-white"}`}>
             {user?.name || "Guest User"}
@@ -66,7 +66,7 @@ export default function UserProfileCard() {
         </div>
       </div>
 
-      {/* Wallet Balance (Replaces ID/Email) */}
+      {}
       <div className={`mt-4 pt-3 border-t ${isLight ? "border-gray-200" : "border-gray-700"}`}>
          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 opacity-80">

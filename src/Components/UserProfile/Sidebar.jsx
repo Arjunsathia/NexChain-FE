@@ -24,7 +24,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 
 import { createPortal } from "react-dom";
 
-// Logout Confirmation Modal
+
 const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
   if (typeof document === 'undefined') return null;
 
@@ -105,39 +105,39 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
   const { watchlist } = useWatchlist() || { watchlist: [] };
 
-  // 💡 Theme Classes Helper - Matches Admin Sidebar
+  
   const TC = useMemo(() => ({
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     
-    // Backgrounds & Borders
+    
     bgSidebar: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgMobile: isLight ? "bg-white shadow-md border-none" : "bg-gray-800/90 backdrop-blur-md border-none",
 
-    // Header Colors
+    
     headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
     headerTitle: isLight ? "text-gray-900" : "text-white",
 
-    // Menu Item Base
+    
     menuItemBase: isLight 
       ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
       : "text-gray-400 hover:bg-white/5 hover:text-white",
 
-    // Menu Item Active
+    
     menuItemActive: isLight 
       ? "bg-blue-50 text-blue-700 shadow-sm" 
       : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
     
-    // Icons
+    
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
     iconInactive: isLight ? "text-gray-400" : "text-gray-500",
     
-    // Stats
+    
     bgStatCard: isLight ? "bg-gray-50 border-none" : "bg-gray-900/50 border-none",
     bgStatItem: isLight ? "bg-white border-none shadow-sm" : "bg-black/20 border-none shadow-inner",
     
-    // Logout
+    
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
     
   }), [isLight]);
@@ -171,7 +171,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const { totalCoins, currentValue } = useMemo(() => {
     const coins = Array.isArray(purchasedCoins) ? purchasedCoins : [];
     
-    // Filter out coins with 0 quantity (sold out)
+    
     const activeCoins = coins.filter(coin => {
         const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
         return qty > 0;
@@ -182,7 +182,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     let currentVal = 0;
 
     activeCoins.forEach(coin => {
-      // Use currentPrice from the hook's transformed data, or fallback
+      
       const price = Number(coin.currentPrice) || Number(coin.current_price) || Number(coin.coinPriceUSD) || 0;
       const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
       
@@ -231,7 +231,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         }
         .slide-in { animation: slideIn 0.5s ease-out forwards; }
       `}</style>
-      {/* Mobile Version */}
+      {}
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
@@ -263,7 +263,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             ))}
           </nav>
 
-          {/* Mobile Logout */}
+          {}
           <div className="mt-4 pt-4 border-t border-gray-200/10">
             <button
               className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
@@ -285,7 +285,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
       </div>
 
-      {/* Desktop Sidebar */}
+      {}
       <aside
         className={`
           hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
@@ -293,7 +293,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ${TC.bgSidebar}
         `}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
           <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
             <span className="text-white font-bold text-xl">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
@@ -304,7 +304,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {/* Navigation */}
+        {}
         <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
           {menus.map((item, index) => (
             <Link
@@ -329,14 +329,14 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                 </span>
               </div>
               
-              {/* Active Indicator */}
+              {}
               {isActive(item.path) && (
                 <div className="flex items-center gap-2">
                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
                 </div>
               )}
               
-              {/* Hover Glow Effect */}
+              {}
               {!isActive(item.path) && (
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               )}
@@ -344,7 +344,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ))}
         </nav>
 
-        {/* Bottom Stats Card */}
+        {}
         <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>Portfolio</span>
@@ -372,7 +372,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {/* Logout Button */}
+        {}
         <div className="mt-4 slide-in" style={{ animationDelay: '0.6s' }}>
           <button
             className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}

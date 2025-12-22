@@ -23,7 +23,7 @@ function AdminDashboard() {
   const { coins } = useCoinContext() ?? { coins: [] };
   const isLight = useThemeCheck();
 
-  // Premium Theme Classes - Matches User Dashboard
+  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -40,13 +40,13 @@ function AdminDashboard() {
 
       cardHover: isLight ? "hover:shadow-blue-500/10" : "hover:shadow-cyan-500/10",
 
-      // heading gradient (keeps cyan→blue like your other Dashboard)
+      
       headerGradient: "from-cyan-400 to-blue-500",
     }),
     [isLight]
   );
 
-  // State
+  
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -73,14 +73,14 @@ function AdminDashboard() {
 
     const fetchReports = async () => {
       try {
-        // Fetch feedback from the backend using centralized API
+        
         const res = await getData("/feedback");
         const feedbackData = res?.data ?? res ?? [];
 
-        // Filter and transform feedback into reports format
+        
         const reportsFromFeedback = Array.isArray(feedbackData)
           ? feedbackData
-              .filter((fb) => fb.type === "bug" || fb.type === "issue") // Only show bugs/issues
+              .filter((fb) => fb.type === "bug" || fb.type === "issue") 
               .map((fb) => {
                 const message = fb.message || "";
                 const trimmedTitle =
@@ -98,13 +98,13 @@ function AdminDashboard() {
                   createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
                 };
               })
-              .slice(0, 4) // Show only latest 4
+              .slice(0, 4) 
           : [];
 
         if (mounted) setReports(reportsFromFeedback);
       } catch (err) {
         console.error("Failed to fetch feedback reports:", err);
-        // Fallback to empty array instead of mock data
+        
         if (mounted) setReports([]);
       }
     };
@@ -170,7 +170,7 @@ function AdminDashboard() {
         console.error("Failed to fetch admin data:", err);
       } finally {
         setIsLoading(false);
-        // small delay so the fade/slide animation looks smooth like your User Dashboard
+        
         setTimeout(() => mounted && setContentLoaded(true), 300);
       }
     };
@@ -194,14 +194,14 @@ function AdminDashboard() {
 
   const adminStats = useMemo(() => {
     const totalUsers = users.length;
-    // Mock coins count if not available from API
+    
     const totalCoins = 150;
     const totalTrades = users.reduce(
       (total, u) => total + (u.purchasedCoins?.length || 0),
       0
     );
 
-    // Use fetched data or fallback to Bitcoin if no data exists
+    
     const trending = trendingCoinData || { symbol: "BTC", price_change_percentage_24h: 2.45 };
 
     return {
@@ -257,7 +257,7 @@ function AdminDashboard() {
         rounded-3xl
       `}
     >
-      {/* Header Section (always visible) */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
@@ -283,7 +283,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Content block with the same animation effect as your Dashboard */}
+      {}
       <div
         className={`transition-all duration-500 ease-in-out ${
           contentLoaded && !isLoading
@@ -291,10 +291,10 @@ function AdminDashboard() {
             : "opacity-0 translate-y-4"
         }`}
       >
-        {/* Stat Cards / Skeleton (shown in the same place) */}
+        {}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-6">
           {isLoading ? (
-            // skeleton cards
+            
             [...Array(4)].map((_, i) => (
               <div
                 key={i}
@@ -302,7 +302,7 @@ function AdminDashboard() {
               />
             ))
           ) : (
-            // real stat cards - Styled like User Dashboard
+            
             [
               {
                 label: "Total Users",
@@ -340,9 +340,9 @@ function AdminDashboard() {
           )}
         </div>
 
-        {/* Main Grid */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 fade-in" style={{ animationDelay: '0.1s' }}>
-          {/* Chart */}
+          {}
           <div className={`lg:col-span-2 ${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
             <div className="flex items-center justify-between mb-2 sm:mb-6">
               <h2
@@ -352,7 +352,7 @@ function AdminDashboard() {
                 User Registration
               </h2>
               
-              {/* Time Range Selector */}
+              {}
               <div className={`flex items-center p-1 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-gray-700/50'}`}>
                 {['Week', 'Month'].map((range) => (
                   <button
@@ -372,7 +372,7 @@ function AdminDashboard() {
             </div>
 
             {isLoading ? (
-              // chart skeleton
+              
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/30 rounded" />
             ) : (
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
@@ -381,7 +381,7 @@ function AdminDashboard() {
             )}
           </div>
 
-          {/* Quick Actions & Health */}
+          {}
           <div className="space-y-3 sm:space-y-4 lg:space-y-6">
             <PlatformHealth isLoading={isLoading} TC={TC} />
             <QuickActions
@@ -392,12 +392,12 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Bottom Grid: Reports & Users */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 fade-in" style={{ animationDelay: '0.15s' }}>
-          {/* Reports */}
+          {}
           <RecentReports reports={reports} isLoading={isLoading} TC={TC} />
 
-          {/* Latest Users */}
+          {}
           <LatestUsers users={latestUsers} isLoading={isLoading} TC={TC} />
         </div>
       </div>

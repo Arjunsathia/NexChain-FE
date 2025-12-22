@@ -15,7 +15,7 @@ const NotificationSettings = () => {
     setNotifications({ ...notifications, [e.target.name]: e.target.checked });
   };
 
-  // Theme Classes
+  
   const containerClass = `rounded-xl p-4 border flex items-center justify-between gap-4 ${
     isDark ? "bg-gray-700/30 border-gray-700" : "bg-gray-50 border-gray-200"
   }`;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 
-// New Component for Dynamic Market Analysis Tab
+
 const DynamicAnalysisFeature = () => {
   const [dataPoints, setDataPoints] = useState([40, 45, 42, 48, 55, 50, 58, 62, 60, 65, 58, 62, 68, 72, 70]);
   
@@ -10,9 +10,9 @@ const DynamicAnalysisFeature = () => {
     const interval = setInterval(() => {
       setDataPoints(prev => {
         const last = prev[prev.length - 1];
-        const change = (Math.random() - 0.5) * 15; // Random movement
+        const change = (Math.random() - 0.5) * 15; 
         let next = last + change;
-        // Keep within bounds
+        
         if (next > 90) next = 85;
         if (next < 20) next = 25;
         return [...prev.slice(1), next];
@@ -21,7 +21,7 @@ const DynamicAnalysisFeature = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate SVG path
+  
   const width = 100;
   const height = 60;
   const stepX = width / (dataPoints.length - 1);
@@ -52,14 +52,14 @@ const DynamicAnalysisFeature = () => {
         </div>
       </div>
 
-      {/* Chart Container */}
+      {}
       <div className="flex-1 relative w-full bg-gray-950/40 rounded-xl border border-gray-800/50 overflow-hidden p-0 shadow-inner">
-        {/* Grid Lines */}
+        {}
         <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-10 pointer-events-none">
            {[...Array(24)].map((_,i) => <div key={i} className="border-r border-b border-gray-500/30"></div>)}
         </div>
 
-        {/* SVG Chart */}
+        {}
         <div className="absolute inset-0 top-4 bottom-0 left-0 right-0">
             <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
             <defs>
@@ -71,12 +71,12 @@ const DynamicAnalysisFeature = () => {
             <path d={areaPath} fill="url(#chartGradient)" />
             <path d={pathData} fill="none" stroke="#728AD5" strokeWidth="1.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
             
-            {/* Pulsing Dot at the end */}
+            {}
             <circle cx={width} cy={height - (dataPoints[dataPoints.length-1] / 100) * height} r="1.5" fill="#fff" className="animate-pulse" />
             </svg>
         </div>
         
-        {/* Overlay Info */}
+        {}
         <div className="absolute top-4 left-4 z-10">
            <div className="text-3xl font-bold text-white tracking-tight">
              ${(45000 + dataPoints[dataPoints.length-1] * 100).toLocaleString(undefined, {maximumFractionDigits: 0})}
@@ -88,7 +88,7 @@ const DynamicAnalysisFeature = () => {
         </div>
       </div>
       
-      {/* Bottom Indicators */}
+      {}
       <div className="flex items-center gap-3 mt-5">
          <div className="text-xs text-gray-400 font-medium whitespace-nowrap">Volume</div>
          <div className="h-2 flex-1 bg-gray-800/50 rounded-full overflow-hidden relative">

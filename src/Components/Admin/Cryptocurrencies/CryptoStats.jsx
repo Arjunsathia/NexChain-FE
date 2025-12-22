@@ -51,7 +51,7 @@ function CryptoStats({ coins, TC }) {
               <stat.icon className={`text-base sm:text-lg ${stat.color}`} />
             </div>
           </div>
-          {/* Glow Effect */}
+          {}
           <div
             className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${stat.bg} blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500`}
           />

@@ -43,7 +43,7 @@ const HoldingsActions = ({
         </div>
       </div>
 
-      {/* Market Info Card */}
+      {}
       <div
         className={`p-3 rounded-lg border glow-fade ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
         style={{ animationDelay: "300ms" }}

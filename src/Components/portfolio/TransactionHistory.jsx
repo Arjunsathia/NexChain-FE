@@ -12,53 +12,53 @@ const TransactionHistory = () => {
   const { transactionHistory, loading } = usePurchasedCoins();
   const [filter, setFilter] = useState('all');
 
-  // 💡 Theme Classes Helper
+  
   const TC = useMemo(() => ({
-    // Card Background (aligned with other dashboard cards, no border)
+    
     bgContainer: isLight
       ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     
-    // Text Colors
+    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     
-    // Header/Icon Colors
+    
     bgIcon: isLight ? "p-2 bg-cyan-100 rounded-lg" : "p-2 bg-cyan-400/10 rounded-lg",
     iconColor: isLight ? "text-cyan-600" : "text-cyan-400",
     
-    // Filter Container
+    
     bgFilterContainer: isLight ? "bg-gray-100 border-gray-300" : "bg-gray-800 border-gray-700",
     
-    // Filter Button Defaults
+    
     textFilterDefault: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-300",
     
-    // Summary Cards
+    
     bgBuySummary: isLight ? "bg-green-100/50 border-green-300" : "bg-green-500/10 border-green-500/30",
     bgSellSummary: isLight ? "bg-red-100/50 border-red-300" : "bg-red-500/10 border-red-500/30",
     
-    // Transaction Item
+    
     bgItem: isLight ? "bg-gray-50 border-gray-200 hover:bg-gray-100" : "bg-white/5 border-white/5 hover:bg-gray-800/40",
     borderItem: isLight ? "border-gray-200" : "border-gray-700",
     
-    // Item Icon Circles
+    
     bgBuyIcon: isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400",
     bgSellIcon: isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400",
     
-    // Quantity Text
+    
     textQuantityBuy: isLight ? "text-green-700" : "text-green-400",
     textQuantitySell: isLight ? "text-red-700" : "text-red-400",
 
-    // Pill Text
+    
     bgPillBuy: isLight ? "bg-green-100/50 text-green-600" : "bg-green-400/20 text-green-400",
     bgPillSell: isLight ? "bg-red-100/50 text-red-600" : "bg-red-400/20 text-red-400",
     
-    // Price/Date Accents
+    
     textPriceAccent: isLight ? "text-yellow-600/70" : "text-yellow-400/70",
     textDateAccent: isLight ? "text-cyan-600/70" : "text-cyan-400/70",
     
-    // Skeleton Colors
+    
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
   }), [isLight]);
@@ -285,7 +285,7 @@ const TransactionList = ({ TC, transactions }) => (
     className="space-y-3 max-h-96 overflow-y-auto fade-in scrollbar-hide"
     style={{ animationDelay: "0.3s" }}
   >
-    {/* Scrollbar hide utility */}
+    {}
     <style jsx>{`
       .scrollbar-hide {
         -ms-overflow-style: none;

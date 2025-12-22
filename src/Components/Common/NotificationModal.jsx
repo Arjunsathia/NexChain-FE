@@ -20,10 +20,10 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
     }
   }, [isOpen]);
 
-  // Close when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Ignore clicks inside the modal OR on the trigger button (bell)
+      
       if (
         modalRef.current && 
         !modalRef.current.contains(event.target) &&
@@ -114,7 +114,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             ref={modalRef}
             style={{ pointerEvents: 'auto' }}
           >
-            {/* Header */}
+            {}
             <div className={`p-3 md:p-4 border-b flex justify-between items-center ${
               isDark ? 'border-gray-700/50 bg-gray-900/50' : 'border-gray-100 bg-white/50'
             }`}>
@@ -141,7 +141,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
               )}
             </div>
 
-            {/* List */}
+            {}
             <div className={`max-h-[60vh] md:max-h-[450px] overflow-y-auto custom-scrollbar bg-transparent`}>
               {loading ? (
                 <div className="p-12 text-center">

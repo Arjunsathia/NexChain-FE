@@ -2,9 +2,9 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
-// ---------------------------
-// ENHANCED testimonials data
-// ---------------------------
+
+
+
 const testimonials = [
   { name: "Asha S.", message: "NexChain helped me trade smarter—the UX is incredibly intuitive and fast!", rating: 5, avatar: "A", timestamp: "2 days ago" },
   { name: "Vikram P.", message: "Simulation mode is brilliant for learning and testing new strategies risk-free.", rating: 4, avatar: "V", timestamp: "1 week ago" },
@@ -61,7 +61,7 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
 };
 
 const TestimonialCarousel = ({ TC, isMobile }) => {
-  // Reduce duplication to 3x which is usually sufficient for smooth looping without excessive DOM size
+  
   const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials, ...testimonials], []);
   const duration = 50;
 

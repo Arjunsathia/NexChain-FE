@@ -1,11 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-// New Component for the Premium Scroll Indicator
+
 const PremiumScrollIndicator = ({ onClick, TC }) => {
   return (
     <motion.div
-      // ENTRANCE: soft wipe-up + fade-in
+      
       initial={{ opacity: 0, y: 40, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -17,7 +17,7 @@ const PremiumScrollIndicator = ({ onClick, TC }) => {
       onClick={onClick}
       aria-label="Scroll down"
     >
-      {/* FLOATING WRAPPER */}
+      {}
       <motion.div
         className="flex flex-col items-center gap-3"
         animate={{ y: [0, -6, 0] }}
@@ -33,15 +33,15 @@ const PremiumScrollIndicator = ({ onClick, TC }) => {
         whileTap={{ scale: 0.97 }}
       >
 
-        {/* GLOW RING UNDERNEATH */}
+        {}
         <div className="h-2 w-16 rounded-full blur-md bg-[#728AD5]/25 pointer-events-none" />
 
-        {/* OUTER GRADIENT FRAME */}
+        {}
         <div className="relative">
           <div className="relative w-8 h-14 rounded-full p-[1px] bg-gradient-to-b from-[#728AD5]/80 via-[#728AD5]/20 to-transparent shadow-[0_0_30px_rgba(114,138,213,0.35)]">
-            {/* INNER TRACK */}
+            {}
             <div className="relative w-full h-full rounded-full bg-slate-950/80 backdrop-blur-md flex justify-center overflow-hidden">
-              {/* MOVING PILL */}
+              {}
               <motion.div
                 animate={{
                   y: ["-120%", "60%"],

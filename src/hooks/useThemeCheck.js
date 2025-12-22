@@ -3,7 +3,7 @@ import { getInitialTheme } from "@/utils/theme-manager";
 
 const useThemeCheck = () => {
   const [isLight, setIsLight] = useState(() => {
-    // Check local storage or DOM
+    
     if (typeof window !== "undefined") {
         return (document.documentElement.getAttribute("data-theme") || getInitialTheme()) === 'light';
     }
@@ -17,7 +17,7 @@ const useThemeCheck = () => {
     };
 
     window.addEventListener('theme-change', handleThemeChange);
-    // Also listen to storage events for multi-tab sync
+    
     window.addEventListener('storage', handleThemeChange);
 
     return () => {

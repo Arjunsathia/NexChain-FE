@@ -11,7 +11,7 @@ const TestimonialsSection = ({ TC, sectionVariants, isMobile }) => {
       viewport={{ once: true, margin: "-100px" }}
       variants={sectionVariants}
     >
-      {/* BACKGROUND REMOVED as requested */}
+      {}
       
       <div className="relative z-10">
         <div className="text-center mb-16">

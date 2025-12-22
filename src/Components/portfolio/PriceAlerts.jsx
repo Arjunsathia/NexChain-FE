@@ -25,7 +25,7 @@ const PriceAlerts = ({ isLight, livePrices }) => {
 
   useEffect(() => {
     fetchAlerts();
-    const interval = setInterval(fetchAlerts, 15000); // Poll every 15s
+    const interval = setInterval(fetchAlerts, 15000); 
     return () => clearInterval(interval);
   }, [user]);
 

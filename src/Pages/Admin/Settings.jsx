@@ -21,7 +21,7 @@ const AdminSettings = () => {
   const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
-    // Simulate initial loading
+    
     const timer = setTimeout(() => {
       setLoading(false);
       setTimeout(() => setContentLoaded(true), 300);
@@ -29,7 +29,7 @@ const AdminSettings = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Theme Classes
+  
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
@@ -48,7 +48,7 @@ const AdminSettings = () => {
     headerGradient: "from-cyan-400 to-blue-500",
   }), [isLight]);
 
-  // Settings State
+  
   const [settings, setSettings] = useState({
     platformName: "NexChain",
     contactEmail: "contact@nexchain.com",
@@ -80,7 +80,7 @@ const AdminSettings = () => {
 
   return (
     <div className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
@@ -108,7 +108,7 @@ const AdminSettings = () => {
         </button>
       </div>
 
-      {/* Tabs */}
+      {}
       <div className={`flex overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
         {[
           { id: "general", label: "General", icon: FaCog },
@@ -130,7 +130,7 @@ const AdminSettings = () => {
         ))}
       </div>
 
-      {/* Loading Skeleton */}
+      {}
       {loading ? (
         <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
           <div className="space-y-6">
@@ -146,29 +146,29 @@ const AdminSettings = () => {
           </div>
         </div>
       ) : (
-        /* Content */
+        
         <div 
           className={`transition-all duration-500 ease-in-out ${
             contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
           <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-            {/* General Settings */}
+            {}
             {activeTab === "general" && (
               <GeneralSettings settings={settings} setSettings={setSettings} TC={TC} />
             )}
 
-            {/* Security Settings */}
+            {}
             {activeTab === "security" && (
               <SecuritySettings security={security} setSecurity={setSecurity} TC={TC} />
             )}
 
-            {/* Notifications Settings */}
+            {}
             {activeTab === "notifications" && (
               <NotificationSettings notifications={notifications} setNotifications={setNotifications} TC={TC} />
             )}
 
-            {/* API Settings */}
+            {}
             {activeTab === "api" && (
               <ApiSettings apiSettings={apiSettings} setApiSettings={setApiSettings} TC={TC} />
             )}

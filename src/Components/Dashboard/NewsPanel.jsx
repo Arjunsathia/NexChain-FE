@@ -48,7 +48,7 @@ export default function NewsPanel() {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textSource: isLight ? "text-cyan-600" : "text-cyan-400",
     
-    // List item styles
+    
     bgItem: isLight 
       ? "hover:bg-gray-50 border-b border-gray-100" 
       : "hover:bg-white/5 border-b border-gray-700/50",
@@ -59,7 +59,7 @@ export default function NewsPanel() {
 
   return (
     <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 fade-in ${TC.bgContainer}`}>
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
@@ -74,7 +74,7 @@ export default function NewsPanel() {
         </button>
       </div>
 
-      {/* List Layout */}
+      {}
       <div className="flex flex-col gap-2">
         {sampleNews.map((news, index) => (
           <div
@@ -85,7 +85,7 @@ export default function NewsPanel() {
               ${index !== sampleNews.length - 1 ? TC.bgItem : "hover:bg-gray-50 dark:hover:bg-white/5"}
             `}
           >
-            {/* Image Thumbnail */}
+            {}
             <div className="relative w-24 h-16 flex-shrink-0 overflow-hidden rounded-lg">
                <img
                   src={news.image}
@@ -94,7 +94,7 @@ export default function NewsPanel() {
                />
             </div>
 
-            {/* Content */}
+            {}
             <div className="flex-1 min-w-0">
                <h3 className={`font-semibold text-sm mb-1 leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
                   {news.title}
