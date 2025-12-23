@@ -1,8 +1,9 @@
 import React from "react";
 
-function StatCard({ label, value, icon: Icon, color, badge, TC }) {
+function StatCard({ label, value, icon: Icon, color, badge, TC, onClick, isLoading }) {
   return (
     <div
+      onClick={onClick}
       className={`
       ${TC.bgStatsCard} rounded-lg sm:rounded-xl p-3 sm:p-4 
       transition-all duration-300 ease-in-out 
@@ -26,7 +27,11 @@ function StatCard({ label, value, icon: Icon, color, badge, TC }) {
       <p
         className={`text-base sm:text-lg font-bold mb-0.5 sm:mb-1 transition-colors ${TC.textPrimary} group-hover:text-blue-500`}
       >
-        {value ?? 0}
+        {isLoading ? (
+          <span className="inline-block w-16 h-6 bg-gray-500/20 rounded animate-pulse" />
+        ) : (
+          value ?? 0
+        )}
       </p>
 
       <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>{label}</p>

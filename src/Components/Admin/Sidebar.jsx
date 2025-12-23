@@ -12,49 +12,64 @@ import {
 } from "react-icons/fa";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useUserContext from "@/hooks/useUserContext";
+import api, { SERVER_URL } from "@/api/axiosConfig";
 
 function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
+  const { user } = useUserContext();
+  const [dashboardStats, setDashboardStats] = useState({ onlineUsers: 0, activeTrades: 0 });
 
-  
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/purchases/platform-stats');
+        if (res.data.success) {
+          setDashboardStats({
+            onlineUsers: res.data.stats.totalUsers,
+            activeTrades: res.data.stats.tradesToday
+          });
+        }
+      } catch (err) {
+
+      }
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+
   const TC = useMemo(() => ({
-    
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    
-    
-    bgSidebar: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+
+    bgSidebar: isLight
+      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
-    bgMobile: isLight 
-      ? "bg-white shadow-md" 
+    bgMobile: isLight
+      ? "bg-white shadow-md"
       : "bg-gray-800/90 backdrop-blur-md",
 
-    
     headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
     headerTitle: isLight ? "text-gray-900" : "text-white",
 
-    
-    menuItemBase: isLight 
-      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
+    menuItemBase: isLight
+      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
       : "text-gray-400 hover:bg-white/5 hover:text-white",
 
-    
-    menuItemActive: isLight 
-      ? "bg-blue-50 text-blue-700 shadow-sm" 
+    menuItemActive: isLight
+      ? "bg-blue-50 text-blue-700 shadow-sm"
       : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
-    
-    
+
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
     iconInactive: isLight ? "text-gray-400" : "text-gray-500",
-    
-    
+
     bgStatCard: isLight ? "bg-gray-50" : "bg-gray-900/50",
     bgStatItem: isLight ? "bg-white shadow-sm" : "bg-black/20",
-    
-    
+
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
   }), [isLight]);
 
@@ -83,8 +98,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   };
 
   const adminStats = [
-    { label: "Online Users", value: "1.2K", color: "text-green-400", icon: FaUsers },
-    { label: "Active Trades", value: "247", color: "text-cyan-400", icon: FaChartLine },
+    { label: "Total Users", value: dashboardStats.onlineUsers.toLocaleString(), color: "text-green-400", icon: FaUsers },
+    { label: "Trades Today", value: dashboardStats.activeTrades.toLocaleString(), color: "text-cyan-400", icon: FaChartLine },
   ];
 
   return (
@@ -94,21 +109,25 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           from { opacity: 0; transform: translateX(-20px); }
           to { opacity: 1; transform: translateX(0); }
         }
-        .slide-in { animation: slideIn 0.5s ease-out forwards; }
+        .slide-in { animation: slideIn 0.3s ease-out forwards; }
       `}</style>
-      {}
+      { }
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
-            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20`}>
-              <FaUserShield className="text-white text-lg" />
+            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden`}>
+              {user?.image ? (
+                <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <FaUserShield className="text-white text-lg" />
+              )}
             </div>
-            <div>
-              <h2 className={`text-lg font-bold ${TC.headerTitle}`}>Admin Panel</h2>
+            <div className="min-w-0">
+              <h2 className={`text-lg font-bold ${TC.headerTitle} truncate`}>{user?.name || "Admin Panel"}</h2>
               <p className={`text-xs ${TC.textSecondary}`}>Platform Management</p>
             </div>
           </div>
-          
+
           <nav className="space-y-1">
             {menus.map((item, index) => (
               <Link
@@ -130,7 +149,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
       </div>
 
-      {}
+      { }
       <aside
         className={`
           hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
@@ -139,18 +158,22 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
         `}
       >
-        {}
-        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
-          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
-            <FaUserShield className="text-white text-xl" />
+        { }
+        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0s' }}>
+          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform overflow-hidden`}>
+            {user?.image ? (
+              <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <FaUserShield className="text-white text-xl" />
+            )}
           </div>
-          <div>
-            <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight`}>Admin Panel</h2>
-            <p className={`text-xs ${TC.textSecondary} font-medium`}>v2.4.0 • Stable</p>
+          <div className="min-w-0">
+            <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight truncate`}>{user?.name || "Admin Panel"}</h2>
+            <p className={`text-xs ${TC.textSecondary} font-medium`}>Platform Management</p>
           </div>
         </div>
 
-        {}
+        { }
         <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
           {menus.map((item, index) => (
             <Link
@@ -161,28 +184,28 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                 ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
                 slide-in
               `}
-              style={{ animationDelay: `${0.15 + index * 0.05}s` }}
+              style={{ animationDelay: `${0.05 + index * 0.03}s` }}
             >
               <div className="flex items-center gap-3.5 relative z-10">
-                <item.icon 
+                <item.icon
                   className={`
                     text-lg transition-transform duration-300 
                     ${isActive(item.path) ? `${TC.iconActive} scale-110` : `${TC.iconInactive} group-hover:scale-110 group-hover:text-gray-300`}
-                  `} 
+                  `}
                 />
                 <span className={`font-medium tracking-wide ${isActive(item.path) ? "font-semibold" : ""}`}>
                   {item.name}
                 </span>
               </div>
-              
-              {}
+
+              { }
               {isActive(item.path) && (
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
                 </div>
               )}
-              
-              {}
+
+              { }
               {!isActive(item.path) && (
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               )}
@@ -190,8 +213,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ))}
         </nav>
 
-        {}
-        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
+        { }
+        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>System Status</span>
             <span className="flex h-2 w-2 relative">
@@ -199,7 +222,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             {adminStats.map((stat, i) => (
               <div key={i} className={`${TC.bgStatItem} rounded-lg p-2.5`}>

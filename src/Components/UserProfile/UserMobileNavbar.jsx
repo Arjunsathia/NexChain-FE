@@ -20,7 +20,7 @@ import useUserContext from '@/hooks/useUserContext';
 import useWalletContext from '@/hooks/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
-
+import { SERVER_URL } from "@/api/axiosConfig";
 
 function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
@@ -32,56 +32,56 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
   const { watchlist } = useWatchlist() || { watchlist: [] };
 
-  
+
   const TC = useMemo(() => ({
-    
+
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    
-    bgNavbar: isLight 
-      ? "bg-white shadow-sm" 
+
+    bgNavbar: isLight
+      ? "bg-white shadow-sm"
       : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-md",
-    
-    
+
+
     headerTitle: isLight ? "text-blue-600" : "text-cyan-400",
 
-    
-    btnToggleBase: isLight 
-      ? "text-gray-700 bg-gray-100 hover:text-gray-900 hover:bg-gray-200" 
+
+    btnToggleBase: isLight
+      ? "text-gray-700 bg-gray-100 hover:text-gray-900 hover:bg-gray-200"
       : "text-gray-300 bg-gray-800/50 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600",
     btnToggleActive: "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105 rotate-90",
 
-    
+
     bgMenuPanel: isLight
       ? "bg-white lg:bg-gray-50"
       : "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-950 lg:bg-gray-900",
-    
-    
+
+
     linkBase: isLight
       ? "text-gray-700 bg-gray-50 hover:bg-gray-100 hover:shadow-md"
       : "text-gray-300 bg-gray-800/40 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-cyan-600/20 hover:text-white",
-      
-    
+
+
     linkActive: isLight
       ? "bg-blue-100/50 text-blue-700 shadow-md"
       : "bg-gradient-to-r from-cyan-600/30 to-blue-600/30 text-cyan-300 shadow-md backdrop-blur-sm",
-    
-    
+
+
     linkIconBase: isLight ? "text-gray-600" : "text-gray-400",
     linkIconActive: isLight ? "text-blue-600" : "text-cyan-400",
     linkIconBg: isLight ? "bg-gray-200" : "bg-white/10",
 
-    
+
     bgStatsSection: isLight ? "bg-gray-100/70" : "bg-gray-800/30",
     textStatsHeader: isLight ? "text-blue-600" : "text-cyan-400",
 
-    
+
     bgFooter: isLight ? "bg-gray-100/50" : "bg-gray-800/30",
     textFooter: isLight ? "text-gray-600" : "text-gray-400",
-    
-    
+
+
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
   }), [isLight]);
 
@@ -111,12 +111,12 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     return location.pathname.startsWith(path);
   }, [location.pathname]);
 
-  
+
   useEffect(() => {
     if (isOpen && !isDesktop) {
       onToggle();
     }
-    
+
   }, [location.pathname]);
 
   const { totalCoins, currentValue } = useMemo(() => {
@@ -144,7 +144,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
   return (
     <>
-      {}
+      { }
       <nav className={`
         ${TC.bgNavbar} sticky top-0 z-50 rounded-3xl mx-2 mt-2
         transition-all duration-500 ease-out
@@ -152,12 +152,16 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
       `}>
         <div className="px-3 sm:px-4 lg:ml-52 lg:px-4">
           <div className="flex justify-between items-center h-12">
-            {}
+            { }
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${isLight ? "from-blue-600 to-cyan-700" : "from-cyan-600 to-blue-600"} flex items-center justify-center font-bold text-white text-xs shadow-lg overflow-hidden`}>
-                     {user?.name?.charAt(0).toUpperCase() || "U"}
+                    {user?.image ? (
+                      <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.charAt(0).toUpperCase() || "U"
+                    )}
                   </div>
                   <div>
                     <h2 className={`text-lg font-bold ${TC.headerTitle} bg-clip-text`}>
@@ -171,7 +175,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
 
 
-            {}
+            { }
             <button
               onClick={onToggle}
               className={`
@@ -191,7 +195,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {}
+        { }
         <div className={`
           transition-all duration-400 ease-in-out overflow-hidden
           ${TC.bgMenuPanel} rounded-b-3xl
@@ -199,7 +203,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           lg:hidden
         `}>
           <div className={`px-3 pt-3 pb-4 space-y-1`}>
-            {}
+            { }
             {menus.map((item, index) => (
               <Link
                 key={index}
@@ -210,7 +214,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                   text-xs font-medium transition-all duration-150 transform
                   shadow-sm
                   ${isActive(item.path) ? TC.linkActive : TC.linkBase}
-                  ${ (isOpen || isDesktop) ? 'translate-x-0 opacity-100' : 'translate-x-3 opacity-0'}
+                  ${(isOpen || isDesktop) ? 'translate-x-0 opacity-100' : 'translate-x-3 opacity-0'}
                 `}
                 style={{ transitionDelay: `${index * 30}ms` }}
               >
@@ -224,7 +228,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </Link>
             ))}
 
-            {}
+            { }
             <div className={`pt-3 pb-2 mt-2`}>
               <h3 className={`text-xs font-semibold ${TC.textStatsHeader} mb-2 uppercase tracking-wider flex items-center justify-center rounded-full ${TC.bgStatsSection} px-2 py-1 mx-auto w-fit`}>
                 <FaSignal className="mr-1 text-xs" />
@@ -232,45 +236,45 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {statsData.map((stat, index) => {
-                    const statColor = isLight ? stat.color + "-700" : stat.color + "-400";
-                    const statBg = isLight ? `bg-${stat.color}-100 border-${stat.color}-300` : `${stat.bg}-500/20 to-${stat.color}-600/20 border-opacity-40`;
-                    
-                    return (
-                        <div
-                            key={index}
-                            className={`p-2 rounded-xl ${statBg} transition-all duration-150 backdrop-blur-sm shadow-md hover:scale-102 hover:shadow-sm cursor-pointer`}
-                            style={{ transitionDelay: `${200 + (index * 30)}ms` }}
-                        >
-                            <div className="flex flex-col items-center text-center space-y-0.5">
-                            <span className={`text-sm font-bold ${statColor}`}>
-                                {stat.value}
-                            </span>
-                            <span className={`text-xs ${TC.textSecondary} leading-tight font-medium`}>{stat.label}</span>
-                            </div>
-                        </div>
-                    );
+                  const statColor = isLight ? stat.color + "-700" : stat.color + "-400";
+                  const statBg = isLight ? `bg-${stat.color}-100 border-${stat.color}-300` : `${stat.bg}-500/20 to-${stat.color}-600/20 border-opacity-40`;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`p-2 rounded-xl ${statBg} transition-all duration-150 backdrop-blur-sm shadow-md hover:scale-102 hover:shadow-sm cursor-pointer`}
+                      style={{ transitionDelay: `${200 + (index * 30)}ms` }}
+                    >
+                      <div className="flex flex-col items-center text-center space-y-0.5">
+                        <span className={`text-sm font-bold ${statColor}`}>
+                          {stat.value}
+                        </span>
+                        <span className={`text-xs ${TC.textSecondary} leading-tight font-medium`}>{stat.label}</span>
+                      </div>
+                    </div>
+                  );
                 })}
               </div>
             </div>
-            
-            {}
+
+            { }
             <div className="mt-4 pt-4 border-t border-gray-200/10">
-                <button
+              <button
                 className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
                 onClick={onLogout}
                 disabled={isLogoutLoading}
-                >
+              >
                 {isLogoutLoading ? (
-                    <>
+                  <>
                     <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Logging out...</span>
-                    </>
+                  </>
                 ) : (
-                    <>
+                  <>
                     <FaSignOutAlt /> Logout
-                    </>
+                  </>
                 )}
-                </button>
+              </button>
             </div>
 
           </div>

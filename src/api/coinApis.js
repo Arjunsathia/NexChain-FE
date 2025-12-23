@@ -40,6 +40,7 @@ export const getTrendingCoinMarketData = async (idsArray) => {
       params: {
         vs_currency: "usd",
         ids,
+        sparkline: true,
         price_change_percentage: "1h,24h,7d",
       },
     });
@@ -112,4 +113,3 @@ export const getMarketChart = async (id, days = 7) => {
     throw error;
   }
 };
-

@@ -6,7 +6,10 @@ import RecentReports from "@/Components/Admin/Dashboard/RecentReports";
 import LatestUsers from "@/Components/Admin/Dashboard/LatestUsers";
 import PlatformHealth from "@/Components/Admin/Dashboard/PlatformHealth";
 import QuickActions from "@/Components/Admin/Dashboard/QuickActions";
-import { getData } from "@/api/axiosConfig";
+import { getData, default as api } from "@/api/axiosConfig";
+
+import MarketCoinDetailsModal from "@/Components/Admin/MarketInsights/MarketCoinDetailsModal";
+import { getTrendingCoinMarketData } from "@/api/coinApis";
 
 import useCoinContext from "@/hooks/useCoinContext";
 import {
@@ -14,16 +17,20 @@ import {
   FaCoins,
   FaChartLine,
   FaStar,
+  FaTimes,
 } from "react-icons/fa";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
+
+const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+const formatCompactNumber = (number) => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(number);
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const { coins } = useCoinContext() ?? { coins: [] };
   const isLight = useThemeCheck();
 
-  
+
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -37,29 +44,45 @@ function AdminDashboard() {
         ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
         : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25 border-none",
       bgItem: isLight ? "bg-gray-50" : "bg-white/5",
+      modalOverlay: "bg-black/60 backdrop-blur-sm",
+      modalContent: isLight ? "bg-white" : "bg-[#1E222D]",
 
       cardHover: isLight ? "hover:shadow-blue-500/10" : "hover:shadow-cyan-500/10",
 
-      
+
       headerGradient: "from-cyan-400 to-blue-500",
     }),
     [isLight]
   );
 
-  
+
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [trendingCoinData, setTrendingCoinData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Granular loading states
+  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [isReportsLoading, setIsReportsLoading] = useState(true);
+  const [isActivityLoading, setIsActivityLoading] = useState(true);
+  const [isTrendingLoading, setIsTrendingLoading] = useState(true);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+
   const [contentLoaded, setContentLoaded] = useState(false);
   const [timeRange, setTimeRange] = useState("Month");
+  const [platformStats, setPlatformStats] = useState({ tradesToday: 0 });
+  const [isTradesModalOpen, setIsTradesModalOpen] = useState(false);
+  const [todayTransactions, setTodayTransactions] = useState([]);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [selectedCoinDetails, setSelectedCoinDetails] = useState(null);
 
   useEffect(() => {
     let mounted = true;
     let pollInterval;
 
     const fetchUsers = async () => {
+      // Only set loading on initial fetch if users are empty
+      if (users.length === 0) setIsUsersLoading(true);
       try {
         const res = await getData("/users");
         const payload = res?.data ?? res;
@@ -68,48 +91,50 @@ function AdminDashboard() {
       } catch (err) {
         console.error("Failed to fetch users:", err);
         if (mounted) setUsers([]);
+      } finally {
+        if (mounted) setIsUsersLoading(false);
       }
     };
 
     const fetchReports = async () => {
+      if (reports.length === 0) setIsReportsLoading(true);
       try {
-        
         const res = await getData("/feedback");
         const feedbackData = res?.data ?? res ?? [];
-
-        
         const reportsFromFeedback = Array.isArray(feedbackData)
           ? feedbackData
-              .filter((fb) => fb.type === "bug" || fb.type === "issue") 
-              .map((fb) => {
-                const message = fb.message || "";
-                const trimmedTitle =
-                  message.length > 0
-                    ? message.length > 60
-                      ? `${message.substring(0, 60)}...`
-                      : message
-                    : "No title";
+            .filter((fb) => fb.type === "bug" || fb.type === "issue")
+            .map((fb) => {
+              const message = fb.message || "";
+              const trimmedTitle =
+                message.length > 0
+                  ? message.length > 60
+                    ? `${message.substring(0, 60)}...`
+                    : message
+                  : "No title";
 
-                return {
-                  id: fb._id || fb.id,
-                  type: fb.type || "bug",
-                  title: trimmedTitle,
-                  status: fb.status || "new",
-                  createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
-                };
-              })
-              .slice(0, 4) 
+              return {
+                id: fb._id || fb.id,
+                type: fb.type || "bug",
+                title: trimmedTitle,
+                status: fb.status || "new",
+                createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
+              };
+            })
+            .slice(0, 4)
           : [];
 
         if (mounted) setReports(reportsFromFeedback);
       } catch (err) {
         console.error("Failed to fetch feedback reports:", err);
-        
         if (mounted) setReports([]);
+      } finally {
+        if (mounted) setIsReportsLoading(false);
       }
     };
 
     const fetchRecentActivity = async () => {
+      if (recentActivity.length === 0) setIsActivityLoading(true);
       try {
         const res = await getData("/activity");
         const activityData = res?.data ?? res ?? [];
@@ -143,46 +168,59 @@ function AdminDashboard() {
           },
         ];
         if (mounted) setRecentActivity(mockActivity);
+      } finally {
+        if (mounted) setIsActivityLoading(false);
       }
     };
 
     const fetchTrendingCoin = async () => {
+      if (!trendingCoinData) setIsTrendingLoading(true);
       try {
         const res = await getData("/watchlist/trending");
         const data = res?.data ?? res;
         if (mounted) setTrendingCoinData(data);
       } catch (err) {
         console.error("Failed to fetch trending coin:", err);
-      }
-    };
-
-    const load = async () => {
-      setIsLoading(true);
-      setContentLoaded(false);
-      try {
-        await Promise.all([
-          fetchUsers(),
-          fetchReports(),
-          fetchRecentActivity(),
-          fetchTrendingCoin(),
-        ]);
-      } catch (err) {
-        console.error("Failed to fetch admin data:", err);
       } finally {
-        setIsLoading(false);
-        
-        setTimeout(() => mounted && setContentLoaded(true), 300);
+        if (mounted) setIsTrendingLoading(false);
       }
     };
 
-    load();
+    const fetchPlatformStats = async () => {
+      // Check if we already have stats to avoid flickering or unnecessary loaders if mostly static
+      if (platformStats.tradesToday === 0) setIsStatsLoading(true);
+      try {
+        const res = await api.get('/purchases/platform-stats');
+        if (res.data.success && mounted) {
+          setPlatformStats({
+            tradesToday: res.data.stats.tradesToday
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch platform stats:", err);
+      } finally {
+        if (mounted) setIsStatsLoading(false);
+      }
+    };
+
+    // Initial load - fire all requests in parallel but don't wait for all to finish
+    fetchUsers();
+    fetchReports();
+    fetchRecentActivity();
+    fetchTrendingCoin();
+    fetchPlatformStats();
+
+    // Set content loaded immediately for fade in
+    setTimeout(() => mounted && setContentLoaded(true), 50);
 
     pollInterval = setInterval(() => {
       if (mounted) {
+        // Silent updates
         fetchUsers();
         fetchReports();
         fetchRecentActivity();
         fetchTrendingCoin();
+        fetchPlatformStats();
       }
     }, 30000);
 
@@ -194,23 +232,16 @@ function AdminDashboard() {
 
   const adminStats = useMemo(() => {
     const totalUsers = users.length;
-    
     const totalCoins = 150;
-    const totalTrades = users.reduce(
-      (total, u) => total + (u.purchasedCoins?.length || 0),
-      0
-    );
-
-    
     const trending = trendingCoinData || { symbol: "BTC", price_change_percentage_24h: 2.45 };
 
     return {
-        totalUsers,
-        totalCoins,
-        totalTrades,
-        trendingCoin: trending
+      totalUsers,
+      totalCoins,
+      tradesToday: platformStats.tradesToday,
+      trendingCoin: trending
     };
-  }, [users, trendingCoinData]);
+  }, [users, trendingCoinData, platformStats]);
 
   const latestUsers = useMemo(() => {
     return [...users]
@@ -229,6 +260,40 @@ function AdminDashboard() {
         image: u.image,
       }));
   }, [users]);
+
+  const handleTradeCardClick = async () => {
+    setIsTradesModalOpen(true);
+    setIsModalLoading(true);
+    try {
+      const res = await api.get('/purchases/today-transactions');
+      if (res.data.success) {
+        setTodayTransactions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch detailed transactions", err);
+    } finally {
+      setIsModalLoading(false);
+    }
+  };
+
+  const handleTrendingCardClick = async () => {
+    let coinId = trendingCoinData?.id || trendingCoinData?.item?.id;
+
+    if (!coinId) {
+      coinId = "bitcoin";
+    }
+
+    if (coinId) {
+      try {
+        const marketData = await getTrendingCoinMarketData([coinId]);
+        if (marketData && marketData.length > 0) {
+          setSelectedCoinDetails(marketData[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch trending coin details", error);
+      }
+    }
+  };
 
   const handleQuickAction = (action) => {
     switch (action) {
@@ -257,7 +322,7 @@ function AdminDashboard() {
         rounded-3xl
       `}
     >
-      {}
+      { }
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
@@ -270,7 +335,7 @@ function AdminDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {isLoading && (
+          {(isUsersLoading || isStatsLoading) && (
             <div className="flex items-center text-sm text-gray-300">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
               Loading...
@@ -283,66 +348,62 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {}
+      { }
       <div
-        className={`transition-all duration-500 ease-in-out ${
-          contentLoaded && !isLoading
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4"
-        }`}
+        className={`transition-all duration-500 ease-in-out ${contentLoaded
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4"
+          }`}
       >
-        {}
+        { }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-6">
-          {isLoading ? (
-            
-            [...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className={`${TC.bgCard} h-32 rounded-xl animate-pulse`}
-              />
-            ))
-          ) : (
-            
-            [
-              {
-                label: "Total Users",
-                value: adminStats.totalUsers,
-                icon: FaUsers,
-                color: "from-blue-500 to-cyan-400",
-                badge: "+12%"
-              },
-              {
-                label: "Active Coins",
-                value: adminStats.totalCoins,
-                icon: FaCoins,
-                color: "from-purple-500 to-pink-400",
-                badge: "+5 new"
-              },
-              {
-                label: "Total Trades",
-                value: adminStats.totalTrades,
-                icon: FaChartLine,
-                color: "from-green-500 to-emerald-400",
-                badge: "+8.2%"
-              },
-              {
-                label: "Trending Coin",
-                value: adminStats.trendingCoin ? adminStats.trendingCoin.symbol?.toUpperCase() : "N/A",
-                icon: FaStar,
-                color: "from-amber-500 to-yellow-400",
-                badge: (adminStats.trendingCoin && adminStats.trendingCoin.price_change_percentage_24h != null)
-                    ? `${Number(adminStats.trendingCoin.price_change_percentage_24h).toFixed(2)}%`
-                    : "No data"
-              },
-            ].map((stat, i) => (
-              <StatCard key={i} {...stat} TC={TC} />
-            ))
-          )}
+          {[
+            {
+              label: "Total Users",
+              value: adminStats.totalUsers,
+              icon: FaUsers,
+              color: "from-blue-500 to-cyan-400",
+              badge: "+12%",
+              onClick: () => navigate('/admin/users'),
+              isLoading: isUsersLoading
+            },
+            {
+              label: "Active Coins",
+              value: adminStats.totalCoins,
+              icon: FaCoins,
+              color: "from-purple-500 to-pink-400",
+              badge: "+5 new",
+              onClick: () => navigate('/admin/cryptocurrencies'),
+              isLoading: false
+            },
+            {
+              label: "Trades Today",
+              value: adminStats.tradesToday || 0,
+              icon: FaChartLine,
+              color: "from-green-500 to-emerald-400",
+              badge: "+8.2%",
+              onClick: handleTradeCardClick,
+              isLoading: isStatsLoading
+            },
+            {
+              label: "Trending Coin",
+              value: adminStats.trendingCoin ? adminStats.trendingCoin.symbol?.toUpperCase() : "N/A",
+              icon: FaStar,
+              color: "from-amber-500 to-yellow-400",
+              badge: (adminStats.trendingCoin && adminStats.trendingCoin.price_change_percentage_24h != null)
+                ? `${Number(adminStats.trendingCoin.price_change_percentage_24h).toFixed(2)}%`
+                : "No data",
+              onClick: handleTrendingCardClick,
+              isLoading: isTrendingLoading
+            },
+          ].map((stat, i) => (
+            <StatCard key={i} {...stat} TC={TC} />
+          ))}
         </div>
 
-        {}
+        { }
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 fade-in" style={{ animationDelay: '0.1s' }}>
-          {}
+          { }
           <div className={`lg:col-span-2 ${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
             <div className="flex items-center justify-between mb-2 sm:mb-6">
               <h2
@@ -351,8 +412,8 @@ function AdminDashboard() {
                 <FaChartLine className="text-cyan-400 text-xs sm:text-base" />{" "}
                 User Registration
               </h2>
-              
-              {}
+
+              { }
               <div className={`flex items-center p-1 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-gray-700/50'}`}>
                 {['Week', 'Month'].map((range) => (
                   <button
@@ -360,8 +421,8 @@ function AdminDashboard() {
                     onClick={() => setTimeRange(range)}
                     className={`
                       px-3 py-1 text-xs font-medium rounded-md transition-all duration-200
-                      ${timeRange === range 
-                        ? (isLight ? 'bg-white text-gray-900 shadow-sm' : 'bg-gray-600 text-white shadow-sm') 
+                      ${timeRange === range
+                        ? (isLight ? 'bg-white text-gray-900 shadow-sm' : 'bg-gray-600 text-white shadow-sm')
                         : (isLight ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white')}
                     `}
                   >
@@ -371,8 +432,7 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {isLoading ? (
-              
+            {isUsersLoading ? (
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/30 rounded" />
             ) : (
               <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
@@ -381,26 +441,101 @@ function AdminDashboard() {
             )}
           </div>
 
-          {}
+          { }
           <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-            <PlatformHealth isLoading={isLoading} TC={TC} />
+            <PlatformHealth isLoading={false} TC={TC} />
             <QuickActions
-              isLoading={isLoading}
+              isLoading={false}
               handleQuickAction={handleQuickAction}
               TC={TC}
             />
           </div>
         </div>
 
-        {}
+        { }
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 fade-in" style={{ animationDelay: '0.15s' }}>
-          {}
-          <RecentReports reports={reports} isLoading={isLoading} TC={TC} />
+          { }
+          <RecentReports reports={reports} isLoading={isReportsLoading} TC={TC} />
 
-          {}
-          <LatestUsers users={latestUsers} isLoading={isLoading} TC={TC} />
+          { }
+          <LatestUsers users={latestUsers} isLoading={isUsersLoading} TC={TC} />
         </div>
       </div>
+
+      {/* Market Coin Details Modal */}
+      <MarketCoinDetailsModal
+        selectedCoin={selectedCoinDetails}
+        setSelectedCoin={setSelectedCoinDetails}
+        TC={TC}
+        isLight={isLight}
+        formatCurrency={formatCurrency}
+        formatCompactNumber={formatCompactNumber}
+      />
+
+      {/* Trades Modal */}
+      {isTradesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl ${TC.bgCard} shadow-2xl flex flex-col slide-in`}>
+            <div className="p-4 sm:p-6 border-b border-gray-200/10 flex justify-between items-center">
+              <h2 className={`text-xl font-bold ${TC.textPrimary}`}>Today's Transactions</h2>
+              <button onClick={() => setIsTradesModalOpen(false)} className={`p-2 rounded-lg hover:bg-gray-100/10 ${TC.textSecondary}`}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+              {isModalLoading ? (
+                <div className="flex justify-center p-8">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : todayTransactions.length === 0 ? (
+                <div className={`text-center py-10 ${TC.textSecondary}`}>No transactions found for today.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className={`border-b border-gray-200/10 text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}>
+                        <th className="pb-3 pl-2">Time</th>
+                        <th className="pb-3">User</th>
+                        <th className="pb-3">Type</th>
+                        <th className="pb-3">Asset</th>
+                        <th className="pb-3 text-right">Amount</th>
+                        <th className="pb-3 text-right pr-2">Value (USD)</th>
+                      </tr>
+                    </thead>
+                    <tbody className={`text-sm ${TC.textPrimary} divide-y divide-gray-200/5`}>
+                      {todayTransactions.map((tx) => (
+                        <tr key={tx._id} className="hover:bg-gray-50/5 transition-colors">
+                          <td className="py-3 pl-2 whitespace-nowrap text-xs sm:text-sm">
+                            {new Date(tx.transactionDate).toLocaleTimeString()}
+                          </td>
+                          <td className="py-3">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{tx.userName}</span>
+                              <span className={`text-xs ${TC.textSecondary}`}>{tx.userEmail}</span>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${tx.type === 'buy' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                              {tx.type.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-3 flex items-center gap-2">
+                            {tx.image && <img src={tx.image} alt="" className="w-5 h-5 rounded-full" />}
+                            <span>{tx.coinSymbol?.toUpperCase()}</span>
+                          </td>
+                          <td className="py-3 text-right font-medium">{Number(tx.quantity).toFixed(4)}</td>
+                          <td className="py-3 text-right pr-2 font-medium">${Number(tx.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

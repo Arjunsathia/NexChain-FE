@@ -12,7 +12,6 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const AdminFeedback = () => {
   const isLight = useThemeCheck();
 
-  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -54,7 +53,11 @@ const AdminFeedback = () => {
   );
 
   const [feedbacks, setFeedbacks] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // Granular Loading States
+  const [isFeedbacksLoading, setIsFeedbacksLoading] = useState(true);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+
   const [contentLoaded, setContentLoaded] = useState(false);
   const [stats, setStats] = useState({});
   const [filters, setFilters] = useState({
@@ -75,11 +78,12 @@ const AdminFeedback = () => {
   useEffect(() => {
     fetchFeedbacks();
     fetchStats();
+    setTimeout(() => setContentLoaded(true), 100);
   }, []);
+
   const fetchFeedbacks = async () => {
     try {
-      setLoading(true);
-      setContentLoaded(false);
+      if (feedbacks.length === 0) setIsFeedbacksLoading(true);
       setError("");
       const data = await getData("/feedback");
       if (data && data.success) {
@@ -88,28 +92,26 @@ const AdminFeedback = () => {
         throw new Error("Invalid response format");
       }
     } catch (error) {
-       
       console.error("❌ Error fetching feedbacks:", error);
       setError(
         "Failed to load feedback data. Please check if backend is running."
       );
       setFeedbacks([]);
     } finally {
-      setLoading(false);
-      setTimeout(() => setContentLoaded(true), 300);
+      setIsFeedbacksLoading(false);
     }
   };
 
   const fetchStats = useCallback(async () => {
     try {
+      if (!stats.total) setIsStatsLoading(true);
       const data = await getData("/feedback/stats");
       if (data && data.success) {
         setStats(data.data || {});
       }
     } catch (error) {
-      
       console.error("❌ Error fetching stats:", error);
-      
+
       const localStats = {
         total: feedbacks.length,
         today: feedbacks.filter((fb) => {
@@ -122,8 +124,10 @@ const AdminFeedback = () => {
         resolved: feedbacks.filter((f) => f.status === "resolved").length,
       };
       setStats(localStats);
+    } finally {
+      setIsStatsLoading(false);
     }
-  }, [feedbacks]);
+  }, [feedbacks, stats.total]);
 
   const updateFeedbackStatus = async (id, status) => {
     try {
@@ -155,10 +159,6 @@ const AdminFeedback = () => {
       alert("❌ Error updating notes. Please try again.");
     }
   };
-
-  
-
-  
 
   const confirmDelete = (feedback) => {
     setFeedbackToDelete(feedback);
@@ -199,44 +199,10 @@ const AdminFeedback = () => {
     return matchesSearch && matchesStatus && matchesType && matchesPriority;
   });
 
-  
-  const FeedbackSkeleton = () => (
-    <div className="space-y-6">
-      {}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className={`${TC.bgCard} h-32 rounded-2xl animate-pulse`}
-          />
-        ))}
-      </div>
-
-      {}
-      <div className={`${TC.bgCard} h-20 rounded-2xl animate-pulse`} />
-
-      {}
-      <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
-        <div className="space-y-4">
-          <div
-            className={`h-10 w-full ${TC.tableHead} rounded animate-pulse`}
-          />
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className={`h-16 w-full ${TC.bgItem} rounded-xl animate-pulse`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div
       className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
     >
-      {}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1
@@ -249,7 +215,7 @@ const AdminFeedback = () => {
           </p>
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          {loading && (
+          {(isFeedbacksLoading || isStatsLoading) && (
             <div className="flex items-center text-sm text-gray-300">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
               Loading...
@@ -260,36 +226,55 @@ const AdminFeedback = () => {
               fetchFeedbacks();
               fetchStats();
             }}
-            disabled={loading}
+            disabled={isFeedbacksLoading}
             className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} flex-1 sm:flex-initial justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <FaSync className={loading ? "animate-spin" : ""} /> Refresh
+            <FaSync className={isFeedbacksLoading ? "animate-spin" : ""} /> Refresh
           </button>
         </div>
       </div>
 
-      {loading ? (
-        <FeedbackSkeleton />
-      ) : (
-        <div
-          className={`transition-all duration-500 ease-in-out space-y-4 lg:space-y-6 ${
-            contentLoaded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
+      <div
+        className={`transition-all duration-500 ease-in-out space-y-4 lg:space-y-6 ${contentLoaded
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
           }`}
-        >
-          {}
+      >
+        {isStatsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className={`${TC.bgStatsCard || TC.bgCard} h-32 rounded-2xl animate-pulse bg-opacity-50`}
+              />
+            ))}
+          </div>
+        ) : (
           <FeedbackStats stats={stats} TC={TC} />
+        )}
 
-          {}
-          <FeedbackFilters
-            filters={filters}
-            setFilters={setFilters}
-            TC={TC}
-            isLight={isLight}
-          />
+        <FeedbackFilters
+          filters={filters}
+          setFilters={setFilters}
+          TC={TC}
+          isLight={isLight}
+        />
 
-          {}
+        {isFeedbacksLoading ? (
+          <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
+            <div className="space-y-4">
+              <div
+                className={`h-10 w-full ${TC.tableHead} rounded animate-pulse`}
+              />
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-16 w-full ${TC.bgItem} rounded-xl animate-pulse`}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
           <FeedbackTable
             filteredFeedbacks={filteredFeedbacks}
             TC={TC}
@@ -300,10 +285,9 @@ const AdminFeedback = () => {
             setShowModal={setShowModal}
             confirmDelete={confirmDelete}
           />
-        </div>
-      )}
+        )}
+      </div>
 
-      {}
       {showModal && (
         <FeedbackDetailsModal
           selectedFeedback={selectedFeedback}
@@ -316,7 +300,6 @@ const AdminFeedback = () => {
         />
       )}
 
-      {}
       <FeedbackDeleteModal
         showDeleteModal={showDeleteModal}
         setShowDeleteModal={setShowDeleteModal}

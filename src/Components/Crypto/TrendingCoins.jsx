@@ -17,8 +17,8 @@ function TrendingCoins() {
   const bufferRef = useRef({});
 
   const TC = useMemo(() => ({
-    bgContainer: isLight 
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
+    bgContainer: isLight
+      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
       : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textAccentGreen: isLight ? "text-green-600" : "text-green-400",
@@ -40,15 +40,15 @@ function TrendingCoins() {
         : [];
 
       if (idsArray.length === 0) {
-         
-         idsArray = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
+
+        idsArray = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
       }
 
       const marketData = await getTrendingCoinMarketData(idsArray);
       setCoins(marketData);
     } catch (err) {
       console.warn("Primary trending fetch failed, using fallback...", err);
-      
+
       try {
         const fallbackIds = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana"];
         const marketData = await getTrendingCoinMarketData(fallbackIds);
@@ -66,11 +66,11 @@ function TrendingCoins() {
     fetchTrendingCoins();
   }, [fetchTrendingCoins]);
 
-  
+
   useEffect(() => {
     if (coins.length === 0) return;
 
-    
+
     const symbolMap = {
       bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
       cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
@@ -79,8 +79,8 @@ function TrendingCoins() {
       "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt",
       tron: "trxusdt", avalanche: "avaxusdt", shiba: "shibusdt", toncoin: "tonusdt"
     };
-    
-    
+
+
     const symbolToId = Object.entries(symbolMap).reduce((acc, [key, val]) => {
       acc[val] = key;
       return acc;
@@ -98,20 +98,20 @@ function TrendingCoins() {
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.data) {
-        const stream = message.stream; 
+        const stream = message.stream;
         const symbol = stream.split('@')[0];
         const coinId = symbolToId[symbol];
 
         if (coinId) {
-           bufferRef.current[coinId] = {
-             price: parseFloat(message.data.c),
-             change: parseFloat(message.data.P), 
-           };
+          bufferRef.current[coinId] = {
+            price: parseFloat(message.data.c),
+            change: parseFloat(message.data.P),
+          };
         }
       }
     };
 
-    
+
     const interval = setInterval(() => {
       if (Object.keys(bufferRef.current).length > 0) {
         setLivePrices(prev => ({ ...prev, ...bufferRef.current }));
@@ -125,11 +125,11 @@ function TrendingCoins() {
     };
   }, [coins]);
 
-  
+
   const displayedCoins = useMemo(() => {
-    
+
     if (!Array.isArray(coins)) return [];
-    
+
     return coins.map(coin => {
       const live = livePrices[coin.id];
       return {

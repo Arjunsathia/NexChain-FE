@@ -82,28 +82,14 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
       const res = await api.post("/alerts/create", alertData);
 
       if (res.data.success) {
-        toast.custom((t) => (
-          <div className={`${t.visible ? 'animate-enter' : 'animate-leave'
-            } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
-            <div className="flex-1 w-0 p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 pt-0.5">
-                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <FaBell className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    Alert Created Successfully
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    You'll be notified when {symbol.toUpperCase()} goes {condition} ${priceValue}
-                  </p>
-                </div>
-              </div>
+        toast.success(
+          <div>
+            <div className="font-semibold">Alert Created Successfully</div>
+            <div className="text-xs font-normal opacity-90 mt-1">
+              You'll be notified when {symbol.toUpperCase()} goes {condition} ${priceValue}
             </div>
           </div>
-        ));
+        );
         onClose();
       } else {
         throw new Error("Failed to create alert");
@@ -183,8 +169,8 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
             {priceValue > 0 && priceValue !== currentPrice && (
               <div className={`absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none`}>
                 <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${isAbove
-                    ? "text-green-600 bg-green-100 dark:bg-green-500/10 dark:text-green-400"
-                    : "text-red-600 bg-red-100 dark:bg-red-500/10 dark:text-red-400"
+                  ? "text-green-600 bg-green-100 dark:bg-green-500/10 dark:text-green-400"
+                  : "text-red-600 bg-red-100 dark:bg-red-500/10 dark:text-red-400"
                   }`}>
                   {isAbove ? <FaArrowUp /> : <FaArrowDown />}
                   {Math.abs(percentDiff).toFixed(2)}%

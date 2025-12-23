@@ -8,9 +8,10 @@ import NotificationModal from "@/Components/Common/NotificationModal";
 import api from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import { SERVER_URL } from "@/api/axiosConfig";
 
 export default function Navbar() {
-  const { toggleTheme } = useTheme(); 
+  const { toggleTheme } = useTheme();
   const isLight = useThemeCheck();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,7 +31,7 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, []);
 
-  
+
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -38,7 +39,7 @@ export default function Navbar() {
         const count = res.data.filter(n => !n.isRead).length;
         setUnreadCount(count);
       } catch (error) {
-        
+
       }
     };
     if (user) {
@@ -48,14 +49,14 @@ export default function Navbar() {
     }
   }, [user]);
 
-  
+
   useEffect(() => {
     if (isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
+      setIsMobileMenuOpen(false);
     }
   }, [location.pathname]);
 
-  
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -83,7 +84,7 @@ export default function Navbar() {
       return location.pathname.startsWith("/admin");
     }
     if (path === "/dashboard") {
-        return location.pathname.startsWith("/dashboard") || location.pathname === "/";
+      return location.pathname.startsWith("/dashboard") || location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
@@ -100,17 +101,16 @@ export default function Navbar() {
           bg-[var(--nav-bg)] border-none rounded-xl px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-2 my-2 mx-2 sm:mx-4
           flex items-center justify-between gap-3 relative transition-all duration-200 ease-out fade-in
           backdrop-blur-xl shadow-sm
-          ${
-            isMounted
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-4"
+          ${isMounted
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-4"
           }
         `}
         style={{ animationDelay: "0.1s" }}
       >
-        {}
+        { }
         <div className="flex items-center gap-3 flex-shrink-0">
-          {}
+          { }
           <button
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMobileMenuOpen((s) => !s)}
@@ -135,11 +135,11 @@ export default function Navbar() {
             className="flex items-center gap-3 focus:outline-none transition-transform duration-300 hover:scale-105 fade-in"
             aria-label="Go to home"
           >
-            {}
+            { }
             <div className={`hidden sm:flex items-center justify-center fade-in bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300`}>
               <Rocket className="h-4 w-4 text-white" />
             </div>
-            
+
             <span className={`text-xl sm:text-2xl font-bold text-[var(--foreground)] font-outfit tracking-tight flex items-baseline relative`}>
               <span>Ne</span>
               <span className="text-3xl mx-0.5 font-black bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)] transform translate-y-[1px] inline-block">
@@ -150,7 +150,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {}
+        { }
         <div className={`hidden lg:flex items-center justify-center gap-1 text-sm font-medium text-[var(--nav-text)] flex-1`}>
           {navItems.map((item) => {
             const active = isActive(item.path);
@@ -171,10 +171,10 @@ export default function Navbar() {
           })}
         </div>
 
-        {}
+        { }
         <div className="flex items-center gap-2 flex-shrink-0">
-          
-          {}
+
+          { }
           <div className="relative">
             <button
               ref={bellRef}
@@ -190,28 +190,28 @@ export default function Navbar() {
                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--background)]"></span>
               )}
             </button>
-            <NotificationModal 
-              isOpen={isNotificationOpen} 
-              onClose={() => setIsNotificationOpen(false)} 
+            <NotificationModal
+              isOpen={isNotificationOpen}
+              onClose={() => setIsNotificationOpen(false)}
               triggerRef={bellRef}
             />
           </div>
 
-          {}
+          { }
           <button
             onClick={toggleTheme}
             className={`
               relative w-12 h-6 rounded-full transition-all duration-500 ease-out
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)]
-              ${isLight 
-                ? 'bg-gradient-to-r from-sky-300 to-blue-500 focus:ring-sky-400/50' 
+              ${isLight
+                ? 'bg-gradient-to-r from-sky-300 to-blue-500 focus:ring-sky-400/50'
                 : 'bg-gradient-to-r from-slate-700 to-indigo-900 focus:ring-indigo-400/50'}
               shadow-md hover:shadow-lg hover:scale-105
             `}
             title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
             aria-label="Toggle theme"
           >
-            {}
+            { }
             <div
               className={`
                 absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md
@@ -228,7 +228,7 @@ export default function Navbar() {
             </div>
           </button>
 
-          {}
+          { }
           <button
             onClick={() => {
               if (user?.id) {
@@ -246,12 +246,20 @@ export default function Navbar() {
               shadow-lg hover:shadow-xl transform hover:scale-110 fade-in overflow-hidden
             `}
           >
-            {user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-[var(--nav-text)]" />}
+            {user?.image ? (
+              <img
+                src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-[var(--nav-text)]" />
+            )}
           </button>
         </div>
       </nav>
 
-      {}
+      { }
       <AnimatePresence mode="wait">
         {isMobileMenuOpen && (
           <>
@@ -290,7 +298,7 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                <button 
+                <button
                   onClick={() => user?.id ? handleNavigate(`/user-profile/${user.id}`) : handleNavigate("/auth")}
                   className={`w-full text-left mb-8 p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] group`}
                 >

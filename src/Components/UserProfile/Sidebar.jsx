@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { 
-  FaUser, 
-  FaEnvelope, 
-  FaCode, 
-  FaCommentDots, 
-  FaWallet, 
-  FaCoins, 
+import {
+  FaUser,
+  FaEnvelope,
+  FaCode,
+  FaCommentDots,
+  FaWallet,
+  FaCoins,
   FaStar,
   FaChevronRight,
   FaChartLine,
@@ -21,6 +21,7 @@ import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
 import useThemeCheck from "@/hooks/useThemeCheck";
+import { SERVER_URL } from "@/api/axiosConfig"; // Import SERVER_URL
 
 import { createPortal } from "react-dom";
 
@@ -42,33 +43,30 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${
-              isLight ? "bg-white" : "bg-gray-800 border border-gray-700"
-            }`}
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${isLight ? "bg-white" : "bg-gray-800 border border-gray-700"
+              }`}
           >
             <div className="text-center">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                isLight ? "bg-red-100" : "bg-red-500/20"
-              }`}>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-100" : "bg-red-500/20"
+                }`}>
                 <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-600" : "text-red-400"}`} />
               </div>
-              
+
               <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
                 Sign Out?
               </h3>
-              
+
               <p className={`text-sm mb-6 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
                 Are you sure you want to sign out of your account?
               </p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
-                    isLight 
-                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    }`}
                 >
                   Cancel
                 </button>
@@ -105,41 +103,41 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
   const { watchlist } = useWatchlist() || { watchlist: [] };
 
-  
+
   const TC = useMemo(() => ({
-    
+
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    
-    
+
+
     bgSidebar: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
     bgMobile: isLight ? "bg-white shadow-md border-none" : "bg-gray-800/90 backdrop-blur-md border-none",
 
-    
+
     headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
     headerTitle: isLight ? "text-gray-900" : "text-white",
 
-    
-    menuItemBase: isLight 
-      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600" 
+
+    menuItemBase: isLight
+      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
       : "text-gray-400 hover:bg-white/5 hover:text-white",
 
-    
-    menuItemActive: isLight 
-      ? "bg-blue-50 text-blue-700 shadow-sm" 
+
+    menuItemActive: isLight
+      ? "bg-blue-50 text-blue-700 shadow-sm"
       : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
-    
-    
+
+
     iconActive: isLight ? "text-blue-600" : "text-cyan-400",
     iconInactive: isLight ? "text-gray-400" : "text-gray-500",
-    
-    
+
+
     bgStatCard: isLight ? "bg-gray-50 border-none" : "bg-gray-900/50 border-none",
     bgStatItem: isLight ? "bg-white border-none shadow-sm" : "bg-black/20 border-none shadow-inner",
-    
-    
+
+
     btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
-    
+
   }), [isLight]);
 
 
@@ -170,11 +168,11 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
   const { totalCoins, currentValue } = useMemo(() => {
     const coins = Array.isArray(purchasedCoins) ? purchasedCoins : [];
-    
-    
+
+
     const activeCoins = coins.filter(coin => {
-        const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
-        return qty > 0;
+      const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
+      return qty > 0;
     });
 
     const uniqueCoins = new Set(activeCoins.map(coin => coin.coinId || coin.coin_id)).size;
@@ -182,10 +180,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     let currentVal = 0;
 
     activeCoins.forEach(coin => {
-      
+
       const price = Number(coin.currentPrice) || Number(coin.current_price) || Number(coin.coinPriceUSD) || 0;
       const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
-      
+
       currentVal += price * qty;
     });
 
@@ -196,29 +194,29 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   }, [purchasedCoins]);
 
   const stats = [
-    { 
-      label: "Balance", 
-      value: `$${(Number(balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`, 
-      color: "text-green-400", 
-      icon: FaWallet 
+    {
+      label: "Balance",
+      value: `$${(Number(balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`,
+      color: "text-green-400",
+      icon: FaWallet
     },
-    { 
-      label: "Coins", 
-      value: totalCoins.toString(), 
-      color: "text-cyan-400", 
-      icon: FaCoins 
+    {
+      label: "Coins",
+      value: totalCoins.toString(),
+      color: "text-cyan-400",
+      icon: FaCoins
     },
-    { 
-      label: "Portfolio", 
-      value: `$${currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`, 
-      color: "text-blue-400", 
-      icon: FaChartLine 
+    {
+      label: "Portfolio",
+      value: `$${currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`,
+      color: "text-blue-400",
+      icon: FaChartLine
     },
-    { 
-      label: "Watchlist", 
-      value: ((watchlist && watchlist.length) || 0).toString(), 
-      color: "text-amber-400", 
-      icon: FaStar 
+    {
+      label: "Watchlist",
+      value: ((watchlist && watchlist.length) || 0).toString(),
+      color: "text-amber-400",
+      icon: FaStar
     }
   ];
 
@@ -229,21 +227,25 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           from { opacity: 0; transform: translateX(-20px); }
           to { opacity: 1; transform: translateX(0); }
         }
-        .slide-in { animation: slideIn 0.5s ease-out forwards; }
+        .slide-in { animation: slideIn 0.3s ease-out forwards; }
       `}</style>
-      {}
+      {/* Mobile Top View (Optional - mostly handled by UserMobileNavbar but keeping if needed) */}
       <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
-            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20`}>
-              <span className="text-white font-bold">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden`}>
+              {user?.image ? (
+                <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-bold">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+              )}
             </div>
             <div>
               <h2 className={`text-lg font-bold ${TC.headerTitle}`}>{user?.name || 'User'}</h2>
               <p className={`text-xs ${TC.textSecondary}`}>Personal Account</p>
             </div>
           </div>
-          
+
           <nav className="space-y-1">
             {menus.map((item, index) => (
               <Link
@@ -263,7 +265,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             ))}
           </nav>
 
-          {}
+          {/* Logout for Mobile */}
           <div className="mt-4 pt-4 border-t border-gray-200/10">
             <button
               className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
@@ -285,7 +287,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
       </div>
 
-      {}
+      {/* Desktop Sidebar */}
       <aside
         className={`
           hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
@@ -293,10 +295,14 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ${TC.bgSidebar}
         `}
       >
-        {}
-        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0.1s' }}>
-          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform`}>
-            <span className="text-white font-bold text-xl">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+        {/* User Info */}
+        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0s' }}>
+          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform overflow-hidden`}>
+            {user?.image ? (
+              <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white font-bold text-xl">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+            )}
           </div>
           <div className="min-w-0">
             <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight truncate`}>{user?.name || 'User'}</h2>
@@ -304,7 +310,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           </div>
         </div>
 
-        {}
+        {/* Menu Items */}
         <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
           {menus.map((item, index) => (
             <Link
@@ -315,28 +321,28 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                 ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
                 slide-in
               `}
-              style={{ animationDelay: `${0.15 + index * 0.05}s` }}
+              style={{ animationDelay: `${0.05 + index * 0.03}s` }}
             >
               <div className="flex items-center gap-3.5 relative z-10">
-                <item.icon 
+                <item.icon
                   className={`
                     text-lg transition-transform duration-300 
                     ${isActive(item.path) ? `${TC.iconActive} scale-110` : `${TC.iconInactive} group-hover:scale-110 group-hover:text-gray-300`}
-                  `} 
+                  `}
                 />
                 <span className={`font-medium tracking-wide ${isActive(item.path) ? "font-semibold" : ""}`}>
                   {item.name}
                 </span>
               </div>
-              
-              {}
+
+              {/* Active Indicator */}
               {isActive(item.path) && (
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
                 </div>
               )}
-              
-              {}
+
+              {/* Hover Effect */}
               {!isActive(item.path) && (
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               )}
@@ -344,8 +350,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           ))}
         </nav>
 
-        {}
-        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.5s' }}>
+        {/* Stats Card */}
+        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>Portfolio</span>
             <span className="flex h-2 w-2 relative">
@@ -353,7 +359,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             {stats.map((stat, i) => (
               <div key={i} className={`${TC.bgStatItem} rounded-lg p-2.5`}>
@@ -362,18 +368,18 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                   <span className={`text-[10px] ${TC.textSecondary} truncate`}>{stat.label}</span>
                 </div>
                 <div className="flex flex-col">
-                    <span className={`text-sm font-bold ${TC.textPrimary} truncate`}>{stat.value}</span>
-                    {stat.subValue && (
-                        <span className={`text-[10px] ${stat.color} font-medium`}>{stat.subValue}</span>
-                    )}
+                  <span className={`text-sm font-bold ${TC.textPrimary} truncate`}>{stat.value}</span>
+                  {stat.subValue && (
+                    <span className={`text-[10px] ${stat.color} font-medium`}>{stat.subValue}</span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {}
-        <div className="mt-4 slide-in" style={{ animationDelay: '0.6s' }}>
+        {/* Desktop Logout Key */}
+        <div className="mt-4 slide-in" style={{ animationDelay: '0.25s' }}>
           <button
             className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}
             onClick={handleLogoutClick}
@@ -393,12 +399,12 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
       </aside>
 
-      <LogoutConfirmationModal 
-        show={showLogoutModal} 
-        onClose={() => setShowLogoutModal(false)} 
-        onConfirm={confirmLogout} 
-        isLight={isLight} 
-        isLoading={isLogoutLoading} 
+      <LogoutConfirmationModal
+        show={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+        isLight={isLight}
+        isLoading={isLogoutLoading}
       />
     </>
   );
