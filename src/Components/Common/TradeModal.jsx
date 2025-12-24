@@ -751,7 +751,7 @@ function TradeModal({
       });
 
 
-      const isFirstPurchase = !userHoldings || userHoldings.quantity === 0;
+      const isFirstEverPurchase = !purchasedCoins || purchasedCoins.length === 0;
 
 
 
@@ -762,15 +762,19 @@ function TradeModal({
         handleClose();
       } else {
 
-        setSuccessData({
-          type: tradeType,
-          coinName: coin.name || coin.coinName,
-          symbol: coin.symbol || coin.coinSymbol,
-          amount: parseFloat(coinAmount),
-          price: parseFloat(currentPrice),
-          total: parseFloat(calculateTotal),
-          isFirstPurchase: isFirstPurchase && tradeType === 'buy'
-        });
+        if (isFirstEverPurchase && tradeType === 'buy') {
+          setSuccessData({
+            type: tradeType,
+            coinName: coin.name || coin.coinName,
+            symbol: coin.symbol || coin.coinSymbol,
+            amount: parseFloat(coinAmount),
+            price: parseFloat(currentPrice),
+            total: parseFloat(calculateTotal),
+            isFirstPurchase: true
+          });
+        } else {
+          handleClose();
+        }
       }
     } catch (error) {
       console.error("Trade error:", error);
@@ -801,7 +805,7 @@ function TradeModal({
   if (successData) {
     return (
       <PurchaseSuccessModal
-        show={!!successData}
+        show={isVisible}
         onClose={handleClose}
         data={successData}
         isFirstPurchase={successData.isFirstPurchase}

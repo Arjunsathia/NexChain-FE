@@ -146,7 +146,6 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               className={`border-t ${isLight ? 'border-gray-100' : 'border-white/5'}`}
             >
               <div className="p-4 space-y-6">
-                {/* Navigation Links */}
                 <div className="space-y-1">
                   {menus.map((item) => {
                     const active = isActive(item.path);
@@ -178,7 +177,6 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                   })}
                 </div>
 
-                {/* Quick Stats Grid */}
                 <div>
                   <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${TC.textSecondary}`}>
                     Quick Stats

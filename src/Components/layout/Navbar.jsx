@@ -23,7 +23,6 @@ export default function Navbar() {
     const [unreadCount, setUnreadCount] = useState(0);
     const bellRef = useRef(null);
 
-    // FIX 1: Ensure all theme-dependent variables are in the dependency array
     const TC = useMemo(() => ({
         navBg: isLight
             ? "bg-white/80 backdrop-blur-md shadow-sm border border-white/40"
@@ -43,14 +42,12 @@ export default function Navbar() {
         setIsMounted(true);
     }, []);
 
-    // FIX 2: Improved interval logic with cleanup and conditional fetching
     useEffect(() => {
         let interval;
         const fetchUnreadCount = async () => {
             if (!user) return;
             try {
                 const res = await api.get('/notifications');
-                // Ensure res.data is an array before filtering to avoid crashes
                 const count = Array.isArray(res.data) ? res.data.filter(n => !n.isRead).length : 0;
                 setUnreadCount(count);
             } catch (err) {
@@ -70,7 +67,6 @@ export default function Navbar() {
         };
     }, [user]);
 
-    // FIX 3: Close mobile menu when navigating
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [location.pathname]);

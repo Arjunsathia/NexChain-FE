@@ -7,114 +7,112 @@ import { useNavigate } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 function TopGainers() {
-  const isLight = useThemeCheck();
-  const [gainers, setGainers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+    const isLight = useThemeCheck();
+    const [gainers, setGainers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-  const TC = useMemo(() => ({
-    // Dashboard Stability Glassmorphism
-    bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    textAccent: isLight ? "text-emerald-600" : "text-emerald-400",
-    textHover: isLight ? "hover:text-cyan-600" : "hover:text-cyan-400",
-    bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
-    borderList: isLight ? "border-gray-100" : "border-gray-700/50",
-    textError: isLight ? "text-gray-600" : "text-gray-400",
-    skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
-    skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4b",
-    textPrice: isLight ? "text-gray-800" : "text-white",
-  }), [isLight]);
+    const TC = useMemo(() => ({
+        // Dashboard Stability Glassmorphism
+        bgContainer: isLight
+            ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+            : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        textPrimary: isLight ? "text-gray-900" : "text-white",
+        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+        textAccent: isLight ? "text-emerald-600" : "text-emerald-400",
+        textHover: isLight ? "hover:text-cyan-600" : "hover:text-cyan-400",
+        bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+        borderList: isLight ? "border-gray-100" : "border-gray-700/50",
+        textError: isLight ? "text-gray-600" : "text-gray-400",
+        skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
+        skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4b",
+        textPrice: isLight ? "text-gray-800" : "text-white",
+    }), [isLight]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const data = await getTopGainers();
-        if (Array.isArray(data)) {
-          setGainers(data.slice(0, 5));
-        } else {
-          console.warn("Top gainers data is not an array:", data);
-          setGainers([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch top gainers:", error);
-        setGainers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const data = await getTopGainers();
+                if (Array.isArray(data)) {
+                    setGainers(data.slice(0, 5));
+                } else {
+                    console.warn("Top gainers data is not an array:", data);
+                    setGainers([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch top gainers:", error);
+                setGainers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetchData();
-  }, []);
+        fetchData();
+    }, []);
 
-  return (
-    <div className={`rounded-xl p-4 md:p-5 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
-      <h2 className={`text-sm md:text-base font-bold mb-3 ${TC.textPrimary} fade-in flex items-center gap-2`} style={{ animationDelay: "0.2s" }}>📈 Top Gainers</h2>
-
-      {loading ? (
-        <ul className="flex-1 flex flex-col justify-between">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <li
-              key={index}
-              className="flex justify-between items-center text-sm fade-in"
-              style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
-            >
-              <Skeleton
-                width={120}
-                height={16}
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-              />
-              <Skeleton
-                width={80}
-                height={16}
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-              />
-            </li>
-          ))}
-        </ul>
-      ) : gainers.length > 0 ? (
-        <ul className={`flex-1 flex flex-col justify-between ${TC.textPrimary}`}>
-          {gainers.map((coin, index) => (
-            <li
-              key={coin.id}
-              className={`flex justify-between items-center text-sm border-b ${TC.borderList} last:border-b-0 pb-2 mb-2 last:mb-0 transition-colors ${TC.bgHover} px-2 py-2 rounded-lg fade-in`}
-              style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
-            >
-              <span
-                className={`flex items-center gap-2 cursor-pointer ${TC.textHover} transition-colors`}
-                onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
-              >
-                <img
-                  src={coin.image}
-                  alt={coin.name}
-                  className="w-5 h-5 rounded-full object-contain"
-                />
-                {coin.name} ({coin.symbol.toUpperCase()})
-              </span>
-
-              <span className={`${TC.textAccent} font-semibold`}>
-                ₹{Number(coin.current_price).toLocaleString("en-IN")} ( +
-                {coin.price_change_percentage_24h?.toFixed(2)}%)
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className={`text-center mt-4 flex flex-col items-center justify-center gap-2 fade-in ${TC.textError}`} style={{ animationDelay: "0.3s" }}>
-          <FaExclamationTriangle className="text-3xl" />
-          <p className="text-sm">
-            Unable to load top gainers. Please try again later.
-          </p>
+    return (
+        <div className={`rounded-xl p-4 md:p-5 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
+            <h2 className={`text-sm md:text-base font-bold mb-3 ${TC.textPrimary} fade-in flex items-center gap-2`} style={{ animationDelay: "0.2s" }}>📈 Top Gainers</h2>
+            {loading ? (
+                <ul className="flex-1 flex flex-col justify-between">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <li
+                            key={index}
+                            className="flex justify-between items-center text-sm fade-in"
+                            style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
+                        >
+                            <Skeleton
+                                width={120}
+                                height={16}
+                                baseColor={TC.skeletonBase}
+                                highlightColor={TC.skeletonHighlight}
+                            />
+                            <Skeleton
+                                width={80}
+                                height={16}
+                                baseColor={TC.skeletonBase}
+                                highlightColor={TC.skeletonHighlight}
+                            />
+                        </li>
+                    ))}
+                </ul>
+            ) : gainers.length > 0 ? (
+                <ul className={`flex-1 flex flex-col justify-between ${TC.textPrimary}`}>
+                    {gainers.map((coin, index) => (
+                        <li
+                            key={coin.id}
+                            className={`flex justify-between items-center text-sm border-b ${TC.borderList} last:border-b-0 pb-2 mb-2 last:mb-0 transition-colors ${TC.bgHover} px-2 py-2 rounded-lg fade-in`}
+                            style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
+                        >
+                            <span
+                                className={`flex items-center gap-2 cursor-pointer ${TC.textHover} transition-colors`}
+                                onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
+                            >
+                                <img
+                                    src={coin.image}
+                                    alt={coin.name}
+                                    className="w-5 h-5 rounded-full object-contain"
+                                />
+                                {coin.name} ({coin.symbol.toUpperCase()})
+                            </span>
+                            <span className={`${TC.textAccent} font-semibold`}>
+                                ₹{Number(coin.current_price).toLocaleString("en-IN")} ( +
+                                {coin.price_change_percentage_24h?.toFixed(2)}%)
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <div className={`text-center mt-4 flex flex-col items-center justify-center gap-2 fade-in ${TC.textError}`} style={{ animationDelay: "0.3s" }}>
+                    <FaExclamationTriangle className="text-3xl" />
+                    <p className="text-sm">
+                        Unable to load top gainers. Please try again later.
+                    </p>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default TopGainers;

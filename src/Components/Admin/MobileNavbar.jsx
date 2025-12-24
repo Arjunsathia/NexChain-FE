@@ -12,7 +12,8 @@ import {
   FaTimes, // Close icon
   FaChevronRight,
   FaUser,
-  FaExchangeAlt
+  FaExchangeAlt,
+  FaSignOutAlt
 } from "react-icons/fa";
 import { HiMenuAlt3 } from "react-icons/hi"; // Modern menu icon
 
@@ -20,7 +21,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 
-function MobileNavbar({ isOpen, onToggle }) {
+function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const { user } = useUserContext();
@@ -142,7 +143,6 @@ function MobileNavbar({ isOpen, onToggle }) {
           </motion.button>
         </div>
 
-        {/* Dropdown Menu */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -153,7 +153,6 @@ function MobileNavbar({ isOpen, onToggle }) {
               className={`border-t ${isLight ? 'border-gray-100' : 'border-white/5'}`}
             >
               <div className="p-4 space-y-6">
-                {/* Navigation Links */}
                 <div className="space-y-1">
                   {menus.map((item) => {
                     const active = isActive(item.path);
@@ -185,7 +184,6 @@ function MobileNavbar({ isOpen, onToggle }) {
                   })}
                 </div>
 
-                {/* Quick Stats Grid */}
                 <div>
                   <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${TC.textSecondary}`}>
                     Platform Stats
@@ -207,15 +205,34 @@ function MobileNavbar({ isOpen, onToggle }) {
                   </div>
                 </div>
 
-                {/* Removed Logout Button as requested */}
-
+                <div className="pt-2">
+                  <button
+                    onClick={() => {
+                      onToggle();
+                      onLogout();
+                    }}
+                    disabled={isLogoutLoading}
+                    className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/20 active:scale-95 transition-all"
+                  >
+                    {isLogoutLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Signing Out...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaSignOutAlt />
+                        <span>Sign Out</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.nav>
 
-      {/* Backdrop for closing when clicking outside (Screen Cover) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

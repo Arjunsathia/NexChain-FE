@@ -388,7 +388,6 @@ const Users = () => {
                     <div className="pb-1 mb-1">
                       <h1 className="text-xl md:text-2xl font-black text-white drop-shadow-md">{selectedUser.name}</h1>
                       <div className="flex items-center gap-2 mt-1">
-                        {/* FIXED ERROR HERE: selectedUser.isActive instead of user.isActive */}
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"} text-white`}>
                           {selectedUser.recentlyActive ? "Active" : "Inactive"}
                         </span>
@@ -397,7 +396,6 @@ const Users = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="mt-14 px-6 md:px-8 pb-10">
                   <div className="flex flex-col-reverse md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex gap-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">

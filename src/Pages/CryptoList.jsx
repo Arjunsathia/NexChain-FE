@@ -5,8 +5,6 @@ import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
 import TrendingCoins from "@/Components/Crypto/TrendingCoins";
-
-
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
@@ -15,15 +13,11 @@ import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
 
-
-
 function CryptoList() {
   const isLight = useThemeCheck();
   const [globalData, setGlobalData] = useState({});
   const [loading, setLoading] = useState(true);
   const { purchasedCoins } = usePurchasedCoins();
-
-
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -32,8 +26,6 @@ function CryptoList() {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-
 
   const [tradeModal, setTradeModal] = useState({
     show: false,
@@ -47,35 +39,22 @@ function CryptoList() {
     type: "buy",
   });
 
-
   const TC = useMemo(() => ({
-
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     bgCard: isLight
       ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
       : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
     bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/95 backdrop-blur-none shadow-md border-b border-gray-800 isolation-isolate prevent-seam",
-
-
     accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
     textAccent: isLight ? "text-blue-600" : "text-cyan-400",
-
-
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
-
-
     bgPillPositive: isLight ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     bgPillNegative: isLight ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-rose-500/10 text-rose-400 border-rose-500/20",
-
-
     iconBg: isLight ? "bg-indigo-50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400",
-
   }), [isLight]);
 
   const fetchData = useCallback(async () => {
@@ -94,7 +73,6 @@ function CryptoList() {
     fetchData();
   }, [fetchData]);
 
-
   const handleTrade = useCallback((coin, options = {}) => {
     if (options.initialAlertMode) {
       setAlertModal({
@@ -109,9 +87,6 @@ function CryptoList() {
       });
     }
   }, []);
-
-
-
 
   const handleCloseModal = useCallback(() => {
     setTradeModal(prev => ({
@@ -128,11 +103,9 @@ function CryptoList() {
     });
   }, []);
 
-
   const getPillClasses = (value) => {
     return value < 0 ? TC.bgPillNegative : TC.bgPillPositive;
   };
-
 
   const formatCompactNumber = (number) => {
     return new Intl.NumberFormat("en-US", {
@@ -142,21 +115,12 @@ function CryptoList() {
   };
 
   return (
-
     <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
-
-      { }
       <div
-
         className={`
-    hidden sm:block
-    sticky top-2 z-40 
-    max-w-7xl mx-auto 
-    rounded-xl shadow-md
-    ${TC.bgHeader} 
-    transition-colors duration-300
-    p-0 
-  `}
+          hidden sm:block sticky top-2 z-40 max-w-7xl mx-auto rounded-xl shadow-md
+          ${TC.bgHeader} transition-colors duration-300 p-0
+        `}
       >
         <div className="px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
@@ -170,7 +134,6 @@ function CryptoList() {
               </div>
             </div>
 
-            { }
             <div className="hidden md:flex items-center gap-6 text-sm">
               <div className="flex flex-col items-end">
                 <span className={TC.textTertiary}>Market Cap</span>
@@ -190,12 +153,7 @@ function CryptoList() {
       </div>
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
-
-        { }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
-
-          { }
-          { }
           <div className={`rounded-xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
             <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
               <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
@@ -245,24 +203,19 @@ function CryptoList() {
             </div>
           </div>
 
-          { }
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.05s' }}>
-            { }
             <TrendingCoins />
           </div>
 
-          { }
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>
             <TopGainers />
           </div>
         </div>
 
-        { }
         <div className="fade-in" style={{ animationDelay: '0.15s' }}>
           <CoinTable onTrade={handleTrade} />
         </div>
 
-        { }
         <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: '0.2s' }}>
           <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
             <FaFire className="text-orange-500" />
@@ -270,10 +223,8 @@ function CryptoList() {
           </h2>
           <NewsSection />
         </div>
-
       </div>
 
-      { }
       <TradeModal
         show={tradeModal.show}
         onClose={handleCloseModal}
@@ -282,7 +233,6 @@ function CryptoList() {
         purchasedCoins={purchasedCoins}
       />
 
-      { }
       <PriceAlertModal
         show={alertModal.show}
         onClose={handleCloseAlertModal}
