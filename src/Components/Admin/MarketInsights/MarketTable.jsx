@@ -23,21 +23,11 @@ function MarketTable({
           Market Overview
         </h3>
         <div className="relative w-full sm:w-72 group">
-          <FaSearch
-            className={`absolute left-4 top-1/2 -translate-y-1/2 text-lg transition-colors ${
-              isLight
-                ? "text-gray-400 group-focus-within:text-cyan-500"
-                : "text-gray-500 group-focus-within:text-cyan-400"
-            }`}
-          />
+          <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`} />
           <input
             type="text"
             placeholder="Search coins..."
-            className={`w-full rounded-xl py-3 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-cyan-500/20 shadow-sm ${
-              isLight
-                ? "bg-white text-gray-900 placeholder-gray-400"
-                : "bg-gray-900/50 text-white placeholder-gray-500"
-            }`}
+            className={`w-full rounded-xl py-2.5 pl-12 pr-4 text-sm font-medium outline-none transition-all border ${TC.bgInput}`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -106,11 +96,10 @@ function MarketTable({
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">
                   <span
-                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
+                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${coin.price_change_percentage_24h >= 0
+                      ? "text-green-400"
+                      : "text-red-400"
+                      }`}
                   >
                     {coin.price_change_percentage_24h >= 0 ? (
                       <FaArrowUp size={10} />
@@ -151,17 +140,19 @@ function MarketTable({
         </table>
       </div>
 
-      {}
+      { }
       {filteredData.length > itemsPerPage && (
         <div className="flex justify-center items-center gap-2 mt-6">
           <button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed " + TC.textSecondary
-                : TC.btnSecondary
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${currentPage === 1
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50 hover:scale-105 active:scale-95"
+              } ${isLight
+                ? "text-gray-600 bg-gray-100"
+                : "text-gray-300 bg-white/5"
+              }`}
           >
             Previous
           </button>
@@ -170,7 +161,7 @@ function MarketTable({
             {Array.from({
               length: Math.ceil(filteredData.length / itemsPerPage),
             }).map((_, i) => {
-              
+
               if (
                 i + 1 === 1 ||
                 i + 1 === Math.ceil(filteredData.length / itemsPerPage) ||
@@ -180,11 +171,10 @@ function MarketTable({
                   <button
                     key={i}
                     onClick={() => paginate(i + 1)}
-                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === i + 1
-                        ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/25"
-                        : TC.btnSecondary
-                    }`}
+                    className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-300 ${currentPage === i + 1
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+                      : TC.btnSecondary
+                      }`}
                   >
                     {i + 1}
                   </button>
@@ -209,11 +199,13 @@ function MarketTable({
             disabled={
               currentPage === Math.ceil(filteredData.length / itemsPerPage)
             }
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              currentPage === Math.ceil(filteredData.length / itemsPerPage)
-                ? "opacity-50 cursor-not-allowed " + TC.textSecondary
-                : TC.btnSecondary
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${currentPage === Math.ceil(filteredData.length / itemsPerPage)
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50 hover:scale-105 active:scale-95"
+              } ${isLight
+                ? "text-gray-600 bg-gray-100"
+                : "text-gray-300 bg-white/5"
+              }`}
           >
             Next
           </button>

@@ -1,6 +1,6 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
-import React, { useMemo } from "react";
+import React from "react";
 
 
 
@@ -15,10 +15,10 @@ const data = [
 export default function SparklineGraph() {
   const isLight = useThemeCheck();
 
-  
+
   const lineColor = isLight ? "#0e7490" : "#3b82f6";
 
-  
+
   const tooltipStyle = {
     backgroundColor: isLight ? '#fff' : '#1f2937',
     border: isLight ? '1px solid #e5e7eb' : '1px solid #4b5563',
@@ -27,8 +27,8 @@ export default function SparklineGraph() {
     padding: '8px',
     fontSize: '12px'
   };
-  
-  
+
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (

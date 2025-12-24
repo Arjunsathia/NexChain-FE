@@ -21,6 +21,7 @@ const CoinPageOutlet = lazy(() => import("@/Pages/CoinDetails/CoinPageOutlet"));
 const User = lazy(() => import("@/Pages/UserProfile/User"));
 const UserDashboard = lazy(() => import("@/Pages/UserProfile/UserDashboard"));
 const UserSettings = lazy(() => import("@/Pages/UserProfile/Settings"));
+const UserSupport = lazy(() => import("@/Pages/UserProfile/Support"));
 
 
 const Admin = lazy(() => import("@/Pages/Admin/Admin"));
@@ -44,7 +45,7 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {}
+        { }
         <Route element={<PublicRoute />}>
           <Route path="/" index element={<Landing />} />
           <Route element={<PublicLayout />}>
@@ -52,18 +53,18 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
-        {}
+        { }
         <Route element={<AuthRoute />}>
           <Route path="/auth" element={<AuthPages />} />
         </Route>
 
-        {}
+        { }
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cryptolist" element={<CryptoList />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
-            <Route path="/watchlist" element={<Watchlist />}/>
+            <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/learning" element={<LearningHub />} />
             <Route path="/coin" element={<CoinPageOutlet />} >
               <Route path="coin-details/:coinId" element={<CoinDetailsPage />} />
@@ -71,6 +72,7 @@ export default function AppRoutes() {
             <Route element={<User />}>
               <Route path="/user-profile/:userId" element={<UserDashboard />} />
               <Route path="/user/settings" element={<UserSettings />} />
+              <Route path="/user/support" element={<UserSupport />} />
             </Route>
             <Route path="/admin" element={<Admin />}>
               <Route index element={<AdminDashboard />} />

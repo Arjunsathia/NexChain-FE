@@ -16,7 +16,7 @@ const LayoutLoader = () => (
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
   const { fetchRole } = useRoleContext();
-  
+
   const location = useLocation();
   const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
   const navigate = useNavigate();
@@ -34,18 +34,18 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
-      {}
-      <div 
+      { }
+      <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
         style={{ background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)" }}
       />
-      <div 
+      <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-dark"
         style={{ background: "linear-gradient(to bottom right, #000000, #0b182d, #000000)" }}
       />
 
       <Navbar />
-      
+
       <main className="flex-1 p-2 sm:p-4 transition-colors duration-300">
         <motion.div
           key={pageKey}
@@ -59,10 +59,10 @@ export default function MainLayout() {
           </Suspense>
         </motion.div>
       </main>
-      
+
       <Footer />
-      
-      {}
+
+      { }
       <ChatbotWidget />
     </div>
   );

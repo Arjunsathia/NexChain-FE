@@ -406,11 +406,11 @@ body {
 }
 
 
-.dashboard-card, .chart-container, .modal-content {
+/* .dashboard-card, .chart-container, .modal-content {
   contain: content; 
   content-visibility: auto; 
   will-change: transform, opacity;
-}
+} */
 
 
 .hover\:scale-110:hover {
@@ -418,9 +418,9 @@ body {
 }
 
 
-*, *::before, *::after {
+/* *, *::before, *::after {
   transition-property: none;
-}
+} */
 
 
 .transform, .transition-transform {
@@ -514,3 +514,69 @@ html.lenis, html.lenis body {
 .perspective-1000 {
   perspective: 1000px;
 }
+
+/* ===============================
+   CHROMIUM GLASSMORPHISM FIX
+   Prevents 1px flashing seams on dark mode glass cards
+   =============================== */
+
+.glass-card {
+  isolation: isolate;
+  background-clip: padding-box;
+  -webkit-background-clip: padding-box;
+
+  /* Prevent Chromium seam flicker */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+
+  /* Keep layer promotion but avoid repaint bugs */
+  transform: translateZ(0);
+
+  /* ❌ REMOVE contain — this is the root cause */
+  /* contain: layout paint style; */
+}
+
+
+/* Dark mode specific: Drop shadows cause the light-line artifact adjacent to blur */
+.dark .glass-card {
+  box-shadow: none !important;
+}
+
+.dark .glass-card::before,
+[data-theme="dark"] .glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  /* Stable shadow rendered separately from blur */
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+  opacity: 0.65;
+}
+
+
+/* Update Legacy Helpers */
+.prevent-seam {
+  background-clip: padding-box;
+  -webkit-background-clip: padding-box;
+  isolation: isolate;
+}
+
+.force-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Prevent scrollbar 1px layout jump */
+html {
+  scrollbar-gutter: stable;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-gutter: stable;
+}
+

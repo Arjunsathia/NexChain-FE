@@ -1,9 +1,6 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo } from "react";
 
-
-
-
 const sampleNews = [
   {
     id: 1,
@@ -39,9 +36,9 @@ function NewsSection() {
   const isLight = useThemeCheck();
 
   const TC = useMemo(() => ({
-    bgCard: isLight 
-      ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
     textTitle: isLight ? "text-gray-900" : "text-white",
     textTime: isLight ? "text-gray-500" : "text-gray-500",
     btnMore: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-md" : "bg-gray-700 text-white hover:bg-gray-600 shadow-md",
@@ -59,7 +56,7 @@ function NewsSection() {
             <img
               src={news.image}
               alt={news.title}
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-40 object-cover transition-transform duration-300"
             />
             <div className="p-4 space-y-2">
               <h3 className={`font-semibold text-sm group-hover:text-cyan-600 transition-colors ${TC.textTitle}`}>{news.title}</h3>

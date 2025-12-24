@@ -54,7 +54,6 @@ const Users = () => {
   const [showUserForm, setShowUserForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [contentLoaded, setContentLoaded] = useState(false);
 
   // Message Modal State
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -67,7 +66,7 @@ const Users = () => {
 
   useEffect(() => {
     fetchUsers();
-    setTimeout(() => setContentLoaded(true), 100);
+
   }, []);
 
   // Fetch detailed info when a user is selected
@@ -75,6 +74,7 @@ const Users = () => {
     if (selectedUser) {
       fetchUserDetails(selectedUser.id || selectedUser._id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser]);
 
   const fetchUsers = async () => {
@@ -173,11 +173,11 @@ const Users = () => {
       try {
         await deleteById("/users", targetId);
         toast.success("User deleted successfully");
-      } catch (err) {
+      } catch {
         await api.post("/users/delete", { id: userToDelete._id });
         toast.success("Delete successful (fallback)");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete user");
       fetchUsers();
     } finally {
@@ -193,67 +193,84 @@ const Users = () => {
 
   const TC = useMemo(() => ({
     bgMain: "bg-transparent",
-    bgPanel: isLight ? "bg-white" : "bg-gray-800/50 backdrop-blur-xl", // Matching Sidebar
+    bgPanel: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+    bgStatsCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
     border: isLight ? "border-gray-200" : "border-white/10",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-400" : "text-gray-500",
+    bgItem: isLight
+      ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
+      : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
     itemHover: isLight ? "hover:bg-gray-100" : "hover:bg-white/5",
     itemActive: isLight ? "bg-blue-50 border-blue-500" : "bg-cyan-500/10 border-cyan-500",
-    bgCard: isLight
-      ? "bg-white border-gray-200 shadow-sm"
-      : "bg-gray-900 border-white/10 shadow-md",
     modalOverlay: "bg-black/60 backdrop-blur-sm",
-    modalContent: isLight ? "bg-white shadow-2xl border border-gray-100" : "bg-[#1A1D26] shadow-2xl border border-gray-800",
+    modalContent: isLight ? "bg-white" : "bg-[#0B0E11] border border-gray-800 prevent-seam force-layer",
     skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-    headerGradient: "from-cyan-400 to-blue-500",
+    headerGradient: "from-blue-600 to-cyan-500",
   }), [isLight]);
 
   const UserListItem = ({ user }) => (
     <div
       onClick={() => setSelectedUser(user)}
-      className={`group flex items-center gap-4 p-4 cursor-pointer transition-all border-b ${TC.border} ${selectedUser?._id === user._id
-        ? `border-l-4 ${TC.itemActive}`
-        : `${TC.itemHover} border-l-4 border-l-transparent`
+      className={`group flex items-center gap-4 p-3.5 mx-2 my-1 rounded-2xl cursor-pointer transition-all duration-300 border-l-4 ${selectedUser?._id === user._id
+        ? `${isLight ? 'bg-white shadow-md' : 'bg-white/10 shadow-lg'} border-blue-500`
+        : `border-transparent ${TC.bgItem} hover:shadow-md`
         }`}
     >
       <div className="relative flex-shrink-0">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden shadow-sm ${isLight ? "bg-gray-200 text-gray-600" : "bg-gray-800 text-gray-300"
-          }`}>
-          {user.image ? (
-            <img
-              src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
-              alt={user.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            user.name?.charAt(0).toUpperCase()
-          )}
+        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md group-hover:shadow-blue-500/20 transition-all`}>
+          <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
+            {user.image ? (
+              <img
+                src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user.name?.charAt(0).toUpperCase()
+            )}
+          </div>
         </div>
-        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 ${isLight ? "border-white" : "border-[#1f2937]"} ${user.recentlyActive ? "bg-green-500" : "bg-red-500"
+        <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 ${isLight ? "border-white" : "border-gray-900"} ${user.recentlyActive ? "bg-green-500 animate-pulse" : "bg-red-500"
           }`} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-0.5">
           <h4 className={`text-sm font-bold truncate ${TC.textPrimary}`}>{user.name}</h4>
-          {user.role === 'admin' && <Shield className="w-3 h-3 text-cyan-500" />}
+          {user.role === 'admin' && <Shield className="w-3.5 h-3.5 text-blue-500" />}
         </div>
-        <p className={`text-xs truncate ${TC.textSecondary}`}>{user.email}</p>
+        <div className="flex items-center justify-between">
+          <p className={`text-[10px] sm:text-xs truncate ${TC.textSecondary}`}>{user.email}</p>
+          <span className={`text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-md bg-blue-500/5 text-blue-500/70 border border-blue-500/10`}>
+            {user.role}
+          </span>
+        </div>
       </div>
     </div>
   );
 
-  const StatCard = ({ label, value, icon: Icon, colorClass, loading, onClick }) => (
+  const StatCard = ({ label, value, icon: Icon, loading, onClick }) => (
     <div
       onClick={onClick}
-      className={`p-4 rounded-xl border ${TC.bgCard} flex items-center gap-4 hover:shadow-lg transition-shadow duration-300 cursor-pointer active:scale-95 transform transition-transform`}
+      className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative shadow-sm hover:shadow-lg`}
     >
-      <div className={`p-3 rounded-full flex-shrink-0 ${colorClass.replace("bg-", "text-")} bg-gray-50 dark:bg-white/5`}>
-        <Icon className="w-6 h-6" />
+      <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+
+      <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 relative z-10">
         <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>{label}</p>
-        <p className={`text-lg font-black leading-tight truncate ${TC.textPrimary}`}>
+        <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
           {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : value}
         </p>
       </div>
@@ -262,23 +279,21 @@ const Users = () => {
 
   return (
     // Updated Layout: Vertical Flex for Header + Content
-    <div className={`
-      flex flex-col h-[calc(100vh-64px)] p-2 sm:p-4 lg:p-8 gap-4 lg:gap-6 overflow-hidden ${TC.bgMain} relative
-    `}>
-      {/* 1. Page Header (New) */}
+    <div className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative fade-in`}>
+      {/* 1. Page Header (Admin Styled) */}
       <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
-            User Management
+          <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
+            User <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Management</span>
           </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
+          <p className={`text-sm font-medium ${TC.textSecondary}`}>
             Manage system users, permissions, and accounts
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => { setEditingUser(null); setShowUserForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold"
           >
             <Plus className="w-4 h-4" /> Add User
           </button>
@@ -288,12 +303,11 @@ const Users = () => {
       {/* 2. Main Content Area (Split View) */}
       <div className={`
         flex-1 flex gap-4 overflow-hidden min-h-0
-        transition-all duration-500 ease-in-out
-        ${contentLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-      `}>
+        fade-in
+      `} style={{ animationDelay: "0.2s" }}>
         {/* Left Pane: User List */}
         <div className={`
-          flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-3xl overflow-hidden shadow-md
+          flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-3xl overflow-hidden
           transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
           w-full ${selectedUser ? "md:w-[380px]" : "md:w-full"}
         `}>
@@ -343,7 +357,7 @@ const Users = () => {
         {/* 2. Right Pane: Detail Panel (Updated: rounded-3xl & Glass Background) */}
         <div className={`
          fixed inset-0 z-[9999] md:static md:z-auto
-         ${TC.bgPanel} md:flex-1 md:rounded-3xl md:overflow-hidden shadow-md
+         ${TC.bgPanel} md:flex-1 md:rounded-3xl md:overflow-hidden
          transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
          ${selectedUser
             ? "translate-y-0 opacity-100 md:translate-y-0 md:translate-x-0"
@@ -485,7 +499,7 @@ const Users = () => {
                               className={`w-full h-32 p-3 rounded-xl resize-none outline-none text-sm ${isLight ? "bg-gray-50 text-gray-800" : "bg-[#0f111a] text-gray-300 border border-gray-800 focus:border-blue-500"}`}
                               placeholder="Add note..."
                             ></textarea>
-                            <button className="mt-2 text-xs font-bold text-blue-500 uppercase tracking-wider">Save Note</button>
+                            <button className="mt-3 w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2">Save Note</button>
                           </div>
                         </div>
                       </div>
@@ -609,7 +623,7 @@ const Users = () => {
         )}
       </div>
       {/* Closing Main Content Area */}
-    </div>
+    </div >
   );
 };
 export default Users;

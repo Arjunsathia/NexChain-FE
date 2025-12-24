@@ -1,6 +1,6 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+
 import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
@@ -30,7 +30,7 @@ function TradeModal({
   const { user } = useUserContext();
   const { balance, refreshBalance } = useWalletContext();
   const { addPurchase, sellCoins, refreshPurchasedCoins } = usePurchasedCoins();
-  const navigate = useNavigate();
+
 
   const [activeTab, setActiveTab] = useState("details");
   const [usdAmount, setUsdAmount] = useState("");
@@ -39,15 +39,15 @@ function TradeModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
+
   const [successData, setSuccessData] = useState(null);
 
-  
-  const [orderType, setOrderType] = useState("market"); 
+
+  const [orderType, setOrderType] = useState("market");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
-  
+
   const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
   const [alertTargetPrice, setAlertTargetPrice] = useState("");
 
@@ -67,7 +67,7 @@ function TradeModal({
     });
 
     return holding;
-  }, [coin, purchasedCoins, forceUpdate]);
+  }, [coin, purchasedCoins]);
 
   const hasHoldings = useMemo(() => {
     return (
@@ -82,10 +82,10 @@ function TradeModal({
     [shouldShowHoldingsInfo, activeTab, type]
   );
 
-  
+
   const TC = useMemo(
     () => ({
-      
+
       bgModal: isLight
         ? "bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
         : "bg-[#0B0E14]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
@@ -96,26 +96,22 @@ function TradeModal({
       textSecondary: isLight ? "text-gray-600" : "text-gray-300",
       textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-      
-      inputBg: isLight
-        ? `bg-gray-50 border-gray-200 focus:bg-white focus:border-${
-            isBuyOperation ? "emerald" : "red"
-          }-500 focus:ring-4 focus:ring-${
-            isBuyOperation ? "emerald" : "red"
-          }-500/10 text-gray-900 placeholder-gray-400 shadow-inner`
-        : `bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-${
-            isBuyOperation ? "emerald" : "red"
-          }-500 focus:ring-4 focus:ring-${
-            isBuyOperation ? "emerald" : "red"
-          }-500/10 text-white placeholder-gray-600 shadow-inner`,
 
-      
+      inputBg: isLight
+        ? `bg-gray-50 border-gray-200 focus:bg-white focus:border-${isBuyOperation ? "emerald" : "red"
+        }-500 focus:ring-4 focus:ring-${isBuyOperation ? "emerald" : "red"
+        }-500/10 text-gray-900 placeholder-gray-400 shadow-inner`
+        : `bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-${isBuyOperation ? "emerald" : "red"
+        }-500 focus:ring-4 focus:ring-${isBuyOperation ? "emerald" : "red"
+        }-500/10 text-white placeholder-gray-600 shadow-inner`,
+
+
       bgTabBase: isLight
         ? "bg-gray-50/80 backdrop-blur-sm"
         : "bg-gray-900/50 backdrop-blur-sm",
       borderTab: isLight ? "border-gray-200" : "border-gray-800",
 
-      
+
       bgCyanAccent: isLight
         ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100"
         : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
@@ -126,7 +122,7 @@ function TradeModal({
         ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100"
         : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
 
-      
+
       bgGreenPill: isLight
         ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
         : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
@@ -134,14 +130,12 @@ function TradeModal({
         ? "bg-red-100 text-red-700 border border-red-200"
         : "bg-red-500/20 text-red-400 border border-red-500/30",
 
-      
+
       hoverBorder: isLight
-        ? `hover:border-${
-            isBuyOperation ? "emerald" : "red"
-          }-400 transition-colors duration-200`
-        : `hover:border-${
-            isBuyOperation ? "emerald" : "red"
-          }-500/50 transition-colors duration-200`,
+        ? `hover:border-${isBuyOperation ? "emerald" : "red"
+        }-400 transition-colors duration-200`
+        : `hover:border-${isBuyOperation ? "emerald" : "red"
+        }-500/50 transition-colors duration-200`,
     }),
     [isLight, isBuyOperation]
   );
@@ -151,14 +145,14 @@ function TradeModal({
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       setIsVisible(false);
-      setTimeout(onClose, 200); 
+      setTimeout(onClose, 200);
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsVisible(false);
-    setTimeout(onClose, 200); 
-  };
+    setTimeout(onClose, 200);
+  }, [onClose]);
 
   const holdingsSummary = useMemo(() => {
     if (!shouldShowHoldingsInfo || !coin) return null;
@@ -232,11 +226,11 @@ function TradeModal({
       setCoinAmount("");
       setSlippage(1.0);
       setIsSubmitting(false);
-      setIsVisible(false); 
+      setIsVisible(false);
       setSuccessData(null);
       setIsAlertMode(initialAlertMode || false);
 
-      
+
       const timer = setTimeout(() => setIsVisible(true), 10);
 
       if (shouldShowHoldingsInfo) {
@@ -252,22 +246,22 @@ function TradeModal({
         coin.market_data?.current_price?.usd ||
         0;
       setCurrentPrice(price);
-      setLimitPrice(price); 
+      setLimitPrice(price);
       setStopPrice(price);
       setOrderType("market");
       setIsAlertMode(false);
       setAlertTargetPrice(price);
-      
+
       return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
-  }, [show, coin, type, shouldShowHoldingsInfo]);
+  }, [show, coin, type, shouldShowHoldingsInfo, initialAlertMode]);
 
-  
-  
-  
-  
+
+
+
+
 
 
 
@@ -304,17 +298,17 @@ function TradeModal({
   const handleLimitPriceChange = (e) => {
     const value = e.target.value;
     setLimitPrice(value);
-    
-    
+
+
     if (coinAmount && value > 0) {
-        const price = parseFloat(value);
-        const calculatedUSD = parseFloat(coinAmount) * price;
-        setUsdAmount(calculatedUSD.toFixed(2));
+      const price = parseFloat(value);
+      const calculatedUSD = parseFloat(coinAmount) * price;
+      setUsdAmount(calculatedUSD.toFixed(2));
     }
   };
 
   const setMaxAmount = () => {
-    const maxCoins = maxAvailable; 
+    const maxCoins = maxAvailable;
     if (maxCoins > 0) {
       setCoinAmount(maxCoins.toFixed(8));
       const calculatedUSD = maxCoins * effectivePrice;
@@ -409,163 +403,163 @@ function TradeModal({
       const { type, symbol, coinAmount, total, coinData } = tradeData;
 
       try {
-        
+
         if (isAlertMode) {
-            const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
-            const alertData = {
-                user_id: user.id,
-                coin_id: coinData.coinId || coinData.id,
-                coin_symbol: symbol,
-                coin_name: coinData.name || coinData.coinName,
-                coin_image: coinData.image,
-                target_price: parseFloat(alertTargetPrice),
-                condition
-            };
-
-            const res = await api.post("/alerts/create", alertData);
-            if (res.data.success) {
-                toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`, {
-                    className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-                    style: {
-                      background: "#DCFCE7",
-                      color: "#166534",
-                      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                      borderRadius: "8px",
-                      border: "none",
-                    },
-                    iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-                });
-                handleClose();
-                return;
-            } else {
-                throw new Error("Failed to create alert");
-            }
-        }
-
-        
-        if (orderType === "limit" || orderType === "stop_limit") {
-            const orderData = {
-                user_id: user.id,
-                coin_id: coinData.coinId || coinData.id,
-                coin_symbol: symbol,
-                coin_name: coinData.name || coinData.coinName,
-                coin_image: coinData.image,
-                type: type, 
-                category: orderType, 
-                limit_price: parseFloat(limitPrice),
-                stop_price: orderType === 'stop_limit' ? parseFloat(stopPrice) : undefined,
-                quantity: parseFloat(coinAmount)
-            };
-
-            const res = await api.post("/orders/create", orderData);
-            
-            if (res.data.success) {
-                toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
-                setSuccessData({
-                    ...orderData,
-                    price: parseFloat(limitPrice),
-                    total: parseFloat(coinAmount) * parseFloat(limitPrice),
-                    newBalance: res.data.newBalance
-                });
-                refreshBalance();
-                refreshPurchasedCoins();
-                handleClose();
-                return;
-            } else {
-                throw new Error(res.data.error || "Failed to create order");
-            }
-        } else {
-            
-            if (isBuyOperation) {
-                if (!coinData) {
-                    throw new Error("Coin data not found");
-                }
-
-                const cryptocurrencyId = coinData.coinId || coinData.id;
-
-                const purchaseData = {
-                    user_id: user.id,
-                    coin_id: cryptocurrencyId,
-                    coin_name: coinData.name || coinData.coinName,
-                    coin_symbol: coinData.symbol || coinData.coinSymbol,
-                    coin_price_usd: currentPrice,
-                    quantity: parseFloat(coinAmount),
-                    total_cost: parseFloat(total),
-                    fees: 0,
-                    image: coinData.image,
-                };
-
-                const result = await addPurchase(purchaseData);
-                if (result.success) {
-                    toast.success(
-                        `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
-                        {
-                            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-                            style: {
-                                background: "#DCFCE7",
-                                color: "#166534",
-                                boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                                borderRadius: "8px",
-                                border: "none",
-                            },
-                            iconTheme: {
-                                primary: "#16A34A",
-                                secondary: "#FFFFFF",
-                            },
-                        }
-                    );
-
-                    if (refreshPurchasedCoins) {
-                        await refreshPurchasedCoins();
-                    }
-                } else {
-                    throw new Error(result.error || "Purchase failed");
-                }
-            } else {
-          
-          if (!coinData) {
-            throw new Error("Coin data not found");
-          }
-
-          const cryptocurrencyId = coinData.coinId || coinData.id;
-
-          const sellData = {
+          const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
+          const alertData = {
             user_id: user.id,
-            coin_id: cryptocurrencyId,
-            quantity: parseFloat(coinAmount),
-            current_price: parseFloat(currentPrice),
+            coin_id: coinData.coinId || coinData.id,
+            coin_symbol: symbol,
+            coin_name: coinData.name || coinData.coinName,
+            coin_image: coinData.image,
+            target_price: parseFloat(alertTargetPrice),
+            condition
           };
 
-          const result = await sellCoins(sellData);
-          if (result.success) {
-            toast.success(
-              `Successfully sold ${parseFloat(coinAmount).toFixed(
-                6
-              )} ${symbol.toUpperCase()}`,
-              {
-                className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-                style: {
-                  background: "#DCFCE7",
-                  color: "#166534",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  borderRadius: "8px",
-                  border: "none",
-                },
-                iconTheme: {
-                  primary: "#16A34A",
-                  secondary: "#FFFFFF",
-                },
-              }
-            );
-
-            if (refreshPurchasedCoins) {
-              await refreshPurchasedCoins();
-            }
+          const res = await api.post("/alerts/create", alertData);
+          if (res.data.success) {
+            toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`, {
+              className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
+              style: {
+                background: "#DCFCE7",
+                color: "#166534",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                borderRadius: "8px",
+                border: "none",
+              },
+              iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
+            });
+            handleClose();
+            return;
           } else {
-            throw new Error(result.error || "Sell failed");
+            throw new Error("Failed to create alert");
           }
         }
-      }
+
+
+        if (orderType === "limit" || orderType === "stop_limit") {
+          const orderData = {
+            user_id: user.id,
+            coin_id: coinData.coinId || coinData.id,
+            coin_symbol: symbol,
+            coin_name: coinData.name || coinData.coinName,
+            coin_image: coinData.image,
+            type: type,
+            category: orderType,
+            limit_price: parseFloat(limitPrice),
+            stop_price: orderType === 'stop_limit' ? parseFloat(stopPrice) : undefined,
+            quantity: parseFloat(coinAmount)
+          };
+
+          const res = await api.post("/orders/create", orderData);
+
+          if (res.data.success) {
+            toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
+            setSuccessData({
+              ...orderData,
+              price: parseFloat(limitPrice),
+              total: parseFloat(coinAmount) * parseFloat(limitPrice),
+              newBalance: res.data.newBalance
+            });
+            refreshBalance();
+            refreshPurchasedCoins();
+            handleClose();
+            return;
+          } else {
+            throw new Error(res.data.error || "Failed to create order");
+          }
+        } else {
+
+          if (isBuyOperation) {
+            if (!coinData) {
+              throw new Error("Coin data not found");
+            }
+
+            const cryptocurrencyId = coinData.coinId || coinData.id;
+
+            const purchaseData = {
+              user_id: user.id,
+              coin_id: cryptocurrencyId,
+              coin_name: coinData.name || coinData.coinName,
+              coin_symbol: coinData.symbol || coinData.coinSymbol,
+              coin_price_usd: currentPrice,
+              quantity: parseFloat(coinAmount),
+              total_cost: parseFloat(total),
+              fees: 0,
+              image: coinData.image,
+            };
+
+            const result = await addPurchase(purchaseData);
+            if (result.success) {
+              toast.success(
+                `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
+                {
+                  className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
+                  style: {
+                    background: "#DCFCE7",
+                    color: "#166534",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                    borderRadius: "8px",
+                    border: "none",
+                  },
+                  iconTheme: {
+                    primary: "#16A34A",
+                    secondary: "#FFFFFF",
+                  },
+                }
+              );
+
+              if (refreshPurchasedCoins) {
+                await refreshPurchasedCoins();
+              }
+            } else {
+              throw new Error(result.error || "Purchase failed");
+            }
+          } else {
+
+            if (!coinData) {
+              throw new Error("Coin data not found");
+            }
+
+            const cryptocurrencyId = coinData.coinId || coinData.id;
+
+            const sellData = {
+              user_id: user.id,
+              coin_id: cryptocurrencyId,
+              quantity: parseFloat(coinAmount),
+              current_price: parseFloat(currentPrice),
+            };
+
+            const result = await sellCoins(sellData);
+            if (result.success) {
+              toast.success(
+                `Successfully sold ${parseFloat(coinAmount).toFixed(
+                  6
+                )} ${symbol.toUpperCase()}`,
+                {
+                  className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
+                  style: {
+                    background: "#DCFCE7",
+                    color: "#166534",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                    borderRadius: "8px",
+                    border: "none",
+                  },
+                  iconTheme: {
+                    primary: "#16A34A",
+                    secondary: "#FFFFFF",
+                  },
+                }
+              );
+
+              if (refreshPurchasedCoins) {
+                await refreshPurchasedCoins();
+              }
+            } else {
+              throw new Error(result.error || "Sell failed");
+            }
+          }
+        }
 
         let retryCount = 0;
         const maxRetries = 3;
@@ -585,7 +579,6 @@ function TradeModal({
         };
 
         await refreshBalanceWithRetry();
-        setForceUpdate((prev) => prev + 1);
       } catch (error) {
         console.error("Trade execution error:", error);
         const errorMessage =
@@ -618,7 +611,9 @@ function TradeModal({
       limitPrice,
       stopPrice,
       isAlertMode,
-      alertTargetPrice
+      alertTargetPrice,
+      handleClose,
+      isBuyOperation
     ]
   );
 
@@ -755,27 +750,27 @@ function TradeModal({
         coinData: coin,
       });
 
-      
+
       const isFirstPurchase = !userHoldings || userHoldings.quantity === 0;
 
-      
-      
-      
-      
+
+
+
+
       if (shouldShowHoldingsInfo) {
-          
-          handleClose();
+
+        handleClose();
       } else {
-          
-          setSuccessData({
-            type: tradeType,
-            coinName: coin.name || coin.coinName,
-            symbol: coin.symbol || coin.coinSymbol,
-            amount: parseFloat(coinAmount),
-            price: parseFloat(currentPrice),
-            total: parseFloat(calculateTotal),
-            isFirstPurchase: isFirstPurchase && tradeType === 'buy'
-          });
+
+        setSuccessData({
+          type: tradeType,
+          coinName: coin.name || coin.coinName,
+          symbol: coin.symbol || coin.coinSymbol,
+          amount: parseFloat(coinAmount),
+          price: parseFloat(currentPrice),
+          total: parseFloat(calculateTotal),
+          isFirstPurchase: isFirstPurchase && tradeType === 'buy'
+        });
       }
     } catch (error) {
       console.error("Trade error:", error);
@@ -802,12 +797,12 @@ function TradeModal({
   };
 
   if (!coin) return null;
-  
+
   if (successData) {
     return (
-      <PurchaseSuccessModal 
-        show={!!successData} 
-        onClose={handleClose} 
+      <PurchaseSuccessModal
+        show={!!successData}
+        onClose={handleClose}
         data={successData}
         isFirstPurchase={successData.isFirstPurchase}
       />
@@ -819,19 +814,16 @@ function TradeModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
-        isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      } ${isLight ? "bg-black/30" : "bg-black/70"}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        } ${isLight ? "bg-black/30" : "bg-black/70"}`}
       onClick={handleBackdropClick}
     >
       <div
-        className={`${
-          TC.bgModal
-        } rounded-2xl shadow-2xl w-[96vw] md:max-w-lg md:w-full mx-auto max-h-[85vh] md:max-h-[90vh] overflow-hidden transition-all duration-200 ease-out origin-center ${
-          isVisible
-            ? "opacity-100 scale-100"
-            : "opacity-0 scale-95"
-        }`}
+        className={`${TC.bgModal
+          } rounded-3xl shadow-2xl w-[96vw] md:max-w-xl md:w-full mx-auto max-h-[90vh] md:max-h-[92vh] overflow-hidden transition-all duration-300 ease-out origin-center ${isVisible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-4 scale-95"
+          }`}
       >
         <TradeModalHeader
           coin={coin}
@@ -908,7 +900,7 @@ function TradeModal({
             />
           )}
 
- 
+
         </div>
       </div>
     </div>

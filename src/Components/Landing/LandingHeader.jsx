@@ -1,41 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+
 import { FaRocket, FaBars, FaTimes } from "react-icons/fa";
 
-const LandingHeader = ({ isLoggedIn }) => {
-  const navigate = useNavigate();
+const LandingHeader = () => {
+  // No navigation needed here
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50); 
+      setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToContact = () => {
-     document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
       <motion.header
         initial={{ y: -100, opacity: 0 }}
-        animate={{ 
-          y: scrolled ? -100 : 0, 
-          opacity: scrolled ? 0 : 1 
+        animate={{
+          y: scrolled ? -100 : 0,
+          opacity: scrolled ? 0 : 1
         }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
         className={`fixed top-0 left-0 right-0 z-50 py-6 transition-all duration-300 pointer-events-none ${scrolled ? '' : 'pointer-events-auto'}`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          
-          {}
-          <div 
+
+          { }
+          <div
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="flex items-center gap-3 cursor-pointer group pointer-events-auto"
           >
@@ -51,7 +52,7 @@ const LandingHeader = ({ isLoggedIn }) => {
             </span>
           </div>
 
-          {}
+          { }
           <div className="hidden md:block pointer-events-auto">
             <button
               onClick={scrollToContact}
@@ -62,8 +63,8 @@ const LandingHeader = ({ isLoggedIn }) => {
             </button>
           </div>
 
-          {}
-          <button 
+          { }
+          <button
             className="md:hidden text-gray-300 hover:text-white transition-colors"
             onClick={() => setMobileMenuOpen(true)}
           >
@@ -72,7 +73,7 @@ const LandingHeader = ({ isLoggedIn }) => {
         </div>
       </motion.header>
 
-      {}
+      { }
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -84,7 +85,7 @@ const LandingHeader = ({ isLoggedIn }) => {
           >
             <div className="p-6 flex items-center justify-between border-b border-white/10">
               <span className="text-xl font-bold text-white font-outfit">Menu</span>
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white"
               >

@@ -12,41 +12,44 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const MarketInsights = () => {
   const isLight = useThemeCheck();
 
-  
+
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
       textSecondary: isLight ? "text-gray-500" : "text-gray-400",
       textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
+      // Glassmorphism Cards - Synced with Admin Sidebar exact styling
       bgCard: isLight
-        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+
+      // Stat Cards - Match sidebar styling with hover effect
       bgStatsCard: isLight
-        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
-      bgItem: isLight ? "bg-gray-50" : "bg-white/5",
+        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
+        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
+
+      bgItem: isLight
+        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
+        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+
       bgInput: isLight
-        ? "bg-white text-gray-900 placeholder-gray-500 shadow-sm"
-        : "bg-gray-900/50 text-white placeholder-gray-500 shadow-inner",
+        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
+        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
 
       btnPrimary:
-        "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25 transition-all duration-300",
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
       btnSecondary: isLight
-        ? "text-gray-600 hover:bg-gray-100"
-        : "text-gray-300 hover:bg-gray-800/50 hover:text-white",
+        ? "bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20"
+        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20",
 
-      tableHead: isLight
-        ? "bg-gray-100 text-gray-600"
-        : "bg-gray-900/50 text-gray-400",
-      tableRow: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
+      tableHead: isLight ? "bg-gray-100/80 text-gray-600" : "bg-white/5 text-gray-400",
+      tableRow: isLight ? "hover:bg-gray-50 transition-colors" : "hover:bg-white/5 transition-colors",
 
-      modalOverlay: "bg-black/80 backdrop-blur-sm",
-      modalContent: isLight
-        ? "bg-white shadow-2xl"
-        : "bg-[#0a0b14] shadow-2xl shadow-black/50",
+      modalOverlay: "bg-black/40 backdrop-blur-sm",
+      modalContent: isLight ? "bg-white" : "bg-[#0B0E11] border border-gray-800 glass-card",
 
-      headerGradient: "from-cyan-400 to-blue-500",
+      headerGradient: "from-blue-600 to-cyan-500",
     }),
     [isLight]
   );
@@ -54,47 +57,39 @@ const MarketInsights = () => {
   const [marketData, setMarketData] = useState([]);
   const [globalStats, setGlobalStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [contentLoaded, setContentLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [showTopGainers, setShowTopGainers] = useState(false);
   const [showTopLosers, setShowTopLosers] = useState(false);
 
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
 
   useEffect(() => {
     fetchMarketData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMarketData = async () => {
-    
+
     const cacheKey = "marketInsightsData_v1";
     const cached = localStorage.getItem(cacheKey);
     let hasCachedData = false;
 
     if (cached) {
       try {
-        const { data, timestamp } = JSON.parse(cached);
-        
-        
-        
+        const { data } = JSON.parse(cached);
         setMarketData(data);
         calculateGlobalStats(data);
         hasCachedData = true;
-        setContentLoaded(true); 
       } catch (e) {
         console.error("Cache parse error", e);
       }
     }
 
-    if (!hasCachedData) {
-      setLoading(true);
-    }
-
     try {
-      
+
       const response = await fetch(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h,7d"
       );
@@ -111,8 +106,8 @@ const MarketInsights = () => {
 
       setMarketData(data);
       calculateGlobalStats(data);
-      
-      
+
+
       localStorage.setItem(cacheKey, JSON.stringify({
         data,
         timestamp: Date.now()
@@ -121,51 +116,48 @@ const MarketInsights = () => {
     } catch (error) {
       console.error("Error fetching market data:", error);
       if (!hasCachedData) {
-         toast.error("Failed to fetch market data.", {
-             style: {
-               background: "#FEE2E2",
-               color: "#991B1B",
-               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-               borderRadius: "8px",
-               fontWeight: "600",
-               fontSize: "14px",
-               padding: "12px 16px",
-               border: "none",
-             },
-             iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-           });
-           setMarketData([]); 
+        toast.error("Failed to fetch market data.", {
+          style: {
+            background: "#FEE2E2",
+            color: "#991B1B",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            borderRadius: "8px",
+            fontWeight: "600",
+            fontSize: "14px",
+            padding: "12px 16px",
+            border: "none",
+          },
+          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+        });
+        setMarketData([]);
       }
     } finally {
       setLoading(false);
-      if (!hasCachedData) {
-         setTimeout(() => setContentLoaded(true), 100);
-      }
     }
   };
 
   const calculateGlobalStats = (data) => {
-      const totalMarketCap = data.reduce(
-        (acc, coin) => acc + coin.market_cap,
-        0
-      );
-      const totalVolume = data.reduce(
-        (acc, coin) => acc + coin.total_volume,
-        0
-      );
-      
-      const btcDominance =
-        (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
-        100;
-        
-      setGlobalStats({
-        marketCap: totalMarketCap,
-        volume: totalVolume,
-        btcDominance: btcDominance || 0,
-        ethDominance:
-          (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
-            100 || 0,
-      });
+    const totalMarketCap = data.reduce(
+      (acc, coin) => acc + coin.market_cap,
+      0
+    );
+    const totalVolume = data.reduce(
+      (acc, coin) => acc + coin.total_volume,
+      0
+    );
+
+    const btcDominance =
+      (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
+      100;
+
+    setGlobalStats({
+      marketCap: totalMarketCap,
+      volume: totalVolume,
+      btcDominance: btcDominance || 0,
+      ethDominance:
+        (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
+        100 || 0,
+    });
   };
 
   const formatCurrency = (value) => {
@@ -190,7 +182,7 @@ const MarketInsights = () => {
       coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
@@ -204,10 +196,10 @@ const MarketInsights = () => {
     .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
     .slice(0, 5);
 
-  
+
   const MarketSkeleton = () => (
     <div className="space-y-6">
-      {}
+      { }
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[...Array(4)].map((_, i) => (
           <div
@@ -217,7 +209,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {}
+      { }
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {[...Array(2)].map((_, i) => (
           <div
@@ -227,7 +219,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {}
+      { }
       <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
         <div className="space-y-4">
           <div
@@ -245,84 +237,82 @@ const MarketInsights = () => {
   );
 
   return (
-    <div
-      className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}
-    >
-      {}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1
-            className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}
-          >
-            Market Insights
-          </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
-            Global crypto market analysis and trends
-          </p>
+    <>
+      <div
+        className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
+        style={{ animationDelay: "0.1s" }}
+      >
+        { }
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
+              Market <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Insights</span>
+            </h1>
+            <p className={`text-sm font-medium ${TC.textSecondary}`}>
+              Global crypto market analysis and trends
+            </p>
+          </div>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            {loading && (
+              <div className="flex items-center text-sm text-gray-300">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Loading...
+              </div>
+            )}
+            <button
+              onClick={fetchMarketData}
+              disabled={loading}
+              className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} w-full sm:w-auto justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <FaSync className={loading ? "animate-spin" : ""} /> Refresh Data
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          {loading && (
-            <div className="flex items-center text-sm text-gray-300">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Loading...
-            </div>
-          )}
-          <button
-            onClick={fetchMarketData}
-            disabled={loading}
-            className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} w-full sm:w-auto justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
+
+        {loading ? (
+          <MarketSkeleton />
+        ) : (
+          <div
+            className="space-y-4 lg:space-y-6 fade-in"
+            style={{ animationDelay: "0.2s" }}
           >
-            <FaSync className={loading ? "animate-spin" : ""} /> Refresh Data
-          </button>
-        </div>
+            { }
+            <GlobalStats
+              globalStats={globalStats}
+              TC={TC}
+              formatCompactNumber={formatCompactNumber}
+            />
+
+            { }
+            <MarketMovers
+              topGainers={topGainers}
+              topLosers={topLosers}
+              setShowTopGainers={setShowTopGainers}
+              setShowTopLosers={setShowTopLosers}
+              TC={TC}
+              formatCurrency={formatCurrency}
+            />
+
+            { }
+            <MarketTable
+              currentItems={currentItems}
+              filteredData={filteredData}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              paginate={paginate}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              TC={TC}
+              isLight={isLight}
+              formatCurrency={formatCurrency}
+              formatCompactNumber={formatCompactNumber}
+              setSelectedCoin={setSelectedCoin}
+            />
+          </div>
+        )}
       </div>
 
-      {loading ? (
-        <MarketSkeleton />
-      ) : (
-        <div
-          className={`transition-all duration-500 ease-in-out space-y-4 lg:space-y-6 ${
-            contentLoaded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
-          }`}
-        >
-          {}
-          <GlobalStats
-            globalStats={globalStats}
-            TC={TC}
-            formatCompactNumber={formatCompactNumber}
-          />
-
-          {}
-          <MarketMovers
-            topGainers={topGainers}
-            topLosers={topLosers}
-            setShowTopGainers={setShowTopGainers}
-            setShowTopLosers={setShowTopLosers}
-            TC={TC}
-            formatCurrency={formatCurrency}
-          />
-
-          {}
-          <MarketTable
-            currentItems={currentItems}
-            filteredData={filteredData}
-            itemsPerPage={itemsPerPage}
-            currentPage={currentPage}
-            paginate={paginate}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            TC={TC}
-            isLight={isLight}
-            formatCurrency={formatCurrency}
-            formatCompactNumber={formatCompactNumber}
-            setSelectedCoin={setSelectedCoin}
-          />
-        </div>
-      )}
-
-      {}
+      { }
       <MarketCoinDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}
@@ -332,7 +322,7 @@ const MarketInsights = () => {
         formatCompactNumber={formatCompactNumber}
       />
 
-      {}
+      { }
       {showTopGainers && (
         <CoinListModal
           title="Top Gainers (24h)"
@@ -349,7 +339,7 @@ const MarketInsights = () => {
         />
       )}
 
-      {}
+      { }
       {showTopLosers && (
         <CoinListModal
           title="Top Losers (24h)"
@@ -365,7 +355,7 @@ const MarketInsights = () => {
           isLight={isLight}
         />
       )}
-    </div>
+    </>
   );
 };
 

@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { FaClock, FaTimes, FaExchangeAlt } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { FaClock, FaTimes, FaLayerGroup } from 'react-icons/fa';
 import api from '@/api/axiosConfig';
 import useUserContext from '@/hooks/useUserContext';
+import useThemeCheck from '@/hooks/useThemeCheck';
 import toast from 'react-hot-toast';
 
-const OpenOrders = ({ isLight, livePrices }) => {
+const OpenOrders = ({ livePrices }) => {
+  const isLight = useThemeCheck();
   const { user } = useUserContext();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [executing, setExecuting] = useState({}); 
+  const [executing, setExecuting] = useState({});
 
-  const fetchOrders = async () => {
+  const TC = useMemo(() => ({
+    bgContainer: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card rounded-xl"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card rounded-xl",
+    textPrimary: isLight ? "text-gray-900" : "text-white",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+    borderItem: isLight ? "border-gray-100" : "border-white/5",
+  }), [isLight]);
+
+  const fetchOrders = useCallback(async () => {
     if (!user) return;
     try {
       const res = await api.get(`/orders/${user.id}`);
@@ -22,149 +34,116 @@ const OpenOrders = ({ isLight, livePrices }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000); 
+    const interval = setInterval(fetchOrders, 10000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [fetchOrders]);
 
-  const handleExecute = async (orderId, currentPrice) => {
+  const handleExecute = useCallback(async (orderId, currentPrice) => {
     if (executing[orderId]) return;
-    
     setExecuting(prev => ({ ...prev, [orderId]: true }));
     try {
-      const res = await api.post('/orders/execute', {
-        orderId,
-        current_price: currentPrice
-      });
-      
+      const res = await api.post('/orders/execute', { orderId, current_price: currentPrice });
       if (res.data.success) {
         toast.success(`Order Executed: ${res.data.order.coin_symbol.toUpperCase()}`);
         fetchOrders();
       }
-    } catch (error) {
-      console.error("Failed to execute order", error);
+    } catch (err) {
+      console.error("Error executing order:", err);
     } finally {
-       setExecuting(prev => {
-           const newState = { ...prev };
-           delete newState[orderId];
-           return newState;
-       });
+      setExecuting(prev => {
+        const newState = { ...prev };
+        delete newState[orderId];
+        return newState;
+      });
     }
-  };
+  }, [executing, fetchOrders]);
 
-  
   useEffect(() => {
     if (!orders.length || !livePrices) return;
-
     orders.forEach(order => {
       if (order.status !== 'pending') return;
-      
       const priceData = livePrices[order.coin_id];
       if (priceData && priceData.current_price) {
         const currentPrice = priceData.current_price;
-        
-        
         if (order.category === 'stop_limit' || order.category === 'stop_market') {
-            if (order.type === 'buy' && currentPrice >= order.stop_price) {
-                handleExecute(order._id, currentPrice);
-            } else if (order.type === 'sell' && currentPrice <= order.stop_price) {
-                handleExecute(order._id, currentPrice);
-            }
-        }
-        
-        else if (order.category === 'limit') {
-            if (order.type === 'buy' && currentPrice <= order.limit_price) {
-                handleExecute(order._id, currentPrice);
-            } else if (order.type === 'sell' && currentPrice >= order.limit_price) {
-                handleExecute(order._id, currentPrice);
-            }
+          if ((order.type === 'buy' && currentPrice >= order.stop_price) ||
+            (order.type === 'sell' && currentPrice <= order.stop_price)) {
+            handleExecute(order._id, currentPrice);
+          }
+        } else if (order.category === 'limit') {
+          if ((order.type === 'buy' && currentPrice <= order.limit_price) ||
+            (order.type === 'sell' && currentPrice >= order.limit_price)) {
+            handleExecute(order._id, currentPrice);
+          }
         }
       }
     });
-  }, [orders, livePrices]);
+  }, [orders, livePrices, handleExecute]);
 
   const handleCancel = async (orderId) => {
     try {
       const res = await api.put(`/orders/cancel/${orderId}`);
       if (res.data.success) {
-        toast.success("Order cancelled successfully");
-        fetchOrders(); 
+        toast.success("Order cancelled");
+        fetchOrders();
       }
-    } catch (error) {
-      toast.error("Failed to cancel order");
+    } catch {
+      toast.error("Failed to cancel");
     }
   };
 
-  if (!user) return null;
-
-  const TC = {
-    bgCard: isLight ? "bg-white/60 border-gray-200 backdrop-blur-sm shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" : "bg-gray-800/40 border-gray-700 shadow-xl shadow-black/20",
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    rowHover: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
-  };
-
-  if (loading && orders.length === 0) {
-    return <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-800 rounded-xl"></div>;
-  }
-
-  if (orders.length === 0) return null;
+  if (!user || (orders.length === 0 && !loading)) return null;
 
   return (
-    <div className={`rounded-lg md:rounded-2xl border p-3 md:p-6 ${TC.bgCard} fade-in`}>
-      <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${TC.textPrimary}`}>
-        <FaClock className="text-amber-500" />
-        Open Orders
-      </h3>
-      
-      <div className="overflow-x-auto">
+    <div className={`p-1 fade-in ${TC.bgContainer}`}>
+      <div className="px-4 pt-3 flex items-center justify-between mb-2">
+        <h3 className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2 tracking-tight">
+          <FaClock className="text-amber-500" size={14} />
+          Open Orders
+        </h3>
+        {orders.length > 0 && (
+          <span className={`text-[10px] ${TC.textSecondary} px-2 py-0.5 rounded-full border border-white/5 font-bold uppercase tracking-wider`}>
+            {orders.length} Pending
+          </span>
+        )}
+      </div>
+
+      <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-white/5'} shadow-lg mx-2 mb-2`}>
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className={`text-xs uppercase ${TC.textSecondary} border-b border-gray-200 dark:border-gray-700`}>
-              <th className="pb-3 pl-2">Pair</th>
-              <th className="pb-3">Type</th>
-              <th className="pb-3">Stop</th>
-              <th className="pb-3">Limit</th>
-              <th className="pb-3">Amount</th>
-              <th className="pb-3">Filled</th>
-              <th className="pb-3 text-right pr-2">Action</th>
+            <tr className={`${isLight ? "bg-gray-100/50" : "bg-white/5"} uppercase tracking-wider text-[10px] font-bold`}>
+              <th className={`py-4 px-4 ${TC.textSecondary}`}>Pair</th>
+              <th className={`py-4 ${TC.textSecondary}`}>Type</th>
+              <th className={`py-4 ${TC.textSecondary}`}>Stop</th>
+              <th className={`py-4 ${TC.textSecondary}`}>Limit</th>
+              <th className={`py-4 ${TC.textSecondary}`}>Amount</th>
+              <th className={`py-4 text-right pr-4 ${TC.textSecondary}`}>Action</th>
             </tr>
           </thead>
-          <tbody className="text-sm">
+          <tbody className={`divide-y ${isLight ? "divide-gray-100" : "divide-white/5"}`}>
             {orders.map((order) => (
-              <tr key={order._id} className={`border-b border-gray-100 dark:border-gray-800/50 transition-colors ${TC.rowHover}`}>
-                <td className="py-3 pl-2 font-medium">
+              <tr key={order._id} className={`transition-colors text-sm ${TC.bgHover}`}>
+                <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
-                    <img src={order.coin_image} alt={order.coin_symbol} className="w-5 h-5 rounded-full" />
-                    <span className={TC.textPrimary}>{order.coin_symbol.toUpperCase()}</span>
+                    <img src={order.coin_image} alt="" className="w-5 h-5 rounded-full" />
+                    <span className={`font-bold ${TC.textPrimary}`}>{order.coin_symbol.toUpperCase()}</span>
                   </div>
                 </td>
-                <td className={`py-3 font-bold ${order.type === 'buy' ? 'text-green-500' : 'text-red-500'}`}>
-                  {order.category === 'stop_limit' ? 'STOP LIMIT' : 
-                   order.category === 'stop_market' ? 'STOP MARKET' : 
-                   order.category === 'limit' ? 'LIMIT' : 'MARKET'} 
-                  <span className="text-xs ml-1 opacity-70">({order.type.toUpperCase()})</span>
+                <td className="py-3">
+                  <span className={`text-[10px] font-bold uppercase ${order.type === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {order.category.replace('_', ' ')} ({order.type})
+                  </span>
                 </td>
-                <td className={`py-3 ${TC.textPrimary}`}>
-                    {order.stop_price ? `$${order.stop_price.toLocaleString()}` : '-'}
-                </td>
-                <td className={`py-3 ${TC.textPrimary}`}>
-                    {order.limit_price ? `$${order.limit_price.toLocaleString()}` : 'Market'}
-                </td>
-                <td className={`py-3 ${TC.textPrimary}`}>{order.quantity}</td>
-                <td className={`py-3 ${TC.textSecondary}`}>
-                  {((order.filled_quantity / order.quantity) * 100).toFixed(1)}%
-                </td>
-                <td className="py-3 text-right pr-2">
-                  <button 
-                    onClick={() => handleCancel(order._id)}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition-colors"
-                    title="Cancel Order"
-                  >
-                    <FaTimes />
+                <td className={`py-3 font-bold ${TC.textPrimary}`}>{order.stop_price ? `$${order.stop_price.toLocaleString()}` : '-'}</td>
+                <td className={`py-3 font-bold ${TC.textPrimary}`}>{order.limit_price ? `$${order.limit_price.toLocaleString()}` : 'MKT'}</td>
+                <td className={`py-3 font-bold ${TC.textPrimary}`}>{order.quantity}</td>
+                <td className="py-3 text-right pr-4">
+                  <button onClick={() => handleCancel(order._id)} className="text-rose-500 hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors">
+                    <FaTimes size={14} />
                   </button>
                 </td>
               </tr>

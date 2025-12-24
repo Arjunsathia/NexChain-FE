@@ -45,7 +45,7 @@ function SecuritySettings({ security, setSecurity, TC }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label
-              className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}
+              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
             >
               Current Password
             </label>
@@ -54,13 +54,13 @@ function SecuritySettings({ security, setSecurity, TC }) {
               <input
                 type="password"
                 placeholder="••••••••"
-                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 border ${TC.bgInput}`}
+                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
               />
             </div>
           </div>
           <div>
             <label
-              className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}
+              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
             >
               New Password
             </label>
@@ -69,7 +69,7 @@ function SecuritySettings({ security, setSecurity, TC }) {
               <input
                 type="password"
                 placeholder="••••••••"
-                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 border ${TC.bgInput}`}
+                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
               />
             </div>
           </div>

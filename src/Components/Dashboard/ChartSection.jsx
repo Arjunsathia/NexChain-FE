@@ -7,41 +7,75 @@ const ChartSection = ({ coinId }) => {
   const isLight = useThemeCheck();
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [days, setDays] = useState(1); 
+  const [days, setDays] = useState(1);
 
-  
+
   const validateData = (data) => {
-      if (!data || typeof data !== "object") return false;
-      if (!Array.isArray(data.prices)) return false;
-      if (data.prices.length === 0) return true; 
-      
-      
-      const first = data.prices[0];
-      return Array.isArray(first) && first.length === 2 && typeof first[0] === "number" && !isNaN(first[1]);
+    if (!data || typeof data !== "object") return false;
+    if (!Array.isArray(data.prices)) return false;
+    if (data.prices.length === 0) return true;
+
+
+    const first = data.prices[0];
+    return Array.isArray(first) && first.length === 2 && typeof first[0] === "number" && !isNaN(first[1]);
   };
 
-  
+
   useEffect(() => {
-    let active = true; 
+    let active = true;
 
     const fetchChart = async () => {
       if (!coinId) return;
       setLoading(true);
-      
-      try {
-        const data = await getMarketChart(coinId, days);
-        
-        if (active) {
-            if (validateData(data)) {
-                setSeries([{ name: "Price", data: data.prices }]);
-            } else {
-                console.warn(`Chart data validation failed for ${coinId}. API might be returning malformed data.`);
-                setSeries([{ name: "Price", data: [] }]);
-            }
+
+      const cacheKey = `chart_${coinId}_${days}`;
+      const now = Date.now();
+      const cached = localStorage.getItem(cacheKey);
+
+      // Helper to set data
+      const setData = (data) => {
+        if (validateData(data)) {
+          setSeries([{ name: "Price", data: data.prices }]);
+        } else {
+          console.warn(`Chart data validation failed for ${coinId}.`);
+          setSeries([{ name: "Price", data: [] }]);
         }
+      };
+
+      try {
+        // 1. Try to use fresh cache first (5 minutes)
+        if (cached) {
+          const { timestamp, data } = JSON.parse(cached);
+          if (now - timestamp < 5 * 60 * 1000) {
+            if (active) {
+              setData(data);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+
+        // 2. If no fresh cache, fetch from API
+        const data = await getMarketChart(coinId, days);
+
+        if (active) {
+          localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, data }));
+          setData(data);
+        }
+
       } catch (error) {
         console.error("Failed to fetch chart data", error);
-        if (active) setSeries([{ name: "Price", data: [] }]);
+
+        // 3. If API fails (e.g. 429), fallback to stale cache if it exists
+        if (active) {
+          if (cached) {
+            console.warn("Using stale cached data due to API failure");
+            const { data } = JSON.parse(cached);
+            setData(data);
+          } else {
+            setSeries([{ name: "Price", data: [] }]);
+          }
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -51,7 +85,7 @@ const ChartSection = ({ coinId }) => {
     return () => { active = false; };
   }, [coinId, days]);
 
-  
+
   const options = {
     chart: {
       type: "area",
@@ -59,6 +93,7 @@ const ChartSection = ({ coinId }) => {
       zoom: { enabled: false },
       toolbar: { show: false },
       background: "transparent",
+      animations: { enabled: false }, // Disable animations to prevent repaint thrashing
     },
     colors: ["#00E396"],
     stroke: {
@@ -118,11 +153,10 @@ const ChartSection = ({ coinId }) => {
   ];
 
   return (
-    <div className={`p-4 rounded-2xl transition-all ${
-      isLight 
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100" 
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50"
-    }`}>
+    <div className={`p-4 rounded-2xl transition-all duration-300 ease-in-out hover:shadow-2xl ${isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card"
+      }`}>
       <div className="flex justify-between items-center mb-4">
         <h3 className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}>
           Price Chart ({coinId?.toUpperCase()})
@@ -132,13 +166,12 @@ const ChartSection = ({ coinId }) => {
             <button
               key={tf.value}
               onClick={() => setDays(tf.value)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                days === tf.value
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : isLight
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${days === tf.value
+                ? "bg-blue-600 text-white shadow-lg"
+                : isLight
                   ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              }`}
+                }`}
             >
               {tf.label}
             </button>
@@ -147,16 +180,16 @@ const ChartSection = ({ coinId }) => {
       </div>
 
       <div className="w-full h-[350px] sm:h-[450px] lg:h-[560px] relative">
-        {}
+        { }
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-[1px] z-10 rounded-xl transition-all duration-300">
-             <div className="flex flex-col items-center gap-2">
-                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                {}
-             </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              { }
+            </div>
           </div>
         )}
-        
+
         <ReactApexChart options={options} series={series} type="area" height="100%" />
       </div>
     </div>

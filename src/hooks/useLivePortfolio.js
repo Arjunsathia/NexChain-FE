@@ -9,19 +9,19 @@ export const useLivePortfolio = () => {
   
   const livePortfolio = useMemo(() => {
     
-    if (!Array.isArray(purchasedCoins) || !Array.isArray(liveCoins)) {
+    if (!Array.isArray(purchasedCoins)) {
       return [];
     }
     
-    if (purchasedCoins.length === 0 || liveCoins.length === 0) {
+    if (purchasedCoins.length === 0) {
       return [];
     }
 
     return purchasedCoins.map(purchasedCoin => {
-      const liveCoin = liveCoins.find(coin => 
+      const liveCoin = Array.isArray(liveCoins) ? liveCoins.find(coin => 
         coin.id === purchasedCoin.coinId || 
         coin.id === purchasedCoin.coin_id
-      );
+      ) : null;
       
       if (!liveCoin) {
         console.warn(`No live data found for coin: ${purchasedCoin.coinName || purchasedCoin.coin_name}`);

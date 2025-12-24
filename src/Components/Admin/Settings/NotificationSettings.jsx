@@ -33,11 +33,11 @@ function NotificationSettings({ notifications, setNotifications, TC }) {
             >
               <div>
                 <h4
-                  className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}
+                  className={`font-bold text-sm sm:text-base ${TC.textPrimary}`}
                 >
                   {item.label}
                 </h4>
-                <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
+                <p className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}>
                   {item.description}
                 </p>
               </div>

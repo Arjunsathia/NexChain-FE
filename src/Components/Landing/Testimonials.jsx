@@ -19,7 +19,7 @@ const testimonials = [
 const TestimonialCard = ({ testimonial, TC, isMobile }) => {
   return (
     <motion.div
-      whileHover={{ y: -5, transition: { duration: 0.2 } }} 
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className={`
           ${TC.bgTestimonial} rounded-2xl md:rounded-3xl ${isMobile ? 'p-3 min-w-[260px]' : 'p-4 md:p-6 min-w-[250px] md:min-w-[320px]'} transition-all duration-300 group flex-shrink-0 relative overflow-hidden
           hover:shadow-2xl border border-transparent hover:border-white/10 cursor-pointer
@@ -31,17 +31,16 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`w-3 h-3 md:w-4 md:h-4 transition-all duration-300 ${
-              i < testimonial.rating
+            className={`w-3 h-3 md:w-4 md:h-4 transition-all duration-300 ${i < testimonial.rating
                 ? "text-yellow-400 fill-yellow-400"
                 : TC.textStarInactive
-            }`}
+              }`}
           />
         ))}
       </div>
 
       <p className={`text-xs md:text-sm leading-snug mb-3 md:mb-4 line-clamp-4 ${TC.textMessage} relative z-10 font-medium font-manrope`}>
-        "{testimonial.message}"
+        &quot;{testimonial.message}&quot;
       </p>
 
       <div className={`flex items-center justify-between pt-3 md:pt-4 border-t ${TC.borderDivider} relative z-10`}>
@@ -61,7 +60,7 @@ const TestimonialCard = ({ testimonial, TC, isMobile }) => {
 };
 
 const TestimonialCarousel = ({ TC, isMobile }) => {
-  
+
   const duplicatedTestimonials = useMemo(() => [...testimonials, ...testimonials, ...testimonials], []);
   const duration = 50;
 
@@ -70,7 +69,7 @@ const TestimonialCarousel = ({ TC, isMobile }) => {
       <div className="py-6">
         <motion.div
           className="flex gap-4 md:gap-8 w-max will-change-transform"
-          animate={{ x: "-33.33%" }} 
+          animate={{ x: "-33.33%" }}
           initial={{ x: "0%" }}
           transition={{ repeat: Infinity, ease: "linear", duration: duration }}
         >

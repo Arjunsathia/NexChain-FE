@@ -13,7 +13,9 @@ const useRoleContext = () => {
         try {
             const decoded = jwtDecode(token);
             role = decoded.role;
-        } catch(e) {}
+        } catch {
+          // ignore
+        }
     }
   }
 

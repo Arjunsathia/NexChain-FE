@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import useThemeCheck from "@/hooks/useThemeCheck";
 
-const NotificationSettings = () => {
-  const isLight = useThemeCheck();
-  const isDark = !isLight;
+
+const NotificationSettings = ({ TC, isLight }) => {
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
     pushNotifications: false,
@@ -15,40 +13,34 @@ const NotificationSettings = () => {
     setNotifications({ ...notifications, [e.target.name]: e.target.checked });
   };
 
-  
-  const containerClass = `rounded-xl p-4 border flex items-center justify-between gap-4 ${
-    isDark ? "bg-gray-700/30 border-gray-700" : "bg-gray-50 border-gray-200"
-  }`;
-  const textPrimary = isDark ? "text-white" : "text-gray-900";
-  const textSecondary = isDark ? "text-gray-400" : "text-gray-500";
-  const toggleBg = isDark ? "bg-gray-700 border-gray-600" : "bg-gray-200 border-gray-300";
-
   return (
-    <div className="space-y-6 animate-fade-in">
-      <h2 className={`text-xl font-bold mb-6 flex items-center gap-2 ${textPrimary}`}>
-        <FaBell className="text-cyan-500" /> Notification Settings
+    <div className="space-y-8 animate-in fade-in duration-300">
+      <h2 className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}>
+        <FaBell className="text-cyan-500" /> Notification Preferences
       </h2>
-      
-      <div className="space-y-4">
+
+      <div className="grid gap-4">
         {[
-          { id: "emailAlerts", label: "Email Alerts", desc: "Receive updates via email" },
-          { id: "pushNotifications", label: "Push Notifications", desc: "Receive push notifications on your device" },
-          { id: "securityAlerts", label: "Security Alerts", desc: "Get notified about suspicious activity" },
+          { id: "emailAlerts", label: "Email Alerts", desc: "Receive market updates & newsletters via email" },
+          { id: "pushNotifications", label: "Push Notifications", desc: "Get instant alerts for your trades & security" },
+          { id: "securityAlerts", label: "Security Alerts", desc: "Immediate notifications for suspicious login attempts" },
         ].map((item) => (
-          <div key={item.id} className={containerClass}>
+          <div key={item.id} className={`rounded-xl p-5 border flex items-center justify-between gap-4 transition-all ${TC.bgItem}`}>
             <div>
-              <h3 className={`font-semibold ${textPrimary}`}>{item.label}</h3>
-              <p className={`text-sm ${textSecondary}`}>{item.desc}</p>
+              <h3 className={`font-bold text-sm sm:text-base ${TC.textPrimary}`}>{item.label}</h3>
+              <p className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary} mt-1`}>{item.desc}</p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
                 name={item.id}
-                checked={notifications[item.id]} 
+                checked={notifications[item.id]}
                 onChange={handleNotificationChange}
-                className="sr-only peer" 
+                className="sr-only peer"
               />
-              <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600 ${toggleBg}`}></div>
+              <div className={`w-11 h-6 rounded-full peer peer-focus:ring-2 peer-focus:ring-cyan-500/20 transition-all 
+                ${isLight ? "bg-gray-200 peer-checked:bg-blue-600" : "bg-gray-700 peer-checked:bg-cyan-500"}
+                peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm`}></div>
             </label>
           </div>
         ))}

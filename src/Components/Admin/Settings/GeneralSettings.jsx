@@ -12,7 +12,7 @@ function GeneralSettings({ settings, setSettings, TC }) {
         <div className="space-y-3 sm:space-y-4">
           <div>
             <label
-              className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}
+              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
             >
               Platform Name
             </label>
@@ -22,12 +22,12 @@ function GeneralSettings({ settings, setSettings, TC }) {
               onChange={(e) =>
                 setSettings({ ...settings, platformName: e.target.value })
               }
-              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
+              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
             />
           </div>
           <div>
             <label
-              className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}
+              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
             >
               Contact Email
             </label>
@@ -37,12 +37,12 @@ function GeneralSettings({ settings, setSettings, TC }) {
               onChange={(e) =>
                 setSettings({ ...settings, contactEmail: e.target.value })
               }
-              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
+              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
             />
           </div>
           <div>
             <label
-              className={`block text-xs sm:text-sm font-medium mb-2 ${TC.textSecondary}`}
+              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
             >
               Support Email
             </label>
@@ -52,7 +52,7 @@ function GeneralSettings({ settings, setSettings, TC }) {
               onChange={(e) =>
                 setSettings({ ...settings, supportEmail: e.target.value })
               }
-              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-cyan-500/50 ${TC.bgInput}`}
+              className={`w-full rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
             />
           </div>
         </div>

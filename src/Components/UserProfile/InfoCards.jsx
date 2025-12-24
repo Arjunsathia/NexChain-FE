@@ -1,11 +1,9 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import { FaWallet, FaCoins, FaChartLine, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import useWalletContext from '@/hooks/useWalletContext';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { useLivePortfolio } from '@/hooks/useLivePortfolio';
-
-
 
 function InfoCards() {
   const isLight = useThemeCheck();
@@ -20,8 +18,9 @@ function InfoCards() {
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
     bgCard: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+      ? "bg-white/80 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
+      : "bg-gray-900/40 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5",
+
     textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
 
     textGreen: isLight ? "text-green-700" : "text-green-400",
@@ -34,7 +33,6 @@ function InfoCards() {
   const portfolioStats = useMemo(() => {
 
     const uniqueCoins = groupedHoldings?.length || 0;
-
 
     const totalInvested = portfolioSummary?.remainingInvestment || 0;
     const currentValue = portfolioSummary?.totalCurrentValue || 0;
@@ -149,50 +147,37 @@ function InfoCards() {
         return (
           <div
             key={idx}
-            className={`${TC.bgCard} rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 group cursor-pointer fade-in`}
+            className={`${TC.bgCard} rounded-2xl p-4 sm:p-5 transition-all duration-300 group cursor-default relative overflow-hidden`}
             style={{ animationDelay: `${0.1 + idx * 0.1}s` }}
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className={`p-1.5 sm:p-2 bg-gradient-to-r ${card.color} rounded-lg shadow-lg`}>
-                <Icon className="text-white text-sm sm:text-base" />
+            {/* Background Gradient Splash */}
+            <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br ${card.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity duration-300`} />
+
+            <div className="flex items-start justify-between mb-4 relative z-10">
+              <div className={`p-2.5 sm:p-3 bg-gradient-to-br ${card.color} rounded-xl shadow-lg shadow-black/5 group-hover:shadow-current/20 transition-all duration-300`}>
+                <Icon className="text-white text-lg sm:text-xl" />
               </div>
               {trendText && (
-                <div className={`text-[10px] sm:text-xs font-semibold ${trendColor}`}>
+                <div className={`text-[10px] sm:text-xs font-bold px-2 py-1 rounded-lg ${trendColor.replace('text-', 'bg-')}/10 ${trendColor} backdrop-blur-sm`}>
                   {trendText}
                 </div>
               )}
             </div>
 
-            <p className={`text-base sm:text-lg font-bold mb-0.5 sm:mb-1 transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
-              {formatValue(card.value, card.format)}
-            </p>
-
-            <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>
-              {card.title}
-            </p>
-            <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${TC.textTertiary}`}>
-              {card.description}
-            </p>
+            <div className="relative z-10">
+              <p className={`text-xs sm:text-sm font-medium uppercase tracking-wider mb-1 ${TC.textSecondary}`}>
+                {card.title}
+              </p>
+              <p className={`text-xl sm:text-2xl font-bold transition-colors ${TC.textPrimary} ${TC.textValueHover}`}>
+                {formatValue(card.value, card.format)}
+              </p>
+              <p className={`text-[10px] sm:text-xs mt-1 ${TC.textTertiary}`}>
+                {card.description}
+              </p>
+            </div>
           </div>
         );
       })}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
     </section>
   );
 }

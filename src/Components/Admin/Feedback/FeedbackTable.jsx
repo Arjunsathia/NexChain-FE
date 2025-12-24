@@ -4,7 +4,7 @@ import { FaEye, FaTrash, FaBug, FaLightbulb, FaStar, FaComments } from "react-ic
 function FeedbackTable({
   filteredFeedbacks,
   TC,
-  isLight,
+
   updateFeedbackStatus,
   setSelectedFeedback,
   setEditNotes,
@@ -150,11 +150,7 @@ function FeedbackTable({
                     onChange={(e) =>
                       updateFeedbackStatus(feedback._id, e.target.value)
                     }
-                    className={`text-[10px] sm:text-xs font-medium rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border-0 focus:ring-1 focus:ring-cyan-500 cursor-pointer transition-all ${
-                      isLight
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-gray-900/50 text-gray-300"
-                    }`}
+                    className={`text-[10px] sm:text-xs font-semibold rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 outline-none transition-all cursor-pointer border ${TC.bgInput}`}
                   >
                     <option value="new">New</option>
                     <option value="in-progress">In Progress</option>
@@ -175,18 +171,14 @@ function FeedbackTable({
                         setEditNotes(feedback.adminNotes || "");
                         setShowModal(true);
                       }}
-                      className={`p-1.5 sm:p-2 rounded-lg ${TC.btnSecondary}`}
+                      className={TC.btnSecondary}
                       title="View Details"
                     >
                       <FaEye className="text-sm" />
                     </button>
                     <button
                       onClick={() => confirmDelete(feedback)}
-                      className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
-                        isLight
-                          ? "text-red-600 hover:bg-red-50"
-                          : "text-red-400 hover:bg-red-500/10"
-                      }`}
+                      className={TC.btnDanger}
                       title="Delete"
                     >
                       <FaTrash className="text-sm" />

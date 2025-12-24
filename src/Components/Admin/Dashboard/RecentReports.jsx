@@ -1,63 +1,82 @@
-import React from "react";
 import { FaExclamationTriangle } from "react-icons/fa";
 
 function RecentReports({ reports, isLoading, TC }) {
+  const getIconColor = (type) => {
+    switch (type?.toLowerCase()) {
+      case 'security': return "text-red-400 bg-red-400/10";
+      case 'bug': return "text-amber-400 bg-amber-400/10";
+      default: return "text-blue-400 bg-blue-400/10";
+    }
+  };
+
   return (
-    <div className={`${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
-      <div className="flex items-center justify-between mb-2 sm:mb-6">
+    <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2
-          className={`text-sm sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-2`}
+          className={`text-sm sm:text-lg font-bold ${TC.textPrimary} flex items-center gap-3`}
         >
-          <FaExclamationTriangle className="text-red-400 text-xs sm:text-base" />{" "}
+          <div className="p-2 rounded-xl bg-red-500/10 text-red-500 shadow-sm">
+            <FaExclamationTriangle className="text-sm" />
+          </div>
           Recent Reports
         </h2>
         <span
-          className={`text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
+          className={`text-[10px] sm:text-xs font-bold px-3 py-1 rounded-lg ${TC.bgItem} ${TC.textSecondary}`}
         >
           {reports.length} Total
         </span>
       </div>
-      <div className="space-y-2 sm:space-y-3">
+
+      <div className="space-y-3">
         {isLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className={`p-2 sm:p-4 rounded-lg sm:rounded-xl ${TC.bgItem} animate-pulse`}
-              />
+                className={`flex gap-3 p-3 rounded-xl ${TC.bgItem} animate-pulse`}
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-700/20" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-3/4 bg-gray-700/20 rounded" />
+                  <div className="h-2 w-1/2 bg-gray-700/20 rounded" />
+                </div>
+              </div>
             ))}
           </>
         ) : (
           reports.slice(0, 4).map((report, i) => (
             <div
               key={report.id ?? i}
-              className={`p-2 sm:p-4 rounded-lg sm:rounded-xl ${TC.bgItem} transition-all duration-200 group`}
+              className={`group flex items-start gap-3 p-3.5 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-lg hover:shadow-black/5`}
             >
-              <div className="flex justify-between items-start mb-1">
-                <h4
-                  className={`font-medium text-xs sm:text-base ${TC.textPrimary} transition-colors line-clamp-1`}
-                >
-                  {report.title}
-                </h4>
-                <span
-                  className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full whitespace-nowrap ml-2 ${
-                    report.status === "open"
-                      ? "bg-red-500/20 text-red-400"
-                      : "bg-yellow-500/20 text-yellow-400"
-                  }`}
-                >
-                  {report.status}
-                </span>
+              {/* Icon Indicator */}
+              <div className={`mt-0.5 p-2 rounded-lg ${getIconColor(report.type)} flex-shrink-0`}>
+                <FaExclamationTriangle className="text-xs" />
               </div>
-              <div className="flex justify-between items-center mt-1 sm:mt-2">
-                <span className={`text-[10px] sm:text-xs ${TC.textSecondary} capitalize`}>
-                  {report.type}
-                </span>
-                <span className={`text-[10px] sm:text-xs ${TC.textSecondary}`}>
-                  {report.createdAt
-                    ? new Date(report.createdAt).toLocaleDateString()
-                    : "Unknown"}
-                </span>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                  <h4 className={`font-bold text-xs sm:text-sm ${TC.textPrimary} line-clamp-1 mb-1`}>
+                    {report.title}
+                  </h4>
+                  <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md whitespace-nowrap ml-2 ${report.status === "open"
+                    ? "bg-red-500/10 text-red-500 border border-red-500/10"
+                    : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/10"
+                    }`}>
+                    {report.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-[10px] font-medium ${TC.textSecondary} capitalize`}>
+                    {report.type}
+                  </span>
+                  <span className={`text-[10px] ${TC.textTertiary}`}>•</span>
+                  <span className={`text-[10px] ${TC.textTertiary}`}>
+                    {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown"}
+                  </span>
+                </div>
               </div>
             </div>
           ))

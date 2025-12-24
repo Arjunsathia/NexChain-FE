@@ -3,7 +3,7 @@ import { FaServer, FaBolt, FaCheckCircle, FaExclamationTriangle } from "react-ic
 
 function PlatformHealth({ isLoading, TC }) {
   return (
-    <div className={`${TC.bgCard} rounded-xl sm:rounded-2xl p-3 sm:p-6`}>
+    <div className={`${TC.bgCard} rounded-2xl p-3 sm:p-4`}>
       <h3
         className={`text-sm sm:text-lg font-bold ${TC.textPrimary} mb-2 sm:mb-4 flex items-center gap-2`}
       >

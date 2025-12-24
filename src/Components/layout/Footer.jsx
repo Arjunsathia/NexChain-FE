@@ -1,16 +1,18 @@
 import React, { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
-  FaGithub,
-  FaTwitter,
-  FaLinkedin,
-  FaStar,
-  FaBug,
-  FaLightbulb,
-  FaPaperPlane,
-  FaCheckCircle,
+    FaGithub,
+    FaTwitter,
+    FaLinkedin,
+    FaStar,
+    FaBug,
+    FaLightbulb,
+    FaPaperPlane,
+    FaCheckCircle,
+    FaRocket,
+    FaHeart
 } from "react-icons/fa";
-import { X } from "lucide-react"; 
+import { X } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
@@ -18,447 +20,301 @@ import useUserContext from "@/hooks/useUserContext";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 export default function Footer() {
-  const isLight = useThemeCheck();
-  const { user } = useUserContext();
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [feedbackType, setFeedbackType] = useState("suggestion");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+    const isLight = useThemeCheck();
+    const { user } = useUserContext();
+    const [showFeedback, setShowFeedback] = useState(false);
+    const [feedback, setFeedback] = useState("");
+    const [feedbackType, setFeedbackType] = useState("suggestion");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
-  
-  const TC = useMemo(() => ({
-    
-    bgFooter: isLight 
-      ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" 
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
-    bgModal: isLight 
-      ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/30 border-none" 
-      : "bg-gray-900/90 backdrop-blur-xl shadow-2xl shadow-black/80 border-none",
-    
-    bgModalHeader: isLight 
-      ? "bg-gray-100/90 border-none" 
-      : "bg-gradient-to-r from-gray-800 to-gray-900 border-none",
-    
-    
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-700" : "text-gray-300",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
-    
-    
-    textDisclaimerAccent: isLight ? "text-blue-700" : "text-cyan-400",
-    borderDisclaimer: isLight ? "border-gray-300/50" : "border-gray-700/50",
-    
-    
-    bgSocial: isLight 
-      ? "bg-white/70 text-gray-500 hover:bg-blue-50/70 ring-2 ring-transparent hover:ring-blue-500/50 shadow-sm" 
-      : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-cyan-400/50 shadow-sm",
-    
-    
-    inputBg: isLight ? "bg-gray-100/70 text-gray-900 placeholder-gray-500 border-none shadow-inner" : "bg-gray-800/50 text-white placeholder-gray-500 border-none shadow-inner",
-    
-    
-    bgBtnFeedbackActive: isLight 
-      ? "bg-blue-100/50 text-blue-700 shadow-md ring-2 ring-blue-500/50 border-none" 
-      : "bg-cyan-600/20 text-cyan-400 shadow-lg ring-2 ring-cyan-400/50 border-none",
-    bgBtnFeedbackDefault: isLight 
-      ? "bg-gray-100/50 text-gray-500 hover:text-gray-700 border-none" 
-      : "bg-gray-800/50 text-gray-400 hover:text-white border-none",
-    
-    
-    bgBtnCancel: isLight 
-      ? "bg-gray-100/70 text-gray-700 hover:bg-gray-200/90 ring-2 ring-transparent hover:ring-gray-400/50 border-none" 
-      : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 ring-2 ring-transparent hover:ring-gray-400/50 border-none",
+    const TC = useMemo(() => ({
+        bgFooter: isLight
+            ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
+            : "bg-gray-800/40 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
 
-    
-    bgPrimaryBtn: "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-cyan-500/25",
+        bgModal: isLight
+            ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/30 border-none"
+            : "bg-gray-900/90 backdrop-blur-xl shadow-2xl shadow-black/80 border-none",
 
-  }), [isLight]);
+        textPrimary: isLight ? "text-gray-900" : "text-white",
+        textSecondary: isLight ? "text-gray-600" : "text-gray-300",
+        textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
-  const handleSubmitFeedback = async (e) => {
-    e.preventDefault();
-    if (!feedback.trim()) {
-      return;
-    }
+        headingGradient: "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent",
 
-    setIsSubmitting(true);
-    try {
-      
-      const feedbackData = {
-        type: feedbackType,
-        message: feedback.trim(),
-        userEmail: user?.email || "anonymous@nexchain.com",
-        userName: user?.name || "Anonymous User",
-        userId: user?.id || null,
-        pageUrl: window.location.href,
-        timestamp: new Date().toISOString(),
-        status: "new",
-        priority: "medium",
-      };
+        bgSocial: isLight
+            ? "bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600"
+            : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-cyan-400",
 
-      
-      const response = await postForm("/feedback", feedbackData);
-      
-      
-      if (response && (response.success || response._id)) { 
-        setShowSuccess(true);
-        
-        setTimeout(() => {
-          setFeedback("");
-          setFeedbackType("suggestion");
-          setShowFeedback(false);
-          setShowSuccess(false);
-        }, 2000);
-      } else {
-        throw new Error("Failed to submit feedback");
-      }
+        inputBg: isLight ? "bg-gray-50/50 text-gray-900 border-gray-200" : "bg-black/20 text-white border-white/10",
 
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        bgBtnFeedbackActive: isLight
+            ? "bg-blue-50 text-blue-600 ring-1 ring-blue-500/20"
+            : "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30",
+        bgBtnFeedbackDefault: isLight
+            ? "bg-gray-50 text-gray-500 hover:bg-gray-100"
+            : "bg-white/5 text-gray-400 hover:bg-white/10",
 
-  const closeModal = () => {
-    if (!isSubmitting) {
-      setShowFeedback(false);
-      setFeedback("");
-      setFeedbackType("suggestion");
-      setShowSuccess(false);
-    }
-  };
+        bgPrimaryBtn: "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/20",
+        bgCancelBtn: isLight ? "bg-gray-100 text-gray-600 hover:bg-gray-200" : "bg-white/5 text-gray-300 hover:bg-white/10",
 
-  return (
-    <>
-      <motion.footer
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.2 }}
-        className={`
-          ${TC.bgFooter} rounded-xl px-3 py-4 my-2 mx-2 sm:px-6 sm:py-6 sm:my-4 sm:mx-4
-          transition-all duration-700 ease-out
+    }), [isLight]);
+
+    const handleSubmitFeedback = async (e) => {
+        e.preventDefault();
+        if (!feedback.trim()) return;
+
+        setIsSubmitting(true);
+        try {
+            const feedbackData = {
+                type: feedbackType,
+                message: feedback.trim(),
+                userEmail: user?.email || "anonymous@nexchain.com",
+                userName: user?.name || "Anonymous User",
+                userId: user?.id || null,
+                pageUrl: window.location.href,
+                timestamp: new Date().toISOString(),
+                status: "new",
+            };
+
+            const response = await postForm("/feedback", feedbackData);
+
+            if (response && (response.success || response._id)) {
+                setShowSuccess(true);
+                setTimeout(() => {
+                    setFeedback("");
+                    setFeedbackType("suggestion");
+                    setShowFeedback(false);
+                    setShowSuccess(false);
+                }, 2000);
+            }
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const closeModal = () => {
+        if (!isSubmitting) setShowFeedback(false);
+    };
+
+    const currentYear = new Date().getFullYear();
+
+    return (
+        <>
+            <motion.footer
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.2 }}
+                className={`
+          ${TC.bgFooter} rounded-2xl px-5 py-6 sm:px-6 sm:py-8 mx-3 my-3 sm:mx-4 sm:my-4
+          transition-all duration-500 ease-out border border-transparent
         `}
-      >
-        <div className="max-w-7xl mx-auto">
-          {}
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-8 mb-4 md:mb-8">
-            
-            {}
-            <div className="col-span-3 md:col-span-3 lg:col-span-3">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                <h3 className="text-sm sm:text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 sm:mb-4 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                  Important Disclaimer
-                </h3>
-                <p className={`text-xs sm:text-sm leading-relaxed ${TC.textSecondary}`}>
-                  <span className={`font-semibold ${TC.textDisclaimerAccent}`}>
-                    Cryptocurrency investments involve significant risk
-                  </span>{" "}
-                  and may result in financial loss. Prices are highly volatile
-                  and unpredictable. Always conduct your own research and
-                  consult with a qualified financial advisor before making any
-                  investment decisions. NexChain provides market data and
-                  educational content but does not offer financial or investment
-                  advice.
-                </p>
-              </motion.div>
-            </div>
-
-            {}
-            <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
-                <h4
-                    className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
-                >
-                    Quick Links
-                </h4>
-                <div className={`space-y-1 text-xs sm:text-sm ${TC.textSecondary}`}>
-                    <a href="/faq" className="block hover:text-cyan-400 transition-colors">FAQ</a>
-                    <a href="/terms" className="block hover:text-cyan-400 transition-colors">Terms of Service</a>
-                    <a href="/privacy" className="block hover:text-cyan-400 transition-colors">Privacy Policy</a>
-                    <a href="/careers" className="block hover:text-cyan-400 transition-colors">Careers</a>
-                </div>
-            </div>
-
-            {}
-            <div className="col-span-2 md:col-span-1 lg:col-span-1 space-y-6">
-              
-              {}
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
-                <button
-                  onClick={() => setShowFeedback(true)}
-                  className={`w-full ${TC.bgPrimaryBtn} font-medium py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 ring-2 ring-transparent hover:ring-cyan-400/50`}
-                >
-                  <FaPaperPlane className="text-sm" />
-                  Share Feedback
-                </button>
-              </motion.div>
-
-              {}
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-                <h4
-                  className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wider ${TC.textTertiary}`}
-                >
-                  Connect
-                </h4>
-                <div className="flex gap-4">
-                  {[
-                    {
-                      icon: FaGithub,
-                      label: "GitHub",
-                      color: isLight ? "hover:text-gray-900" : "hover:text-cyan-400",
-                    },
-                    {
-                      icon: FaTwitter,
-                      label: "Twitter",
-                      color: "hover:text-blue-500",
-                    },
-                    {
-                      icon: FaLinkedin,
-                      label: "LinkedIn",
-                      color: "hover:text-blue-600",
-                    },
-                  ].map((social, index) => (
-                    <a
-                      key={index}
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`
-                        p-3 rounded-xl transition-all duration-300
-                        ${TC.bgSocial} ${social.color} hover:scale-110
-                      `}
-                      aria-label={social.label}
-                    >
-                      <social.icon size={18} />
-                    </a>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {}
-          <div
-            className={`pt-6 ${TC.borderDisclaimer} text-center`}
-          >
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div
-                className={`text-[10px] sm:text-sm ${TC.textTertiary}`}
-              >
-                © {new Date().getFullYear()} NexChain. All rights reserved.
-              </div>
-              <div
-                className={`flex items-center gap-4 text-xs ${TC.textTertiary}`}
-              >
-                <span className="opacity-90">
-                  Secure
-                </span>
-                <div
-                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"
-                ></div>
-                <span className="opacity-90">
-                  Reliable
-                </span>
-                <div
-                  className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"
-                ></div>
-                <span className="opacity-90">
-                  Real-time
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.footer>
-
-      {}
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence> 
-          {showFeedback && (
-            <motion.div
-              key="feedback-modal-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-              onClick={closeModal}
             >
-              <motion.div
-                key="feedback-modal-content"
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative w-[90vw] max-w-[320px] p-0 mx-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className={`rounded-xl shadow-2xl ${TC.bgModal} overflow-hidden`}>
-                  
-                  {}
-                  {showSuccess ? (
-                    <motion.div
-                      key="success"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="p-6 text-center"
-                    >
-                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <FaCheckCircle className="text-2xl text-green-400" />
-                      </div>
-                      <h3 className={`text-lg font-bold mb-1 ${TC.textPrimary}`}>
-                        Feedback Sent!
-                      </h3>
-                      <p className={`text-xs mb-4 ${TC.textSecondary}`}>
-                        We appreciate your input.
-                      </p>
-                      <div className="w-10 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto"></div>
-                    </motion.div>
-                  ) : (
-                    
-                    <motion.div key="form">
-                      {}
-                      <div
-                        className={`px-4 py-3 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 flex items-center justify-center shadow-md"
-                            >
-                              <FaPaperPlane className="h-3.5 w-3.5 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                                Quick Feedback
-                              </h3>
-                              <p className={`text-[10px] sm:text-xs ${TC.textTertiary}`}>
-                                Share your thoughts
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={closeModal}
-                            disabled={isSubmitting}
-                            className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${TC.textTertiary}`}
-                          >
-                            <X size={18} />
-                          </button>
-                        </div>
-                      </div>
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 mb-6 sm:mb-8">
 
-                      {}
-                      <form onSubmit={handleSubmitFeedback} className="p-4 space-y-4">
-                        {}
-                        <div>
-                          <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
-                            Feedback Type
-                          </label>
-                          <div className="grid grid-cols-3 gap-2">
-                            {[
-                              {
-                                type: "suggestion",
-                                icon: FaLightbulb,
-                                label: "Suggestion",
-                                color: isLight ? "text-yellow-600" : "text-yellow-400",
-                              },
-                              {
-                                type: "bug",
-                                icon: FaBug,
-                                label: "Bug",
-                                color: isLight ? "text-red-600" : "text-red-400",
-                              },
-                              {
-                                type: "praise",
-                                icon: FaStar,
-                                label: "Praise",
-                                color: isLight ? "text-cyan-600" : "text-cyan-400",
-                              },
-                            ].map((item) => (
-                              <motion.button
-                                key={item.type}
-                                type="button"
-                                onClick={() => setFeedbackType(item.type)}
-                                disabled={isSubmitting}
-                                whileTap={{ scale: 0.98 }}
-                                className={`
-                                  py-2 px-1 rounded-lg transition-all duration-200 flex flex-col items-center gap-1.5
-                                  ${
-                                    feedbackType === item.type
-                                      ? TC.bgBtnFeedbackActive
-                                      : TC.bgBtnFeedbackDefault
-                                  }
-                                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
-                                `}
-                              >
-                                <item.icon className={`text-sm ${item.color}`} />
-                                <span className="text-[10px] sm:text-xs font-medium truncate w-full text-center">
-                                  {item.label}
+                        {/* Brand & Disclaimer Section */}
+                        <div className="flex-1 space-y-3 sm:space-y-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                                    <FaRocket size={14} />
+                                </div>
+                                <h3 className={`text-lg sm:text-xl font-bold ${TC.textPrimary} tracking-tight`}>
+                                    NexChain
+                                </h3>
+                            </div>
+
+                            <p className={`text-sm leading-relaxed max-w-lg ${TC.textSecondary}`}>
+                                Empowering your financial future with advanced crypto tools.
+                                <span className="opacity-70 mx-1 block sm:inline mt-1 sm:mt-0">
+                                    Trading involves risk. Invest responsibly.
                                 </span>
-                              </motion.button>
-                            ))}
-                          </div>
+                            </p>
+
+                            <div className="flex gap-2 pt-1">
+                                {[
+                                    { icon: FaGithub, href: "#", label: "GitHub" },
+                                    { icon: FaTwitter, href: "#", label: "Twitter" },
+                                    { icon: FaLinkedin, href: "#", label: "LinkedIn" },
+                                ].map((social, idx) => (
+                                    <a
+                                        key={idx}
+                                        href={social.href}
+                                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${TC.bgSocial} hover:scale-110 shadow-sm`}
+                                        aria-label={social.label}
+                                    >
+                                        <social.icon size={16} />
+                                    </a>
+                                ))}
+                            </div>
                         </div>
 
-                        {}
-                        <div>
-                          <label className={`text-xs font-medium mb-2 block ${TC.textSecondary}`}>
-                            Your Feedback
-                          </label>
-                          <textarea
-                            value={feedback}
-                            onChange={(e) => setFeedback(e.target.value)}
-                            placeholder="Tell us what's on your mind..."
-                            rows="3"
-                            className={`w-full rounded-xl px-3 py-2 text-xs sm:text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300 resize-none disabled:opacity-50 ${TC.inputBg}`}
-                            required
-                            disabled={isSubmitting}
-                          />
-                        </div>
+                        {/* Links & Actions */}
+                        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-8 lg:gap-16 pt-2 sm:pt-0">
+                            {/* Quick Links */}
+                            <div className="space-y-3 min-w-[120px]">
+                                <h4 className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}>Platform</h4>
+                                <div className="flex flex-col space-y-2">
+                                    {['Dashboard', 'Market', 'Portfolio', 'Learn'].map((item) => (
+                                        <a key={item} href={`/${item.toLowerCase()}`} className={`text-sm font-medium ${TC.textSecondary} hover:text-cyan-500 transition-colors`}>
+                                            {item}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
 
-                        {}
-                        <div
-                          className="flex gap-2 pt-1"
-                        >
-                          <motion.button
-                            type="button"
-                            onClick={closeModal}
-                            disabled={isSubmitting}
-                            whileTap={{ scale: 0.98 }}
-                            className={`flex-1 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${TC.bgBtnCancel}`}
-                          >
-                            Cancel
-                          </motion.button>
-                          <motion.button
-                            type="submit"
-                            disabled={!feedback.trim() || isSubmitting}
-                            whileTap={{ scale: 0.98 }}
-                            className={`flex-1 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium ${TC.bgPrimaryBtn} shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50`}
-                          >
-                            {isSubmitting ? (
-                              <>
-                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Sending...
-                              </>
-                            ) : (
-                              <>
-                                <FaPaperPlane className="text-xs" />
-                                Send
-                              </>
-                            )}
-                          </motion.button>
+                            {/* Legal */}
+                            <div className="space-y-3 min-w-[120px]">
+                                <h4 className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}>Legal</h4>
+                                <div className="flex flex-col space-y-2">
+                                    {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
+                                        <a key={item} href="#" className={`text-sm font-medium ${TC.textSecondary} hover:text-cyan-500 transition-colors`}>
+                                            {item}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Feedback CTA - Full width on mobile col-span-2 */}
+                            <div className="space-y-3 col-span-2 sm:col-span-1 sm:w-auto">
+                                <h4 className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}>Community</h4>
+                                <button
+                                    onClick={() => setShowFeedback(true)}
+                                    className={`
+                      group w-full sm:w-auto flex items-center justify-center sm:justify-start gap-3 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300
+                      ${TC.bgPrimaryBtn} hover:shadow-cyan-500/30 transform hover:-translate-y-0.5
+                    `}
+                                >
+                                    <FaPaperPlane className="transform group-hover:rotate-12 transition-transform" />
+                                    <span>Share Feedback</span>
+                                </button>
+                                <p className={`text-xs ${TC.textTertiary} max-w-[200px] mx-auto sm:mx-0 text-center sm:text-left`}>
+                                    Help us improve NexChain with your ideas.
+                                </p>
+                            </div>
                         </div>
-                      </form>
-                    </motion.div>
-                  )}
+                    </div>
+
+                    {/* Bottom Bar */}
+                    <div className={`pt-6 border-t ${isLight ? "border-gray-100" : "border-gray-800"}`}>
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                            <p className={`text-xs font-medium ${TC.textTertiary}`}>
+                                &copy; {currentYear} NexChain Inc. All rights reserved.
+                            </p>
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                Systems Operational
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
-    </>
-  );
+            </motion.footer>
+
+            {/* Feedback Modal */}
+            {typeof document !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {showFeedback && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                            onClick={closeModal}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                                className={`relativ w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${TC.bgModal}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {showSuccess ? (
+                                    <div className="p-8 text-center flex flex-col items-center">
+                                        <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
+                                            <FaCheckCircle className="text-3xl text-green-500" />
+                                        </div>
+                                        <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>Feedback Sent!</h3>
+                                        <p className={`text-sm ${TC.textSecondary}`}>Thanks for helping us grow.</p>
+                                    </div>
+                                ) : (
+                                    <div className="p-0">
+                                        <div className={`px-5 py-4 border-b flex justify-between items-center ${isLight ? "border-gray-100" : "border-gray-800"}`}>
+                                            <h3 className={`font-bold ${TC.textPrimary}`}>Send Feedback</h3>
+                                            <button onClick={closeModal} className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 ${TC.textTertiary}`}>
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+
+                                        <form onSubmit={handleSubmitFeedback} className="p-5 space-y-4">
+                                            <div>
+                                                <label className={`text-xs font-bold uppercase tracking-wider mb-2 block ${TC.textTertiary}`}>Type</label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {[
+                                                        { id: 'suggestion', icon: FaLightbulb, label: 'Idea' },
+                                                        { id: 'bug', icon: FaBug, label: 'Bug' },
+                                                        { id: 'praise', icon: FaHeart, label: 'Love' },
+                                                    ].map(item => (
+                                                        <button
+                                                            key={item.id}
+                                                            type="button"
+                                                            onClick={() => setFeedbackType(item.id)}
+                                                            className={`
+                                         flex flex-col items-center gap-1.5 py-2.5 rounded-xl border transition-all duration-200
+                                         ${feedbackType === item.id
+                                                                    ? `${TC.bgBtnFeedbackActive} border-blue-500/30`
+                                                                    : `${TC.bgBtnFeedbackDefault} border-transparent`
+                                                                }
+                                      `}
+                                                        >
+                                                            <item.icon className={feedbackType === item.id ? "text-blue-500" : "opacity-50"} />
+                                                            <span className="text-xs font-semibold">{item.label}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className={`text-xs font-bold uppercase tracking-wider mb-2 block ${TC.textTertiary}`}>Message</label>
+                                                <textarea
+                                                    value={feedback}
+                                                    onChange={(e) => setFeedback(e.target.value)}
+                                                    rows="3"
+                                                    placeholder="Tell us what you think..."
+                                                    className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none border ${TC.inputBg}`}
+                                                />
+                                            </div>
+
+                                            <div className="flex gap-3 pt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={closeModal}
+                                                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${TC.bgCancelBtn}`}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    disabled={!feedback.trim() || isSubmitting}
+                                                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold ${TC.bgPrimaryBtn} disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                >
+                                                    {isSubmitting ? "Sending..." : "Submit"}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
+        </>
+    );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { FaSearch } from "react-icons/fa";
 import useCoinContext from "@/hooks/useCoinContext";
 import CryptoStats from "@/Components/Admin/Cryptocurrencies/CryptoStats";
@@ -13,41 +13,37 @@ const AdminCryptocurrencies = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCoin, setSelectedCoin] = useState(null);
-  const [contentLoaded, setContentLoaded] = useState(false); 
+
   const coinsPerPage = 10;
 
-  useEffect(() => {
-    
-    const timer = setTimeout(() => {
-      setContentLoaded(true);
-    }, 50); 
-    return () => clearTimeout(timer);
-  }, []);
 
-  
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
       textSecondary: isLight ? "text-gray-500" : "text-gray-400",
       textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
-      bgCard: isLight 
-        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-        : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      bgCard: isLight
+        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
       bgStatsCard: isLight
-        ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-        : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
-      bgItem: isLight ? "bg-gray-50" : "bg-white/5",
-      bgInput: isLight ? "bg-white text-gray-900 placeholder-gray-500 shadow-sm" : "bg-gray-900/50 text-white placeholder-gray-500 shadow-inner",
+        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
+        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
+      bgItem: isLight
+        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
+        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+      bgInput: isLight
+        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
+        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
 
-      tableHead: isLight ? "bg-gray-100 text-gray-600" : "bg-gray-900/50 text-gray-400",
-      tableRow: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
+      tableHead: isLight ? "bg-gray-100/80 text-gray-600" : "bg-white/5 text-gray-400",
+      tableRow: isLight ? "hover:bg-gray-50 transition-colors" : "hover:bg-white/5 transition-colors",
 
-      modalOverlay: "bg-black/80 backdrop-blur-sm",
-      modalContent: isLight ? "bg-white shadow-2xl" : "bg-[#0a0b14] shadow-2xl shadow-black/50",
+      modalOverlay: "bg-black/40 backdrop-blur-sm",
+      modalContent: isLight ? "bg-white shadow-2xl" : "bg-[#0B0E11] border border-gray-800 glass-card",
 
-      
-      headerGradient: "from-cyan-400 to-blue-500",
+
+      headerGradient: "from-blue-600 to-cyan-500",
     }),
     [isLight]
   );
@@ -81,54 +77,43 @@ const AdminCryptocurrencies = () => {
   };
 
   return (
-    
-    <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
-      {}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          {}
-          <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
-            Cryptocurrencies
-          </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>Monitor market prices and coin performance</p>
+    <>
+      <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
+              Crypto <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Management</span>
+            </h1>
+            <p className={`text-sm font-medium ${TC.textSecondary}`}>Monitor market prices and coin performance</p>
+          </div>
+          <div className="relative group w-full sm:w-72">
+            <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`} />
+            <input
+              type="text"
+              placeholder="Search coins..."
+              className={`w-full rounded-xl py-2.5 pl-12 pr-4 text-sm font-medium outline-none transition-all border ${TC.bgInput}`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
-        <div className="relative w-full sm:w-72">
-          <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 text-lg transition-colors ${isLight ? "text-gray-400 group-focus-within:text-cyan-500" : "text-gray-500 group-focus-within:text-cyan-400"}`} />
-          <input
-            type="text"
-            placeholder="Search coins..."
-            className={`w-full rounded-xl py-3 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-cyan-500/20 shadow-sm ${isLight ? "bg-white text-gray-900 placeholder-gray-400" : "bg-gray-900/50 text-white placeholder-gray-500"}`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+
+        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+          <CryptoStats coins={coins} TC={TC} />
+          <CryptoTable
+            currentCoins={currentCoins}
+            TC={TC}
+            isLight={isLight}
+            formatCurrency={formatCurrency}
+            formatLargeNumber={formatLargeNumber}
+            setSelectedCoin={setSelectedCoin}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            paginate={paginate}
           />
         </div>
       </div>
 
-      <div
-        className={`transition-all duration-500 ease-in-out ${
-          contentLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        }`}
-      >
-
-        {}
-        <CryptoStats coins={coins} TC={TC} />
-
-        {}
-        <CryptoTable
-          currentCoins={currentCoins}
-          TC={TC}
-          isLight={isLight}
-          formatCurrency={formatCurrency}
-          formatLargeNumber={formatLargeNumber}
-          setSelectedCoin={setSelectedCoin}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          paginate={paginate}
-        />
-
-      </div>
-
-      {}
       <CryptoDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}
@@ -137,7 +122,7 @@ const AdminCryptocurrencies = () => {
         formatCurrency={formatCurrency}
         formatLargeNumber={formatLargeNumber}
       />
-    </div>
+    </>
   );
 };
 

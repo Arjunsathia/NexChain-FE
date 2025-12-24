@@ -1,5 +1,5 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { FaBell, FaTimes, FaArrowUp, FaArrowDown, FaPercentage } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -86,7 +86,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
           <div>
             <div className="font-semibold">Alert Created Successfully</div>
             <div className="text-xs font-normal opacity-90 mt-1">
-              You'll be notified when {symbol.toUpperCase()} goes {condition} ${priceValue}
+              You&apos;ll be notified when {symbol.toUpperCase()} goes {condition} ${priceValue}
             </div>
           </div>
         );

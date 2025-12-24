@@ -7,7 +7,7 @@ const CoinListModal = ({
   onClose,
   TC,
   formatCurrency,
-  isLight,
+
 }) => {
   if (!coins) return null;
 
@@ -56,11 +56,10 @@ const CoinListModal = ({
                   {formatCurrency(coin.current_price)}
                 </p>
                 <p
-                  className={`text-[10px] font-bold ${
-                    coin.price_change_percentage_24h >= 0
+                  className={`text-[10px] font-bold ${coin.price_change_percentage_24h >= 0
                       ? "text-green-400"
                       : "text-red-400"
-                  }`}
+                    }`}
                 >
                   {coin.price_change_percentage_24h >= 0 ? "+" : ""}
                   {coin.price_change_percentage_24h.toFixed(2)}%

@@ -1,5 +1,5 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import useThemeCheck from '@/hooks/useThemeCheck';
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import useWalletContext from "@/hooks/useWalletContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
@@ -13,36 +13,56 @@ import OpenOrders from "@/Components/portfolio/OpenOrders";
 
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
-
-
-
-
 const PortfolioPage = () => {
   const isLight = useThemeCheck();
   const { balance } = useWalletContext();
-  const { groupedHoldings, portfolioSummary: initialSummary, loading: portfolioLoading } = useLivePortfolio();
+  const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
   const { purchasedCoins } = usePurchasedCoins();
-  
+
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
 
-  
+
   const [tradeModal, setTradeModal] = useState({
     show: false,
     coin: null,
     type: "buy",
   });
 
-  
-  const TC = useMemo(() => ({
-    bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md border-b border-gray-200" : "bg-gray-900/80 backdrop-blur-md border-b border-gray-800",
-    iconBg: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",
-  }), [isLight]);
 
-  
+  const TC = useMemo(
+    () => ({
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
+
+      // Glassmorphism Cards - Synced with Dashboard Quality
+      bgCard: isLight
+        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+
+      bgHeader: isLight
+        ? "bg-gray-100/50 border-b border-gray-200 isolation-isolate"
+        : "bg-white/5 border-b border-white/5 isolation-isolate",
+
+      bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+
+      bgInput: isLight
+        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
+        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
+
+      btnPrimary:
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
+
+      headerGradient: "from-blue-600 to-cyan-500",
+
+      textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
+      textNegative: isLight ? "text-rose-600" : "text-rose-400",
+    }),
+    [isLight]
+  );
+
+
   useEffect(() => {
     if (!groupedHoldings || groupedHoldings.length === 0) return;
 
@@ -59,25 +79,25 @@ const PortfolioPage = () => {
 
     const streams = symbols.join('/');
     let lastUpdate = 0;
-    const THROTTLE_MS = 2000; 
+    const THROTTLE_MS = 2000;
 
     try {
       if (ws.current) ws.current.close();
-      
+
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
 
       ws.current.onopen = () => { };
 
       ws.current.onmessage = (event) => {
         const now = Date.now();
-        if (now - lastUpdate < THROTTLE_MS) return; 
+        if (now - lastUpdate < THROTTLE_MS) return;
 
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
           lastUpdate = now;
           const symbol = message.stream.replace('@ticker', '');
           const coinData = message.data;
-          
+
           const symbolToCoinId = {
             "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vechain": "vetusdt", "tron": "trxusdt"
           };
@@ -105,10 +125,10 @@ const PortfolioPage = () => {
     };
   }, [groupedHoldings]);
 
-  
+
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];
-    
+
     return groupedHoldings.map(coin => {
       const liveData = livePrices[coin.coinId];
       if (liveData) {
@@ -131,7 +151,7 @@ const PortfolioPage = () => {
     });
   }, [groupedHoldings, livePrices]);
 
-  
+
   const liveSummary = useMemo(() => {
     const totalCurrentValue = mergedHoldings.reduce((sum, coin) => sum + (coin.totalCurrentValue || 0), 0);
     const totalInvested = mergedHoldings.reduce((sum, coin) => sum + (coin.remainingInvestment || 0), 0);
@@ -146,7 +166,7 @@ const PortfolioPage = () => {
     };
   }, [mergedHoldings]);
 
-  
+
   const topPerformer = useMemo(() => {
     if (!mergedHoldings || mergedHoldings.length === 0) return null;
     return [...mergedHoldings].sort((a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0))[0];
@@ -155,79 +175,77 @@ const PortfolioPage = () => {
   const handleTrade = useCallback((coin) => {
     setTradeModal({
       show: true,
-      coin: { ...coin, id: coin.coinId }, 
-      type: "buy", 
+      coin: { ...coin, id: coin.coinId },
+      type: "buy",
     });
   }, []);
 
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 10);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
-    <div className={`min-h-screen p-2 sm:p-5 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
 
-      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
-        
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
-          <PortfolioHeader 
-            isLight={isLight} 
-            portfolioSummary={liveSummary} 
-            balance={balance} 
-            loading={portfolioLoading}
-            topPerformer={topPerformer}
-          />
-        </div>
+    <>
+      <div
+        className={`min-h-screen p-2 sm:p-4 lg:p-6 ${TC.textPrimary}`}
+      >
 
-        {}
-        <div className="space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
-          <HoldingsTable 
-            isLight={isLight} 
-            holdings={mergedHoldings} 
-            loading={portfolioLoading} 
-            onTrade={handleTrade} 
-          />
-        </div>
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
 
-        {}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.3s" }}>
-          <div className="lg:col-span-2">
-            <PerformanceChart 
-              isLight={isLight} 
-              groupedHoldings={mergedHoldings} 
-              balance={balance} 
-              loading={portfolioLoading} 
+          {/* Header Section */}
+          <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+            <PortfolioHeader
+              isLight={isLight}
+              portfolioSummary={liveSummary}
+              balance={balance}
+              loading={portfolioLoading}
+              topPerformer={topPerformer}
+              TC={TC}
             />
           </div>
-          <div className="lg:col-span-1">
-            <PortfolioDistribution 
-              isLight={isLight} 
-              groupedHoldings={mergedHoldings} 
-              balance={balance} 
-              loading={portfolioLoading} 
+
+          <div className="space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
+            <HoldingsTable
+              isLight={isLight}
+              holdings={mergedHoldings}
+              loading={portfolioLoading}
+              onTrade={handleTrade}
+              TC={TC}
             />
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.3s" }}>
+            <div className="lg:col-span-2">
+              <PerformanceChart
+                isLight={isLight}
+                groupedHoldings={mergedHoldings}
+                balance={balance}
+                loading={portfolioLoading}
+                TC={TC}
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <PortfolioDistribution
+                isLight={isLight}
+                groupedHoldings={mergedHoldings}
+                balance={balance}
+                loading={portfolioLoading}
+                TC={TC}
+              />
+            </div>
+          </div>
+
+          <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+            <OpenOrders isLight={isLight} livePrices={livePrices} TC={TC} />
+          </div>
+
+
+
+          <div className={`pt-8 border-t ${isLight ? 'border-gray-200' : 'border-white/5'} fade-in`} style={{ animationDelay: "0.5s" }}>
+            <TransactionHistory TC={TC} />
+          </div>
+
         </div>
-
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.35s" }}>
-           <OpenOrders isLight={isLight} livePrices={livePrices} />
-        </div>
-
-
-
-        {}
-        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: "0.4s" }}>
-           <TransactionHistory />
-        </div>
-
       </div>
 
-      {}
+      {/* Trade Modal - Moved outside transformed container to fix z-index/fixed position context */}
       <TradeModal
         show={tradeModal.show}
         onClose={() => setTradeModal({ ...tradeModal, show: false })}
@@ -235,7 +253,7 @@ const PortfolioPage = () => {
         type={tradeModal.type}
         purchasedCoins={purchasedCoins}
       />
-    </div>
+    </>
   );
 };
 

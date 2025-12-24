@@ -70,11 +70,10 @@ function CryptoTable({
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">
                   <div
-                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
+                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${coin.price_change_percentage_24h >= 0
+                      ? "text-green-400"
+                      : "text-red-400"
+                      }`}
                   >
                     {coin.price_change_percentage_24h >= 0 ? (
                       <FaArrowUp size={10} />
@@ -97,11 +96,10 @@ function CryptoTable({
                 <td className="py-3 px-3 sm:py-4 sm:px-6 text-center">
                   <button
                     onClick={() => setSelectedCoin(coin)}
-                    className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                      isLight
-                        ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-800/50 hover:text-white"
-                    }`}
+                    className={`p-1.5 sm:p-2.5 rounded-xl transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-cyan-500/20 ${isLight
+                      ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
+                      : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
+                      }`}
                   >
                     <FaEye className="text-sm" />
                   </button>
@@ -112,21 +110,19 @@ function CryptoTable({
         </table>
       </div>
 
-      {}
+      { }
       {totalPages > 1 && (
         <div className="p-4 flex justify-center gap-2">
           <button
             onClick={() => paginate(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800/50"
-            } ${
-              isLight
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${currentPage === 1
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50"
+              } ${isLight
                 ? "text-gray-600 bg-gray-100"
                 : "text-gray-300 bg-gray-800/50"
-            }`}
+              }`}
           >
             Previous
           </button>
@@ -165,17 +161,15 @@ function CryptoTable({
                 key={index}
                 onClick={() => typeof page === "number" && paginate(page)}
                 disabled={typeof page !== "number"}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  page === currentPage
-                    ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/25"
-                    : typeof page === "number"
-                    ? `${
-                        isLight
-                          ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          : "bg-gray-800/50 text-gray-300 hover:bg-gray-800/50"
-                      }`
+                className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-300 ${page === currentPage
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+                  : typeof page === "number"
+                    ? `${isLight
+                      ? "bg-gray-100/80 text-gray-600 hover:bg-gray-200"
+                      : "bg-white/5 text-gray-300 hover:bg-white/10"
+                    }`
                     : `${TC.textSecondary}`
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -185,15 +179,13 @@ function CryptoTable({
           <button
             onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-              currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800/50"
-            } ${
-              isLight
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${currentPage === totalPages
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50"
+              } ${isLight
                 ? "text-gray-600 bg-gray-100"
                 : "text-gray-300 bg-gray-800/50"
-            }`}
+              }`}
           >
             Next
           </button>

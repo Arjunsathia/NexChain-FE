@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
 import TrendingCoins from "@/Components/Dashboard/TrendingCoins";
@@ -11,9 +11,7 @@ import UserProfileCard from "@/Components/Dashboard/UserProfileCard";
 import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
-
 import useThemeCheck from "@/hooks/useThemeCheck";
-
 
 const coinToSymbol = {
   bitcoin: "btcusdt",
@@ -28,57 +26,50 @@ const coinToSymbol = {
 
 export default function Dashboard() {
   const isLight = useThemeCheck();
-  const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
-  const [topCoins, setTopCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // Data State: Initialize from cache for instant data
+  const [topCoins, setTopCoins] = useState(() => {
+    try {
+      const cached = localStorage.getItem("dashboardTopCoins");
+      if (cached) return JSON.parse(cached);
+    } catch (e) {
+      console.error("Cache parse error", e);
+    }
+    return [];
+  });
+
+  const [selectedCoinId, setSelectedCoinId] = useState(() => {
+    if (topCoins.length > 0) return topCoins[0].id;
+    return "bitcoin";
+  });
+
+  const [loading, setLoading] = useState(() => topCoins.length === 0);
   const [liveData, setLiveData] = useState({});
+
   const ws = useRef(null);
   const liveDataRef = useRef({});
+  const bufferRef = useRef({});
 
-  
   const handleCoinClick = (coinId) => {
     setSelectedCoinId(coinId);
   };
 
-  
   useEffect(() => {
     liveDataRef.current = liveData;
   }, [liveData]);
 
   useEffect(() => {
     const fetchTopCoins = async () => {
-      
-      const cachedData = localStorage.getItem("dashboardTopCoins");
-      if (cachedData) {
-        try {
-           const parsed = JSON.parse(cachedData);
-           if (Array.isArray(parsed) && parsed.length > 0) {
-             setTopCoins(parsed);
-             setSelectedCoinId(parsed[0].id);
-             setLoading(false); 
-           }
-        } catch (e) { console.error("Cache parse error", e); }
-      }
-
       try {
-        if (!cachedData) setLoading(true);
-        
-        
         const data = await getCoins({ per_page: 5 });
-        
         if (Array.isArray(data)) {
           const topThree = data.slice(0, 3);
           setTopCoins(topThree);
-          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree)); 
-          
-          if (topThree.length > 0) {
-             
-             
-             if (!cachedData) setSelectedCoinId(topThree[0].id);
+          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree));
+
+          if (topCoins.length === 0 && topThree.length > 0) {
+            setSelectedCoinId(topThree[0].id);
           }
-        } else {
-           console.warn("Top coins data is not an array:", data);
-           if (!cachedData) setTopCoins([]);
         }
       } catch (error) {
         console.error("Failed to load coins", error);
@@ -86,14 +77,10 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
-
     fetchTopCoins();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  
-  const bufferRef = useRef({});
-
-  
   useEffect(() => {
     if (topCoins.length === 0) return;
 
@@ -105,20 +92,15 @@ export default function Dashboard() {
 
     if (!symbols) return;
 
-    
     const intervalId = setInterval(() => {
       if (Object.keys(bufferRef.current).length > 0) {
         setLiveData((prev) => ({
           ...prev,
           ...bufferRef.current,
         }));
-        bufferRef.current = {}; 
-        
-        
-        
-        
+        bufferRef.current = {};
       }
-    }, 1500);
+    }, 200);
 
     try {
       ws.current = new WebSocket(
@@ -136,8 +118,6 @@ export default function Dashboard() {
           if (coinId) {
             const newPrice = parseFloat(data.data.c);
             const newChange = parseFloat(data.data.P);
-
-            
             bufferRef.current[coinId] = {
               price: newPrice,
               change: newChange,
@@ -146,36 +126,20 @@ export default function Dashboard() {
           }
         }
       };
-
-      ws.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
     } catch (error) {
       console.error("WebSocket setup failed:", error);
     }
 
     return () => {
       clearInterval(intervalId);
-      if (ws.current) {
-        ws.current.close();
-      }
+      if (ws.current) ws.current.close();
     };
   }, [topCoins]);
 
-  
-
-  
   const USERDATA_HEIGHT = "h-[150px]";
-
-  
-  const CHART_HEIGHT = "h-[620px]"; 
-
-  
+  const CHART_HEIGHT = "h-[620px]";
   const PORTFOLIO_HEIGHT = "h-[300px]";
   const TRADES_HEIGHT = "h-[266px]";
-
-  
   const WATCHLIST_HEIGHT = "h-[280px]";
   const TRENDING_HEIGHT = "h-[250px]";
   const LEARNING_HUB_HEIGHT = "h-[186px]";
@@ -186,30 +150,17 @@ export default function Dashboard() {
 
   return (
     <div
-      className={`min-h-screen p-2 sm:p-4 lg:p-6 fade-in ${
-        isLight ? "text-gray-900" : "text-white"
-      }`}
-      style={{ animationDelay: "0.1s" }}
+      className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
-      {}
       <div className="xl:hidden flex flex-col gap-4">
-        {}
-        <div
-          className="fade-in"
-          style={{ animationDelay: "0s" }}
-        >
+        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
           <UserProfileCard />
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.05s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="space-y-1">
-            <h2
-              className={`text-lg font-bold mb-3 px-1 ${
-                isLight ? "text-gray-900" : "text-white"
-              }`}
-            >
-              Top Cryptos
+            <h2 className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
+              Top <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Cryptos</span>
             </h2>
             <TopCoins
               topCoins={topCoins}
@@ -222,71 +173,50 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
           <ChartSection coinId={selectedCoinId} />
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.15s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.4s" }}>
           <PortfolioCard />
         </div>
 
-        {}
-        <div className="flex flex-col gap-4">
-          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+          <div className="flex flex-col gap-4">
             <WatchlistPreview />
-          </div>
-          <div className="fade-in" style={{ animationDelay: "0.25s" }}>
             <TrendingCoins />
           </div>
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.6s" }}>
           <NewsPanel />
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.35s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.7s" }}>
           <RecentTradesCard />
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.8s" }}>
           <LearningHub />
         </div>
       </div>
 
-      {}
       <div className="hidden xl:flex flex-col gap-6">
         <div className="grid grid-cols-12 gap-6 items-start">
-          {}
           <div className="col-span-3 flex flex-col gap-6">
-            <div
-              className={`fade-in ${USERDATA_HEIGHT}`}
-              style={{ animationDelay: "0s" }}
-            >
+            <div className={`fade-in ${USERDATA_HEIGHT}`} style={{ animationDelay: "0.1s" }}>
               <UserProfileCard />
             </div>
-            <div
-              className={`fade-in ${PORTFOLIO_HEIGHT}`}
-              style={{ animationDelay: "0.05s" }}
-            >
+            <div className={`fade-in ${PORTFOLIO_HEIGHT}`} style={{ animationDelay: "0.2s" }}>
               <PortfolioCard />
             </div>
-            <div
-              className={`fade-in ${TRADES_HEIGHT}`}
-              style={{ animationDelay: "0.1s" }}
-            >
+            <div className={`fade-in ${TRADES_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
               <RecentTradesCard />
             </div>
           </div>
 
-          {}
           <div className="col-span-6 flex flex-col gap-6">
-            {}
-            <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+            <div className="fade-in" style={{ animationDelay: "0.2s" }}>
               <TopCoins
                 topCoins={topCoins}
                 selectedCoinId={selectedCoinId}
@@ -296,44 +226,29 @@ export default function Dashboard() {
                 loading={loading}
               />
             </div>
-
-            {}
-            <div
-              className={`fade-in ${CHART_HEIGHT}`}
-              style={{ animationDelay: "0.15s" }}
-            >
+            <div className={`fade-in ${CHART_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
               <ChartSection coinId={selectedCoinId} />
             </div>
           </div>
 
-          {}
           <div className="col-span-3 flex flex-col gap-6">
-            <div
-              className={`fade-in ${WATCHLIST_HEIGHT}`}
-              style={{ animationDelay: "0.15s" }}
-            >
+            <div className={`fade-in ${WATCHLIST_HEIGHT}`} style={{ animationDelay: "0.2s" }}>
               <WatchlistPreview />
             </div>
-            <div
-              className={`fade-in ${TRENDING_HEIGHT}`}
-              style={{ animationDelay: "0.2s" }}
-            >
+            <div className={`fade-in ${TRENDING_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
               <TrendingCoins />
             </div>
-            <div
-              className={`fade-in ${LEARNING_HUB_HEIGHT}`}
-              style={{ animationDelay: "0.25s" }}
-            >
+            <div className={`fade-in ${LEARNING_HUB_HEIGHT}`} style={{ animationDelay: "0.4s" }}>
               <LearningHub />
             </div>
           </div>
         </div>
 
-        {}
-        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
           <NewsPanel />
         </div>
       </div>
     </div>
   );
 }
+

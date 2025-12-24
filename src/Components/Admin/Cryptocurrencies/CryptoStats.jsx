@@ -30,31 +30,28 @@ function CryptoStats({ coins, TC }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       {stats.map((stat, i) => (
         <div
           key={i}
-          className={`${TC.bgStatsCard} p-4 sm:p-6 rounded-2xl relative overflow-hidden group transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 will-change-transform`}
+          className={`${TC.bgStatsCard} p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md h-full`}
         >
-          <div className="flex justify-between items-start">
-            <div>
-              <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
+          {/* Background Gradient Splash */}
+          <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+
+          <div className="flex items-center gap-4 relative z-10 h-full">
+            <div className={`p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+              <stat.icon className="text-xl" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>
                 {stat.label}
               </p>
-              <h3 className={`text-xl sm:text-2xl font-bold mt-1 ${TC.textPrimary}`}>
+              <h3 className={`text-xl sm:text-2xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
                 {stat.value}
               </h3>
             </div>
-            <div
-              className={`p-2 sm:p-3 rounded-xl ${stat.bg} ${stat.border} border`}
-            >
-              <stat.icon className={`text-base sm:text-lg ${stat.color}`} />
-            </div>
           </div>
-          {}
-          <div
-            className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${stat.bg} blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500`}
-          />
         </div>
       ))}
     </div>

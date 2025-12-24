@@ -1,9 +1,9 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { deleteWatchList, getData } from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
 import useCoinContext from "@/hooks/useCoinContext";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
+import useThemeCheck from '@/hooks/useThemeCheck';
 
 import { Outlet, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -31,7 +31,7 @@ const Watchlist = () => {
 
   const userFromLocalStorage = JSON.parse(localStorage.getItem("NEXCHAIN_USER"));
   const userId = user?.id || userFromLocalStorage?.id;
-  
+
   const [watchlistData, setWatchlistData] = useState([]);
   const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(false);
@@ -51,24 +51,38 @@ const Watchlist = () => {
   const livePricesRef = useRef({});
   const itemsPerPage = 10;
 
-  
+
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    bgCard: isLight 
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+
+    // Glassmorphism Cards - Synced with Dashboard Quality
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+
+    bgHeader: isLight
+      ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100"
+      : "bg-gray-900/95 backdrop-blur-none shadow-md border-b border-gray-800 isolation-isolate prevent-seam",
+
+    bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+
+    textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
+    textNegative: isLight ? "text-rose-600" : "text-rose-400",
+
+    btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
+
     bgStatsCard: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-2xl hover:shadow-cyan-400/25",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/80 backdrop-blur-md shadow-md border-b border-gray-800",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+
     skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
 
-  
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
+    const timer = setTimeout(() => setIsMounted(true), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -81,8 +95,8 @@ const Watchlist = () => {
       .map((item) => {
         const liveCoin = liveCoins.find((coin) => coin.id === item.id);
         const livePriceData = livePrices[item.id];
-        
-        
+
+
         const userHolding = purchasedCoins.find(
           (pc) => pc.coinId === item.id
         );
@@ -104,12 +118,12 @@ const Watchlist = () => {
       .filter(Boolean);
   }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
 
-  
+
   useEffect(() => {
     if (watchlistData.length === 0) return;
 
     const symbolMap = {
-      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", 
+      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
       cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
       "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt"
     };
@@ -122,13 +136,13 @@ const Watchlist = () => {
 
     try {
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${symbols.join('/')}`);
-      
+
       ws.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
           const symbol = message.stream.replace('@ticker', '');
           const coinId = Object.keys(symbolMap).find(key => symbolMap[key] === symbol);
-          
+
           if (coinId) {
             setLivePrices(prev => ({
               ...prev,
@@ -200,8 +214,8 @@ const Watchlist = () => {
 
   const handleRemoveConfirm = useCallback(async () => {
     if (!removeModal.coin || !userId) return;
-    
-    
+
+
     const coinIdToRemove = removeModal.coin.id;
     setWatchlistData(prev => prev.filter(item => item.id !== coinIdToRemove));
     setRemoveModal({ show: false, coin: null });
@@ -210,8 +224,8 @@ const Watchlist = () => {
       await deleteWatchList("/watchlist/remove", { id: coinIdToRemove, user_id: userId });
       toast.success("Removed from watchlist!", {
         style: {
-          background: "#DCFCE7", 
-          color: "#166534", 
+          background: "#DCFCE7",
+          color: "#166534",
           fontWeight: "600",
           fontSize: "14px",
           padding: "12px 16px",
@@ -222,7 +236,7 @@ const Watchlist = () => {
         iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
       });
 
-      
+
       fetchData(false);
     } catch (err) {
       console.error("Failed to remove from watchlist:", err);
@@ -239,7 +253,7 @@ const Watchlist = () => {
         },
         iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
       });
-      
+
       fetchData(true);
     }
   }, [removeModal.coin, userId, fetchData]);
@@ -264,7 +278,7 @@ const Watchlist = () => {
     [navigate]
   );
 
-  
+
   const stats = useMemo(() => {
     const totalValue = mergedCoins.reduce((sum, coin) => {
       const holding = coin.userHolding;
@@ -283,83 +297,86 @@ const Watchlist = () => {
 
   return (
     <>
-      <main className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
         <Outlet />
 
-        {}
-        <WatchlistHeader 
-          TC={TC} 
-          isLight={isLight} 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
+        {/* Sticky Header */}
+        <WatchlistHeader
+          TC={TC}
+          isLight={isLight}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          {}
-          <WatchlistStats stats={stats} TC={TC} isLight={isLight} />
+          <div className={`transition-all duration-300 ease-out delay-[100ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <WatchlistStats stats={stats} TC={TC} isLight={isLight} />
+          </div>
 
-          {}
-          {loading ? (
-            <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
-              <div className="p-8">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="mb-4">
-                    <Skeleton height={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="0.5rem" />
-                  </div>
-                ))}
+          <div className={`transition-all duration-300 ease-out delay-[150ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            {loading ? (
+              <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
+                <div className="p-8">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="mb-4">
+                      <Skeleton height={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="0.5rem" />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : paginatedCoins.length === 0 ? (
-            <div className={`text-center py-16 rounded-2xl ${TC.bgCard} fade-in`}>
-              <div className="text-6xl mb-4">⭐</div>
-              <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
-                {searchTerm ? `No coins found matching "${searchTerm}"` : "Your watchlist is empty"}
-              </h3>
-              <p className={TC.textSecondary}>
-                {!searchTerm && "Add coins to your watchlist to track them here"}
-              </p>
-            </div>
-          ) : (
-            <>
-              {}
-              <WatchlistTable 
-                coins={paginatedCoins} 
-                TC={TC} 
-                isLight={isLight} 
-                handleCoinClick={handleCoinClick} 
-                handleTrade={handleTrade} 
-                setRemoveModal={setRemoveModal}
-                handleAlertClick={handleAlertClick}
-              />
+            ) : paginatedCoins.length === 0 ? (
+              <div className={`text-center py-16 rounded-2xl ${TC.bgCard} fade-in`}>
+                <div className="text-6xl mb-4">⭐</div>
+                <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
+                  {searchTerm ? `No coins found matching "${searchTerm}"` : "Your watchlist is empty"}
+                </h3>
+                <p className={TC.textSecondary}>
+                  {!searchTerm && "Add coins to your watchlist to track them here"}
+                </p>
+              </div>
+            ) : (
+              <>
+                { }
+                <WatchlistTable
+                  coins={paginatedCoins}
+                  TC={TC}
+                  isLight={isLight}
+                  handleCoinClick={handleCoinClick}
+                  handleTrade={handleTrade}
+                  setRemoveModal={setRemoveModal}
+                  handleAlertClick={handleAlertClick}
+                />
 
-              {}
-              <WatchlistMobileCards 
-                coins={paginatedCoins} 
-                TC={TC} 
-                isLight={isLight} 
-                handleCoinClick={handleCoinClick} 
-                handleTrade={handleTrade} 
-                setRemoveModal={setRemoveModal}
-                handleAlertClick={handleAlertClick}
-              />
-            </>
-          )}
+                { }
+                <WatchlistMobileCards
+                  coins={paginatedCoins}
+                  TC={TC}
+                  isLight={isLight}
+                  handleCoinClick={handleCoinClick}
+                  handleTrade={handleTrade}
+                  setRemoveModal={setRemoveModal}
+                  handleAlertClick={handleAlertClick}
+                />
+              </>
+            )}
+          </div>
 
-          {}
-          <WatchlistPagination 
-            currentPage={currentPage} 
-            totalPages={totalPages} 
-            setCurrentPage={setCurrentPage} 
-            TC={TC} 
-            isLight={isLight} 
-          />
+          <div className={`transition-all duration-300 ease-out delay-[200ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <WatchlistPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
+              TC={TC}
+              isLight={isLight}
+            />
+          </div>
         </div>
-      </main>
+      </div>
 
-      <PriceAlertModal 
-        show={alertModal.show} 
-        onClose={() => setAlertModal({ show: false, coin: null })} 
-        coin={alertModal.coin} 
+      <PriceAlertModal
+        show={alertModal.show}
+        onClose={() => setAlertModal({ show: false, coin: null })}
+        coin={alertModal.coin}
       />
 
       <RemoveConfirmationModal

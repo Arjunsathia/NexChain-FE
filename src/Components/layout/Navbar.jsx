@@ -1,341 +1,269 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, User, ChevronRight, Rocket, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
-import api from "@/api/axiosConfig";
+import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import { SERVER_URL } from "@/api/axiosConfig";
 
 export default function Navbar() {
-  const { toggleTheme } = useTheme();
-  const isLight = useThemeCheck();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useUserContext();
-  const { role } = useRoleContext();
+    const { toggleTheme } = useTheme();
+    const isLight = useThemeCheck();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { user } = useUserContext();
+    const { role } = useRoleContext();
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const bellRef = useRef(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const bellRef = useRef(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+    // FIX 1: Ensure all theme-dependent variables are in the dependency array
+    const TC = useMemo(() => ({
+        navBg: isLight
+            ? "bg-white/80 backdrop-blur-md shadow-sm border border-white/40"
+            : "bg-gray-900/80 backdrop-blur-md shadow-lg border border-gray-800/50",
+        textPrimary: isLight ? "text-gray-900" : "text-white",
+        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+        linkIdle: isLight ? "text-gray-600 hover:bg-gray-50/80" : "text-gray-400 hover:bg-white/5",
+        linkActive: isLight
+            ? "text-blue-600 bg-blue-50 font-semibold"
+            : "text-cyan-400 bg-cyan-900/20 font-semibold",
+        actionBtnHover: isLight ? "hover:bg-gray-100 text-gray-600" : "hover:bg-gray-800 text-gray-300",
+        logoGradient: "from-blue-600 to-cyan-500",
+        textGradient: "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent",
+    }), [isLight]);
 
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await api.get('/notifications');
-        const count = res.data.filter(n => !n.isRead).length;
-        setUnreadCount(count);
-      } catch (error) {
+    // FIX 2: Improved interval logic with cleanup and conditional fetching
+    useEffect(() => {
+        let interval;
+        const fetchUnreadCount = async () => {
+            if (!user) return;
+            try {
+                const res = await api.get('/notifications');
+                // Ensure res.data is an array before filtering to avoid crashes
+                const count = Array.isArray(res.data) ? res.data.filter(n => !n.isRead).length : 0;
+                setUnreadCount(count);
+            } catch (err) {
+                console.error("Failed to fetch notifications", err);
+            }
+        };
 
-      }
-    };
-    if (user) {
-      fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+        if (user) {
+            fetchUnreadCount();
+            interval = setInterval(fetchUnreadCount, 60000);
+        } else {
+            setUnreadCount(0);
+        }
 
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [user]);
 
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  }, [location.pathname]);
-
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") {
+    // FIX 3: Close mobile menu when navigating
+    useEffect(() => {
         setIsMobileMenuOpen(false);
-        setIsNotificationOpen(false);
-      }
+    }, [location.pathname]);
+
+    // Nav items logic
+    const navItems = useMemo(() => [
+        { path: "/dashboard", label: "Dashboard" },
+        { path: "/cryptolist", label: "Markets" },
+        { path: "/portfolio", label: "Portfolio" },
+        { path: "/watchlist", label: "Watchlist" },
+        { path: "/learning", label: "Learn" },
+        ...(role === "admin" ? [{ path: "/admin", label: "Admin" }] : []),
+    ], [role]);
+
+    const isActive = (path) => {
+        if (path === "/admin") return location.pathname.startsWith("/admin");
+        if (path === "/dashboard") return location.pathname === "/dashboard" || location.pathname === "/";
+        return location.pathname.startsWith(path);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
-  const isAdmin = role === "admin";
-
-  const navItems = [
-    { path: "/dashboard", label: "Dashboard" },
-    { path: "/cryptolist", label: "Cryptocurrency" },
-    { path: "/portfolio", label: "Portfolio" },
-    { path: "/watchlist", label: "WatchList" },
-    { path: "/learning", label: "Learning Hub" },
-    ...(isAdmin ? [{ path: "/admin", label: "Admin" }] : []),
-  ];
-
-  const isActive = (path) => {
-    if (path === "/admin") {
-      return location.pathname.startsWith("/admin");
-    }
-    if (path === "/dashboard") {
-      return location.pathname.startsWith("/dashboard") || location.pathname === "/";
-    }
-    return location.pathname.startsWith(path);
-  };
-
-  const handleNavigate = (path) => {
-    setIsMobileMenuOpen(false);
-    navigate(path);
-  };
-
-  return (
-    <>
-      <nav
-        className={`
-          bg-[var(--nav-bg)] border-none rounded-xl px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-2 my-2 mx-2 sm:mx-4
-          flex items-center justify-between gap-3 relative transition-all duration-200 ease-out fade-in
-          backdrop-blur-xl shadow-sm
-          ${isMounted
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-4"
-          }
-        `}
-        style={{ animationDelay: "0.1s" }}
-      >
-        { }
-        <div className="flex items-center gap-3 flex-shrink-0">
-          { }
-          <button
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setIsMobileMenuOpen((s) => !s)}
-            className={`lg:hidden p-2 rounded-xl transition-all duration-300 hover:bg-[var(--nav-hover-bg)] text-[var(--nav-text)] fade-in active:scale-90 flex flex-col justify-center items-center gap-1.5 w-10 h-10`}
-          >
-            <motion.span
-              animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-              className={`w-5 h-0.5 rounded-full bg-[var(--nav-text)]`}
-            />
-            <motion.span
-              animate={isMobileMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
-              className={`w-5 h-0.5 rounded-full bg-[var(--nav-text)]`}
-            />
-            <motion.span
-              animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-              className={`w-5 h-0.5 rounded-full bg-[var(--nav-text)]`}
-            />
-          </button>
-
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-3 focus:outline-none transition-transform duration-300 hover:scale-105 fade-in"
-            aria-label="Go to home"
-          >
-            { }
-            <div className={`hidden sm:flex items-center justify-center fade-in bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300`}>
-              <Rocket className="h-4 w-4 text-white" />
-            </div>
-
-            <span className={`text-xl sm:text-2xl font-bold text-[var(--foreground)] font-outfit tracking-tight flex items-baseline relative`}>
-              <span>Ne</span>
-              <span className="text-3xl mx-0.5 font-black bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)] transform translate-y-[1px] inline-block">
-                X
-              </span>
-              <span>Chain</span>
-            </span>
-          </button>
-        </div>
-
-        { }
-        <div className={`hidden lg:flex items-center justify-center gap-1 text-sm font-medium text-[var(--nav-text)] flex-1`}>
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => handleNavigate(item.path)}
+    return (
+        <>
+            <nav
                 className={`
-                  relative overflow-hidden group px-4 py-1.5 rounded-xl mx-0.5 lg:mx-1 transition-all duration-300
-                  ${active ? 'bg-[var(--nav-item-active-bg)] shadow-md' : 'hover:bg-[var(--nav-hover-bg)] hover:shadow-sm'}
+                    relative mx-2 sm:mx-4 mt-2 sm:mt-4 z-50
+                    rounded-2xl px-4 sm:px-6 py-3 transition-all duration-500 ease-out
+                    ${TC.navBg}
+                    ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
                 `}
-              >
-                <span className={`relative z-10 transition-colors duration-300 font-semibold ${active ? 'text-[var(--nav-item-active-text)]' : 'text-[var(--nav-text)] group-hover:text-[var(--nav-hover-text)]'}`}>
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        { }
-        <div className="flex items-center gap-2 flex-shrink-0">
-
-          { }
-          <div className="relative">
-            <button
-              ref={bellRef}
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className={`
-                w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
-                hover:bg-[var(--nav-hover-bg)] text-[var(--nav-text)] hover:text-[var(--nav-hover-text)]
-              `}
-              title="Notifications"
             >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--background)]"></span>
-              )}
-            </button>
-            <NotificationModal
-              isOpen={isNotificationOpen}
-              onClose={() => setIsNotificationOpen(false)}
-              triggerRef={bellRef}
-            />
-          </div>
+                <div className="flex items-center justify-between max-w-[1600px] mx-auto w-full">
 
-          { }
-          <button
-            onClick={toggleTheme}
-            className={`
-              relative w-12 h-6 rounded-full transition-all duration-500 ease-out
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)]
-              ${isLight
-                ? 'bg-gradient-to-r from-sky-300 to-blue-500 focus:ring-sky-400/50'
-                : 'bg-gradient-to-r from-slate-700 to-indigo-900 focus:ring-indigo-400/50'}
-              shadow-md hover:shadow-lg hover:scale-105
-            `}
-            title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            aria-label="Toggle theme"
-          >
-            { }
-            <div
-              className={`
-                absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md
-                transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-                flex items-center justify-center
-                ${isLight ? 'translate-x-0.5' : 'translate-x-[26px]'}
-              `}
-            >
-              {isLight ? (
-                <Sun size={12} className="text-amber-500 fill-amber-500" />
-              ) : (
-                <Moon size={12} className="text-indigo-600 fill-indigo-600" />
-              )}
-            </div>
-          </button>
+                    {/* Left Section */}
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className={`lg:hidden p-2.5 rounded-xl transition-all duration-200 ${TC.actionBtnHover}`}
+                            aria-label="Open Menu"
+                        >
+                            <Menu size={20} strokeWidth={2.5} />
+                        </button>
 
-          { }
-          <button
-            onClick={() => {
-              if (user?.id) {
-                navigate(`/user-profile/${user.id}`);
-              } else {
-                navigate("/auth");
-              }
-            }}
-            title={user?.name || "User Profile"}
-            className={`
-              w-9 h-9 rounded-xl 
-              !bg-gray-100 border border-gray-300 dark:!bg-gray-800 dark:border-gray-600
-              flex items-center justify-center
-              font-bold text-gray-700 dark:text-gray-200 transition-all duration-300
-              shadow-lg hover:shadow-xl transform hover:scale-110 fade-in overflow-hidden
-            `}
-          >
-            {user?.image ? (
-              <img
-                src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              user?.name?.charAt(0).toUpperCase() || <User size={16} className="text-[var(--nav-text)]" />
-            )}
-          </button>
-        </div>
-      </nav>
-
-      { }
-      <AnimatePresence mode="wait">
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-              animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
-              exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/40 z-[55] lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-
-            <motion.aside
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{ type: "spring", damping: 35, stiffness: 350, mass: 0.8 }}
-              className={`fixed left-0 top-0 h-[100dvh] w-[85vw] max-w-[320px] z-[60] lg:hidden shadow-2xl bg-[var(--background)] border-r border-[var(--border)]`}
-            >
-              <div className={`h-full p-6 flex flex-col items-center`}>
-                <div className="w-full flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center bg-gradient-to-tr from-cyan-500 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20">
-                      <Rocket className="h-4 w-4 text-white" />
+                        <div
+                            onClick={() => navigate("/")}
+                            className="flex items-center gap-2.5 group cursor-pointer"
+                        >
+                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${TC.logoGradient} flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300`}>
+                                <Rocket size={16} className="fill-white" />
+                            </div>
+                            <span className={`text-xl font-bold tracking-tight ${TC.textPrimary}`}>
+                                Nex<span className={TC.textGradient}>Chain</span>
+                            </span>
+                        </div>
                     </div>
-                    <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)] font-outfit tracking-tight flex items-baseline relative">
-                      <span>Ne</span>
-                      <span className="text-3xl mx-0.5 font-black bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)] transform translate-y-[1px] inline-block">
-                        X
-                      </span>
-                      <span>Chain</span>
-                    </span>
-                  </div>
-                  <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-xl hover:bg-[var(--nav-hover-bg)] text-[var(--nav-text)]`}>
-                    <X size={20} />
-                  </button>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden lg:flex items-center gap-1.5">
+                        {navItems.map((item) => {
+                            const active = isActive(item.path);
+                            return (
+                                <button
+                                    key={item.path}
+                                    onClick={() => navigate(item.path)}
+                                    className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${active ? TC.linkActive : TC.linkIdle}`}
+                                >
+                                    <span className="relative z-10">{item.label}</span>
+                                    {active && (
+                                        <motion.div
+                                            layoutId="navbar-indicator"
+                                            className={`absolute inset-0 rounded-xl -z-0 ${isLight ? 'bg-blue-50/80' : 'bg-cyan-500/10'}`}
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Right Section */}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                        {user && (
+                            <div className="relative">
+                                <button
+                                    ref={bellRef}
+                                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover} relative`}
+                                >
+                                    <Bell size={19} strokeWidth={2.5} />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 animate-pulse" />
+                                    )}
+                                </button>
+                                <NotificationModal
+                                    isOpen={isNotificationOpen}
+                                    onClose={() => setIsNotificationOpen(false)}
+                                    triggerRef={bellRef}
+                                />
+                            </div>
+                        )}
+
+                        <button
+                            onClick={toggleTheme}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover}`}
+                            aria-label="Toggle Theme"
+                        >
+                            {isLight ? <Moon size={19} className="text-indigo-600" /> : <Sun size={19} className="text-amber-400" />}
+                        </button>
+
+                        <button
+                            onClick={() => user?.id ? navigate(`/user-profile/${user.id}`) : navigate("/auth")}
+                            className="ml-1 sm:ml-2 w-10 h-10 rounded-xl overflow-hidden ring-2 ring-transparent hover:ring-blue-500/50 transition-all duration-300 shadow-md"
+                        >
+                            {user?.image ? (
+                                <img
+                                    src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.src = "fallback-image-url-here"; }}
+                                />
+                            ) : (
+                                <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white font-bold text-sm`}>
+                                    {user?.name?.charAt(0).toUpperCase() || <User size={16} />}
+                                </div>
+                            )}
+                        </button>
+                    </div>
                 </div>
+            </nav>
 
-                <button
-                  onClick={() => user?.id ? handleNavigate(`/user-profile/${user.id}`) : handleNavigate("/auth")}
-                  className={`w-full text-left mb-8 p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] group`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-700 flex items-center justify-center font-bold text-white text-lg`}>
-                      {user?.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-[var(--foreground)] font-semibold text-sm truncate`}>{user?.name || "User"}</p>
-                      <p className={`text-[var(--primary)] text-xs capitalize font-medium`}>{role}</p>
-                    </div>
-                  </div>
-                </button>
+            {/* Mobile Sidebar */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+                        />
+                        <motion.div
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                            className={`fixed top-0 left-0 h-full w-[280px] z-[70] lg:hidden shadow-2xl flex flex-col p-6 ${isLight ? "bg-white" : "bg-gray-950"}`}
+                        >
+                            {/* Drawer Content */}
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-2">
+                                    <Rocket className="text-blue-600" size={24} />
+                                    <span className={`text-xl font-bold ${TC.textPrimary}`}>NexChain</span>
+                                </div>
+                                <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-lg ${TC.actionBtnHover}`}>
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                <nav className="w-full space-y-4 mb-2 flex-1">
-                  {navItems.map((item, index) => (
-                    <motion.button
-                      key={item.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: 0.1 + (index * 0.04) }}
-                      onClick={() => handleNavigate(item.path)}
-                      className={`
-                        w-full text-left py-3 px-4 rounded-xl transition-all duration-200 flex items-center gap-4
-                        ${isActive(item.path) ? 'bg-[var(--nav-item-active-bg)] text-[var(--nav-item-active-text)] font-semibold' : 'text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] font-medium'}
-                      `}
-                    >
-                      <span className="flex-1">{item.label}</span>
-                      <ChevronRight size={16} className={isActive(item.path) ? "text-[var(--primary)]" : "opacity-50"} />
-                    </motion.button>
-                  ))}
-                </nav>
-              </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </>
-  );
+                            <div className="flex-1 space-y-2">
+                                {navItems.map(item => (
+                                    <button
+                                        key={item.path}
+                                        onClick={() => navigate(item.path)}
+                                        className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isActive(item.path) ? TC.linkActive : TC.linkIdle}`}
+                                    >
+                                        {item.label}
+                                        <ChevronRight size={16} />
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* User Section at Bottom */}
+                            <div className={`mt-auto p-4 rounded-2xl ${isLight ? "bg-gray-50" : "bg-gray-900"}`}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+                                        {user?.name?.charAt(0).toUpperCase() || "G"}
+                                    </div>
+                                    <div className="truncate">
+                                        <p className={`text-sm font-bold truncate ${TC.textPrimary}`}>{user?.name || "Guest"}</p>
+                                        <p className={`text-xs ${TC.textSecondary}`}>{role || "Visitor"}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => user ? navigate('/user/settings') : navigate('/auth')}
+                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+                                >
+                                    {user ? "Settings" : "Login"}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </>
+    );
 }

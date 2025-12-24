@@ -1,31 +1,26 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
-  FaUser,
-  FaEnvelope,
   FaCode,
   FaCommentDots,
   FaWallet,
   FaCoins,
   FaStar,
-  FaChevronRight,
   FaChartLine,
   FaSignOutAlt,
-  FaCog
+  FaCog,
+  FaChevronRight
 } from "react-icons/fa";
-import { logout } from "@/api/axiosConfig";
 import useUserContext from '@/hooks/useUserContext';
 import useWalletContext from '@/hooks/useWalletContext';
 import { usePurchasedCoins } from '@/hooks/usePurchasedCoins';
-import { useWatchlist } from '@/hooks/useWatchlist';
 
 import useThemeCheck from "@/hooks/useThemeCheck";
-import { SERVER_URL } from "@/api/axiosConfig"; // Import SERVER_URL
-
+import { SERVER_URL } from "@/api/axiosConfig";
 import { createPortal } from "react-dom";
 
-
+// Logout Modal Component
 const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
   if (typeof document === 'undefined') return null;
 
@@ -36,28 +31,31 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${isLight ? "bg-white" : "bg-gray-800 border border-gray-700"
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
               }`}
           >
-            <div className="text-center">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-100" : "bg-red-500/20"
+            {/* Background Glow */}
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`} />
+
+            <div className="text-center relative z-10">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
                 }`}>
-                <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-600" : "text-red-400"}`} />
+                <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`} />
               </div>
 
               <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
                 Sign Out?
               </h3>
 
-              <p className={`text-sm mb-6 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
-                Are you sure you want to sign out of your account?
+              <p className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+                Are you sure you want to end your session?
               </p>
 
               <div className="flex gap-3">
@@ -65,7 +63,7 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
                   onClick={onClose}
                   className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
                     ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                 >
                   Cancel
@@ -73,7 +71,7 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
                 <button
                   onClick={onConfirm}
                   disabled={isLoading}
-                  className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-lg shadow-red-500/20 transition-all flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>
@@ -97,128 +95,77 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
 function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
-  const navigate = useNavigate();
   const { user } = useUserContext();
   const { balance } = useWalletContext();
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
-  const { watchlist } = useWatchlist() || { watchlist: [] };
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const TC = useMemo(() => ({
-
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
+    bgSidebar: isLight
+      ? "bg-white/80 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
+      : "bg-gray-900/40 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/5",
 
-    bgSidebar: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
-    bgMobile: isLight ? "bg-white shadow-md border-none" : "bg-gray-800/90 backdrop-blur-md border-none",
+    bgStats: isLight
+      ? "bg-gray-50/80 border border-gray-100"
+      : "bg-white/5 border border-white/5",
 
+    menuItemBase: isLight ? "text-gray-600 hover:bg-gray-100/80" : "text-gray-400 hover:bg-white/5",
+    menuItemActiveText: isLight ? "text-blue-600" : "text-white",
 
-    headerIconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
-    headerTitle: isLight ? "text-gray-900" : "text-white",
+    // Gradients & Accents
+    activeGradient: "bg-gradient-to-r from-cyan-500 to-blue-500",
+    activeGlow: isLight ? "shadow-[0_4px_14px_0_rgba(59,130,246,0.3)]" : "shadow-[0_4px_14px_0_rgba(6,182,212,0.3)]",
 
-
-    menuItemBase: isLight
-      ? "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
-      : "text-gray-400 hover:bg-white/5 hover:text-white",
-
-
-    menuItemActive: isLight
-      ? "bg-blue-50 text-blue-700 shadow-sm"
-      : "bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]",
-
-
-    iconActive: isLight ? "text-blue-600" : "text-cyan-400",
-    iconInactive: isLight ? "text-gray-400" : "text-gray-500",
-
-
-    bgStatCard: isLight ? "bg-gray-50 border-none" : "bg-gray-900/50 border-none",
-    bgStatItem: isLight ? "bg-white border-none shadow-sm" : "bg-black/20 border-none shadow-inner",
-
-
-    btnLogout: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
+    divider: isLight ? "border-gray-100" : "border-gray-800",
 
   }), [isLight]);
 
-
-
-
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  const handleLogoutClick = () => {
-    setShowLogoutModal(true);
-  };
-
-  const confirmLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
-  };
-
   const menus = [
     { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
+    { name: "Support", path: "/user/support", icon: FaCommentDots },
     { name: "Settings", path: "/user/settings", icon: FaCog },
     { name: "API Keys", path: "/user/api", icon: FaCode },
-    { name: "Support", path: "/user/support", icon: FaCommentDots },
   ];
 
   const isActive = (path) => {
+    // Handle dynamic path matching specifically for the profile/overview route
+    if (path.includes('/user-profile/')) {
+      // Check if current location starts with /user-profile
+      return location.pathname.startsWith('/user-profile');
+    }
     return location.pathname.startsWith(path);
   };
 
+
+  // Calculate mini-portfolio stats
   const { totalCoins, currentValue } = useMemo(() => {
-    const coins = Array.isArray(purchasedCoins) ? purchasedCoins : [];
+    const list = Array.isArray(purchasedCoins) ? purchasedCoins : [];
 
+    if (list.length === 0) return { totalCoins: 0, currentValue: 0 };
 
-    const activeCoins = coins.filter(coin => {
-      const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
-      return qty > 0;
-    });
+    const uniqueCoins = new Set(list.filter(c => Number(c.quantity) > 0).map(c => c.coinId || c.coin_id)).size;
+    const currentVal = list.reduce((acc, coin) => {
+      const price = Number(coin.current_price) || Number(coin.coinPriceUSD) || 0;
+      const qty = Number(coin.quantity) || 0;
+      return acc + (price * qty);
+    }, 0);
 
-    const uniqueCoins = new Set(activeCoins.map(coin => coin.coinId || coin.coin_id)).size;
-
-    let currentVal = 0;
-
-    activeCoins.forEach(coin => {
-
-      const price = Number(coin.currentPrice) || Number(coin.current_price) || Number(coin.coinPriceUSD) || 0;
-      const qty = Number(coin.totalQuantity) || Number(coin.quantity) || 0;
-
-      currentVal += price * qty;
-    });
-
-    return {
-      totalCoins: uniqueCoins,
-      currentValue: currentVal
-    };
+    return { totalCoins: uniqueCoins, currentValue: currentVal };
   }, [purchasedCoins]);
 
-  const stats = [
-    {
-      label: "Balance",
-      value: `$${(Number(balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`,
-      color: "text-green-400",
-      icon: FaWallet
-    },
-    {
-      label: "Coins",
-      value: totalCoins.toString(),
-      color: "text-cyan-400",
-      icon: FaCoins
-    },
-    {
-      label: "Portfolio",
-      value: `$${currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2, notation: "compact" })}`,
-      color: "text-blue-400",
-      icon: FaChartLine
-    },
-    {
-      label: "Watchlist",
-      value: ((watchlist && watchlist.length) || 0).toString(),
-      color: "text-amber-400",
-      icon: FaStar
-    }
-  ];
 
   return (
     <>
@@ -229,180 +176,150 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         }
         .slide-in { animation: slideIn 0.3s ease-out forwards; }
       `}</style>
-      {/* Mobile Top View (Optional - mostly handled by UserMobileNavbar but keeping if needed) */}
-      <div className={`w-full lg:hidden ${TC.bgMobile} rounded-xl mb-4 overflow-hidden`}>
-        <div className="p-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className={`w-10 h-10 rounded-xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden`}>
-              {user?.image ? (
-                <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white font-bold">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-              )}
-            </div>
-            <div>
-              <h2 className={`text-lg font-bold ${TC.headerTitle}`}>{user?.name || 'User'}</h2>
-              <p className={`text-xs ${TC.textSecondary}`}>Personal Account</p>
-            </div>
-          </div>
 
-          <nav className="space-y-1">
-            {menus.map((item, index) => (
-              <Link
-                key={index}
-                to={item.path}
-                className={`
-                  flex items-center justify-between p-3 rounded-lg transition-all duration-200
-                  ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
-                `}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className={isActive(item.path) ? TC.iconActive : TC.iconInactive} />
-                  <span className="font-medium text-sm">{item.name}</span>
-                </div>
-                {isActive(item.path) && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_cyan]"></div>}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Logout for Mobile */}
-          <div className="mt-4 pt-4 border-t border-gray-200/10">
-            <button
-              className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${TC.btnLogout}`}
-              onClick={handleLogoutClick}
-              disabled={isLogoutLoading}
-            >
-              {isLogoutLoading ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Logging out...</span>
-                </>
-              ) : (
-                <>
-                  <FaSignOutAlt /> Logout
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+      {/* Mobile Top View (Optional/Legacy check) */}
+      <div className="lg:hidden w-full mb-4">
+        {/* Mobile sidebar content is usually handled by a separate navbar component, 
+              but we ensure this doesn't break if rendered on mobile */}
       </div>
 
       {/* Desktop Sidebar */}
       <aside
-        className={`
-          hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6
-          transition-all duration-500 ease-out sticky top-4
+        className={`hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6 sticky top-4 overflow-hidden 
+          transition-all duration-500 ease-out
           ${TC.bgSidebar}
+          ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
         `}
       >
-        {/* User Info */}
-        <div className="flex items-center gap-4 mb-10 slide-in" style={{ animationDelay: '0s' }}>
-          <div className={`w-12 h-12 rounded-2xl ${TC.headerIconBg} flex items-center justify-center shadow-lg shadow-cyan-500/20 transform hover:scale-105 transition-transform overflow-hidden`}>
-            {user?.image ? (
-              <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-white font-bold text-xl">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-            )}
-          </div>
-          <div className="min-w-0">
-            <h2 className={`text-xl font-bold ${TC.headerTitle} tracking-tight truncate`}>{user?.name || 'User'}</h2>
-            <p className={`text-xs ${TC.textSecondary} font-medium`}>Personal Account</p>
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
-          {menus.map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className={`
-                group flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 relative overflow-hidden
-                ${isActive(item.path) ? TC.menuItemActive : TC.menuItemBase}
-                slide-in
-              `}
-              style={{ animationDelay: `${0.05 + index * 0.03}s` }}
+        {/* Profile Header */}
+        <Link to="/user/settings" className="block mb-8 group relative z-10 slide-in" style={{ animationDelay: '0s' }}>
+          <div className="flex items-center gap-4">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="relative"
             >
-              <div className="flex items-center gap-3.5 relative z-10">
-                <item.icon
-                  className={`
-                    text-lg transition-transform duration-300 
-                    ${isActive(item.path) ? `${TC.iconActive} scale-110` : `${TC.iconInactive} group-hover:scale-110 group-hover:text-gray-300`}
-                  `}
-                />
-                <span className={`font-medium tracking-wide ${isActive(item.path) ? "font-semibold" : ""}`}>
-                  {item.name}
-                </span>
+              <div className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg ${isLight ? 'shadow-blue-500/20' : 'shadow-black/40'} border-2 ${isLight ? 'border-white' : 'border-gray-700'}`}>
+                {user?.image ? (
+                  <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className={`w-full h-full flex items-center justify-center font-bold text-lg ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-gray-800 text-white'}`}>
+                    {user?.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                )}
               </div>
+              {/* Status Dot */}
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+            </motion.div>
 
-              {/* Active Indicator */}
-              {isActive(item.path) && (
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan] animate-pulse"></div>
-                </div>
-              )}
+            <div className="min-w-0">
+              <h2 className={`text-lg font-bold truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                {user?.name || 'User'}
+              </h2>
+              <div className={`flex items-center gap-1 text-xs font-medium ${TC.textSecondary}`}>
+                Personal Account <FaChevronRight size={10} />
+              </div>
+            </div>
+          </div>
+        </Link>
 
-              {/* Hover Effect */}
-              {!isActive(item.path) && (
-                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              )}
-            </Link>
-          ))}
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2 relative z-10">
+          {menus.map((item, index) => {
+            const active = isActive(item.path);
+            return (
+              <div
+                key={item.name}
+                className="slide-in"
+                style={{ animationDelay: `${0.05 + index * 0.03}s` }}
+              >
+                <Link
+                  to={item.path}
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group overflow-hidden ${active ? '' : TC.menuItemBase
+                    }`}
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className={`absolute inset-0 rounded-xl ${TC.activeGradient} ${TC.activeGlow}`}
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+
+                  <span className={`relative z-10 text-lg transition-colors duration-200 ${active ? 'text-white' : isLight ? 'text-gray-400 group-hover:text-blue-500' : 'text-gray-500 group-hover:text-cyan-400'}`}>
+                    <item.icon />
+                  </span>
+
+                  <span className={`relative z-10 font-medium text-sm transition-colors duration-200 ${active ? 'text-white' : ''}`}>
+                    {item.name}
+                  </span>
+
+                  {active && <FaChevronRight className="relative z-10 ml-auto text-white/80 text-xs" />}
+                </Link>
+              </div>
+            );
+          })}
         </nav>
 
-        {/* Stats Card */}
-        <div className={`mt-6 p-4 rounded-2xl ${TC.bgStatCard} slide-in`} style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}>Portfolio</span>
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {stats.map((stat, i) => (
-              <div key={i} className={`${TC.bgStatItem} rounded-lg p-2.5`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <stat.icon className={`text-xs ${stat.color}`} />
-                  <span className={`text-[10px] ${TC.textSecondary} truncate`}>{stat.label}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className={`text-sm font-bold ${TC.textPrimary} truncate`}>{stat.value}</span>
-                  {stat.subValue && (
-                    <span className={`text-[10px] ${stat.color} font-medium`}>{stat.subValue}</span>
-                  )}
-                </div>
+        {/* Bottom Stats & Logout */}
+        <div
+          className="mt-6 pt-6 border-t border-dashed relative z-10 slide-in"
+          style={{ borderColor: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)', animationDelay: '0.2s' }}
+        >
+          {/* Quick Stats Grid */}
+          <div className={`rounded-2xl p-4 mb-4 ${TC.bgStats}`}>
+            <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${TC.textTertiary}`}>Your Assets</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}>Net Worth</p>
+                <p className={`text-sm font-bold ${TC.textPrimary}`}>
+                  ${currentValue.toLocaleString('en-IN', { notation: "compact", maximumFractionDigits: 1 })}
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
+              <div>
+                <p className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}>Cash</p>
+                <p className={`text-sm font-bold ${TC.textPrimary}`}>
+                  ${(Number(balance) || 0).toLocaleString('en-IN', { notation: "compact", maximumFractionDigits: 1 })}
+                </p>
+              </div>
+            </div>
 
-        {/* Desktop Logout Key */}
-        <div className="mt-4 slide-in" style={{ animationDelay: '0.25s' }}>
+            <div className="mt-3 flex items-center gap-2">
+              <div className="flex -space-x-2">
+                {[FaWallet, FaCoins, FaStar].map((Icon, i) => (
+                  <div key={i} className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${isLight ? 'border-white bg-gray-100 text-gray-400' : 'border-gray-800 bg-gray-700 text-gray-400'}`}>
+                    <Icon size={10} />
+                  </div>
+                ))}
+              </div>
+              <span className={`text-[10px] font-medium ${TC.textSecondary}`}>+ {totalCoins} Active Coins</span>
+            </div>
+          </div>
+
           <button
-            className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 text-sm disabled:opacity-60 disabled:cursor-not-allowed hover:disabled:scale-100 flex items-center justify-center gap-2 ${TC.btnLogout} transform hover:scale-105`}
-            onClick={handleLogoutClick}
+            onClick={() => setShowLogoutModal(true)}
             disabled={isLogoutLoading}
+            className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 group ${isLight
+              ? "bg-red-50 text-red-600 hover:bg-red-100"
+              : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+              }`}
           >
-            {isLogoutLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Logging out...</span>
-              </>
-            ) : (
-              <>
-                <FaSignOutAlt /> Logout
-              </>
-            )}
+            <FaSignOutAlt className="group-hover:-translate-x-1 transition-transform" />
+            <span>Log Out</span>
           </button>
         </div>
+
+        {/* Background Decor */}
+        <div className={`absolute -bottom-20 -left-20 w-60 h-60 rounded-full blur-3xl pointer-events-none ${isLight ? 'bg-blue-500/5' : 'bg-cyan-500/5'}`} />
+
       </aside>
 
       <LogoutConfirmationModal
         show={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
-        onConfirm={confirmLogout}
+        onConfirm={onLogout}
         isLight={isLight}
         isLoading={isLogoutLoading}
       />

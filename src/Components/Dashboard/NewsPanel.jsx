@@ -42,24 +42,24 @@ export default function NewsPanel() {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl border border-gray-700/50",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textSource: isLight ? "text-cyan-600" : "text-cyan-400",
-    
-    
-    bgItem: isLight 
-      ? "hover:bg-gray-50 border-b border-gray-100" 
+
+
+    bgItem: isLight
+      ? "hover:bg-gray-50 border-b border-gray-100"
       : "hover:bg-white/5 border-b border-gray-700/50",
-    
+
     iconColor: isLight ? "text-cyan-600" : "text-cyan-400",
     bgIcon: isLight ? "bg-cyan-100" : "bg-cyan-400/10",
   }), [isLight]);
 
   return (
-    <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 fade-in ${TC.bgContainer}`}>
-      {}
+    <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 ease-in-out hover:shadow-2xl ${TC.bgContainer}`}>
+      { }
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className={`p-2 rounded-lg ${TC.bgIcon}`}>
@@ -70,11 +70,11 @@ export default function NewsPanel() {
           </h2>
         </div>
         <button className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isLight ? "border-gray-300 hover:bg-gray-100" : "border-gray-600 hover:bg-gray-700"} ${TC.textSecondary}`}>
-           View All
+          View All
         </button>
       </div>
 
-      {}
+      { }
       <div className="flex flex-col gap-2">
         {sampleNews.map((news, index) => (
           <div
@@ -85,30 +85,30 @@ export default function NewsPanel() {
               ${index !== sampleNews.length - 1 ? TC.bgItem : "hover:bg-gray-50 dark:hover:bg-white/5"}
             `}
           >
-            {}
+            { }
             <div className="relative w-24 h-16 flex-shrink-0 overflow-hidden rounded-lg">
-               <img
-                  src={news.image}
-                  alt={news.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-               />
+              <img
+                src={news.image}
+                alt={news.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             </div>
 
-            {}
+            { }
             <div className="flex-1 min-w-0">
-               <h3 className={`font-semibold text-sm mb-1 leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
-                  {news.title}
-               </h3>
-               
-               <div className="flex items-center justify-between mt-1">
-                  <span className={`text-[10px] uppercase font-bold tracking-wider ${TC.textSource}`}>
-                     {news.source}
-                  </span>
-                  <div className={`flex items-center gap-1 text-[10px] ${TC.textSecondary}`}>
-                     <FaClock className="text-[10px]" />
-                     {news.time}
-                  </div>
-               </div>
+              <h3 className={`font-semibold text-sm mb-1 leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
+                {news.title}
+              </h3>
+
+              <div className="flex items-center justify-between mt-1">
+                <span className={`text-[10px] uppercase font-bold tracking-wider ${TC.textSource}`}>
+                  {news.source}
+                </span>
+                <div className={`flex items-center gap-1 text-[10px] ${TC.textSecondary}`}>
+                  <FaClock className="text-[10px]" />
+                  {news.time}
+                </div>
+              </div>
             </div>
           </div>
         ))}

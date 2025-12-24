@@ -1,52 +1,50 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { FaUser, FaLock, FaGlobe, FaBell, FaIdCard, FaSave } from "react-icons/fa";
-import useUserContext from "@/hooks/useUserContext";
+import { FaUser, FaLock, FaGlobe, FaBell, FaIdCard } from "react-icons/fa";
+
 import ProfileSettings from "@/Components/Settings/ProfileSettings";
 import SecuritySettings from "@/Components/Settings/SecuritySettings";
 import PreferenceSettings from "@/Components/Settings/PreferenceSettings";
 import NotificationSettings from "@/Components/Settings/NotificationSettings";
 import KYCVerification from "@/Components/Settings/KYCVerification";
 
-import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 const Settings = () => {
   const isLight = useThemeCheck();
-  const isDark = !isLight;
   const [activeTab, setActiveTab] = useState("profile");
-  const { user } = useUserContext();
-  const [loading, setLoading] = useState(true);
-  const [contentLoaded, setContentLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    
-    const timer = setTimeout(() => {
-      setLoading(false);
-      setTimeout(() => setContentLoaded(true), 300);
-    }, 800);
+    const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  
-  const TC = useMemo(() => ({
-    textPrimary: isDark ? "text-white" : "text-gray-900",
-    textSecondary: isDark ? "text-gray-400" : "text-gray-600",
-    textTertiary: isDark ? "text-gray-500" : "text-gray-500",
-    
-    bgCard: isDark 
-      ? "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20"
-      : "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)]",
-    bgInput: isDark ? "bg-gray-900/50 text-white shadow-inner" : "bg-white text-gray-900 shadow-sm",
-    bgItem: isDark ? "bg-white/5" : "bg-gray-50",
-    
-    btnPrimary: isDark 
-      ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg hover:shadow-cyan-500/25"
-      : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25",
-    
-    headerGradient: "from-cyan-400 to-blue-500",
-  }), [isDark]);
+  const TC = useMemo(
+    () => ({
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
+      // Glassmorphism Cards - Synced with Admin Sidebar exact styling
+      bgCard: isLight
+        ? "bg-white/90 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-white/40 transform-gpu"
+        : "bg-gray-900/60 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/5 transform-gpu",
 
+      bgInput: isLight
+        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
+        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
+
+      bgItem: isLight
+        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate transition-colors"
+        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate transition-colors",
+
+      btnPrimary:
+        "px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold flex items-center justify-center gap-2",
+
+      headerGradient: "from-blue-600 to-cyan-500",
+    }),
+    [isLight]
+  );
 
   const tabs = [
     { id: "profile", label: "Profile", icon: FaUser },
@@ -57,67 +55,53 @@ const Settings = () => {
   ];
 
   return (
-    <div className={`flex-1 w-full max-w-full overflow-x-hidden p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}` }>
-      {}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="px-2 py-2"> 
-          <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
-            Account Settings
-          </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
-            Manage your personal information and preferences
-          </p>
-        </div>
-      </div>
-
-      {}
-      <div className={`flex w-full max-w-full overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap transition-all ${
-              activeTab === tab.id
-                ? "bg-cyan-500/20 text-cyan-400"
-                : `${TC.textSecondary} hover:bg-gray-800/50`
-            }`}
-          >
-            <tab.icon className="text-sm sm:text-base" /> {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {}
-      {loading ? (
-        <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-          <div className="space-y-6">
-            <div className="h-8 w-48 bg-gray-700/30 rounded animate-pulse mb-6" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i}>
-                  <div className="h-4 w-32 bg-gray-700/30 rounded animate-pulse mb-2" />
-                  <div className="h-12 w-full bg-gray-700/30 rounded-xl animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        
-        <div 
-          className={`transition-all duration-500 ease-in-out ${
-            contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+    <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <div
+        className={`transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
           }`}
-        >
-          <div className={`${TC.bgCard} w-full overflow-hidden rounded-2xl p-3 sm:p-6 lg:p-8`}>
-            {activeTab === "profile" && <ProfileSettings />}
-            {activeTab === "security" && <SecuritySettings />}
-            {activeTab === "kyc" && <KYCVerification />}
-            {activeTab === "preferences" && <PreferenceSettings />}
-            {activeTab === "notifications" && <NotificationSettings />}
+      >
+        {/* Header - Matches Dashboard */}
+        <header className="mb-6 py-2 px-2">
+          <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
+            Account <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Settings</span>
+          </h1>
+          <p className={`text-sm font-medium ${TC.textSecondary}`}>
+            Manage your personal information and profile preferences.
+          </p>
+        </header>
+
+        {/* Tab Navigation - Matches User Requested Style */}
+        <div className={`flex items-center gap-2 p-1.5 rounded-2xl ${TC.bgCard} shadow-sm border ${isLight ? 'border-gray-200' : 'border-white/5'} overflow-x-auto no-scrollbar max-w-fit mb-6`}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform-gpu active:scale-95 whitespace-nowrap ${activeTab === tab.id
+                ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+                : `${TC.textSecondary} hover:bg-gray-100/50 dark:hover:bg-white/5`
+                }`}
+            >
+              <tab.icon className={`text-base ${activeTab === tab.id ? 'animate-pulse' : 'opacity-70'}`} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Main Content Card - Matches Dashboard Style */}
+        <div className={`${TC.bgCard} rounded-2xl p-6 sm:p-8 relative overflow-hidden min-h-[500px]`}>
+          {/* Decorative Background Gradient (Persistent) */}
+          <div className={`absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none transition-opacity duration-500 ${isLight ? 'opacity-100' : 'opacity-20'}`} />
+
+          <div className="relative z-10">
+            {activeTab === "profile" && <ProfileSettings TC={TC} isLight={isLight} />}
+            {activeTab === "security" && <SecuritySettings TC={TC} isLight={isLight} />}
+            {activeTab === "kyc" && <KYCVerification TC={TC} isLight={isLight} />}
+            {activeTab === "preferences" && <PreferenceSettings TC={TC} isLight={isLight} />}
+            {activeTab === "notifications" && <NotificationSettings TC={TC} isLight={isLight} />}
           </div>
         </div>
-      )}
+
+      </div>
     </div>
   );
 };

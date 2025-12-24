@@ -10,35 +10,37 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
   const ws = useRef(null);
   const tradesRef = useRef([]);
 
-  
+
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400", 
+    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
 
-    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
-    borderHeader: isLight ? "border-gray-300/50" : "border-gray-700/50",
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+    borderHeader: isLight ? "border-gray-100" : "border-gray-800",
 
-    
+
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
-    
-    
+
+
     bgLive: isLight ? "bg-green-100 border-none text-green-700" : "bg-green-400/10 border-none text-green-400",
     textLiveDot: isLight ? "bg-green-700" : "bg-green-400",
 
-    
+
     textBuy: isLight ? "text-green-700" : "text-green-400",
     textSell: isLight ? "text-red-700" : "text-red-400",
-    
+
     bgBuyHover: isLight ? 'hover:bg-green-500/10' : 'hover:bg-green-500/5',
     bgSellHover: isLight ? 'hover:bg-red-500/10' : 'hover:bg-red-500/5',
 
-    
+
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
-    
-    
+
+
     textEmpty: isLight ? "text-gray-500" : "text-gray-400",
-    
+
   }), [isLight]);
 
 
@@ -53,11 +55,11 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
           id: trade.t,
           price: parseFloat(trade.p),
           volume: parseFloat(trade.q),
-          time: new Date(trade.T).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
+          time: new Date(trade.T).toLocaleTimeString('en-US', {
+            hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false 
+            hour12: false
           }),
           isBuyerMaker: trade.m,
         };
@@ -84,8 +86,8 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
     const isBuy = !trade.isBuyerMaker;
     const priceColor = isBuy ? TC.textBuy : TC.textSell;
     const bgColor = isBuy ? TC.bgBuyHover : TC.bgSellHover;
-    const arrowColor = priceColor; 
-    
+    const arrowColor = priceColor;
+
     return (
       <div
         key={`${trade.id}-${index}`}
@@ -98,9 +100,9 @@ const TradeHistory = memo(({ symbol = 'btcusdt' }) => {
             <FaArrowDown className={`${arrowColor} text-xs flex-shrink-0`} />
           )}
           <span className={`${priceColor} font-mono font-medium`}>
-            {trade.price.toLocaleString('en-US', { 
-              minimumFractionDigits: 2, 
-              maximumFractionDigits: 2 
+            {trade.price.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
             })}
           </span>
         </div>

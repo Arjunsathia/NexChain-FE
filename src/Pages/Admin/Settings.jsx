@@ -18,37 +18,44 @@ const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
-    
     const timer = setTimeout(() => {
       setLoading(false);
-      setTimeout(() => setContentLoaded(true), 300);
-    }, 800);
+
+    }, 150);
     return () => clearTimeout(timer);
   }, []);
 
-  
+
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-    
-    bgCard: isLight 
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]" 
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
-    bgInput: isLight ? "bg-white text-gray-900 shadow-sm" : "bg-gray-900/50 text-white shadow-inner",
-    bgItem: isLight ? "bg-gray-50" : "bg-white/5",
-    
-    btnPrimary: isLight 
-      ? "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25" 
-      : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg hover:shadow-cyan-500/25",
-    
-    headerGradient: "from-cyan-400 to-blue-500",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-400" : "text-gray-500",
+
+    // Glassmorphism Cards - Synced with Admin Sidebar exact styling
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 transform-gpu glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 transform-gpu glass-card",
+
+    bgInput: isLight
+      ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
+      : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
+
+    bgItem: isLight
+      ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
+      : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+
+    btnPrimary:
+      "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
+    btnSecondary: isLight
+      ? "bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20"
+      : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20",
+
+    headerGradient: "from-blue-600 to-cyan-500",
   }), [isLight]);
 
-  
+
   const [settings, setSettings] = useState({
     platformName: "NexChain",
     contactEmail: "contact@nexchain.com",
@@ -79,14 +86,16 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary}`}>
-      {}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div
+      className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
+    >
+      {/* 1. Page Header (Admin Styled) */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
-          <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${TC.headerGradient} bg-clip-text text-transparent`}>
-            Settings
+          <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
+            Admin <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Settings</span>
           </h1>
-          <p className={`${TC.textSecondary} mt-1 text-xs sm:text-sm`}>
+          <p className={`text-sm font-medium ${TC.textSecondary}`}>
             Manage system configuration and preferences
           </p>
         </div>
@@ -108,8 +117,8 @@ const AdminSettings = () => {
         </button>
       </div>
 
-      {}
-      <div className={`flex overflow-x-auto pb-2 gap-2 custom-scrollbar`}>
+      { }
+      <div className={`flex items-center gap-2 p-1.5 rounded-2xl ${TC.bgCard} shadow-sm border ${isLight ? 'border-gray-200' : 'border-white/5'} overflow-x-auto no-scrollbar max-w-fit mb-2`}>
         {[
           { id: "general", label: "General", icon: FaCog },
           { id: "security", label: "Security", icon: FaShieldAlt },
@@ -119,18 +128,18 @@ const AdminSettings = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap transition-all ${
-              activeTab === tab.id
-                ? "bg-cyan-500/20 text-cyan-400"
-                : `${TC.textSecondary} hover:bg-gray-800/50`
-            }`}
+            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform-gpu active:scale-95 whitespace-nowrap ${activeTab === tab.id
+              ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+              : `${TC.textSecondary} hover:bg-gray-100/50 dark:hover:bg-white/5`
+              }`}
           >
-            <tab.icon className="text-sm sm:text-base" /> {tab.label}
+            <tab.icon className={`text-base ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
+            {tab.label}
           </button>
         ))}
       </div>
 
-      {}
+      { }
       {loading ? (
         <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
           <div className="space-y-6">
@@ -146,29 +155,28 @@ const AdminSettings = () => {
           </div>
         </div>
       ) : (
-        
-        <div 
-          className={`transition-all duration-500 ease-in-out ${
-            contentLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
+
+        <div
+          className="fade-in"
+          style={{ animationDelay: "0.2s" }}
         >
           <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-            {}
+            { }
             {activeTab === "general" && (
               <GeneralSettings settings={settings} setSettings={setSettings} TC={TC} />
             )}
 
-            {}
+            { }
             {activeTab === "security" && (
               <SecuritySettings security={security} setSecurity={setSecurity} TC={TC} />
             )}
 
-            {}
+            { }
             {activeTab === "notifications" && (
               <NotificationSettings notifications={notifications} setNotifications={setNotifications} TC={TC} />
             )}
 
-            {}
+            { }
             {activeTab === "api" && (
               <ApiSettings apiSettings={apiSettings} setApiSettings={setApiSettings} TC={TC} />
             )}

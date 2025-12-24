@@ -50,8 +50,7 @@ function CoinTable({ onTrade }) {
   const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
   const [coins, setCoins] = useState(Array.isArray(initialCoins) ? initialCoins : []);
   const [watchlist, setWatchlist] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
+
   const navigate = useNavigate();
 
 
@@ -66,26 +65,32 @@ function CoinTable({ onTrade }) {
 
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-700" : "text-gray-300",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-400",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+
+    // Dashboard Stability Glassmorphism
     bgContainer: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
     bgCard: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+    bgHeader: isLight ? "bg-gray-100/50" : "bg-white/5",
+    bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+
     bgLoading: isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 text-cyan-400",
-    bgTableHeader: isLight ? "border-b border-gray-300 bg-gray-100 text-gray-600" : "border-b border-gray-700 bg-gray-900/50 text-gray-400",
+    bgTableHeader: isLight ? "bg-gray-100/50" : "bg-white/5",
     bgTableFooter: isLight ? "bg-gray-100 border-t border-gray-300" : "bg-gray-900/50 border-t border-gray-700",
-    tableDivide: isLight ? "divide-gray-200" : "divide-gray-700",
+    tableDivide: isLight ? "divide-gray-100" : "divide-white/5",
     inputBg: isLight ? "bg-white border-gray-300 text-gray-800 placeholder-gray-500" : "bg-gray-800 border-gray-700 text-white placeholder-gray-400",
     btnPagination: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300" : "bg-gray-700 text-gray-300 hover:bg-gray-600",
     btnPaginationActive: isLight ? "bg-cyan-600 text-white shadow-md" : "bg-cyan-600 text-white shadow-lg",
-    bgPillPositive: isLight ? "bg-green-100 text-green-600" : "bg-green-500/20 text-green-400",
-    bgPillNegative: isLight ? "bg-red-100 text-red-600" : "bg-red-500/20 text-red-400",
+    bgPillPositive: isLight ? "bg-emerald-100 text-emerald-600" : "bg-emerald-500/20 text-emerald-400",
+    bgPillNegative: isLight ? "bg-rose-100 text-rose-600" : "bg-rose-500/20 text-rose-400",
     bgSubCard: isLight ? "bg-gray-100/70" : "bg-gray-700/30",
     starDefault: isLight ? "text-gray-400 hover:text-yellow-600" : "text-gray-500 hover:text-yellow-400",
     starFilled: isLight ? "text-yellow-600" : "text-yellow-400",
+    btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
   }), [isLight]);
 
 
@@ -104,7 +109,7 @@ function CoinTable({ onTrade }) {
   const fetchWatchlist = useCallback(async () => {
     if (!user?.id) return;
 
-    setLoadingWatchlist(true);
+
     try {
       const res = await getData("/watchlist", { user_id: user.id });
 
@@ -112,8 +117,6 @@ function CoinTable({ onTrade }) {
       setWatchlist(watchlistIds);
     } catch (err) {
       console.error("Failed to fetch watchlist data", err);
-    } finally {
-      setLoadingWatchlist(false);
     }
   }, [user?.id]);
 
@@ -220,7 +223,7 @@ function CoinTable({ onTrade }) {
       sparkline_in_7d: { price: coinData?.sparkline_in_7d?.price },
     };
 
-    setSubmitting(true);
+
     try {
       if (isCurrentlyInWatchlist) {
         await deleteWatchList("/watchlist/remove", {
@@ -239,8 +242,6 @@ function CoinTable({ onTrade }) {
           : prev.filter(id => id !== coinId)
       );
       toast.error("Operation failed. Reverting changes.");
-    } finally {
-      setSubmitting(false);
     }
   }, [watchlist, user?.id, fetchWatchlist]);
 
@@ -375,41 +376,43 @@ function CoinTable({ onTrade }) {
 
   return (
     <div className={`w-full ${TC.textPrimary}`}>
-      <main className={`max-w-7xl mx-auto rounded-lg md:rounded-2xl p-4 md:p-6 shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] ${TC.bgCard}`}>
-        { }
-        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-            <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Cryptocurrency Prices
-              </h1>
-            </div>
+      <div className={`p-1 rounded-xl fade-in ${TC.bgCard}`}>
+        {/* Dashboard Style Header */}
+        <div className="px-4 pt-3 flex items-center justify-between mb-2">
+          <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
+            <FaExchangeAlt className="text-blue-500" size={14} />
+            Cryptocurrency Prices
+          </h3>
+          {paginatedCoins.length > 0 && (
+            <span className={`text-[10px] ${TC.textSecondary} px-2 py-0.5 rounded-full border ${isLight ? "border-gray-200" : "border-gray-700"} font-bold uppercase tracking-wider`}>
+              {enhancedCoins.length} Coins
+            </span>
+          )}
+        </div>
 
-            { }
-            <div className="relative w-full sm:w-64 fade-in" style={{ animationDelay: "0.3s" }}>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search coins..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className={`w-full border border-gray-200 rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all duration-200 ${TC.inputBg}`}
-                />
-                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} text-sm`} />
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} hover:${TC.textPrimary} text-lg transition-colors`}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
+        {/* Search Bar */}
+        <div className="px-4 mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search coins..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className={`w-full border rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all duration-200 ${TC.inputBg}`}
+            />
+            <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} text-sm`} />
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${TC.textTertiary} hover:${TC.textPrimary} text-lg transition-colors`}
+              >
+                ×
+              </button>
+            )}
           </div>
           {searchTerm && (
-            <div className={`text-sm mb-4 fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.4s" }}>
-              Found {enhancedCoins.length} coin{enhancedCoins.length !== 1 ? 's' : ''} matching "{searchTerm}"
+            <div className={`text-sm mt-2 fade-in ${TC.textTertiary}`}>
+              Found {enhancedCoins.length} coin{enhancedCoins.length !== 1 ? 's' : ''} matching &quot;{searchTerm}&quot;
             </div>
           )}
         </div>
@@ -439,9 +442,7 @@ function CoinTable({ onTrade }) {
 
                         className="flex-shrink-0"
                       >
-                        {false ? (
-                          <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-                        ) : coin.isInWatchlist ? (
+                        {coin.isInWatchlist ? (
                           <FaStar className={`${TC.starFilled} text-xl hover:scale-110 transition-transform`} />
                         ) : (
                           <FaRegStar className={`${TC.starDefault} transition-colors text-xl`} />
@@ -502,7 +503,7 @@ function CoinTable({ onTrade }) {
                         e.stopPropagation();
                         handleTrade(coin);
                       }}
-                      className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 fade-in"
+                      className={`${TC.btnPrimary} flex-1 px-4 py-2.5 transition-all duration-200 inline-flex items-center justify-center gap-2`}
                       style={{ animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
                     >
                       <FaExchangeAlt className="text-sm" />
@@ -515,7 +516,7 @@ function CoinTable({ onTrade }) {
           ) : (
             <div className={`text-center py-12 rounded-xl fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
               <div className="text-5xl mb-3">🔍</div>
-              No coins found matching "{searchTerm}"
+              No coins found matching &quot;{searchTerm}&quot;
             </div>
           )}
         </div>
@@ -527,38 +528,22 @@ function CoinTable({ onTrade }) {
               <div className={`p-12 text-center fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
                 <div className="text-6xl mb-4">🔍</div>
                 <div className="text-xl">
-                  No coins found matching "{searchTerm}"
+                  No coins found matching &quot;{searchTerm}&quot;
                 </div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-white/5'} shadow-lg mx-2 mb-2`}>
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className={`fade-in ${TC.bgTableHeader} bg-opacity-50`} style={{ animationDelay: "0.5s" }}>
-                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
-                        ★
-                      </th>
-                      <th className="py-4 px-6 text-left text-xs font-semibold uppercase tracking-wider">
-                        Coin
-                      </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
-                        24h %
-                      </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
-                        Market Cap
-                      </th>
-                      <th className="py-4 px-6 text-right text-xs font-semibold uppercase tracking-wider">
-                        Volume
-                      </th>
-                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
-                        Trend
-                      </th>
-                      <th className="py-4 px-6 text-center text-xs font-semibold uppercase tracking-wider">
-                        Trade
-                      </th>
+                    <tr className={`${TC.bgTableHeader} uppercase tracking-wider text-xs font-bold`}>
+                      <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>★</th>
+                      <th className={`py-4 px-6 ${TC.textSecondary}`}>Coin</th>
+                      <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>Price</th>
+                      <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>24h %</th>
+                      <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>Market Cap</th>
+                      <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>Volume</th>
+                      <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>Trend</th>
+                      <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>Trade</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${TC.tableDivide}`}>
@@ -566,8 +551,7 @@ function CoinTable({ onTrade }) {
                       <tr
                         key={coin.id}
                         onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
-                        className={`cursor-pointer transition-all duration-200 group fade-in ${isLight ? "hover:bg-gray-50" : "hover:bg-gray-700/50"
-                          }`}
+                        className={`cursor-pointer transition-all duration-200 group fade-in ${TC.bgHover}`}
                         style={{ animationDelay: `${0.6 + index * 0.05}s` }}
                       >
                         { }
@@ -578,9 +562,7 @@ function CoinTable({ onTrade }) {
                             className="flex justify-center w-full fade-in"
                             style={{ animationDelay: `${0.6 + index * 0.05 + 0.02}s` }}
                           >
-                            {false ? (
-                              <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-                            ) : coin.isInWatchlist ? (
+                            {coin.isInWatchlist ? (
                               <FaStar className={`${TC.starFilled} hover:scale-110 transition-transform`} />
                             ) : (
                               <FaRegStar className={`${TC.starDefault} transition-colors`} />
@@ -653,15 +635,16 @@ function CoinTable({ onTrade }) {
 
                         { }
                         <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.09}s` }}>
-                          <div className="flex justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => handleTrade(coin)}
-                              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50 flex items-center gap-2"
-                            >
-                              <FaExchangeAlt className="text-xs" />
-                              Trade
-                            </button>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTrade(coin);
+                            }}
+                            className={`${TC.btnPrimary} px-4 py-2 transition-all duration-200 inline-flex items-center justify-center gap-2`}
+                          >
+                            <FaExchangeAlt className="text-xs" />
+                            Trade
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -714,7 +697,7 @@ function CoinTable({ onTrade }) {
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

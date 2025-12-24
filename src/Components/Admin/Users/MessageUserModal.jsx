@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { X, Send, Mail, MessageSquare } from "lucide-react";
-import { default as api } from "@/api/axiosConfig";
+
 import toast from "react-hot-toast";
 
 const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
@@ -22,7 +22,7 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
         try {
             setLoading(true);
             // Determine endpoint based on type
-            const endpoint = messageType === 'email' ? '/users/send-email' : '/users/send-notification';
+
 
             // Simulating API call since backend might not have these specific routes yet
             // In a real app: await api.post(endpoint, { userId: user._id || user.id, subject, message });

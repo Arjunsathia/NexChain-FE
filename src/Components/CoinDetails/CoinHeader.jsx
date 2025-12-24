@@ -22,9 +22,9 @@ function CoinHeader({
 }) {
   return (
     <div
-      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-lg md:rounded-2xl mb-4 md:mb-6 ${TC.bgHeader} transition-colors duration-300`}
+      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-xl shadow-md mb-6 ${TC.bgHeader} transition-colors duration-300`}
     >
-      <div className="p-3 md:p-6">
+      <div className="px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img
@@ -38,22 +38,20 @@ function CoinHeader({
                   {coin.name}
                 </h1>
                 <span
-                  className={`text-xs md:text-sm uppercase px-2 py-1 rounded-lg ${
-                    isLight
+                  className={`text-xs md:text-sm uppercase px-2 py-1 rounded-lg ${isLight
                       ? "bg-cyan-100 text-cyan-700"
                       : "bg-cyan-500/20 text-cyan-400"
-                  }`}
+                    }`}
                 >
                   {coin.symbol}
                 </span>
                 <button
                   onClick={toggleWatchlist}
                   disabled={loadingWatchlist}
-                  className={`text-lg md:text-xl transition-transform ${
-                    loadingWatchlist
+                  className={`text-lg md:text-xl transition-transform ${loadingWatchlist
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-110"
-                  } ${isInWatchlist ? "text-yellow-400" : "text-gray-400"}`}
+                    } ${isInWatchlist ? "text-yellow-400" : "text-gray-400"}`}
                 >
                   {isInWatchlist ? <FaStar /> : <FaRegStar />}
                 </button>
@@ -62,9 +60,8 @@ function CoinHeader({
                 Rank #{coin.market_cap_rank || "N/A"}
               </p>
               {userHoldings && (userHoldings.totalQuantity > 0 || userHoldings.quantity > 0) && (
-                <div className={`text-xs font-medium mt-1.5 px-2 py-0.5 rounded-md inline-block ${
-                  isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400"
-                }`}>
+                <div className={`text-xs font-medium mt-1.5 px-2 py-0.5 rounded-md inline-block ${isLight ? "bg-green-100 text-green-700" : "bg-green-500/20 text-green-400"
+                  }`}>
                   Holding: {(userHoldings.totalQuantity || userHoldings.quantity)?.toLocaleString()} {coin.symbol?.toUpperCase()}
                 </div>
               )}
@@ -81,9 +78,8 @@ function CoinHeader({
                 })}
               </div>
               <div
-                className={`text-sm font-semibold flex items-center justify-end gap-1 ${
-                  isPositive ? "text-green-400" : "text-red-400"
-                }`}
+                className={`text-sm font-semibold flex items-center justify-end gap-1 ${isPositive ? TC.textPositive : TC.textNegative
+                  }`}
               >
                 {isPositive ? (
                   <FaArrowUp className="text-xs" />
@@ -97,7 +93,7 @@ function CoinHeader({
 
             <button
               onClick={handleTrade}
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:scale-105 hover:shadow-cyan-500/25"
+              className={`${TC.btnPrimary} px-6 py-2.5 inline-flex items-center gap-2`}
             >
               <FaExchangeAlt />
               Trade

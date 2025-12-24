@@ -21,20 +21,22 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight ? "bg-white shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none" : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
-    borderHeader: isLight ? "border-gray-300/50" : "border-gray-700/50",
+    bgCard: isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+    borderHeader: isLight ? "border-gray-100" : "border-gray-800",
 
-    
+
     headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
-    
-    
+
+
     bgTabBar: isLight ? "bg-gray-100/50" : "bg-gray-900/50",
     textTabInactive: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-white",
     bgTabActiveCyan: "bg-cyan-600 text-white",
     bgTabActiveGreen: "bg-green-600 text-white",
     bgTabActiveRed: "bg-red-600 text-white",
 
-    
+
     bgBidVolume: isLight ? "bg-green-500/10" : "bg-green-500/10",
     bgAskVolume: isLight ? "bg-red-500/10" : "bg-red-500/10",
     textBidPrice: isLight ? "text-green-700" : "text-green-400",
@@ -42,10 +44,10 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
     textAmount: isLight ? "text-gray-800" : "text-gray-300",
     textTotal: isLight ? "text-gray-500" : "text-gray-400",
 
-    
+
     bgSpread: isLight ? "bg-gray-100/50 border-gray-300/50" : "bg-gray-900/50 border-gray-700/50",
     textSpreadValue: isLight ? "text-blue-600" : "text-cyan-400",
-    
+
   }), [isLight]);
 
 
@@ -125,31 +127,28 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
           <div className={`flex gap-1 rounded-lg p-0.5 ${TC.bgTabBar}`}>
             <button
               onClick={() => setActiveTab('all')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === 'all'
-                  ? TC.bgTabActiveCyan
-                  : TC.textTabInactive
-              }`}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'all'
+                ? TC.bgTabActiveCyan
+                : TC.textTabInactive
+                }`}
             >
               All
             </button>
             <button
               onClick={() => setActiveTab('bids')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === 'bids'
-                  ? TC.bgTabActiveGreen
-                  : TC.textTabInactive
-              }`}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'bids'
+                ? TC.bgTabActiveGreen
+                : TC.textTabInactive
+                }`}
             >
               Bids
             </button>
             <button
               onClick={() => setActiveTab('asks')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === 'asks'
-                  ? TC.bgTabActiveRed
-                  : TC.textTabInactive
-              }`}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'asks'
+                ? TC.bgTabActiveRed
+                : TC.textTabInactive
+                }`}
             >
               Asks
             </button>

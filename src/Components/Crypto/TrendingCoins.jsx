@@ -17,14 +17,17 @@ function TrendingCoins() {
   const bufferRef = useRef({});
 
   const TC = useMemo(() => ({
+    // Dashboard Stability Glassmorphism
     bgContainer: isLight
-      ? "bg-white shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
-      : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
+      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textAccentGreen: isLight ? "text-green-600" : "text-green-400",
-    textAccentRed: isLight ? "text-red-600" : "text-red-500",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textAccentGreen: isLight ? "text-emerald-600" : "text-emerald-400",
+    textAccentRed: isLight ? "text-rose-600" : "text-rose-500",
     textHover: isLight ? "hover:text-cyan-600" : "hover:text-cyan-400",
-    borderList: isLight ? "border-gray-300" : "border-gray-700",
+    bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
+    borderList: isLight ? "border-gray-100" : "border-gray-700/50",
     textError: isLight ? "text-gray-600" : "text-gray-400",
     skeletonBase: isLight ? "#e5e7eb" : "#2c313c",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a404c",
@@ -141,8 +144,8 @@ function TrendingCoins() {
   }, [coins, livePrices]);
 
   return (
-    <div className={`rounded-lg md:rounded-2xl p-3 md:p-6 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
-      <h2 className={`text-lg font-semibold mb-4 ${TC.textPrimary} fade-in`} style={{ animationDelay: "0.2s" }}>
+    <div className={`rounded-xl p-4 md:p-5 fade-in ${TC.bgContainer} h-full flex flex-col`} style={{ animationDelay: "0.1s" }}>
+      <h2 className={`text-sm md:text-base font-bold mb-3 ${TC.textPrimary} fade-in flex items-center gap-2`} style={{ animationDelay: "0.2s" }}>
         🔥 Trending Coins
       </h2>
 
@@ -181,7 +184,7 @@ function TrendingCoins() {
           {displayedCoins.map((coin, index) => (
             <li
               key={coin.id}
-              className={`flex justify-between items-center text-sm ${TC.textPrimary} border-b ${TC.borderList} last:border-b-0 pb-2 fade-in`}
+              className={`flex justify-between items-center text-sm ${TC.textPrimary} border-b ${TC.borderList} last:border-b-0 pb-2 mb-2 last:mb-0 transition-colors ${TC.bgHover} px-2 py-2 rounded-lg fade-in`}
               style={{ animationDelay: `${0.3 + (index * 0.1)}s` }}
             >
               <span
