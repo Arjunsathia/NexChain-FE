@@ -26,51 +26,51 @@ const initialFormKeys = {
 
 export default function UserForm({ open, handleClose, fetchData, id }) {
   const isLight = useThemeCheck();
-  
-  
+
+
   const TC = useMemo(() => ({
-    
-    bgBackdrop: "bg-black/60 backdrop-blur-sm", 
-    bgPanel: isLight 
-      ? "bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)]" 
+
+    bgBackdrop: "bg-black/60 backdrop-blur-sm",
+    bgPanel: isLight
+      ? "bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)]"
       : "bg-[#0f172a]/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
-    
-    
-    bgHeader: isLight 
-      ? "bg-gradient-to-r from-gray-50/80 to-white/80 border-b border-gray-100" 
+
+
+    bgHeader: isLight
+      ? "bg-gradient-to-r from-gray-50/80 to-white/80 border-b border-gray-100"
       : "bg-gradient-to-r from-slate-900/50 to-slate-800/50 border-b border-white/5",
     titleText: isLight ? "text-slate-800" : "text-slate-100",
     subtitleText: isLight ? "text-slate-500" : "text-slate-400",
-    
-    
-    btnClose: isLight 
-      ? "text-slate-400 hover:text-slate-700 hover:bg-slate-100" 
+
+
+    btnClose: isLight
+      ? "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
       : "text-slate-500 hover:text-slate-200 hover:bg-white/10",
 
-    
+
     labelText: isLight ? "text-slate-700 font-medium" : "text-slate-300 font-medium",
-    
-    
-    inputBg: isLight 
-      ? "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 hover:border-cyan-400" 
+
+
+    inputBg: isLight
+      ? "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 hover:border-cyan-400"
       : "bg-slate-900/50 border-white/10 text-slate-100 placeholder:text-slate-600 hover:border-cyan-500/50",
     inputFocus: "focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all duration-200",
     iconColor: isLight ? "text-slate-400" : "text-slate-500",
-    
-    
+
+
     optionBg: isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100",
 
-    
+
     loadingText: isLight ? "text-cyan-600" : "text-cyan-400",
-    
-    
-    btnCancel: isLight 
-      ? "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300" 
+
+
+    btnCancel: isLight
+      ? "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
       : "bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white hover:border-white/20",
     btnSubmit: "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 border border-transparent",
 
-    
-    
+
+
     toastSuccess: {
       style: {
         background: "#DCFCE7",
@@ -201,8 +201,8 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleModalClose} className="relative z-50">
-      <DialogBackdrop 
+    <Dialog open={open} onClose={handleModalClose} className="relative z-[100000]">
+      <DialogBackdrop
         className={`
           fixed inset-0 backdrop-blur-sm transition-all duration-500
           ${TC.bgBackdrop}
@@ -210,16 +210,16 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
         `}
       />
 
-      <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
+      <div className="fixed inset-0 z-[100000] w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
-          <DialogPanel 
+          <DialogPanel
             className={`
               relative transform overflow-hidden rounded-2xl ${TC.bgPanel}
               transition-all duration-500 ease-out w-[90vw] max-w-[340px] sm:max-w-lg
               ${isMounted ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}
             `}
           >
-            {}
+            { }
             <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b ${TC.bgHeader}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -254,7 +254,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                 </div>
               ) : (
                 <div className="space-y-3 sm:space-y-4">
-                  {}
+                  { }
                   <div>
                     <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Full Name</Label>
                     <div className="relative">
@@ -270,7 +270,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                     </div>
                   </div>
 
-                  {}
+                  { }
                   <div>
                     <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Email Address</Label>
                     <div className="relative">
@@ -287,9 +287,9 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                     </div>
                   </div>
 
-                  {}
+                  { }
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    {}
+                    { }
                     <div>
                       <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Phone Number</Label>
                       <div className="relative">
@@ -306,7 +306,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                       </div>
                     </div>
 
-                    {}
+                    { }
                     <div>
                       <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Username</Label>
                       <div className="relative">
@@ -322,7 +322,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                       </div>
                     </div>
 
-                    {}
+                    { }
                     <div>
                       <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>
                         Password {id && <span className={`${TC.subtitleText} text-xs`}>(leave blank to keep current)</span>}
@@ -341,7 +341,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                       </div>
                     </div>
 
-                    {}
+                    { }
                     <div>
                       <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>
                         Confirm Password {id && <span className={`${TC.subtitleText} text-xs`}>(optional)</span>}
@@ -361,7 +361,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                     </div>
                   </div>
 
-                  {}
+                  { }
                   <div>
                     <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>User Role</Label>
                     <div className="relative">
@@ -385,7 +385,7 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                 </div>
               )}
 
-              {}
+              { }
               <div className={`flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${isLight ? "border-gray-100" : "border-white/5"}`}>
                 <Button
                   type="button"

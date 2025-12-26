@@ -43,7 +43,7 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
     };
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div
                 className={`w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} scale-in-95 animate-in duration-200`}
                 onClick={(e) => e.stopPropagation()}

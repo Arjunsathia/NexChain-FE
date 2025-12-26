@@ -16,7 +16,7 @@ function UserDeleteModal({
   // Use Portal to ensure modal is always on top (z-index 9999) and immune to parent overflow/transforms
   return createPortal(
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${TC?.modalOverlay || "bg-black/60 backdrop-blur-sm"
+      className={`fixed inset-0 z-[100000] flex items-center justify-center p-4 ${TC?.modalOverlay || "bg-black/60 backdrop-blur-sm"
         }`}
     >
       <div
@@ -28,8 +28,8 @@ function UserDeleteModal({
           <button
             onClick={() => setShowDeleteModal(false)}
             className={`transition-all duration-200 p-1.5 rounded-lg hover:rotate-90 transform group ${isLight
-                ? "text-gray-500 hover:text-red-600 hover:bg-red-100"
-                : "text-gray-400 hover:text-white hover:bg-red-500/20"
+              ? "text-gray-500 hover:text-red-600 hover:bg-red-100"
+              : "text-gray-400 hover:text-white hover:bg-red-500/20"
               }`}
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
@@ -48,8 +48,8 @@ function UserDeleteModal({
             <button
               onClick={() => setShowDeleteModal(false)}
               className={`px-5 py-2.5 text-sm sm:text-base rounded-xl font-semibold transition-colors ${isLight
-                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                 }`}
             >
               Cancel
