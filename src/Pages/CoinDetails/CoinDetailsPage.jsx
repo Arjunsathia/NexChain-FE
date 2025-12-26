@@ -63,19 +63,19 @@ function CoinDetailsPage() {
 
       // Glassmorphism Cards - Synced with Dashboard Quality
       bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
       bgHeader: isLight
         ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100"
-        : "bg-gray-900/95 backdrop-blur-none shadow-md border-b border-gray-800 isolation-isolate prevent-seam",
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-700/50 isolation-isolate prevent-seam",
 
       bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
 
       skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
       skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
 
-      btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+      btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
 
       textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
       textNegative: isLight ? "text-rose-600" : "text-rose-400",

@@ -10,8 +10,8 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
     // Dashboard Stability Design Tokens
     bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
@@ -39,7 +39,7 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
       <div className={`
         rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
-        will-change-transform shadow-lg hover:shadow-2xl
+        will-change-transform shadow-md hover:shadow-lg
         ${TC.bgCard} ${TC.bgHover} cursor-pointer group
       `}>
         <div className="flex items-center justify-between mb-3">
@@ -62,7 +62,7 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
       <div className={`
         rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
-        will-change-transform shadow-lg hover:shadow-2xl
+        will-change-transform shadow-md hover:shadow-lg
         ${TC.bgCard} ${TC.bgHover} cursor-pointer group
       `}>
         <div className="flex items-center justify-between mb-3">
@@ -86,7 +86,7 @@ const PortfolioHeader = ({ isLight, portfolioSummary, balance, loading, topPerfo
 
       <div className={`
         rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
-        will-change-transform shadow-lg hover:shadow-2xl
+        will-change-transform shadow-md hover:shadow-lg
         ${TC.bgCard} ${TC.bgHover} cursor-pointer group
         col-span-2 lg:col-span-1
       `}>

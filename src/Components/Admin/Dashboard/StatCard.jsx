@@ -13,7 +13,7 @@ function StatCard({ label, value, icon, color, badge, TC, onClick, isLoading }) 
       onClick={onClick}
       className={`
         relative overflow-hidden cursor-pointer group
-        ${TC.bgStatsCard} rounded-2xl p-3 sm:p-4 shadow-lg hover:shadow-2xl transition-all duration-300
+        ${TC.bgStatsCard} rounded-2xl p-3 sm:p-4 transition-all duration-300
       `}
     >
 

@@ -153,9 +153,9 @@ const ChartSection = ({ coinId }) => {
   ];
 
   return (
-    <div className={`p-4 rounded-2xl transition-all duration-300 ease-in-out hover:shadow-2xl ${isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card"
+    <div className={`p-4 rounded-2xl transition-all duration-300 ease-in-out hover:shadow-lg ${isLight
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
       }`}>
       <div className="flex justify-between items-center mb-4">
         <h3 className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}>

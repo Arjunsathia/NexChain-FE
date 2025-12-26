@@ -63,12 +63,12 @@ function CoinTable({ onTrade }) {
 
         // Dashboard Stability Glassmorphism
         bgContainer: isLight
-            ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-            : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+            ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+            : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
         bgCard: isLight
-            ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-            : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
-        bgHeader: isLight ? "bg-gray-100/50" : "bg-white/5",
+            ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+            : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
+        bgHeader: isLight ? "bg-gray-100/50" : "bg-gray-900/95",
         bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
 
         bgLoading: isLight ? "bg-white border-gray-300 text-cyan-600" : "bg-gray-800/50 backdrop-blur-sm border-gray-700 text-cyan-400",
@@ -76,14 +76,14 @@ function CoinTable({ onTrade }) {
         bgTableFooter: isLight ? "bg-gray-100 border-t border-gray-300" : "bg-gray-900/50 border-t border-gray-700",
         tableDivide: isLight ? "divide-gray-100" : "divide-white/5",
         inputBg: isLight ? "bg-white border-gray-300 text-gray-800 placeholder-gray-500" : "bg-gray-800 border-gray-700 text-white placeholder-gray-400",
-        btnPagination: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300" : "bg-gray-700 text-gray-300 hover:bg-gray-600",
-        btnPaginationActive: isLight ? "bg-cyan-600 text-white shadow-md" : "bg-cyan-600 text-white shadow-lg",
+        btnPagination: isLight ? "bg-gray-200 text-gray-800 hover:bg-gray-300" : "bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700",
+        btnPaginationActive: isLight ? "bg-cyan-600 text-white shadow-md" : "bg-cyan-600 text-white shadow-md",
         bgPillPositive: isLight ? "bg-emerald-100 text-emerald-600" : "bg-emerald-500/20 text-emerald-400",
         bgPillNegative: isLight ? "bg-rose-100 text-rose-600" : "bg-rose-500/20 text-rose-400",
         bgSubCard: isLight ? "bg-gray-100/70" : "bg-gray-700/30",
         starDefault: isLight ? "text-gray-400 hover:text-yellow-600" : "text-gray-500 hover:text-yellow-400",
         starFilled: isLight ? "text-yellow-600" : "text-yellow-400",
-        btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+        btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
     }), [isLight]);
 
     useEffect(() => {
@@ -380,7 +380,7 @@ function CoinTable({ onTrade }) {
                                     onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
                                     className={`p-4 rounded-xl border ${isLight
                                         ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
-                                        : "bg-gray-800/40 border-gray-700/50 hover:bg-gray-700/50"
+                                        : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
                                         } cursor-pointer transition-all duration-300 group fade-in`}
                                     style={{ animationDelay: `${0.5 + index * 0.1}s` }}
                                 >
@@ -474,7 +474,7 @@ function CoinTable({ onTrade }) {
                                 </div>
                             </div>
                         ) : (
-                            <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-white/5'} shadow-lg mx-2 mb-2`}>
+                            <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-gray-700/50'} shadow-md mx-2 mb-2`}>
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className={`${TC.bgTableHeader} uppercase tracking-wider text-xs font-bold`}>

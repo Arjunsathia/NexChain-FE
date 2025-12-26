@@ -18,6 +18,7 @@ import {
   X,
   ArrowUpRight,
   ArrowDownLeft,
+  User,
 } from "lucide-react";
 import UserForm from "@/Components/Admin/Users/UserForm";
 import UserDeleteModal from "@/Components/Admin/Users/UserDeleteModal";
@@ -194,21 +195,21 @@ const Users = () => {
   const TC = useMemo(() => ({
     bgMain: "bg-transparent",
     bgPanel: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
     bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
     bgStatsCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
+      ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card hover:bg-white/80 hover:shadow-md"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 hover:bg-gray-800/80",
     border: isLight ? "border-gray-200" : "border-white/10",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     textTertiary: isLight ? "text-gray-400" : "text-gray-500",
     bgItem: isLight
       ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-      : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+      : "bg-transparent hover:bg-white/5 isolation-isolate",
     itemHover: isLight ? "hover:bg-gray-100" : "hover:bg-white/5",
     itemActive: isLight ? "bg-blue-50 border-blue-500" : "bg-cyan-500/10 border-cyan-500",
     modalOverlay: "bg-black/60 backdrop-blur-sm",
@@ -218,50 +219,77 @@ const Users = () => {
     headerGradient: "from-blue-600 to-cyan-500",
   }), [isLight]);
 
-  const UserListItem = ({ user }) => (
+  // Move sub-components outside or memoize them
+  const UserListItem = useMemo(() => ({ user }) => (
     <div
       onClick={() => setSelectedUser(user)}
-      className={`group flex items-center gap-4 p-3.5 mx-2 my-1 rounded-2xl cursor-pointer transition-all duration-300 border-l-4 ${selectedUser?._id === user._id
-        ? `${isLight ? 'bg-white shadow-md' : 'bg-white/10 shadow-lg'} border-blue-500`
-        : `border-transparent ${TC.bgItem} hover:shadow-md`
-        }`}
+      className={`
+        group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
+        transition-all duration-300 border-l-4 relative overflow-hidden
+        ${selectedUser?._id === user._id
+          ? `${isLight ? 'bg-white shadow-sm' : 'bg-white/10 shadow-none'} border-blue-500 scale-[1.02] z-10`
+          : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
+        }
+      `}
     >
-      <div className="relative flex-shrink-0">
-        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md group-hover:shadow-blue-500/20 transition-all`}>
+      {/* Subtle background glow on hover */}
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
+        ${isLight ? 'bg-gradient-to-r from-blue-50/50 to-transparent' : 'bg-gradient-to-r from-blue-500/5 to-transparent'}`}
+      />
+
+      <div className="relative flex-shrink-0 z-10">
+        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md 
+          ${selectedUser?._id === user._id ? 'ring-2 ring-blue-500/20' : ''} 
+          group-hover:shadow-blue-500/30 transition-all`}>
           <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
             {user.image ? (
               <img
                 src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
                 alt={user.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
             ) : (
-              user.name?.charAt(0).toUpperCase()
+              <User className="w-5 h-5 text-gray-400" />
             )}
           </div>
         </div>
-        <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 ${isLight ? "border-white" : "border-gray-900"} ${user.recentlyActive ? "bg-green-500 animate-pulse" : "bg-red-500"
-          }`} />
+        {/* Status indicator with higher contrast border */}
+        <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
+          ${isLight ? "border-white" : "border-gray-800"} 
+          ${user.recentlyActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}
+        />
       </div>
-      <div className="flex-1 min-w-0">
+
+      <div className="flex-1 min-w-0 relative z-10">
         <div className="flex justify-between items-center mb-0.5">
-          <h4 className={`text-sm font-bold truncate ${TC.textPrimary}`}>{user.name}</h4>
-          {user.role === 'admin' && <Shield className="w-3.5 h-3.5 text-blue-500" />}
+          <h4 className={`text-sm font-bold truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-500' : TC.textPrimary}`}>
+            {user.name}
+          </h4>
+          {user.role === 'admin' && (
+            <div className="p-1 rounded-md bg-blue-500/10">
+              <Shield className="w-3 h-3 text-blue-500" />
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-between">
-          <p className={`text-[10px] sm:text-xs truncate ${TC.textSecondary}`}>{user.email}</p>
-          <span className={`text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-md bg-blue-500/5 text-blue-500/70 border border-blue-500/10`}>
+          <p className={`text-[10px] sm:text-xs truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-400/80' : TC.textSecondary}`}>
+            {user.email}
+          </p>
+          <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
+            ${selectedUser?._id === user._id
+              ? 'bg-blue-500 text-white'
+              : 'bg-blue-500/10 text-blue-500/70 border border-blue-500/10'}`}>
             {user.role}
           </span>
         </div>
       </div>
     </div>
-  );
+  ), [selectedUser, isLight, TC]);
 
-  const StatCard = ({ label, value, icon: Icon, loading, onClick }) => (
+  const StatCard = useMemo(() => ({ label, value, icon: Icon, loading, onClick }) => (
     <div
       onClick={onClick}
-      className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative shadow-sm hover:shadow-lg`}
+      className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
     >
       <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
 
@@ -275,7 +303,7 @@ const Users = () => {
         </p>
       </div>
     </div>
-  );
+  ), [TC]);
 
   return (
     // Updated Layout: Vertical Flex for Header + Content
@@ -308,7 +336,7 @@ const Users = () => {
         {/* Left Pane: User List */}
         <div className={`
           flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-3xl overflow-hidden
-          transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+          transition-all duration-200 ease-out
           w-full ${selectedUser ? "md:w-[380px]" : "md:w-full"}
         `}>
           {/* List Toolbar (Search & Filter) */}
@@ -358,7 +386,7 @@ const Users = () => {
         <div className={`
          fixed inset-0 z-[9999] md:static md:z-auto
          ${TC.bgPanel} md:flex-1 md:rounded-3xl md:overflow-hidden
-         transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+         transition-all duration-200 ease-out
          ${selectedUser
             ? "translate-y-0 opacity-100 md:translate-y-0 md:translate-x-0"
             : "translate-y-full opacity-100 pointer-events-none md:pointer-events-none md:w-0 md:opacity-0 md:translate-x-20 md:translate-y-0"}
@@ -382,7 +410,9 @@ const Users = () => {
                       {selectedUser.image ? (
                         <img src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold bg-transparent text-white">{selectedUser.name?.charAt(0)}</div>
+                        <div className="w-full h-full flex items-center justify-center bg-transparent">
+                          <User className="w-12 h-12 text-white/50" />
+                        </div>
                       )}
                     </div>
                     <div className="pb-1 mb-1">

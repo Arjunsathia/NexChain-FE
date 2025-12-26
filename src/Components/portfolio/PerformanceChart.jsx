@@ -10,17 +10,17 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card rounded-xl"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card rounded-xl",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card rounded-xl"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 rounded-xl",
 
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
     bgRangeButtonActive: "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20",
     bgRangeButtonDefault: isLight ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200/50" : "text-gray-400 hover:text-gray-300 hover:bg-white/5",
-    bgRangeContainer: isLight ? "bg-gray-100/80 border-gray-200" : "bg-gray-800/50 border-white/5",
+    bgRangeContainer: isLight ? "bg-gray-100/80 border-gray-200" : "bg-gray-800/50 border-gray-700/50",
 
-    bgStatCard: isLight ? "bg-white/50 border-gray-100" : "bg-white/5 border-white/5",
+    bgStatCard: isLight ? "bg-white/50 border-gray-100" : "bg-gray-800/20 border-border-gray-700/50",
 
     bgPillPositive: isLight ? "bg-emerald-100/50" : "bg-emerald-500/10",
     bgPillNegative: isLight ? "bg-rose-100/50" : "bg-rose-500/10",

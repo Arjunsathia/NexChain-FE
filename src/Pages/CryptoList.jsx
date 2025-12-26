@@ -45,9 +45,9 @@ function CryptoList() {
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
     bgPage: isLight ? "bg-gray-50" : "bg-gray-900",
     bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
-    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/95 backdrop-blur-none shadow-md border-b border-gray-800 isolation-isolate prevent-seam",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
+    bgHeader: isLight ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100" : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-700/50 isolation-isolate prevent-seam",
     accentGradient: isLight ? "bg-gradient-to-r from-blue-600 to-cyan-500" : "bg-gradient-to-r from-blue-500 to-cyan-400",
     textAccent: isLight ? "text-blue-600" : "text-cyan-400",
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",

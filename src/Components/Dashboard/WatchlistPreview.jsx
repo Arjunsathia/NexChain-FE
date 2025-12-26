@@ -21,13 +21,13 @@ function WatchlistPreview() {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     bgItem: isLight
       ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0"
-      : "hover:bg-white/5 border-b border-gray-700/50 last:border-0",
+      : "hover:bg-white/5 border-b border-gray-800 last:border-0",
     textPricePositive: isLight ? "text-green-600" : "text-green-400",
     textPriceNegative: isLight ? "text-red-600" : "text-red-400",
     bgIcon: isLight ? "bg-cyan-100/50 text-cyan-600" : "bg-cyan-500/10 text-cyan-400",
@@ -149,7 +149,7 @@ function WatchlistPreview() {
 
   // Removed isMounted logical class toggling to ensure unified dashboard animation
   return (
-    <div className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-2xl ${TC.bgContainer}`}>
+    <div className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer}`}>
       { }
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">

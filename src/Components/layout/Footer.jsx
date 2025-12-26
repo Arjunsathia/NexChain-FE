@@ -30,8 +30,8 @@ export default function Footer() {
 
     const TC = useMemo(() => ({
         bgFooter: isLight
-            ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-[0_6px_25px_rgba(0,0,0,0.12)] border-none"
-            : "bg-gray-800/40 backdrop-blur-xl shadow-xl shadow-black/20 border-none",
+            ? "bg-white/60 backdrop-blur-xl shadow-sm sm:shadow-md border-none"
+            : "bg-gray-900/95 backdrop-blur-none shadow-none border-t border-gray-800",
 
         bgModal: isLight
             ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-black/30 border-none"

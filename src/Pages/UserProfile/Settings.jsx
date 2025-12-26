@@ -27,8 +27,8 @@ const Settings = () => {
 
       // Glassmorphism Cards - Synced with Admin Sidebar exact styling
       bgCard: isLight
-        ? "bg-white/90 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-white/40 transform-gpu"
-        : "bg-gray-900/60 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/5 transform-gpu",
+        ? "bg-white/90 backdrop-blur-md shadow-md border border-white/40 transform-gpu"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 transform-gpu",
 
       bgInput: isLight
         ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
@@ -36,7 +36,7 @@ const Settings = () => {
 
       bgItem: isLight
         ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate transition-colors"
-        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate transition-colors",
+        : "bg-transparent hover:bg-white/5 border-none isolation-isolate transition-colors",
 
       btnPrimary:
         "px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold flex items-center justify-center gap-2",

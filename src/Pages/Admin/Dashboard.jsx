@@ -37,17 +37,17 @@ function AdminDashboard() {
       // Chromium Compositor Fix: Disable heavy backdrop-blur in dark mode to stop 1px pixel-snapping flicker
       // Premium Glassmorphism Cards - Optimized for stability
       bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
       bgStatsCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card hover:bg-white/80 hover:shadow-lg"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 hover:bg-gray-800/80",
 
       // bgItem: Transparent in dark mode with refined hover for cleaner look
       bgItem: isLight
         ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+        : "bg-transparent hover:bg-white/5 isolation-isolate",
 
       modalOverlay: "bg-black/40 backdrop-blur-sm",
       modalContent: isLight ? "bg-white" : "bg-[#0B0E11] border border-gray-800 prevent-seam force-layer glass-card",

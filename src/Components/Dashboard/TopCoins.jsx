@@ -31,13 +31,13 @@ const BentoCoinCard = React.memo(
 
         // Chromium Compositor Fix: Disable blur in dark mode, use high opacity + stability layers
         bgBase: isLight
-          ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-          : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+          ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+          : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
 
         selectedState: isLight
-          ? "bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20 scale-105 z-10 isolation-isolate prevent-seam force-layer"
-          : "bg-gradient-to-br from-gray-900 to-gray-800 border border-cyan-400 shadow-xl shadow-cyan-500/10 ring-1 ring-cyan-400/20 scale-105 z-10 isolation-isolate prevent-seam force-layer",
+          ? "bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-lg shadow-blue-500/10 ring-2 ring-blue-500/20 scale-105 z-10 isolation-isolate prevent-seam force-layer"
+          : "bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-none scale-105 z-10 isolation-isolate prevent-seam force-layer",
 
 
         hoverEffect: isLight

@@ -30,12 +30,12 @@ function LearningHub() {
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
     bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     bgHero: isLight
-      ? "bg-gradient-to-br from-cyan-50 to-blue-50"
-      : "bg-gradient-to-br from-gray-900/50 to-gray-800/50",
+      ? "bg-gradient-to-br from-cyan-50 to-blue-50 border border-white/20"
+      : "bg-gray-900/95 border border-gray-800",
 
     bgCategory: isLight
       ? "bg-gray-100 hover:bg-cyan-50"
@@ -48,7 +48,7 @@ function LearningHub() {
     bgProgress: isLight ? "bg-gray-200" : "bg-gray-700",
     bgProgressFill: "bg-gradient-to-r from-cyan-500 to-blue-500",
 
-    borderColor: isLight ? "border-gray-200" : "border-gray-700/50",
+    borderColor: isLight ? "border-gray-200" : "border-gray-800",
   }), [isLight]);
 
   const categories = [

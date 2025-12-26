@@ -17,15 +17,15 @@ function Portfolio() {
     textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
     bgCard: isLight
-      ? "bg-white/80 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
-      : "bg-gray-900/40 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5",
+      ? "bg-white/80 backdrop-blur-xl shadow-md border border-white/40"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     bgIcon: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",
 
     headerGradient: "bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent",
 
     // Stats
-    bgStatItem: isLight ? "bg-white shadow-sm border border-gray-100" : "bg-white/5 border border-white/5",
+    bgStatItem: isLight ? "bg-white shadow-sm border border-gray-100" : "bg-gray-800/20 border-none",
 
     // Tooltip
     bgTooltip: isLight ? "bg-white/95 backdrop-blur-xl shadow-xl border border-gray-100" : "bg-gray-800/95 backdrop-blur-xl shadow-xl border border-gray-700",

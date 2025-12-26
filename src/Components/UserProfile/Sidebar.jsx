@@ -10,7 +10,8 @@ import {
   FaChartLine,
   FaSignOutAlt,
   FaCog,
-  FaChevronRight
+  FaChevronRight,
+  FaUserCircle
 } from "react-icons/fa";
 import useUserContext from '@/hooks/useUserContext';
 import useWalletContext from '@/hooks/useWalletContext';
@@ -115,12 +116,12 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
     bgSidebar: isLight
-      ? "bg-white/80 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
-      : "bg-gray-900/40 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/5",
+      ? "bg-white/80 backdrop-blur-xl shadow-md border border-white/40"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     bgStats: isLight
       ? "bg-gray-50/80 border border-gray-100"
-      : "bg-white/5 border border-white/5",
+      : "bg-gray-800/20 border-none",
 
     menuItemBase: isLight ? "text-gray-600 hover:bg-gray-100/80" : "text-gray-400 hover:bg-white/5",
     menuItemActiveText: isLight ? "text-blue-600" : "text-white",
@@ -203,7 +204,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                   <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <div className={`w-full h-full flex items-center justify-center font-bold text-lg ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-gray-800 text-white'}`}>
-                    {user?.name?.charAt(0)?.toUpperCase()}
+                    <FaUserCircle size={24} />
                   </div>
                 )}
               </div>

@@ -22,8 +22,8 @@ function Watchlist() {
 
     // Glassmorphism Card Style
     bgCard: isLight
-      ? "bg-white/80 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
-      : "bg-gray-900/40 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5",
+      ? "bg-white/80 backdrop-blur-md shadow-md border border-white/40"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     // Icon & Header
     bgIcon: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400", // Preserved Color
@@ -195,8 +195,8 @@ function Watchlist() {
 
                 <div className="text-right">
                   <div className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full inline-block mb-0.5 ${coin.price_change_percentage_24h >= 0
-                      ? (isLight ? 'bg-emerald-100/50 text-emerald-600' : 'bg-emerald-500/10 text-emerald-400')
-                      : (isLight ? 'bg-rose-100/50 text-rose-600' : 'bg-rose-500/10 text-rose-400')
+                    ? (isLight ? 'bg-emerald-100/50 text-emerald-600' : 'bg-emerald-500/10 text-emerald-400')
+                    : (isLight ? 'bg-rose-100/50 text-rose-600' : 'bg-rose-500/10 text-rose-400')
                     }`}>
                     {coin.price_change_percentage_24h >= 0 ? "+" : ""}{coin.price_change_percentage_24h?.toFixed(1)}%
                   </div>

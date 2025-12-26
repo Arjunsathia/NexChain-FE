@@ -42,8 +42,8 @@ export default function NewsPanel() {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-600" : "text-gray-400",
     textSource: isLight ? "text-cyan-600" : "text-cyan-400",
@@ -58,7 +58,7 @@ export default function NewsPanel() {
   }), [isLight]);
 
   return (
-    <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 ease-in-out hover:shadow-2xl ${TC.bgContainer}`}>
+    <div className={`rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer}`}>
       { }
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

@@ -26,7 +26,7 @@ export default function Navbar() {
     const TC = useMemo(() => ({
         navBg: isLight
             ? "bg-white/80 backdrop-blur-md shadow-sm border border-white/40"
-            : "bg-gray-900/80 backdrop-blur-md shadow-lg border border-gray-800/50",
+            : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-800",
         textPrimary: isLight ? "text-gray-900" : "text-white",
         textSecondary: isLight ? "text-gray-500" : "text-gray-400",
         linkIdle: isLight ? "text-gray-600 hover:bg-gray-50/80" : "text-gray-400 hover:bg-white/5",
@@ -188,7 +188,7 @@ export default function Navbar() {
                                 />
                             ) : (
                                 <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white font-bold text-sm`}>
-                                    {user?.name?.charAt(0).toUpperCase() || <User size={16} />}
+                                    <User size={16} />
                                 </div>
                             )}
                         </button>
@@ -242,7 +242,7 @@ export default function Navbar() {
                             <div className={`mt-auto p-4 rounded-2xl ${isLight ? "bg-gray-50" : "bg-gray-900"}`}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-                                        {user?.name?.charAt(0).toUpperCase() || "G"}
+                                        <User size={16} />
                                     </div>
                                     <div className="truncate">
                                         <p className={`text-sm font-bold truncate ${TC.textPrimary}`}>{user?.name || "Guest"}</p>

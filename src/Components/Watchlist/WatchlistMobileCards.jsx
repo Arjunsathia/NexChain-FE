@@ -10,7 +10,7 @@ const WatchlistMobileCards = ({ coins, TC, isLight, handleCoinClick, handleTrade
         <div
           key={coin.id}
           onClick={() => handleCoinClick(coin)}
-          className={`rounded-xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group relative overflow-hidden ${TC.bgCard}`}
+          className={`rounded-xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group relative overflow-hidden shadow-md ${TC.bgCard}`}
         >
 
           <div className="flex items-center justify-between mb-3 relative z-10">
@@ -55,7 +55,7 @@ const WatchlistMobileCards = ({ coins, TC, isLight, handleCoinClick, handleTrade
           <div className="flex gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => handleTrade(coin)}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 active:scale-95 transition-all"
             >
               Trade Now
             </button>

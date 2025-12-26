@@ -12,7 +12,7 @@ const WatchlistStats = ({ stats, TC }) => {
       ].map((stat, i) => (
         <div key={i} className={`
           rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
-          will-change-transform group cursor-pointer shadow-lg hover:shadow-2xl
+          will-change-transform group cursor-pointer shadow-md hover:shadow-lg
           ${TC.bgStatsCard} ${TC.bgHover}
         `}>
           <div className="flex items-center justify-between mb-3">

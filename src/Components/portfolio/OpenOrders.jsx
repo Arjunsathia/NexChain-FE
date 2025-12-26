@@ -14,8 +14,8 @@ const OpenOrders = ({ livePrices }) => {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card rounded-xl"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card rounded-xl",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card rounded-xl"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 rounded-xl",
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
@@ -112,7 +112,7 @@ const OpenOrders = ({ livePrices }) => {
         )}
       </div>
 
-      <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-white/5'} shadow-lg mx-2 mb-2`}>
+      <div className={`overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-gray-700/50'} shadow-md mx-2 mb-2`}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className={`${isLight ? "bg-gray-100/50" : "bg-white/5"} uppercase tracking-wider text-[10px] font-bold`}>

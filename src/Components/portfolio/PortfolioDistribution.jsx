@@ -17,8 +17,8 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card rounded-xl"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card rounded-xl",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card rounded-xl"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 rounded-xl",
 
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
@@ -27,8 +27,8 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
     bgPillPositive: isLight ? "bg-emerald-100/50" : "bg-emerald-500/10",
     bgPillNegative: isLight ? "bg-rose-100/50" : "bg-rose-500/10",
 
-    bgSummaryCard: isLight ? "bg-white/50 border-gray-100" : "bg-white/5 border-white/5",
-    borderSummary: isLight ? "border-gray-200" : "border-gray-700",
+    bgSummaryCard: isLight ? "bg-white/50 border-gray-100" : "bg-gray-800/20 border-gray-700/50",
+    borderSummary: isLight ? "border-gray-200" : "border-gray-700/50",
 
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",

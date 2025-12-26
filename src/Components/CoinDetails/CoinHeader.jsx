@@ -22,7 +22,7 @@ function CoinHeader({
 }) {
   return (
     <div
-      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-xl shadow-md mb-6 ${TC.bgHeader} transition-colors duration-300`}
+      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-xl mb-6 ${TC.bgHeader} transition-colors duration-300`}
     >
       <div className="px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
@@ -39,8 +39,8 @@ function CoinHeader({
                 </h1>
                 <span
                   className={`text-xs md:text-sm uppercase px-2 py-1 rounded-lg ${isLight
-                      ? "bg-cyan-100 text-cyan-700"
-                      : "bg-cyan-500/20 text-cyan-400"
+                    ? "bg-cyan-100 text-cyan-700"
+                    : "bg-cyan-500/20 text-cyan-400"
                     }`}
                 >
                   {coin.symbol}
@@ -49,8 +49,8 @@ function CoinHeader({
                   onClick={toggleWatchlist}
                   disabled={loadingWatchlist}
                   className={`text-lg md:text-xl transition-transform ${loadingWatchlist
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:scale-110"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-110"
                     } ${isInWatchlist ? "text-yellow-400" : "text-gray-400"}`}
                 >
                   {isInWatchlist ? <FaStar /> : <FaRegStar />}

@@ -43,27 +43,26 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
       {stats.map((stat, i) => (
         <div
           key={i}
-          className={`rounded-lg md:rounded-2xl p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
+          className={`rounded-lg md:rounded-2xl p-3 md:p-4 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
         >
           <div className="flex items-center justify-between mb-2">
             <div
-              className={`p-2 rounded-lg ${
-                stat.color === "cyan"
+              className={`p-2 rounded-lg ${stat.color === "cyan"
                   ? isLight
                     ? "bg-cyan-50 text-cyan-600"
                     : "bg-cyan-500/10 text-cyan-400"
                   : stat.color === "purple"
-                  ? isLight
-                    ? "bg-purple-50 text-purple-600"
-                    : "bg-purple-500/10 text-purple-400"
-                  : stat.color === "green"
-                  ? isLight
-                    ? "bg-green-50 text-green-600"
-                    : "bg-green-500/10 text-green-400"
-                  : isLight
-                  ? "bg-red-50 text-red-600"
-                  : "bg-red-500/10 text-red-400"
-              }`}
+                    ? isLight
+                      ? "bg-purple-50 text-purple-600"
+                      : "bg-purple-500/10 text-purple-400"
+                    : stat.color === "green"
+                      ? isLight
+                        ? "bg-green-50 text-green-600"
+                        : "bg-green-500/10 text-green-400"
+                      : isLight
+                        ? "bg-red-50 text-red-600"
+                        : "bg-red-500/10 text-red-400"
+                }`}
             >
               <stat.icon className="text-lg" />
             </div>

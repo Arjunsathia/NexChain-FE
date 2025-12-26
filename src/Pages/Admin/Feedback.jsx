@@ -20,17 +20,17 @@ const AdminFeedback = () => {
 
       // Glassmorphism Cards - Synced with Admin Sidebar exact styling
       bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
       // Stat Cards - Match sidebar styling with hover effect
       bgStatsCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card hover:bg-white/80"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card hover:bg-gray-800/80",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card hover:bg-white/80 hover:shadow-lg"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 hover:bg-gray-800/80",
 
       bgItem: isLight
         ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-        : "bg-transparent hover:bg-white/5 border border-white/5 isolation-isolate",
+        : "bg-transparent hover:bg-white/5 isolation-isolate",
 
       bgInput: isLight
         ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"

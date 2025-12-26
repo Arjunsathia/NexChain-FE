@@ -12,8 +12,8 @@ const TransactionHistory = () => {
 
   const TC = useMemo(() => ({
     bgContainer: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card rounded-xl"
-      : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card rounded-xl",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card rounded-xl"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 rounded-xl",
 
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
@@ -22,14 +22,14 @@ const TransactionHistory = () => {
     bgIcon: isLight ? "p-1.5 bg-blue-50 text-blue-600 rounded-lg" : "p-1.5 bg-blue-500/10 text-blue-400 rounded-lg",
     iconColor: isLight ? "text-blue-600" : "text-blue-400",
 
-    bgFilterContainer: isLight ? "bg-gray-100/80 border-gray-200" : "bg-white/5 border-white/5",
+    bgFilterContainer: isLight ? "bg-gray-100/80 border-gray-200" : "bg-gray-800/50 border-gray-700/50",
     textFilterDefault: isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white",
 
     bgBuySummary: isLight ? "bg-emerald-50/50 border-emerald-100" : "bg-emerald-500/5 border-emerald-500/10",
     bgSellSummary: isLight ? "bg-rose-50/50 border-rose-100" : "bg-rose-500/5 border-rose-500/10",
 
     bgItem: isLight ? "bg-white hover:bg-blue-50/50" : "bg-transparent hover:bg-white/5",
-    borderItem: isLight ? "border-gray-100" : "border-white/5",
+    borderItem: isLight ? "border-gray-100" : "border-gray-700/50",
 
     bgBuyIcon: isLight ? "bg-emerald-100 text-emerald-600" : "bg-emerald-500/20 text-emerald-400",
     bgSellIcon: isLight ? "bg-rose-100 text-rose-600" : "bg-rose-500/20 text-rose-400",

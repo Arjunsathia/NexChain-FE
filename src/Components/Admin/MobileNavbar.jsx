@@ -31,7 +31,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     // Glassmorphism & Backgrounds
     navContainer: isLight
       ? "bg-white/80 backdrop-blur-xl border border-white/40 shadow-sm"
-      : "bg-gray-900/80 backdrop-blur-xl border border-white/5 shadow-lg",
+      : "bg-gray-900/95 backdrop-blur-none border border-gray-700/50 shadow-none",
 
     // Typography
     textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -42,12 +42,12 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     itemHover: isLight ? "hover:bg-gray-100" : "hover:bg-white/5",
     activeItem: isLight
       ? "bg-blue-50 text-blue-600 shadow-inner"
-      : "bg-blue-500/10 text-blue-400 border border-blue-500/10",
+      : "bg-blue-500/10 text-blue-400",
 
     // Stats Cards
     statCard: isLight
       ? "bg-gray-50 border border-gray-100"
-      : "bg-black/20 border border-white/5",
+      : "bg-gray-800/20",
   }), [isLight]);
 
   // Admin Sidebar Menus

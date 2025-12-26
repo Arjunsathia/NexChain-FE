@@ -14,8 +14,8 @@ function RecentActivity() {
 
     // Glassmorphism Card Style
     bgCard: isLight
-      ? "bg-white/80 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
-      : "bg-gray-900/40 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5",
+      ? "bg-white/80 backdrop-blur-md shadow-md border border-white/40"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     // Header
     bgIcon: isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400",

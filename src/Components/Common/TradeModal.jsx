@@ -1,4 +1,4 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+ import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 
 import toast from "react-hot-toast";
@@ -39,8 +39,6 @@ function TradeModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-
-  const [successData, setSuccessData] = useState(null);
 
 
   const [orderType, setOrderType] = useState("market");
@@ -145,13 +143,13 @@ function TradeModal({
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       setIsVisible(false);
-      setTimeout(onClose, 200);
+      setTimeout(onClose, 350);
     }
   };
 
   const handleClose = useCallback(() => {
     setIsVisible(false);
-    setTimeout(onClose, 200);
+    setTimeout(onClose, 350);
   }, [onClose]);
 
   const holdingsSummary = useMemo(() => {
@@ -227,7 +225,6 @@ function TradeModal({
       setSlippage(1.0);
       setIsSubmitting(false);
       setIsVisible(false);
-      setSuccessData(null);
       setIsAlertMode(initialAlertMode || false);
 
 
@@ -256,7 +253,7 @@ function TradeModal({
     } else {
       setIsVisible(false);
     }
-  }, [show, coin, type, shouldShowHoldingsInfo, initialAlertMode]);
+  }, [show, coin]);
 
 
 
@@ -455,12 +452,8 @@ function TradeModal({
 
           if (res.data.success) {
             toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
-            setSuccessData({
-              ...orderData,
-              price: parseFloat(limitPrice),
-              total: parseFloat(coinAmount) * parseFloat(limitPrice),
-              newBalance: res.data.newBalance
-            });
+
+
             refreshBalance();
             refreshPurchasedCoins();
             handleClose();
@@ -555,6 +548,7 @@ function TradeModal({
               if (refreshPurchasedCoins) {
                 await refreshPurchasedCoins();
               }
+              handleClose();
             } else {
               throw new Error(result.error || "Sell failed");
             }
@@ -751,31 +745,7 @@ function TradeModal({
       });
 
 
-      const isFirstEverPurchase = !purchasedCoins || purchasedCoins.length === 0;
-
-
-
-
-
-      if (shouldShowHoldingsInfo) {
-
-        handleClose();
-      } else {
-
-        if (isFirstEverPurchase && tradeType === 'buy') {
-          setSuccessData({
-            type: tradeType,
-            coinName: coin.name || coin.coinName,
-            symbol: coin.symbol || coin.coinSymbol,
-            amount: parseFloat(coinAmount),
-            price: parseFloat(currentPrice),
-            total: parseFloat(calculateTotal),
-            isFirstPurchase: true
-          });
-        } else {
-          handleClose();
-        }
-      }
+      handleClose();
     } catch (error) {
       console.error("Trade error:", error);
       const errorMessage =
@@ -802,112 +772,104 @@ function TradeModal({
 
   if (!coin) return null;
 
-  if (successData) {
-    return (
-      <PurchaseSuccessModal
-        show={isVisible}
-        onClose={handleClose}
-        data={successData}
-        isFirstPurchase={successData.isFirstPurchase}
-      />
-    );
-  }
-
   const symbol = coin.symbol?.toUpperCase() || coin.coinSymbol?.toUpperCase();
   const coinName = coin.name || coin.coinName;
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        } ${isLight ? "bg-black/30" : "bg-black/70"}`}
-      onClick={handleBackdropClick}
-    >
-      <div
-        className={`${TC.bgModal
-          } rounded-3xl shadow-2xl w-[96vw] md:max-w-xl md:w-full mx-auto max-h-[90vh] md:max-h-[92vh] overflow-hidden transition-all duration-300 ease-out origin-center ${isVisible
-            ? "opacity-100 translate-y-0 scale-100"
-            : "opacity-0 translate-y-4 scale-95"
-          }`}
-      >
-        <TradeModalHeader
-          coin={coin}
-          coinName={coinName}
-          symbol={symbol}
-          currentPrice={currentPrice}
-          shouldShowHoldingsInfo={shouldShowHoldingsInfo}
-          activeTab={activeTab}
-          isBuyOperation={isBuyOperation}
-          isLight={isLight}
-          TC={TC}
-          handleClose={handleClose}
-        />
+    <>
 
-        {shouldShowHoldingsInfo && (
-          <TradeModalTabs
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          } ${isLight ? "bg-black/30" : "bg-black/70"}`}
+        onClick={handleBackdropClick}
+      >
+        <div
+          className={`${TC.bgModal
+            } rounded-3xl shadow-2xl w-[96vw] md:max-w-xl md:w-full mx-auto max-h-[90vh] md:max-h-[92vh] overflow-hidden transition-all duration-300 ease-out origin-center ${isVisible
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-4 scale-95"
+            }`}
+        >
+          <TradeModalHeader
+            coin={coin}
+            coinName={coinName}
+            symbol={symbol}
+            currentPrice={currentPrice}
+            shouldShowHoldingsInfo={shouldShowHoldingsInfo}
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            isBuyOperation={isBuyOperation}
             isLight={isLight}
             TC={TC}
+            handleClose={handleClose}
           />
-        )}
 
-        <div className="p-2 sm:p-4 overflow-y-auto max-h-[calc(75vh-100px)] custom-scrollbar">
-          {shouldShowHoldingsInfo && holdingsSummary && (
-            <HoldingsInfo
-              holdingsSummary={holdingsSummary}
+          {shouldShowHoldingsInfo && (
+            <TradeModalTabs
               activeTab={activeTab}
-              isLight={isLight}
-              TC={TC}
-              symbol={symbol}
-            />
-          )}
-
-          {(!shouldShowHoldingsInfo || activeTab !== "details") && (
-            <TransactionForm
-              coinAmount={coinAmount}
-              handleCoinAmountChange={handleCoinAmountChange}
-              usdAmount={usdAmount}
-              handleUsdAmountChange={handleUsdAmountChange}
-              shouldShowSellAll={shouldShowSellAll}
-              handleSellAll={handleSellAll}
-              setMaxAmount={setMaxAmount}
-              maxAvailable={maxAvailable}
-              symbol={symbol}
-              currentPrice={currentPrice}
-              TC={TC}
-              slippage={slippage}
-              setSlippage={setSlippage}
-              isLight={isLight}
-              calculateTotal={calculateTotal}
-              isBuyOperation={isBuyOperation}
-              handleSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
-              orderType={orderType}
-              setOrderType={setOrderType}
-              limitPrice={limitPrice}
-              handleLimitPriceChange={handleLimitPriceChange}
-              isAlertMode={isAlertMode}
-              setIsAlertMode={setIsAlertMode}
-              alertTargetPrice={alertTargetPrice}
-              setAlertTargetPrice={setAlertTargetPrice}
-              stopPrice={stopPrice}
-              setStopPrice={setStopPrice}
-            />
-          )}
-
-          {shouldShowHoldingsInfo && activeTab === "details" && (
-            <HoldingsActions
               setActiveTab={setActiveTab}
+              isLight={isLight}
               TC={TC}
-              currentPrice={currentPrice}
-              holdingsSummary={holdingsSummary}
             />
           )}
 
+          <div className="p-2 sm:p-4 overflow-y-auto max-h-[calc(75vh-100px)] custom-scrollbar">
+            {shouldShowHoldingsInfo && holdingsSummary && (
+              <HoldingsInfo
+                holdingsSummary={holdingsSummary}
+                activeTab={activeTab}
+                isLight={isLight}
+                TC={TC}
+                symbol={symbol}
+              />
+            )}
 
+            {(!shouldShowHoldingsInfo || activeTab !== "details") && (
+              <TransactionForm
+                coinAmount={coinAmount}
+                handleCoinAmountChange={handleCoinAmountChange}
+                usdAmount={usdAmount}
+                handleUsdAmountChange={handleUsdAmountChange}
+                shouldShowSellAll={shouldShowSellAll}
+                handleSellAll={handleSellAll}
+                setMaxAmount={setMaxAmount}
+                maxAvailable={maxAvailable}
+                symbol={symbol}
+                currentPrice={currentPrice}
+                TC={TC}
+                slippage={slippage}
+                setSlippage={setSlippage}
+                isLight={isLight}
+                calculateTotal={calculateTotal}
+                isBuyOperation={isBuyOperation}
+                handleSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                orderType={orderType}
+                setOrderType={setOrderType}
+                limitPrice={limitPrice}
+                handleLimitPriceChange={handleLimitPriceChange}
+                isAlertMode={isAlertMode}
+                setIsAlertMode={setIsAlertMode}
+                alertTargetPrice={alertTargetPrice}
+                setAlertTargetPrice={setAlertTargetPrice}
+                stopPrice={stopPrice}
+                setStopPrice={setStopPrice}
+              />
+            )}
+
+            {shouldShowHoldingsInfo && activeTab === "details" && (
+              <HoldingsActions
+                setActiveTab={setActiveTab}
+                TC={TC}
+                currentPrice={currentPrice}
+                holdingsSummary={holdingsSummary}
+              />
+            )}
+
+
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

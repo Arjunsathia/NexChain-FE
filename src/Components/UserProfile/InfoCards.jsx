@@ -18,8 +18,8 @@ function InfoCards() {
     textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
     bgCard: isLight
-      ? "bg-white/80 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40"
-      : "bg-gray-900/40 backdrop-blur-xl shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5",
+      ? "bg-white/80 backdrop-blur-xl shadow-md border border-white/40"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     textValueHover: isLight ? "group-hover:text-blue-600" : "group-hover:text-cyan-300",
 

@@ -44,7 +44,7 @@ function LatestUsers({ users, isLoading, TC }) {
           users.map((user, i) => (
             <div
               key={user.id ?? i}
-              className={`group flex items-center gap-3 p-3 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-lg hover:shadow-black/5`}
+              className={`group flex items-center gap-3 p-3 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-md hover:shadow-black/5`}
             >
               {/* Avatar Section */}
               <div className="relative">

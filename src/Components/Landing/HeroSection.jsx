@@ -15,19 +15,19 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
     <section className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
-          {}
+          { }
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center lg:text-left space-y-3 md:space-y-8 order-2 lg:order-1"
+            className="text-center lg:text-left space-y-3 md:space-y-8 order-2 lg:order-1 relative z-20"
           >
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
               className={`inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase bg-white/5 text-[#A5B4FC] border border-white/10 backdrop-blur-md`}
-            > 
+            >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#728AD5]"></span>
@@ -43,7 +43,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </h1>
 
             <p className={`text-sm md:text-xl max-w-xl mx-auto lg:mx-0 ${TC.textSecondary} leading-relaxed font-light font-manrope`}>
-              Experience institutional-grade crypto trading with real-time analytics, 
+              Experience institutional-grade crypto trading with real-time analytics,
               AI-powered insights, and zero-latency execution.
             </p>
 
@@ -65,7 +65,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </div>
           </motion.div>
 
-          {}
+          { }
           <motion.div
             initial={{ opacity: 0, scale: 0.5, x: 0 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -73,12 +73,12 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0"
             style={{ y: fgParallaxY }}
           >
-             <HeroGlobe />
+            <HeroGlobe />
           </motion.div>
         </motion.div>
       </div>
 
-      {}
+      { }
       <PremiumScrollIndicator onClick={scrollToFeatures} TC={TC} />
     </section>
   );

@@ -47,7 +47,7 @@ function RecentReports({ reports, isLoading, TC }) {
           reports.slice(0, 4).map((report, i) => (
             <div
               key={report.id ?? i}
-              className={`group flex items-start gap-3 p-3.5 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-lg hover:shadow-black/5`}
+              className={`group flex items-start gap-3 p-3.5 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-md hover:shadow-black/5`}
             >
               {/* Icon Indicator */}
               <div className={`mt-0.5 p-2 rounded-lg ${getIconColor(report.type)} flex-shrink-0`}>

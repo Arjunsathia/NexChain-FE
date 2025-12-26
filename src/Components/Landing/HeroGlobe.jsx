@@ -7,7 +7,7 @@ const PARTICLES = [...Array(15)];
 
 const HeroGlobe = () => {
   // Generate orbital data nodes
-  const particles = useMemo(() => 
+  const particles = useMemo(() =>
     PARTICLES.map((_, i) => ({
       id: i,
       size: Math.random() * 3 + 2,
@@ -18,29 +18,29 @@ const HeroGlobe = () => {
     })), []);
 
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center perspective-[2000px] select-none">
-      
+    <div className="relative w-full h-[500px] flex items-center justify-center perspective-[2000px] select-none pointer-events-none">
+
       {/* 1. Atmospheric Glow Overlay */}
       <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-indigo-500/10 rounded-full blur-[80px] animate-pulse pointer-events-none" />
 
       {/* 2. The 3D Rotating Wireframe */}
-      <motion.div 
+      <motion.div
         className="relative w-[280px] h-[280px] md:w-[500px] md:h-[500px] preserve-3d will-change-transform"
         animate={{ rotateY: 360 }}
         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       >
         {/* Latitude Grid */}
         {LATITUDE_LINES.map((_, i) => (
-          <div 
+          <div
             key={`lat-${i}`}
             className="absolute inset-0 rounded-full border-[0.5px] border-indigo-400/20"
             style={{ transform: `rotateX(${i * (180 / LATITUDE_LINES.length)}deg)` }}
           />
         ))}
-        
+
         {/* Longitude Grid */}
         {LONGITUDE_LINES.map((_, i) => (
-          <div 
+          <div
             key={`long-${i}`}
             className="absolute inset-0 rounded-full border-[0.5px] border-cyan-400/20"
             style={{ transform: `rotateY(${i * (360 / LONGITUDE_LINES.length)}deg)` }}
@@ -56,14 +56,14 @@ const HeroGlobe = () => {
             animate={{ rotateZ: 360 }}
             transition={{ duration: p.duration, repeat: Infinity, ease: "linear", delay: p.delay }}
           >
-            <div 
+            <div
               className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full shadow-[0_0_10px_currentColor]"
-              style={{ 
-                width: p.size, 
-                height: p.size, 
+              style={{
+                width: p.size,
+                height: p.size,
                 backgroundColor: p.color,
                 color: p.color,
-                filter: `blur(${p.size < 4 ? '0px' : '1px'})` 
+                filter: `blur(${p.size < 4 ? '0px' : '1px'})`
               }}
             />
           </motion.div>
@@ -71,21 +71,21 @@ const HeroGlobe = () => {
       </motion.div>
 
       {/* 3. Glassmorphic Central Branding Core */}
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8 }}
         className="absolute z-20"
       >
         <div className="relative w-32 h-32 md:w-52 md:h-52 bg-slate-900/60 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/10 shadow-[0_0_60px_rgba(79,70,229,0.3)] overflow-hidden">
-          
+
           {/* Internal Kinetic Rings */}
-          <motion.div 
+          <motion.div
             animate={{ rotate: -360 }}
             transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
             className="absolute inset-2 border-t border-l border-indigo-500/40 rounded-full"
           />
-          <motion.div 
+          <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
             className="absolute inset-4 border-b border-r border-cyan-500/20 border-dashed rounded-full"
@@ -109,7 +109,8 @@ const HeroGlobe = () => {
         </div>
       </motion.div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .preserve-3d { transform-style: preserve-3d; }
       `}} />
     </div>

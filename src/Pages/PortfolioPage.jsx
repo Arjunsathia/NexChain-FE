@@ -38,12 +38,12 @@ const PortfolioPage = () => {
 
       // Glassmorphism Cards - Synced with Dashboard Quality
       bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
       bgHeader: isLight
         ? "bg-gray-100/50 border-b border-gray-200 isolation-isolate"
-        : "bg-white/5 border-b border-white/5 isolation-isolate",
+        : "bg-gray-900/95 border-b border-gray-700/50 isolation-isolate",
 
       bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
 
@@ -52,7 +52,7 @@ const PortfolioPage = () => {
         : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
 
       btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
 
       headerGradient: "from-blue-600 to-cyan-500",
 

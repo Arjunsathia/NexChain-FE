@@ -134,12 +134,12 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
     bgSidebar: isLight
-      ? "bg-white/90 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/40 transform-gpu"
-      : "bg-gray-900/60 backdrop-blur-md shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/5 transform-gpu",
+      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
     bgStats: isLight
       ? "bg-gray-50/80 border border-gray-100"
-      : "bg-gray-800/50 border border-gray-700/50", // Higher opacity for stability
+      : "bg-gray-800/20", // Cleaner look for internal stats, no border
 
     menuItemBase: isLight ? "text-gray-600 hover:bg-gray-100/80" : "text-gray-400 hover:bg-white/5",
 
@@ -305,7 +305,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
 
         {/* Background Decor */}
-        <div className={`absolute -bottom-20 -left-20 w-60 h-60 rounded-full blur-3xl pointer-events-none ${isLight ? 'bg-cyan-500/5' : 'bg-blue-500/5'}`} />
+
 
       </aside>
 

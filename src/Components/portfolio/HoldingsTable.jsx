@@ -20,12 +20,12 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) =>
       textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
       bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_6px_25px_rgba(0,0,0,0.12),0_0_10px_rgba(0,0,0,0.04)] border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-xl border border-gray-700/50 ring-1 ring-white/5 glass-card",
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
       bgHeader: isLight
         ? "bg-gray-100/50 border-b border-gray-200"
-        : "bg-white/5 border-b border-white/5",
+        : "bg-gray-900/95 border-b border-gray-700/50",
 
       bgHover: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
 
@@ -35,7 +35,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) =>
       textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
       textNegative: isLight ? "text-rose-600" : "text-rose-400",
 
-      btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+      btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
     };
   }, [isLight, passedTC]);
 
@@ -101,7 +101,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) =>
         )}
       </div>
 
-      <div className={`hidden md:block overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-white/5'} shadow-lg mx-2 mb-2`}>
+      <div className={`hidden md:block overflow-hidden rounded-xl border ${isLight ? 'border-gray-100' : 'border-gray-700/50'} shadow-md mx-2 mb-2`}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className={`${TC.bgHeader} uppercase tracking-wider text-xs font-bold`}>
