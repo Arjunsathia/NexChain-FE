@@ -1,6 +1,12 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || `http://${window.location.hostname}:5050/api`;
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
+  if (import.meta.env.DEV) return `http://${window.location.hostname}:5050/api`;
+  return "/api"; // Production fallback to relative path
+};
+
+const API_BASE_URL = getBaseUrl();
 
 const COINGECKO_BASE_URL = import.meta.env.DEV 
   ? "/api/coingecko" 
