@@ -382,235 +382,24 @@ const Users = () => {
           </div>
         </div>
 
-        {/* 2. Right Pane: Detail Panel (Updated: rounded-3xl & Glass Background) */}
-        <div className={`
-         fixed inset-0 z-[9999] md:static md:z-auto
-         ${TC.bgPanel} md:flex-1 md:rounded-3xl md:overflow-hidden
-         transition-all duration-200 ease-out
-         ${selectedUser
-            ? "translate-y-0 opacity-100 md:translate-y-0 md:translate-x-0"
-            : "translate-y-full opacity-100 pointer-events-none md:pointer-events-none md:w-0 md:opacity-0 md:translate-x-20 md:translate-y-0"}
-      `}>
-          {selectedUser && (
-            <div className="h-full w-full flex flex-col relative bg-transparent">
-              <div className="absolute top-4 right-4 z-40">
-                <button
-                  onClick={() => setSelectedUser(null)}
-                  className={`p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all`}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        {/* 2. Right Pane: Detail Panel (Responsive Portal Logic) */}
+        <UserDetailPane
+          selectedUser={selectedUser}
+          setSelectedUser={setSelectedUser}
+          TC={TC}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          userDetails={userDetails}
+          loadingDetails={loadingDetails}
+          setExpandedStat={setExpandedStat}
+          handleEdit={handleEdit}
+          userToDelete={userToDelete}
+          setUserToDelete={setUserToDelete}
+          setShowDeleteModal={setShowDeleteModal}
+          setShowMessageModal={setShowMessageModal}
+          isLight={isLight}
+        />
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {/* Cover - Updated styling to match Detail Panel roundedness */}
-                <div className="relative h-48 bg-gradient-to-r from-blue-600 to-indigo-700">
-                  <div className="absolute bottom-6 left-6 md:left-8 flex items-end gap-5">
-                    <div className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden border-white/20 bg-white/10 backdrop-blur-md`}>
-                      {selectedUser.image ? (
-                        <img src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-transparent">
-                          <User className="w-12 h-12 text-white/50" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="pb-1 mb-1">
-                      <h1 className="text-xl md:text-2xl font-black text-white drop-shadow-md">{selectedUser.name}</h1>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"} text-white`}>
-                          {selectedUser.recentlyActive ? "Active" : "Inactive"}
-                        </span>
-                        {selectedUser.role === 'admin' && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500 text-white">Admin</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-14 px-6 md:px-8 pb-10">
-                  <div className="flex flex-col-reverse md:flex-row md:items-center justify-between gap-6 mb-8">
-                    <div className="flex gap-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-                      {["Overview", "History", "Docs"].map(tab => (
-                        <button
-                          key={tab}
-                          onClick={() => setActiveTab(tab.toLowerCase())}
-                          className={`pb-2 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.toLowerCase() ? "text-blue-500 border-blue-500" : "text-gray-400 border-transparent hover:text-gray-500"
-                            }`}
-                        >
-                          {tab}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2 self-end md:self-auto">
-                      <button
-                        onClick={() => handleEdit(selectedUser)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5"
-                      >
-                        <Edit className="w-4 h-4" /> Edit Profile
-                      </button>
-                      {selectedUser.role !== 'admin' && (
-                        <button
-                          onClick={() => { setUserToDelete(selectedUser); setShowDeleteModal(true); }}
-                          className="p-2 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/30 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    {activeTab === "overview" && (
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <StatCard
-                            label="Joined"
-                            value={new Date(selectedUser.createdAt).toLocaleDateString()}
-                            icon={Calendar}
-                            colorClass="bg-blue-500"
-                            onClick={() => setExpandedStat('joined')}
-                          />
-                          <StatCard
-                            label="Balance"
-                            value={`$${userDetails.balance?.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                            icon={Wallet}
-                            colorClass="bg-green-500"
-                            loading={loadingDetails}
-                            onClick={() => setExpandedStat('balance')}
-                          />
-                          <StatCard
-                            label="Assets"
-                            value={userDetails.holdings?.length || 0}
-                            icon={FileText}
-                            colorClass="bg-purple-500"
-                            loading={loadingDetails}
-                            onClick={() => setExpandedStat('assets')}
-                          />
-                          <StatCard
-                            label="Status"
-                            value={selectedUser.recentlyActive ? "Active" : "Inactive"}
-                            icon={selectedUser.recentlyActive ? CheckCircle : Ban}
-                            colorClass={selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"}
-                            onClick={() => setExpandedStat('status')}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <div className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border} space-y-4`}>
-                            <h3 className={`font-bold ${TC.textPrimary}`}>Contact Information</h3>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Mail className="w-4 h-4 text-gray-500" /></div>
-                              <div>
-                                <p className={`text-xs ${TC.textSecondary}`}>Email Address</p>
-                                <p className={`text-sm font-medium ${TC.textPrimary}`}>{selectedUser.email}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Phone className="w-4 h-4 text-gray-500" /></div>
-                              <div>
-                                <p className={`text-xs ${TC.textSecondary}`}>Phone Number</p>
-                                <p className={`text-sm font-medium ${TC.textPrimary}`}>{selectedUser.phone || "Not Set"}</p>
-                              </div>
-                            </div>
-
-                            <div className="pt-2 flex gap-3">
-                              <button
-                                onClick={() => setShowMessageModal(true)}
-                                className={`flex-1 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${isLight ? "bg-blue-50 text-blue-600 hover:bg-blue-100" : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"}`}
-                              >
-                                <Mail className="w-4 h-4" /> Send Email
-                              </button>
-                            </div>
-                          </div>
-                          <div className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border}`}>
-                            <h3 className={`font-bold mb-4 ${TC.textPrimary}`}>Admin Notes</h3>
-                            <textarea
-                              className={`w-full h-32 p-3 rounded-xl resize-none outline-none text-sm ${isLight ? "bg-gray-50 text-gray-800" : "bg-[#0f111a] text-gray-300 border border-gray-800 focus:border-blue-500"}`}
-                              placeholder="Add note..."
-                            ></textarea>
-                            <button className="mt-3 w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2">Save Note</button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {activeTab === "history" && (
-                      <div className="space-y-4">
-                        {loadingDetails ? (
-                          <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
-                        ) : userDetails.transactions && userDetails.transactions.length > 0 ? (
-                          userDetails.transactions.map((tx) => (
-                            <div key={tx._id} className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgCard} ${TC.border}`}>
-                              <div className="flex items-center gap-4">
-                                <div className={`p-2 rounded-full ${tx.type === 'buy' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                  {tx.type === 'buy' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
-                                </div>
-                                <div>
-                                  <p className={`font-bold ${TC.textPrimary}`}>{tx.coinName} ({tx.coinSymbol?.toUpperCase()})</p>
-                                  <p className={`text-xs ${TC.textSecondary}`}>{new Date(tx.transactionDate).toLocaleString()}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className={`font-bold ${tx.type === 'buy' ? 'text-green-500' : 'text-red-500'}`}>
-                                  {tx.type === 'buy' ? '+' : '-'}{tx.quantity?.toFixed(6)}
-                                </p>
-                                <p className={`text-xs ${TC.textSecondary}`}>${tx.totalValue?.toFixed(2)}</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className={`h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl ${isLight ? "border-gray-200" : "border-gray-800"}`}>
-                            <Clock className="w-10 h-10 text-gray-300 mb-3" />
-                            <p className={`font-bold ${TC.textSecondary}`}>No transactions found</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {activeTab === "docs" && (
-                      <div className="grid grid-cols-2 gap-4">
-                        {userDetails.kycData?.documentImage ? (
-                          <div className="col-span-2">
-                            <div className={`p-4 rounded-xl border ${TC.bgCard} ${TC.border} mb-4`}>
-                              <h3 className={`font-bold mb-2 ${TC.textPrimary}`}>KYC Status: <span className={`${userDetails.kycStatus === 'verified' ? 'text-green-500' : 'text-yellow-500'} uppercase`}>{userDetails.kycStatus}</span></h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <p className={`text-xs ${TC.textSecondary}`}>Full Name</p>
-                                  <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.fullName}</p>
-                                </div>
-                                <div>
-                                  <p className={`text-xs ${TC.textSecondary}`}>ID Type</p>
-                                  <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.idType}</p>
-                                </div>
-                                <div>
-                                  <p className={`text-xs ${TC.textSecondary}`}>ID Number</p>
-                                  <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.idNumber}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className={`rounded-xl border border-dashed overflow-hidden ${isLight ? "border-gray-200" : "border-gray-800"}`}>
-                              <img
-                                src={userDetails.kycData.documentImage.startsWith('http') ? userDetails.kycData.documentImage : `${SERVER_URL}/uploads/${userDetails.kycData.documentImage}`}
-                                alt="KYC Document"
-                                className="w-full h-auto object-contain max-h-[500px]"
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div className={`h-40 col-span-2 rounded-xl border-2 border-dashed flex items-center justify-center ${isLight ? "border-gray-200" : "border-gray-800"}`}>
-                              <div className="text-center">
-                                <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                <p className={`text-xs font-bold ${TC.textSecondary}`}>No KYC Documents Submitted</p>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
 
         <UserForm
           open={showUserForm}
@@ -654,4 +443,307 @@ const Users = () => {
     </div >
   );
 };
+const UserDetailPane = ({
+  selectedUser,
+  setSelectedUser,
+  TC,
+  activeTab,
+  setActiveTab,
+  userDetails,
+  loadingDetails,
+  setExpandedStat,
+  handleEdit,
+  userToDelete,
+  setUserToDelete,
+  setShowDeleteModal,
+  setShowMessageModal,
+  isLight
+}) => {
+  // Simple media query hook
+  const [isDesktop, setIsDesktop] = useState(window.matchMedia("(min-width: 768px)").matches);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const listener = () => setIsDesktop(media.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
+  const content = (
+    <div className={`
+      fixed inset-0 z-[99999] md:static md:z-auto
+      w-full h-[100dvh] md:w-auto md:h-auto
+      ${isLight ? 'bg-white' : 'bg-gray-950'} md:bg-transparent ${/* Solid bg on mobile, transparent/variable on desktop */ ""}
+      md:flex-1 md:rounded-3xl md:overflow-hidden md:border md:border-gray-200 md:dark:border-gray-800
+      md:backdrop-blur-xl md:shadow-sm md:glass-card
+      transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)
+      flex flex-col
+      ${selectedUser
+        ? "translate-y-0 opacity-100 md:translate-y-0 md:translate-x-0"
+        : "translate-y-[110%] opacity-100 md:opacity-0 pointer-events-none md:pointer-events-none md:w-0 md:translate-x-10"}
+    `}>
+      {selectedUser && (
+        <div className="h-full w-full flex flex-col relative bg-transparent">
+          <div className="absolute top-4 right-4 z-40">
+            <button
+              onClick={() => setSelectedUser(null)}
+              className={`p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all`}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            {/* Cover - Updated styling to match Detail Panel roundedness */}
+            <div className="relative h-48 bg-gradient-to-r from-blue-600 to-indigo-700">
+              <div className="absolute bottom-6 left-6 md:left-8 flex items-end gap-5">
+                <div className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden border-white/20 bg-white/10 backdrop-blur-md`}>
+                  {selectedUser.image ? (
+                    <img src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-transparent">
+                      <User className="w-12 h-12 text-white/50" />
+                    </div>
+                  )}
+                </div>
+                <div className="pb-1 mb-1">
+                  <h1 className="text-xl md:text-2xl font-black text-white drop-shadow-md">{selectedUser.name}</h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"} text-white`}>
+                      {selectedUser.recentlyActive ? "Active" : "Inactive"}
+                    </span>
+                    {selectedUser.role === 'admin' && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500 text-white">Admin</span>}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-14 px-6 md:px-8 pb-10">
+              <div className="flex flex-col-reverse md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div className="flex gap-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+                  {["Overview", "History", "Docs"].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab.toLowerCase())}
+                      className={`pb-2 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.toLowerCase() ? "text-blue-500 border-blue-500" : "text-gray-400 border-transparent hover:text-gray-500"
+                        }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2 self-end md:self-auto">
+                  <button
+                    onClick={() => handleEdit(selectedUser)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5"
+                  >
+                    <Edit className="w-4 h-4" /> Edit Profile
+                  </button>
+                  {selectedUser.role !== 'admin' && (
+                    <button
+                      onClick={() => { setUserToDelete(selectedUser); setShowDeleteModal(true); }}
+                      className="p-2 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/30 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {activeTab === "overview" && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div
+                        onClick={() => setExpandedStat('joined')}
+                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
+                      >
+                        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0 relative z-10">
+                          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>Joined</p>
+                          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                            {new Date(selectedUser.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setExpandedStat('balance')}
+                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
+                      >
+                        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+                          <Wallet className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0 relative z-10">
+                          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>Balance</p>
+                          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                            {loadingDetails ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${userDetails.balance?.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setExpandedStat('assets')}
+                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
+                      >
+                        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0 relative z-10">
+                          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>Assets</p>
+                          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                            {loadingDetails ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : (userDetails.holdings?.length || 0)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setExpandedStat('status')}
+                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
+                      >
+                        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+                          {selectedUser.recentlyActive ? <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" /> : <Ban className="w-5 h-5 sm:w-6 sm:h-6" />}
+                        </div>
+                        <div className="flex-1 min-w-0 relative z-10">
+                          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>Status</p>
+                          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                            {selectedUser.recentlyActive ? "Active" : "Inactive"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border} space-y-4`}>
+                        <h3 className={`font-bold ${TC.textPrimary}`}>Contact Information</h3>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Mail className="w-4 h-4 text-gray-500" /></div>
+                          <div>
+                            <p className={`text-xs ${TC.textSecondary}`}>Email Address</p>
+                            <p className={`text-sm font-medium ${TC.textPrimary}`}>{selectedUser.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Phone className="w-4 h-4 text-gray-500" /></div>
+                          <div>
+                            <p className={`text-xs ${TC.textSecondary}`}>Phone Number</p>
+                            <p className={`text-sm font-medium ${TC.textPrimary}`}>{selectedUser.phone || "Not Set"}</p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 flex gap-3">
+                          <button
+                            onClick={() => setShowMessageModal(true)}
+                            className={`flex-1 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${isLight ? "bg-blue-50 text-blue-600 hover:bg-blue-100" : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"}`}
+                          >
+                            <Mail className="w-4 h-4" /> Send Email
+                          </button>
+                        </div>
+                      </div>
+                      <div className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border}`}>
+                        <h3 className={`font-bold mb-4 ${TC.textPrimary}`}>Admin Notes</h3>
+                        <textarea
+                          className={`w-full h-32 p-3 rounded-xl resize-none outline-none text-sm ${isLight ? "bg-gray-50 text-gray-800" : "bg-[#0f111a] text-gray-300 border border-gray-800 focus:border-blue-500"}`}
+                          placeholder="Add note..."
+                        ></textarea>
+                        <button className="mt-3 w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2">Save Note</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {activeTab === "history" && (
+                  <div className="space-y-4">
+                    {loadingDetails ? (
+                      <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
+                    ) : userDetails.transactions && userDetails.transactions.length > 0 ? (
+                      userDetails.transactions.map((tx) => (
+                        <div key={tx._id} className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgCard} ${TC.border}`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`p-2 rounded-full ${tx.type === 'buy' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                              {tx.type === 'buy' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <p className={`font-bold ${TC.textPrimary}`}>{tx.coinName} ({tx.coinSymbol?.toUpperCase()})</p>
+                              <p className={`text-xs ${TC.textSecondary}`}>{new Date(tx.transactionDate).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-bold ${tx.type === 'buy' ? 'text-green-500' : 'text-red-500'}`}>
+                              {tx.type === 'buy' ? '+' : '-'}{tx.quantity?.toFixed(6)}
+                            </p>
+                            <p className={`text-xs ${TC.textSecondary}`}>${tx.totalValue?.toFixed(2)}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className={`h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl ${isLight ? "border-gray-200" : "border-gray-800"}`}>
+                        <Clock className="w-10 h-10 text-gray-300 mb-3" />
+                        <p className={`font-bold ${TC.textSecondary}`}>No transactions found</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeTab === "docs" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {userDetails.kycData?.documentImage ? (
+                      <div className="col-span-2">
+                        <div className={`p-4 rounded-xl border ${TC.bgCard} ${TC.border} mb-4`}>
+                          <h3 className={`font-bold mb-2 ${TC.textPrimary}`}>KYC Status: <span className={`${userDetails.kycStatus === 'verified' ? 'text-green-500' : 'text-yellow-500'} uppercase`}>{userDetails.kycStatus}</span></h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <p className={`text-xs ${TC.textSecondary}`}>Full Name</p>
+                              <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.fullName}</p>
+                            </div>
+                            <div>
+                              <p className={`text-xs ${TC.textSecondary}`}>ID Type</p>
+                              <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.idType}</p>
+                            </div>
+                            <div>
+                              <p className={`text-xs ${TC.textSecondary}`}>ID Number</p>
+                              <p className={`text-sm font-medium ${TC.textPrimary}`}>{userDetails.kycData.idNumber}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className={`rounded-xl border border-dashed overflow-hidden ${isLight ? "border-gray-200" : "border-gray-800"}`}>
+                          <img
+                            src={userDetails.kycData.documentImage.startsWith('http') ? userDetails.kycData.documentImage : `${SERVER_URL}/uploads/${userDetails.kycData.documentImage}`}
+                            alt="KYC Document"
+                            className="w-full h-auto object-contain max-h-[500px]"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className={`h-40 col-span-2 rounded-xl border-2 border-dashed flex items-center justify-center ${isLight ? "border-gray-200" : "border-gray-800"}`}>
+                          <div className="text-center">
+                            <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                            <p className={`text-xs font-bold ${TC.textSecondary}`}>No KYC Documents Submitted</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // If NOT Desktop (Mobile) and a user is selected, render via Portal to body.
+  if (!isDesktop) {
+    return ReactDOM.createPortal(content, document.body);
+  }
+
+  // Otherwise (Desktop), render inline.
+  return content;
+};
+
 export default Users;
