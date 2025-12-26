@@ -12,12 +12,12 @@ const UserStatDetailModal = ({ isOpen, onClose, statType, user, userDetails, TC,
                         <h4 className={`text-sm font-bold uppercase tracking-wider ${TC.textSecondary}`}>Asset Holdings</h4>
                         {userDetails.holdings && userDetails.holdings.length > 0 ? (
                             <div className={`overflow-hidden rounded-xl border ${isLight ? "border-gray-200" : "border-white/10"}`}>
-                                <table className="w-full text-sm text-left">
+                                <table className="w-full text-xs sm:text-sm text-left">
                                     <thead className={isLight ? "bg-gray-50 text-gray-500" : "bg-white/5 text-gray-400"}>
                                         <tr>
-                                            <th className="px-4 py-3 font-bold">Coin</th>
-                                            <th className="px-4 py-3 font-bold text-right">Quantity</th>
-                                            <th className="px-4 py-3 font-bold text-right">Tot. Invested</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold">Coin</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-right">Quantity</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-right">Tot. Invested</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -141,24 +141,24 @@ const UserStatDetailModal = ({ isOpen, onClose, statType, user, userDetails, TC,
     return (
         <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <div
-                className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} scale-in-95 animate-in duration-200`}
+                className={`w-[90vw] sm:w-full sm:max-w-md rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} scale-in-95 animate-in duration-200`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className={`px-6 py-4 border-b flex justify-between items-center ${isLight ? "border-gray-100" : "border-gray-800"}`}>
-                    <h3 className={`text-lg font-bold ${TC.textPrimary}`}>
+                <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b flex justify-between items-center ${isLight ? "border-gray-100" : "border-gray-800"}`}>
+                    <h3 className={`text-base sm:text-lg font-bold ${TC.textPrimary}`}>
                         {getTitle()}
                     </h3>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-full transition-colors ${isLight ? "hover:bg-gray-100 text-gray-500" : "hover:bg-white/10 text-gray-400"}`}
+                        className={`p-1.5 sm:p-2 rounded-full transition-colors ${isLight ? "hover:bg-gray-100 text-gray-500" : "hover:bg-white/10 text-gray-400"}`}
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
                     {renderContent()}
                 </div>
             </div>
