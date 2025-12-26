@@ -220,90 +220,98 @@ const Users = () => {
   }), [isLight]);
 
   // Move sub-components outside or memoize them
-  const UserListItem = useMemo(() => ({ user }) => (
-    <div
-      onClick={() => setSelectedUser(user)}
-      className={`
+  const UserListItem = useMemo(() => {
+    const Component = ({ user }) => (
+      <div
+        onClick={() => setSelectedUser(user)}
+        className={`
         group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
         transition-all duration-300 border-l-4 relative overflow-hidden
         ${selectedUser?._id === user._id
-          ? `${isLight ? 'bg-white shadow-sm' : 'bg-white/10 shadow-none'} border-blue-500 scale-[1.02] z-10`
-          : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
-        }
+            ? `${isLight ? 'bg-white shadow-sm' : 'bg-white/10 shadow-none'} border-blue-500 scale-[1.02] z-10`
+            : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
+          }
       `}
-    >
-      {/* Subtle background glow on hover */}
-      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
+      >
+        {/* Subtle background glow on hover */}
+        <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
         ${isLight ? 'bg-gradient-to-r from-blue-50/50 to-transparent' : 'bg-gradient-to-r from-blue-500/5 to-transparent'}`}
-      />
+        />
 
-      <div className="relative flex-shrink-0 z-10">
-        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md 
+        <div className="relative flex-shrink-0 z-10">
+          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md 
           ${selectedUser?._id === user._id ? 'ring-2 ring-blue-500/20' : ''} 
           group-hover:shadow-blue-500/30 transition-all`}>
-          <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
-            {user.image ? (
-              <img
-                src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
-                alt={user.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            ) : (
-              <User className="w-5 h-5 text-gray-400" />
-            )}
+            <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
+              {user.image ? (
+                <img
+                  src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
+                  alt={user.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <User className="w-5 h-5 text-gray-400" />
+              )}
+            </div>
           </div>
-        </div>
-        {/* Status indicator with higher contrast border */}
-        <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
+          {/* Status indicator with higher contrast border */}
+          <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
           ${isLight ? "border-white" : "border-gray-800"} 
           ${user.recentlyActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}
-        />
-      </div>
-
-      <div className="flex-1 min-w-0 relative z-10">
-        <div className="flex justify-between items-center mb-0.5">
-          <h4 className={`text-sm font-bold truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-500' : TC.textPrimary}`}>
-            {user.name}
-          </h4>
-          {user.role === 'admin' && (
-            <div className="p-1 rounded-md bg-blue-500/10">
-              <Shield className="w-3 h-3 text-blue-500" />
-            </div>
-          )}
+          />
         </div>
-        <div className="flex items-center justify-between">
-          <p className={`text-[10px] sm:text-xs truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-400/80' : TC.textSecondary}`}>
-            {user.email}
-          </p>
-          <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
+
+        <div className="flex-1 min-w-0 relative z-10">
+          <div className="flex justify-between items-center mb-0.5">
+            <h4 className={`text-sm font-bold truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-500' : TC.textPrimary}`}>
+              {user.name}
+            </h4>
+            {user.role === 'admin' && (
+              <div className="p-1 rounded-md bg-blue-500/10">
+                <Shield className="w-3 h-3 text-blue-500" />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between">
+            <p className={`text-[10px] sm:text-xs truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-400/80' : TC.textSecondary}`}>
+              {user.email}
+            </p>
+            <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
             ${selectedUser?._id === user._id
-              ? 'bg-blue-500 text-white'
-              : 'bg-blue-500/10 text-blue-500/70 border border-blue-500/10'}`}>
-            {user.role}
-          </span>
+                ? 'bg-blue-500 text-white'
+                : 'bg-blue-500/10 text-blue-500/70 border border-blue-500/10'}`}>
+              {user.role}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  ), [selectedUser, isLight, TC]);
+    );
+    Component.displayName = "UserListItem";
+    return Component;
+  }, [selectedUser, isLight, TC]);
 
-  const StatCard = useMemo(() => ({ label, value, icon: Icon, loading, onClick }) => (
-    <div
-      onClick={onClick}
-      className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-    >
-      <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
+  const StatCard = useMemo(() => {
+    const Component = ({ label, value, icon: Icon, loading, onClick }) => (
+      <div
+        onClick={onClick}
+        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
+      >
+        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
 
-      <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+        </div>
+        <div className="flex-1 min-w-0 relative z-10">
+          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>{label}</p>
+          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : value}
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0 relative z-10">
-        <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>{label}</p>
-        <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
-          {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : value}
-        </p>
-      </div>
-    </div>
-  ), [TC]);
+    );
+    Component.displayName = "StatCard";
+    return Component;
+  }, [TC]);
 
   return (
     // Updated Layout: Vertical Flex for Header + Content
@@ -453,7 +461,6 @@ const UserDetailPane = ({
   loadingDetails,
   setExpandedStat,
   handleEdit,
-  userToDelete,
   setUserToDelete,
   setShowDeleteModal,
   setShowMessageModal,
@@ -479,8 +486,8 @@ const UserDetailPane = ({
       transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)
       flex flex-col
       ${selectedUser
-        ? "translate-y-0 opacity-100 md:translate-y-0 md:translate-x-0"
-        : "translate-y-[110%] opacity-100 md:opacity-0 pointer-events-none md:pointer-events-none md:w-0 md:translate-x-10"}
+        ? "translate-y-0 opacity-100 md:!translate-y-0 md:translate-x-0"
+        : "translate-y-[110%] opacity-100 md:opacity-0 pointers-events-none md:!translate-y-0 md:w-0 md:translate-x-20"}
     `}>
       {selectedUser && (
         <div className="h-full w-full flex flex-col relative bg-transparent">

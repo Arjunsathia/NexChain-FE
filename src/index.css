@@ -387,6 +387,11 @@ body {
   transition-property: background-color, color, background, border-color;
   transition-timing-function: ease-out;
   transition-duration: 0ms; 
+  background: var(--app-bg);
+  background-attachment: fixed;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 
