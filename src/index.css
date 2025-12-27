@@ -585,3 +585,7 @@ html {
   scrollbar-gutter: stable;
 }
 
+
+.will-change-transform {
+  will-change: transform;
+}

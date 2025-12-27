@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
 import TrendingCoins from "@/Components/Dashboard/TrendingCoins";
@@ -27,59 +28,36 @@ const coinToSymbol = {
 export default function Dashboard() {
   const isLight = useThemeCheck();
 
-  // Data State: Initialize from cache for instant data
-  const [topCoins, setTopCoins] = useState(() => {
-    try {
-      const cached = localStorage.getItem("dashboardTopCoins");
-      if (cached) return JSON.parse(cached);
-    } catch (e) {
-      console.error("Cache parse error", e);
+  // React Query for caching Top Coins (prevents reload on navigation)
+  const { data: topCoins = [], isLoading: loading } = useQuery({
+    queryKey: ['dashboardTopCoins'],
+    queryFn: async () => {
+      const data = await getCoins({ per_page: 5 });
+      if (Array.isArray(data)) {
+        return data.slice(0, 3);
+      }
+      return [];
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    refetchOnWindowFocus: false,
+  });
+
+  const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
+
+  // Sync selectedCoinId when data loads if not set (or typically default to bitcoin)
+  useEffect(() => {
+    if (topCoins.length > 0 && selectedCoinId === "bitcoin" && !topCoins.find(c => c.id === "bitcoin")) {
+      setSelectedCoinId(topCoins[0].id);
     }
-    return [];
-  });
+  }, [topCoins]);
 
-  const [selectedCoinId, setSelectedCoinId] = useState(() => {
-    if (topCoins.length > 0) return topCoins[0].id;
-    return "bitcoin";
-  });
-
-  const [loading, setLoading] = useState(() => topCoins.length === 0);
   const [liveData, setLiveData] = useState({});
-
   const ws = useRef(null);
-  const liveDataRef = useRef({});
   const bufferRef = useRef({});
 
   const handleCoinClick = (coinId) => {
     setSelectedCoinId(coinId);
   };
-
-  useEffect(() => {
-    liveDataRef.current = liveData;
-  }, [liveData]);
-
-  useEffect(() => {
-    const fetchTopCoins = async () => {
-      try {
-        const data = await getCoins({ per_page: 5 });
-        if (Array.isArray(data)) {
-          const topThree = data.slice(0, 3);
-          setTopCoins(topThree);
-          localStorage.setItem("dashboardTopCoins", JSON.stringify(topThree));
-
-          if (topCoins.length === 0 && topThree.length > 0) {
-            setSelectedCoinId(topThree[0].id);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load coins", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTopCoins();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (topCoins.length === 0) return;

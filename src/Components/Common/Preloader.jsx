@@ -2,100 +2,75 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const Preloader = () => {
-  const letters = "NEXCHAIN".split("");
-
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: "blur(20px)" }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050505] text-white overflow-hidden"
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#030303] text-white overflow-hidden"
     >
-      {}
-      <div className="absolute inset-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-purple-900/10 rounded-full blur-[120px]" />
+      {/* Cinematic Background - Deep, clean void */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.02)_0%,_rgba(0,0,0,0)_100%)] opacity-50 will-change-transform" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center">
-        {}
-        <div className="relative w-24 h-24 mb-12">
-          {}
+      <div className="relative z-10 flex flex-col items-center justify-center p-8" style={{ transform: 'translateZ(0)' }}>
+
+        {/* The "Nexus" - Advanced Kinetic Structure */}
+        <div className="relative w-32 h-32 mb-12 perspective-1000">
+
+          {/* Ring 1 - The Stabilizer (Slow, Horizontal) */}
           <motion.div
-            animate={{
-              boxShadow: [
-                "0 0 20px rgba(6,182,212,0.2)",
-                "0 0 60px rgba(6,182,212,0.6)",
-                "0 0 20px rgba(6,182,212,0.2)",
-              ],
-            }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 rounded-full bg-transparent"
+            animate={{ rotateX: [60, 70, 60], rotateZ: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 rounded-full border-[1px] border-white/20 will-change-transform"
+            style={{ borderTopColor: "rgba(255,255,255,0.8)", borderBottomColor: "transparent" }}
           />
 
-          {}
+          {/* Ring 2 - The Accelerator (Medium, Vertical-ish) */}
           <motion.div
-            className="absolute inset-0 rounded-full border border-cyan-500/20 border-t-cyan-400"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          
-          {}
-          <motion.div
-            className="absolute inset-2 rounded-full border border-blue-500/20 border-b-blue-400"
-            animate={{ rotate: -360 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            animate={{ rotateY: [60, 50, 60], rotateZ: -360 }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-2 rounded-full border-[1px] border-cyan-400/20 will-change-transform"
+            style={{ borderLeftColor: "rgba(34,211,238, 0.8)", borderRightColor: "transparent" }}
           />
 
-          {}
+          {/* Ring 3 - The Core (Fast, Omni) */}
           <motion.div
-            className="absolute inset-4 rounded-full border border-purple-500/20 border-l-purple-400"
-            animate={{ rotate: 180 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            animate={{ rotateX: [45, -45, 45], rotateY: [45, 45, 45], rotateZ: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-6 rounded-full border-[1px] border-blue-500/20 will-change-transform"
+            style={{ borderTopColor: "rgba(59,130,246, 0.9)", borderLeftColor: "transparent" }}
           />
 
-          {}
-          <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white shadow-[0_0_15px_white]" />
+          {/* Central Singularity Point */}
+          <motion.div
+            animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full shadow-[0_0_20px_white] will-change-transform"
+          />
+
         </div>
 
-        {}
-        <div className="flex overflow-hidden">
-          {letters.map((char, index) => (
-            <motion.span
-              key={index}
-              initial={{ y: 80, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: 0.5,
-                delay: 0.1 + index * 0.04,
-                ease: [0.215, 0.61, 0.355, 1],
-              }}
-              className="text-5xl md:text-6xl font-bold font-outfit tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-500"
-            >
-              {char}
-            </motion.span>
-          ))}
-        </div>
-
-        {}
-        <motion.div
-          initial={{ opacity: 0, letterSpacing: "0.8em" }}
-          animate={{ opacity: 1, letterSpacing: "0.3em" }}
-          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-          className="mt-4 text-xs font-medium text-cyan-500/80 uppercase"
-        >
-          The Future of Trading
-        </motion.div>
-
-        {}
-        <div className="mt-16 w-32 h-[1px] bg-gray-800 relative overflow-hidden">
+        {/* Brand Name - Pure & Clean */}
+        <div className="relative overflow-hidden">
+          <motion.h1
+            initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }} // smooth custom bezier
+            className="text-4xl font-light font-outfit tracking-[0.3em] text-white select-none will-change-transform"
+          >
+            NEXCHAIN
+          </motion.h1>
+          {/* Reflection glint */}
           <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: "100%" }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+            initial={{ x: "-100%", opacity: 0 }}
+            animate={{ x: "100%", opacity: [0, 1, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 will-change-transform"
           />
         </div>
+
       </div>
     </motion.div>
   );

@@ -23,20 +23,7 @@ export default function Navbar() {
     const [unreadCount, setUnreadCount] = useState(0);
     const bellRef = useRef(null);
 
-    const TC = useMemo(() => ({
-        navBg: isLight
-            ? "bg-white/80 backdrop-blur-md shadow-sm border border-white/40"
-            : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-800",
-        textPrimary: isLight ? "text-gray-900" : "text-white",
-        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-        linkIdle: isLight ? "text-gray-600 hover:bg-gray-50/80" : "text-gray-400 hover:bg-white/5",
-        linkActive: isLight
-            ? "text-blue-600 bg-blue-50 font-semibold"
-            : "text-cyan-400 bg-cyan-900/20 font-semibold",
-        actionBtnHover: isLight ? "hover:bg-gray-100 text-gray-600" : "hover:bg-gray-800 text-gray-300",
-        logoGradient: "from-blue-600 to-cyan-500",
-        textGradient: "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent",
-    }), [isLight]);
+
 
     useEffect(() => {
         setIsMounted(true);
@@ -72,6 +59,26 @@ export default function Navbar() {
     }, [location.pathname]);
 
     // Nav items logic
+    const TC = useMemo(() => ({
+        // Removing main nav background
+        navContainer: "bg-transparent",
+
+        // New Shared Capsule Style for all 3 islands - Unified Premium Glass
+        capsule: isLight
+            ? "bg-gray-50/60 backdrop-blur-xl shadow-sm border border-gray-200/60 hover:bg-white/90 hover:shadow-md hover:border-gray-300/50 transition-all duration-300 ease-out"
+            : "bg-white/5 backdrop-blur-xl shadow-lg border border-white/5 hover:bg-white/10 hover:border-white/10 hover:shadow-blue-900/10 transition-all duration-300 ease-out",
+
+        textPrimary: isLight ? "text-gray-900" : "text-white",
+        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+        linkIdle: isLight ? "text-gray-600 hover:bg-gray-50/80" : "text-gray-400 hover:bg-white/5",
+        linkActive: isLight
+            ? "text-blue-600 bg-blue-50 font-semibold"
+            : "text-cyan-400 bg-cyan-900/20 font-semibold",
+        actionBtnHover: isLight ? "hover:bg-gray-100 text-gray-600" : "hover:bg-gray-800 text-gray-300",
+        logoGradient: "from-blue-600 to-cyan-500",
+        textGradient: "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent",
+    }), [isLight]);
+
     const navItems = useMemo(() => [
         { path: "/dashboard", label: "Dashboard" },
         { path: "/cryptolist", label: "Markets" },
@@ -91,19 +98,19 @@ export default function Navbar() {
         <>
             <nav
                 className={`
-                    relative mx-2 sm:mx-4 mt-2 sm:mt-4 z-50
-                    rounded-2xl px-4 sm:px-6 py-3 transition-all duration-500 ease-out
-                    ${TC.navBg}
+                    relative mx-2 sm:mx-6 mt-4 z-50
+                    transition-all duration-500 ease-out
+                    ${TC.navContainer}
                     ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
                 `}
             >
-                <div className="flex items-center justify-between max-w-[1600px] mx-auto w-full">
+                <div className="relative flex items-center justify-between max-w-[1600px] mx-auto w-full h-full">
 
-                    {/* Left Section */}
-                    <div className="flex items-center gap-3 sm:gap-4">
+                    {/* Left Island - Branding */}
+                    <div className={`relative z-20 rounded-full ${TC.capsule} h-[52px] flex items-center pl-2.5 pr-6 gap-3 sm:gap-4`}>
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className={`lg:hidden p-2.5 rounded-xl transition-all duration-200 ${TC.actionBtnHover}`}
+                            className={`lg:hidden p-2 rounded-full transition-all duration-200 ${TC.actionBtnHover}`}
                             aria-label="Open Menu"
                         >
                             <Menu size={20} strokeWidth={2.5} />
@@ -111,10 +118,10 @@ export default function Navbar() {
 
                         <div
                             onClick={() => navigate("/")}
-                            className="flex items-center gap-2.5 group cursor-pointer"
+                            className="flex items-center gap-3 group cursor-pointer"
                         >
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${TC.logoGradient} flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300`}>
-                                <Rocket size={16} className="fill-white" />
+                            <div className={`w-9 h-9 rounded-full bg-gradient-to-tr ${TC.logoGradient} flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300`}>
+                                <Rocket size={18} className="fill-white" />
                             </div>
                             <span className={`text-xl font-bold tracking-tight ${TC.textPrimary}`}>
                                 Nex<span className={TC.textGradient}>Chain</span>
@@ -122,41 +129,45 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-1.5">
+                    {/* Center Island - Navigation */}
+                    <div className={`hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 px-2 h-[52px] rounded-full ${TC.capsule} z-10`}>
                         {navItems.map((item) => {
                             const active = isActive(item.path);
                             return (
                                 <button
                                     key={item.path}
                                     onClick={() => navigate(item.path)}
-                                    className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${active ? TC.linkActive : TC.linkIdle}`}
+                                    className={`
+                                        relative px-6 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 
+                                        outline-none select-none
+                                        ${active ? "text-white" : TC.textSecondary + " hover:text-gray-900 dark:hover:text-gray-200"}
+                                    `}
                                 >
-                                    <span className="relative z-10">{item.label}</span>
                                     {active && (
                                         <motion.div
-                                            layoutId="navbar-indicator"
-                                            className={`absolute inset-0 rounded-xl -z-0 ${isLight ? 'bg-blue-50/80' : 'bg-cyan-500/10'}`}
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                            layoutId="navbar-active"
+                                            className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/20 rounded-full -z-0"
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                         />
                                     )}
+                                    <span className="relative z-10">{item.label}</span>
                                 </button>
                             );
                         })}
                     </div>
 
-                    {/* Right Section */}
-                    <div className="flex items-center gap-1.5 sm:gap-2">
+                    {/* Right Island - Actions */}
+                    <div className={`flex items-center gap-2 relative z-20 rounded-full ${TC.capsule} h-[52px] px-2.5`}>
                         {user && (
                             <div className="relative">
                                 <button
                                     ref={bellRef}
                                     onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover} relative`}
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover} relative`}
                                 >
-                                    <Bell size={19} strokeWidth={2.5} />
+                                    <Bell size={20} strokeWidth={2.5} />
                                     {unreadCount > 0 && (
-                                        <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 animate-pulse" />
+                                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-950 animate-pulse" />
                                     )}
                                 </button>
                                 <NotificationModal
@@ -169,15 +180,15 @@ export default function Navbar() {
 
                         <button
                             onClick={toggleTheme}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover}`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${TC.actionBtnHover}`}
                             aria-label="Toggle Theme"
                         >
-                            {isLight ? <Moon size={19} className="text-indigo-600" /> : <Sun size={19} className="text-amber-400" />}
+                            {isLight ? <Moon size={20} className="text-indigo-600" /> : <Sun size={20} className="text-amber-400" />}
                         </button>
 
                         <button
                             onClick={() => user?.id ? navigate(`/user-profile/${user.id}`) : navigate("/auth")}
-                            className="ml-1 sm:ml-2 w-10 h-10 rounded-xl overflow-hidden ring-2 ring-transparent hover:ring-blue-500/50 transition-all duration-300 shadow-md"
+                            className="ml-1 w-9 h-9 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-blue-500/50 transition-all duration-300 shadow-md"
                         >
                             {user?.image ? (
                                 <img
@@ -188,7 +199,7 @@ export default function Navbar() {
                                 />
                             ) : (
                                 <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white font-bold text-sm`}>
-                                    <User size={16} />
+                                    <User size={18} />
                                 </div>
                             )}
                         </button>
