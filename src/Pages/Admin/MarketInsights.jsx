@@ -8,6 +8,7 @@ import CoinListModal from "@/Components/Admin/MarketInsights/CoinListModal";
 import MarketCoinDetailsModal from "@/Components/Admin/MarketInsights/MarketCoinDetailsModal";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
+import { coinGecko } from "@/api/axiosConfig";
 
 const MarketInsights = () => {
   const isLight = useThemeCheck();
@@ -89,16 +90,18 @@ const MarketInsights = () => {
     }
 
     try {
+      const response = await coinGecko.get("/coins/markets", {
+        params: {
+          vs_currency: "usd",
+          order: "market_cap_desc",
+          per_page: 50,
+          page: 1,
+          sparkline: true,
+          price_change_percentage: "24h,7d"
+        }
+      });
 
-      const response = await fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h,7d"
-      );
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       if (!Array.isArray(data)) {
         throw new Error("Invalid data format received from API");

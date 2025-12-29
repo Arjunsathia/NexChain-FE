@@ -111,6 +111,9 @@ function CoinTable({ onTrade }) {
         fetchWatchlist();
     }, [fetchWatchlist]);
 
+    const [liveData, setLiveData] = useState({});
+    const bufferRef = useRef({});
+
     useEffect(() => {
         if (coins.length === 0) return;
 
@@ -122,13 +125,24 @@ function CoinTable({ onTrade }) {
                 };
                 return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
             })
-            .filter(Boolean)
-            .join('/');
+            .filter(Boolean);
 
-        if (!symbols) return;
+        if (symbols.length === 0) return;
+
+        const streamUrl = `wss://stream.binance.com:9443/stream?streams=${symbols.join('/')}`;
+
+        const intervalId = setInterval(() => {
+            if (Object.keys(bufferRef.current).length > 0) {
+                setLiveData(prev => ({
+                    ...prev,
+                    ...bufferRef.current
+                }));
+                bufferRef.current = {};
+            }
+        }, 500); // Update UI every 500ms
 
         try {
-            ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${symbols}`);
+            ws.current = new WebSocket(streamUrl);
             ws.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.stream && data.data) {
@@ -141,21 +155,13 @@ function CoinTable({ onTrade }) {
 
                     const coinId = symbolToCoinId[symbol];
                     if (coinId) {
-                        setCoins(prevCoins =>
-                            prevCoins.map(coin => {
-                                if (coin.id === coinId) {
-                                    return {
-                                        ...coin,
-                                        current_price: parseFloat(coinData.c),
-                                        price_change_percentage_24h: parseFloat(coinData.P),
-                                        price_change_24h: parseFloat(coinData.p),
-                                        total_volume: parseFloat(coinData.v) * parseFloat(coinData.c),
-                                        market_cap: parseFloat(coinData.c) * (coin.market_cap / coin.current_price || 1)
-                                    };
-                                }
-                                return coin;
-                            })
-                        );
+                        bufferRef.current[coinId] = {
+                            current_price: parseFloat(coinData.c),
+                            price_change_percentage_24h: parseFloat(coinData.P),
+                            price_change_24h: parseFloat(coinData.p),
+                            // Approximate market cap/volume updates
+                            total_volume: parseFloat(coinData.v) * parseFloat(coinData.c)
+                        };
                     }
                 }
             };
@@ -164,9 +170,10 @@ function CoinTable({ onTrade }) {
         }
 
         return () => {
+            clearInterval(intervalId);
             if (ws.current) { ws.current.close(); }
         };
-    }, [coins]);
+    }, [coins]); // Re-run if coins change (e.g. search or pagination)
 
     const toggleWishlist = useCallback(async (coinId, coinData) => {
         if (!user?.id) {
@@ -253,13 +260,18 @@ function CoinTable({ onTrade }) {
             const userHolding = safePurchasedCoins.find(
                 pc => pc.coin_id === coin.id || pc.id === coin.id
             );
+
+            // Merge live data if available
+            const live = liveData[coin.id] || {};
+
             return {
                 ...coin,
+                ...live,
                 isInWatchlist,
                 userHolding: userHolding || null
             };
         });
-    }, [filteredCoins, watchlist, purchasedCoins]);
+    }, [filteredCoins, watchlist, purchasedCoins, liveData]);
 
     const formatCurrency = useCallback((value) => {
         if (!value) return "$0";

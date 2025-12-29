@@ -49,7 +49,7 @@ export default function Dashboard() {
     if (topCoins.length > 0 && selectedCoinId === "bitcoin" && !topCoins.find(c => c.id === "bitcoin")) {
       setSelectedCoinId(topCoins[0].id);
     }
-  }, [topCoins]);
+  }, [topCoins, selectedCoinId]);
 
   const [liveData, setLiveData] = useState({});
   const ws = useRef(null);

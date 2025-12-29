@@ -1,7 +1,7 @@
 import React from "react";
 import { FaTimes, FaMoneyBillWave } from "react-icons/fa";
 
-const TradeModalHeader = ({
+const TradeModalHeader = React.memo(({
   coin,
   coinName,
   symbol,
@@ -13,7 +13,7 @@ const TradeModalHeader = ({
   TC,
   handleClose,
 }) => {
-  
+
   const headerAccentClass = (() => {
     if (shouldShowHoldingsInfo && activeTab === "details")
       return TC.bgCyanAccent;
@@ -30,20 +30,17 @@ const TradeModalHeader = ({
           <img
             src={coin.image}
             alt={coinName}
-            className={`w-10 h-10 rounded-full border-2 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 ${
-              isLight ? "border-gray-300" : "border-gray-600"
-            }`}
+            className={`w-10 h-10 rounded-full border-2 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 ${isLight ? "border-gray-300" : "border-gray-600"
+              }`}
           />
           <div
-            className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${
-              isLight ? "border-white" : "border-gray-900"
-            } transition-all duration-300 ${
-              shouldShowHoldingsInfo && activeTab === "details"
+            className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${isLight ? "border-white" : "border-gray-900"
+              } transition-all duration-300 ${shouldShowHoldingsInfo && activeTab === "details"
                 ? "bg-cyan-500 animate-pulse"
                 : isBuyOperation
-                ? "bg-green-500 animate-pulse"
-                : "bg-red-500 animate-pulse"
-            }`}
+                  ? "bg-green-500 animate-pulse"
+                  : "bg-red-500 animate-pulse"
+              }`}
           ></div>
         </div>
         <div className="fade-in">
@@ -80,16 +77,17 @@ const TradeModalHeader = ({
       </div>
       <button
         onClick={handleClose}
-        className={`transition-all duration-200 p-1 rounded-lg hover:rotate-90 transform group ${
-          isLight
+        className={`transition-all duration-200 p-1 rounded-lg hover:rotate-90 transform group ${isLight
             ? "text-gray-500 hover:text-red-600 hover:bg-red-100"
             : "text-gray-400 hover:text-white hover:bg-red-500/20"
-        }`}
+          }`}
       >
         <FaTimes className="text-lg group-hover:scale-110 transition-transform" />
       </button>
     </div>
   );
-};
+});
+
+TradeModalHeader.displayName = "TradeModalHeader";
 
 export default TradeModalHeader;

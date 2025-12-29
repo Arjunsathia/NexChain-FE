@@ -1,7 +1,7 @@
 import React from "react";
 import { FaWallet, FaArrowUp, FaArrowDown, FaInfoCircle } from "react-icons/fa";
 
-const HoldingsActions = ({
+const HoldingsActions = React.memo(({
   setActiveTab,
   TC,
   currentPrice,
@@ -43,7 +43,7 @@ const HoldingsActions = ({
         </div>
       </div>
 
-      {}
+      { }
       <div
         className={`p-3 rounded-lg border glow-fade ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
         style={{ animationDelay: "300ms" }}
@@ -80,6 +80,8 @@ const HoldingsActions = ({
       </div>
     </div>
   );
-};
+});
+
+HoldingsActions.displayName = "HoldingsActions";
 
 export default HoldingsActions;

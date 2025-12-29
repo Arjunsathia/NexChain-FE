@@ -62,6 +62,7 @@ const PortfolioPage = () => {
     [isLight]
   );
 
+  const bufferRef = useRef({});
 
   useEffect(() => {
     if (!groupedHoldings || groupedHoldings.length === 0) return;
@@ -78,23 +79,25 @@ const PortfolioPage = () => {
     if (symbols.length === 0) return;
 
     const streams = symbols.join('/');
-    let lastUpdate = 0;
-    const THROTTLE_MS = 2000;
+
+    const intervalId = setInterval(() => {
+      if (Object.keys(bufferRef.current).length > 0) {
+        setLivePrices(prev => ({
+          ...prev,
+          ...bufferRef.current
+        }));
+        bufferRef.current = {};
+      }
+    }, 1000); // Update UI every 1s
 
     try {
       if (ws.current) ws.current.close();
 
       ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
 
-      ws.current.onopen = () => { };
-
       ws.current.onmessage = (event) => {
-        const now = Date.now();
-        if (now - lastUpdate < THROTTLE_MS) return;
-
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
-          lastUpdate = now;
           const symbol = message.stream.replace('@ticker', '');
           const coinData = message.data;
 
@@ -104,14 +107,11 @@ const PortfolioPage = () => {
 
           const coinId = symbolToCoinId[symbol];
           if (coinId) {
-            setLivePrices(prev => ({
-              ...prev,
-              [coinId]: {
-                current_price: parseFloat(coinData.c),
-                price_change_percentage_24h: parseFloat(coinData.P),
-                price_change_24h: parseFloat(coinData.p),
-              }
-            }));
+            bufferRef.current[coinId] = {
+              current_price: parseFloat(coinData.c),
+              price_change_percentage_24h: parseFloat(coinData.P),
+              price_change_24h: parseFloat(coinData.p),
+            };
           }
         }
       };
@@ -121,9 +121,10 @@ const PortfolioPage = () => {
     } catch (error) { console.error('Portfolio WebSocket setup failed:', error); }
 
     return () => {
+      clearInterval(intervalId);
       if (ws.current) { ws.current.close(); }
     };
-  }, [groupedHoldings]);
+  }, [groupedHoldings]); // Re-run if holdings change
 
 
   const mergedHoldings = useMemo(() => {

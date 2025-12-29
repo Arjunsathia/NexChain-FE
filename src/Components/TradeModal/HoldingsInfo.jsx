@@ -1,21 +1,19 @@
 import React from "react";
 import { FaCoins, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
-const HoldingsInfo = ({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
+const HoldingsInfo = React.memo(({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
   if (!holdingsSummary) return null;
 
   return (
     <div
-      className={`mb-4 p-5 rounded-xl glow-fade transition-all duration-300 ${
-        activeTab === "details"
-          ? "bg-cyan-500/5 border border-cyan-500/20 shadow-lg shadow-cyan-500/5"
-          : `${TC.bgCard}`
-      }`}
+      className={`mb-4 p-5 rounded-xl glow-fade transition-all duration-300 ${activeTab === "details"
+        ? "bg-cyan-500/5 border border-cyan-500/20 shadow-lg shadow-cyan-500/5"
+        : `${TC.bgCard}`
+        }`}
     >
       <h3
-        className={`text-sm font-bold mb-3 flex items-center gap-2 ${
-          isLight ? "text-cyan-700" : "text-cyan-400"
-        }`}
+        className={`text-sm font-bold mb-3 flex items-center gap-2 ${isLight ? "text-cyan-700" : "text-cyan-400"
+          }`}
       >
         <FaCoins className="text-yellow-500 " />
         Holdings Summary
@@ -67,30 +65,26 @@ const HoldingsInfo = ({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
         ))}
       </div>
 
-      {}
+      { }
       <div
-        className={`p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
-          holdingsSummary.profitLoss >= 0
-            ? `${
-                isLight
-                  ? "bg-green-100/50 border-green-500/50"
-                  : "bg-green-500/10 border-green-500/30"
-              }`
-            : `${
-                isLight
-                  ? "bg-red-100/50 border-red-500/50"
-                  : "bg-red-500/10 border-red-500/30"
-              }`
-        }`}
+        className={`p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${holdingsSummary.profitLoss >= 0
+          ? `${isLight
+            ? "bg-green-100/50 border-green-500/50"
+            : "bg-green-500/10 border-green-500/30"
+          }`
+          : `${isLight
+            ? "bg-red-100/50 border-red-500/50"
+            : "bg-red-500/10 border-red-500/30"
+          }`
+          }`}
       >
         <div className="flex justify-between items-center">
           <span className={`text-sm font-semibold ${TC.textSecondary}`}>
             Total P&L
           </span>
           <div
-            className={`flex items-center gap-2 ${
-              holdingsSummary.profitLoss >= 0 ? "text-green-600" : "text-red-600"
-            }`}
+            className={`flex items-center gap-2 ${holdingsSummary.profitLoss >= 0 ? "text-green-600" : "text-red-600"
+              }`}
           >
             {holdingsSummary.profitLoss >= 0 ? (
               <FaArrowUp className="text-sm animate-bounce" />
@@ -105,9 +99,8 @@ const HoldingsInfo = ({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
               })}
             </span>
             <span
-              className={`text-xs font-bold px-2 py-1 rounded-full ${
-                holdingsSummary.profitLoss >= 0 ? TC.bgGreenPill : TC.bgRedPill
-              }`}
+              className={`text-xs font-bold px-2 py-1 rounded-full ${holdingsSummary.profitLoss >= 0 ? TC.bgGreenPill : TC.bgRedPill
+                }`}
             >
               {holdingsSummary.profitLoss >= 0 ? "+" : ""}
               {holdingsSummary.profitLossPercentage.toFixed(2)}%
@@ -117,6 +110,7 @@ const HoldingsInfo = ({ holdingsSummary, activeTab, isLight, TC, symbol }) => {
       </div>
     </div>
   );
-};
+});
 
+HoldingsInfo.displayName = "HoldingsInfo";
 export default HoldingsInfo;

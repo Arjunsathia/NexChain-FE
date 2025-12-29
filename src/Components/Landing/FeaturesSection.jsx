@@ -34,14 +34,14 @@ const FeaturesSection = forwardRef(({ TC }, ref) => {
                 key={feature.id}
                 onClick={() => setActiveFeature(index)}
                 className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 border ${activeFeature === index
-                    ? "bg-[#728AD5]/10 border-[#728AD5]/50 shadow-lg shadow-[#728AD5]/10"
-                    : "bg-[#0a0f1e]/40 border-white/5 hover:bg-[#0a0f1e]/60 hover:border-white/20"
+                  ? "bg-[#728AD5]/10 border-[#728AD5]/50 shadow-lg shadow-[#728AD5]/10"
+                  : "bg-[#0a0f1e]/40 border-white/5 hover:bg-[#0a0f1e]/60 hover:border-white/20"
                   }`}
               >
                 <div className="flex items-start gap-4 relaticve z-10">
                   <div className={`p-3 rounded-xl transition-colors duration-300 ${activeFeature === index
-                      ? "bg-[#728AD5] text-white shadow-md"
-                      : "bg-[#1e293b] text-slate-400 group-hover:bg-[#2d3b55] group-hover:text-white"
+                    ? "bg-[#728AD5] text-white shadow-md"
+                    : "bg-[#1e293b] text-slate-400 group-hover:bg-[#2d3b55] group-hover:text-white"
                     }`}>
                     <feature.icon className="w-6 h-6" />
                   </div>

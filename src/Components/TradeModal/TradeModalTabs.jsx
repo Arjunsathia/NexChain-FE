@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCoins, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
-const TradeModalTabs = ({ activeTab, setActiveTab, isLight, TC }) => {
+const TradeModalTabs = React.memo(({ activeTab, setActiveTab, isLight, TC }) => {
   return (
     <div className={`${TC.bgTabBase} border-b ${TC.borderTab}`}>
       <div className="flex">
@@ -42,23 +42,21 @@ const TradeModalTabs = ({ activeTab, setActiveTab, isLight, TC }) => {
             >
               <div className="flex items-center justify-center gap-1">
                 <Icon
-                  className={`text-sm transition-all duration-300 ${
-                    tabIsActive
-                      ? "animate-bounce"
-                      : "group-hover:scale-110 group-hover:-translate-y-0.5"
-                  }`}
+                  className={`text-sm transition-all duration-300 ${tabIsActive
+                    ? "animate-bounce"
+                    : "group-hover:scale-110 group-hover:-translate-y-0.5"
+                    }`}
                 />
                 {tab.label}
               </div>
               {tabIsActive && (
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-300 ${
-                    tab.key === "details"
-                      ? "bg-cyan-600"
-                      : tab.key === "deposit"
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-300 ${tab.key === "details"
+                    ? "bg-cyan-600"
+                    : tab.key === "deposit"
                       ? "bg-green-600"
                       : "bg-red-600"
-                  }`}
+                    }`}
                 ></div>
               )}
             </button>
@@ -67,6 +65,7 @@ const TradeModalTabs = ({ activeTab, setActiveTab, isLight, TC }) => {
       </div>
     </div>
   );
-};
+});
 
+TradeModalTabs.displayName = "TradeModalTabs";
 export default TradeModalTabs;
