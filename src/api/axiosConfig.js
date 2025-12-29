@@ -42,10 +42,18 @@ const api = axios.create({
 });
 
 
+let memoryToken = null;
+
+export const setMemoryToken = (token) => {
+  memoryToken = token;
+};
+
+// ... existing code ...
+
 api.interceptors.request.use(
   (config) => {
     try {
-      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      const token = memoryToken || localStorage.getItem("NEXCHAIN_USER_TOKEN");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -62,7 +70,31 @@ api.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 and we haven't retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Try to refresh the token
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+        const { accessToken } = response.data;
+
+        if (accessToken) {
+          setMemoryToken(accessToken);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, user should be logged out
+        console.error("Token refresh failed", refreshError);
+        // We might want to dispatch logout here, but we don't have store access
+        // For now, let the error propagate
+      }
+    }
+
     console.error("API Error:", error.response?.status, error.response?.data || error.message);
     return Promise.reject(error);
   }
@@ -131,7 +163,7 @@ export const login = async (url, credentials) => {
 
 export const logout = async () => {
   try {
-    await api.post("/users/logout");
+    await api.post("/auth/logout");
   } catch (error) {
     console.error("Logout Error", error);
     throw error;

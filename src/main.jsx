@@ -30,6 +30,7 @@ createRoot(document.getElementById("root")).render(
             left: 20,
             bottom: 20,
             right: 20,
+            zIndex: 999999,
           }}
           toastOptions={{
             className: '!bg-white !text-gray-900 !border !border-gray-200 !shadow-[0_8px_30px_-5px_rgba(0,0,0,0.15)] !rounded-xl !text-sm !font-semibold !px-5 !py-3 gap-3',

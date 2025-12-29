@@ -41,6 +41,7 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     user: getInitialUser(),
+    accessToken: null,
     loading: false,
     error: null,
   },
@@ -51,10 +52,17 @@ const userSlice = createSlice({
     },
     logout: (state) => {
       state.user = {};
+      state.accessToken = null;
       state.loading = false;
       state.error = null;
       localStorage.removeItem("NEXCHAIN_USER");
       localStorage.removeItem("NEXCHAIN_USER_TOKEN");
+    },
+    setAccessToken: (state, action) => {
+      state.accessToken = action.payload;
+      if (action.payload) {
+        localStorage.setItem("NEXCHAIN_USER_TOKEN", action.payload);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -74,5 +82,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { logout, setUser } = userSlice.actions;
+export const { logout, setUser, setAccessToken } = userSlice.actions;
 export default userSlice.reducer;

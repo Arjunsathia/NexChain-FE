@@ -129,6 +129,30 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
     }
   }, [open]);
 
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [emailForOtp, setEmailForOtp] = useState("");
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await postForm("/auth/verify-email-otp", { email: emailForOtp, otp: otpCode });
+      toast.success("User verified and created successfully!", TC.toastSuccess);
+
+      setShowOtpInput(false);
+      setOtpCode("");
+      setEmailForOtp("");
+      fetchData();
+      handleClose();
+      setFormData(initialFormKeys);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid OTP", TC.toastError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -161,16 +185,21 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
       if (id) {
         await updateById("/users", id, formData);
         toast.success("User updated successfully!", TC.toastSuccess);
+        fetchData();
+        handleClose();
+        setFormData(initialFormKeys);
       } else {
-        await postForm("/users", formData);
-        toast.success("User created successfully!", TC.toastSuccess);
+        // Use registration endpoint to trigger OTP
+        const res = await postForm("/auth/register", formData);
+
+        // If registration successful (OTP sent), show OTP input
+        setEmailForOtp(res.email || formData.email);
+        setShowOtpInput(true);
+        toast.success("OTP sent to user's email!", TC.toastSuccess);
       }
-      fetchData();
-      handleClose();
-      setFormData(initialFormKeys);
     } catch (err) {
       console.error(err);
-      toast.error(id ? "User update failed!" : "User creation failed!", TC.toastError);
+      toast.error(err.response?.data?.message || (id ? "User update failed!" : "User creation failed!"), TC.toastError);
     } finally {
       setSubmitting(false);
     }
@@ -197,11 +226,14 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
 
   const handleModalClose = () => {
     setFormData(initialFormKeys);
+    setShowOtpInput(false);
+    setOtpCode("");
+    setEmailForOtp("");
     handleClose();
   };
 
   return (
-    <Dialog open={open} onClose={handleModalClose} className="relative z-[100000]">
+    <Dialog open={open} onClose={handleModalClose} className="relative z-[1000]">
       <DialogBackdrop
         className={`
           fixed inset-0 backdrop-blur-sm transition-all duration-500
@@ -210,16 +242,16 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
         `}
       />
 
-      <div className="fixed inset-0 z-[100000] w-screen overflow-y-auto">
+      <div className="fixed inset-0 z-[1000] w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
           <DialogPanel
             className={`
               relative transform overflow-hidden rounded-2xl ${TC.bgPanel}
-              transition-all duration-500 ease-out w-[90vw] max-w-[340px] sm:max-w-lg
+              transition-all duration-500 ease-out w-full max-w-lg
               ${isMounted ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}
             `}
           >
-            { }
+            {/* Header */}
             <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b ${TC.bgHeader}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -228,190 +260,222 @@ export default function UserForm({ open, handleClose, fetchData, id }) {
                   </div>
                   <div>
                     <DialogTitle className={`text-lg sm:text-xl font-bold ${TC.titleText}`}>
-                      {id ? "Update User" : "Create New User"}
+                      {showOtpInput ? "Verify Email" : id ? "Update User" : "Create New User"}
                     </DialogTitle>
                     <p className={`text-xs sm:text-sm ${TC.subtitleText}`}>
-                      {id ? "Modify user information" : "Add a new user to the system"}
+                      {showOtpInput ? "Enter the OTP sent to user's email" : id ? "Modify user information" : "Add a new user to the system"}
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleModalClose}
-                  className={`p-1 sm:p-2 rounded-lg transition-all duration-200 ${TC.btnClose}`}
-                >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
-                </button>
+                {!showOtpInput && (
+                  <button
+                    onClick={handleModalClose}
+                    className={`p-1 sm:p-2 rounded-lg transition-all duration-200 ${TC.btnClose}`}
+                  >
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+                )}
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 space-y-3 sm:space-y-5">
-              {loading ? (
-                <div className="flex justify-center items-center py-8 sm:py-12">
-                  <div className={`flex items-center gap-2 sm:gap-3 ${TC.loadingText} text-sm sm:text-base`}>
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                    Loading user data...
-                  </div>
+            {/* OTP Form */}
+            {showOtpInput ? (
+              <form onSubmit={handleVerifyOTP} className="p-6 space-y-6">
+                <div className="space-y-4">
+                  <Label className={`text-xs font-bold uppercase tracking-wider text-center block ${TC.labelText}`}>6-Digit OTP</Label>
+                  <Input
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="000000"
+                    maxLength={6}
+                    className={`bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 text-center text-2xl tracking-[0.5em] focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono ${TC.inputBg}`}
+                    required
+                    autoFocus
+                  />
                 </div>
-              ) : (
-                <div className="space-y-3 sm:space-y-4">
-                  { }
-                  <div>
-                    <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Full Name</Label>
-                    <div className="relative">
-                      <User className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
-                      <Input
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter full name"
-                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
-                        required
-                      />
+                <div className="flex flex-col gap-3">
+                  <Button
+                    type="submit"
+                    disabled={loading || otpCode.length !== 6}
+                    className={`w-full py-3 text-sm font-semibold rounded-xl shadow-lg border border-transparent ${TC.btnSubmit}`}
+                  >
+                    {loading ? "Verifying..." : "Verify OTP"}
+                  </Button>
+                  <button type="button" onClick={() => setShowOtpInput(false)} className={`w-full text-center text-sm ${TC.subtitleText} hover:text-cyan-400`}>Back</button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="p-4 space-y-3 sm:space-y-5">
+                {loading ? (
+                  <div className="flex justify-center items-center py-8 sm:py-12">
+                    <div className={`flex items-center gap-2 sm:gap-3 ${TC.loadingText} text-sm sm:text-base`}>
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                      {id ? "Loading user data..." : "Creating user..."}
                     </div>
                   </div>
-
-                  { }
-                  <div>
-                    <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Email Address</Label>
-                    <div className="relative">
-                      <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
-                      <Input
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="you@example.com"
-                        className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  { }
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    { }
+                ) : (
+                  <div className="space-y-3 sm:space-y-4">
+                    {/* Name */}
                     <div>
-                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Phone Number</Label>
-                      <div className="relative">
-                        <Phone className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
-                        <Input
-                          name="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+1 (555) 000-0000"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    { }
-                    <div>
-                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Username</Label>
+                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Full Name</Label>
                       <div className="relative">
                         <User className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                         <Input
-                          name="user_name"
-                          value={formData.user_name}
+                          name="name"
+                          value={formData.name}
                           onChange={handleChange}
-                          placeholder="Choose username"
+                          placeholder="Enter full name"
                           className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
                           required
                         />
                       </div>
                     </div>
 
-                    { }
+                    {/* Email */}
                     <div>
-                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>
-                        Password {id && <span className={`${TC.subtitleText} text-xs`}>(leave blank to keep current)</span>}
-                      </Label>
+                      <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Email Address</Label>
                       <div className="relative">
-                        <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
+                        <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
                         <Input
-                          name="password"
-                          type="password"
-                          value={formData.password}
+                          name="email"
+                          type="email"
+                          value={formData.email}
                           onChange={handleChange}
-                          placeholder="••••••••"
+                          placeholder="you@example.com"
                           className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
-                          required={!id}
+                          required
                         />
                       </div>
                     </div>
 
-                    { }
-                    <div>
-                      <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>
-                        Confirm Password {id && <span className={`${TC.subtitleText} text-xs`}>(optional)</span>}
-                      </Label>
-                      <div className="relative">
-                        <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
-                        <Input
-                          name="confirm_password"
-                          type="password"
-                          value={formData.confirm_password}
-                          onChange={handleChange}
-                          placeholder="••••••••"
-                          className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
-                          required={!id}
-                        />
+                    {/* Phone & Username */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {/* Phone */}
+                      <div>
+                        <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Phone Number</Label>
+                        <div className="relative">
+                          <Phone className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
+                          <Input
+                            name="phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="+1 (555) 000-0000"
+                            className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
+                            required
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  { }
-                  <div>
-                    <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>User Role</Label>
-                    <div className="relative">
-                      <Shield className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor} z-10`} />
-                      <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        required
-                        className={`w-full border rounded-lg sm:rounded-xl pl-9 sm:pl-10 pr-8 sm:pr-10 py-2.5 sm:py-3 h-10 sm:h-12 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors appearance-none text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
-                      >
-                        <option value="" className={TC.optionBg}>Select a role</option>
-                        <option value="user" className={TC.optionBg}>User</option>
-                        <option value="admin" className={TC.optionBg}>Admin</option>
-                      </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <div className={`w-3 h-3 sm:w-4 sm:h-4 border-r-2 border-b-2 ${TC.iconColor} transform rotate-45 -translate-y-1/2`}></div>
+                      {/* Username */}
+                      <div>
+                        <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>Username</Label>
+                        <div className="relative">
+                          <User className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
+                          <Input
+                            name="user_name"
+                            value={formData.user_name}
+                            onChange={handleChange}
+                            placeholder="Choose username"
+                            className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Password */}
+                      <div>
+                        <Label className={`text-[10px] sm:text-xs ${TC.labelText} mb-1 block`}>
+                          Password {id && <span className={`${TC.subtitleText} text-xs`}>(leave blank to keep current)</span>}
+                        </Label>
+                        <div className="relative">
+                          <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
+                          <Input
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
+                            required={!id}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Confirm Password */}
+                      <div>
+                        <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>
+                          Confirm Password {id && <span className={`${TC.subtitleText} text-xs`}>(optional)</span>}
+                        </Label>
+                        <div className="relative">
+                          <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor}`} />
+                          <Input
+                            name="confirm_password"
+                            type="password"
+                            value={formData.confirm_password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            className={`pl-9 sm:pl-10 border rounded-lg sm:rounded-xl h-9 sm:h-10 focus:border-cyan-500 transition-colors text-xs sm:text-sm ${TC.inputBg} ${TC.inputFocus}`}
+                            required={!id}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Role */}
+                    <div>
+                      <Label className={`text-xs sm:text-sm ${TC.labelText} mb-1 sm:mb-2 block`}>User Role</Label>
+                      <div className="relative">
+                        <Shield className={`absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 ${TC.iconColor} z-10`} />
+                        <select
+                          name="role"
+                          value={formData.role}
+                          onChange={handleChange}
+                          required
+                          className={`w-full border rounded-lg sm:rounded-xl pl-9 sm:pl-10 pr-8 sm:pr-10 py-2.5 sm:py-3 h-10 sm:h-12 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors appearance-none text-sm sm:text-base ${TC.inputBg} ${TC.inputFocus}`}
+                        >
+                          <option value="" className={TC.optionBg}>Select a role</option>
+                          <option value="user" className={TC.optionBg}>User</option>
+                          <option value="admin" className={TC.optionBg}>Admin</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <div className={`w-3 h-3 sm:w-4 sm:h-4 border-r-2 border-b-2 ${TC.iconColor} transform rotate-45 -translate-y-1/2`}></div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className={`flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${isLight ? "border-gray-100" : "border-white/5"}`}>
+                  <Button
+                    type="button"
+                    onClick={handleModalClose}
+                    className={`px-3 sm:px-4 py-2 border rounded-lg sm:rounded-xl transition-all duration-200 text-xs sm:text-sm ${TC.btnCancel}`}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className={`px-4 sm:px-6 py-2 font-semibold rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 text-xs sm:text-sm ${TC.btnSubmit}`}
+                  >
+                    {submitting ? (
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        {id ? "Updating..." : "Creating..."}
+                      </div>
+                    ) : id ? (
+                      "Update User"
+                    ) : (
+                      "Create User"
+                    )}
+                  </Button>
                 </div>
-              )}
+              </form>
+            )}
 
-              { }
-              <div className={`flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${isLight ? "border-gray-100" : "border-white/5"}`}>
-                <Button
-                  type="button"
-                  onClick={handleModalClose}
-                  className={`px-3 sm:px-4 py-2 border rounded-lg sm:rounded-xl transition-all duration-200 text-xs sm:text-sm ${TC.btnCancel}`}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className={`px-4 sm:px-6 py-2 font-semibold rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 text-xs sm:text-sm ${TC.btnSubmit}`}
-                >
-                  {submitting ? (
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {id ? "Updating..." : "Creating..."}
-                    </div>
-                  ) : id ? (
-                    "Update User"
-                  ) : (
-                    "Create User"
-                  )}
-                </Button>
-              </div>
-            </form>
           </DialogPanel>
         </div>
       </div>
