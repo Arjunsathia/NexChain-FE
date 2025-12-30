@@ -1,3 +1,4 @@
+
 import React from "react";
 import { FaTimes, FaMoneyBillWave } from "react-icons/fa";
 
@@ -10,79 +11,52 @@ const TradeModalHeader = React.memo(({
   activeTab,
   isBuyOperation,
   isLight,
-  TC,
   handleClose,
 }) => {
 
-  const headerAccentClass = (() => {
-    if (shouldShowHoldingsInfo && activeTab === "details")
-      return TC.bgCyanAccent;
-    if (isBuyOperation) return TC.bgGreenAccent;
-    return TC.bgRedAccent;
-  })();
+  const getAccentColor = () => {
+    if (shouldShowHoldingsInfo && activeTab === "details") return "text-cyan-500";
+    if (isBuyOperation) return "text-emerald-500";
+    return "text-rose-500";
+  };
 
   return (
-    <div
-      className={`relative flex items-center justify-between p-3 md:p-4 border-b transition-all duration-300 ${headerAccentClass}`}
-    >
+    <div className={`relative flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 transition-colors duration-300 ${isLight ? "bg-white border-b border-gray-100" : "bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-b border-white/5"}`}>
       <div className="flex items-center gap-3">
-        <div className="relative group">
+        {/* Coin Icon - Compact */}
+        <div className="relative">
           <img
             src={coin.image}
             alt={coinName}
-            className={`w-10 h-10 rounded-full border-2 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 ${isLight ? "border-gray-300" : "border-gray-600"
-              }`}
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
           />
-          <div
-            className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${isLight ? "border-white" : "border-gray-900"
-              } transition-all duration-300 ${shouldShowHoldingsInfo && activeTab === "details"
-                ? "bg-cyan-500 animate-pulse"
-                : isBuyOperation
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-red-500 animate-pulse"
-              }`}
-          ></div>
         </div>
-        <div className="fade-in">
-          <h2 className={`text-lg font-bold ${TC.textPrimary}`}>
-            {shouldShowHoldingsInfo ? (
-              <>
-                {coinName}
-                <span className="text-cyan-600 ml-1 text-sm">({symbol})</span>
-              </>
-            ) : (
-              <>
-                <span
-                  className={isBuyOperation ? "text-green-600" : "text-red-600"}
-                >
-                  {isBuyOperation ? "Deposit" : "Withdraw"}
-                </span>{" "}
-                {symbol}
-              </>
-            )}
-          </h2>
-          <p
-            className={`${TC.textSecondary} text-xs flex items-center gap-1 mt-1`}
-          >
-            <FaMoneyBillWave className="text-yellow-500 " />
-            <span className="font-semibold">
-              $
-              {currentPrice.toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: currentPrice < 1 ? 6 : 2,
-              })}
+
+        {/* Text Info - Inline */}
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-2">
+            <h2 className={`text-base font-bold leading-none ${isLight ? "text-gray-900" : "text-white"}`}>
+              {coinName}
+            </h2>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isLight ? "bg-gray-200 text-gray-500" : "bg-white/10 text-gray-400"}`}>
+              {symbol}
             </span>
-          </p>
+          </div>
+          <div className={`text-xs font-mono font-bold leading-none mt-1 ${isLight ? "text-gray-900" : "text-white"}`}>
+            ${currentPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+          </div>
         </div>
       </div>
+
+      {/* Close Button - Tiny */}
       <button
         onClick={handleClose}
-        className={`transition-all duration-200 p-1 rounded-lg hover:rotate-90 transform group ${isLight
-            ? "text-gray-500 hover:text-red-600 hover:bg-red-100"
-            : "text-gray-400 hover:text-white hover:bg-red-500/20"
-          }`}
+        className={`
+          p-1.5 rounded-full transition-colors bg-white/10 hover:bg-white/20
+          ${isLight ? "hover:bg-gray-100 text-gray-400 bg-transparent" : "text-white"}
+        `}
       >
-        <FaTimes className="text-lg group-hover:scale-110 transition-transform" />
+        <FaTimes className="text-sm" />
       </button>
     </div>
   );

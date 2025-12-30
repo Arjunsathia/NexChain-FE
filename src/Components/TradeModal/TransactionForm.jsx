@@ -1,13 +1,8 @@
-import React from "react";
-import {
-  FaCoins,
-  FaMoneyBillWave,
-  FaInfoCircle,
-  FaExchangeAlt,
-  FaArrowUp,
-  FaArrowDown,
-  FaBell,
-} from "react-icons/fa";
+
+import React from 'react';
+import useThemeCheck from '@/hooks/useThemeCheck';
+import { FaArrowDown, FaChevronDown } from "react-icons/fa";
+import AdvancedOptions from "./AdvancedOptions";
 
 const TransactionForm = React.memo(({
   coinAmount,
@@ -20,10 +15,8 @@ const TransactionForm = React.memo(({
   maxAvailable,
   symbol,
   currentPrice,
-  TC,
   slippage,
   setSlippage,
-  isLight,
   calculateTotal,
   isBuyOperation,
   handleSubmit,
@@ -39,314 +32,219 @@ const TransactionForm = React.memo(({
   stopPrice,
   setStopPrice,
 }) => {
+  const isLight = useThemeCheck();
+  const [isOrderTypeOpen, setIsOrderTypeOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOrderTypeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const formatOrderType = (type) => {
+    const types = { market: "Market", limit: "Limit", stop_limit: "Stop-Limit" };
+    return types[type] || type;
+  };
+
+  const inputStyle = `w-full text-right bg-transparent outline-none font-mono text-base font-semibold placeholder-gray-400 dark:placeholder-gray-600 transition-colors
+    ${isLight ? "text-gray-900" : "text-white"}
+  `;
+
+  const inputContainerStyle = `relative flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 rounded-xl border transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-0
+    ${isLight
+      ? "bg-white border-gray-200 focus-within:border-blue-400 focus-within:ring-blue-100"
+      : "bg-gray-800 border-gray-700 focus-within:ring-cyan-500/50"}
+  `;
+
   return (
-    <div className="space-y-3 md:space-y-4">
-      { }
-      <div className="flex gap-2 mb-4">
-        <div className={`flex-1 flex p-1.5 rounded-xl ${isLight ? "bg-gray-100 border border-gray-200/60" : "bg-gray-800/80 border border-white/5"}`}>
-          {['market', 'limit', 'stop_limit', 'stop_market'].map((type) => (
+    <div className="flex flex-col gap-2 sm:gap-3 pb-2 sm:pb-4">
+      {/* Order Type Inline Row */}
+      {!isAlertMode && (
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+            Order Type
+          </span>
+          <div className="relative" ref={dropdownRef}>
             <button
-              key={type}
-              onClick={() => { setOrderType(type); setIsAlertMode(false); }}
-              className={`flex-1 py-2.5 px-3 text-[10px] sm:text-xs rounded-lg capitalize whitespace-nowrap transition-all duration-300 ${orderType === type && !isAlertMode
-                ? `text-white font-bold shadow-lg ${isBuyOperation
-                  ? "bg-gradient-to-r from-emerald-500 to-green-600 shadow-emerald-500/20"
-                  : "bg-gradient-to-r from-red-500 to-rose-600 shadow-red-500/20"
-                }`
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 font-medium dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-white/5"
-                }`}
+              onClick={() => setIsOrderTypeOpen(!isOrderTypeOpen)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all
+                ${isLight
+                  ? "bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-700"
+                  : "bg-white/5 border-white/10 hover:bg-white/10 text-white"}
+              `}
             >
-              {type.replace('_', ' ')}
+              <span>{formatOrderType(orderType)}</span>
+              <FaChevronDown className={`text-[8px] transition-transform ${isOrderTypeOpen ? "rotate-180" : ""}`} />
             </button>
-          ))}
-        </div>
-      </div>
 
-      { }
-      {isAlertMode ? (
-        <div className="space-y-4">
-          { }
-          <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 text-center">
-            <FaBell className="text-3xl text-yellow-500 mx-auto mb-2" />
-            <h3 className="font-bold text-yellow-700 dark:text-yellow-500">Set Price Alert</h3>
-            <p className="text-xs text-yellow-600/80 dark:text-yellow-500/70 mt-1">
-              Get notified when {symbol} hits your target price.
-            </p>
+            {isOrderTypeOpen && (
+              <div className={`absolute right-0 top-full mt-1 w-32 rounded-lg border shadow-xl overflow-hidden z-30 ${isLight ? "bg-white border-gray-200" : "bg-[#1a1d24] border-white/10"
+                }`}>
+                {["market", "limit", "stop_limit"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setOrderType(type);
+                      setIsAlertMode(false);
+                      setIsOrderTypeOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs font-semibold transition-colors
+                      ${orderType === type
+                        ? (isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400")
+                        : (isLight ? "text-gray-700 hover:bg-gray-50" : "text-gray-300 hover:bg-white/5")
+                      }
+                    `}
+                  >
+                    {formatOrderType(type)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+      )}
 
-          <div>
-            <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
-              <FaExchangeAlt className="text-yellow-500" />
-              Target Price (USD)
-            </label>
+      {/* Limit/Stop Price Inputs */}
+      {(orderType === 'limit' || orderType === 'stop_limit' || orderType === 'stop_market') && (
+        <div className="flex gap-2 animate-in slide-in-from-top-2">
+          {(orderType === 'stop_limit' || orderType === 'stop_market') && (
+            <div className={`flex-1 px-3 py-2.5 rounded-lg border ${isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/10"
+              }`}>
+              <div className="text-[9px] font-bold text-gray-400 uppercase mb-1">Stop Price</div>
+              <input
+                type="number"
+                value={stopPrice}
+                onChange={(e) => setStopPrice(e.target.value)}
+                placeholder="0.00"
+                className={`w-full bg-transparent font-mono font-bold text-sm outline-none ${isLight ? "text-gray-900" : "text-white"
+                  }`}
+              />
+            </div>
+          )}
+          {(orderType === 'limit' || orderType === 'stop_limit') && (
+            <div className={`flex-1 px-3 py-2.5 rounded-lg border ${isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/10"
+              }`}>
+              <div className="text-[9px] font-bold text-gray-400 uppercase mb-1">Limit Price</div>
+              <input
+                type="number"
+                value={limitPrice}
+                onChange={handleLimitPriceChange}
+                placeholder="0.00"
+                className={`w-full bg-transparent font-mono font-bold text-sm outline-none ${isLight ? "text-gray-900" : "text-white"
+                  }`}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main Input Section */}
+      <div className="flex flex-col gap-2.5 relative">
+        {/* Swap Arrow */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <div className={`p-1.5 rounded-full shadow-lg border-2 ${isLight ? "bg-white border-gray-200 text-gray-400" : "bg-gray-900 border-gray-700 text-gray-500"
+            }`}>
+            <FaArrowDown size={10} />
+          </div>
+        </div>
+
+        {/* Pay Input */}
+        <div className={inputContainerStyle}>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Pay</span>
+            <span className="text-xs font-semibold text-gray-500">USD</span>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
             <input
               type="number"
               placeholder="0.00"
-              value={alertTargetPrice}
-              onChange={(e) => setAlertTargetPrice(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
+              value={usdAmount}
+              onChange={handleUsdAmountChange}
+              className={`${inputStyle} max-w-[150px]`}
             />
-          </div>
-
-          <div className="text-center text-xs text-gray-500">
-            Current Price: <span className="font-bold">${currentPrice.toLocaleString()}</span>
+            <div className="flex gap-1">
+              {[25, 50, 75, 100].map((pct) => (
+                <button
+                  key={pct}
+                  onClick={() => pct === 100 && setMaxAmount()}
+                  className={`text-[9px] px-2 py-0.5 rounded-md font-bold transition-all
+                    ${isLight
+                      ? "bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200"
+                      : "bg-white/5 hover:bg-white/10 text-gray-400 border border-white/10"}
+                  `}
+                >
+                  {pct === 100 ? 'MAX' : `${pct}%`}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      ) : (
-        <>
-          { }
-          {(orderType === 'stop_limit' || orderType === 'stop_market') && (
-            <div>
-              <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
-                <FaExchangeAlt className="text-red-500" />
-                Stop Price (USD)
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={stopPrice}
-                onChange={(e) => setStopPrice(e.target.value)}
-                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
-              />
-            </div>
-          )}
 
-          { }
-          {(orderType === 'limit' || orderType === 'stop_limit') && (
-            <div>
-              <label className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}>
-                <FaExchangeAlt className="text-purple-500" />
-                Limit Price (USD)
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={limitPrice}
-                onChange={handleLimitPriceChange}
-                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
-              />
-            </div>
-          )}
-
-          { }
-          <div className="grid grid-cols-2 gap-3">
-            { }
-            <div>
-              <label
-                className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}
-              >
-                <FaCoins className="text-yellow-500" />
-                Amount ({symbol})
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  placeholder="0.000000"
-                  value={coinAmount}
-                  onChange={handleCoinAmountChange}
-                  step="0.000001"
-                  min="0.000001"
-                  className={`w-full border rounded-lg pl-3 pr-20 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
-                />
-                <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex gap-1">
-                  {shouldShowSellAll && (
-                    <button
-                      onClick={handleSellAll}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 flex items-center gap-1 hover:scale-110 group shadow-md"
-                      title="Sell All Holdings"
-                    >
-                      <FaCoins className="text-xs group-hover:rotate-12 transition-transform" />
-                      ALL
-                    </button>
-                  )}
-                  <button
-                    onClick={setMaxAmount}
-                    className={`${isBuyOperation ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"} text-white px-2 py-1 rounded text-xs font-bold transition-all duration-200 hover:scale-110 group shadow-md`}
-                  >
-                    <span className="group-hover:scale-110 inline-block transition-transform">
-                      MAX
-                    </span>
-                  </button>
-                </div>
+        {/* Receive Input */}
+        <div className={inputContainerStyle}>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Receive</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-[8px] text-white font-bold shadow-sm">
+                {symbol ? symbol[0] : 'C'}
               </div>
-            </div>
-            <div>
-              <label
-                className={`flex text-xs font-semibold mb-2 items-center gap-1 ${TC.textSecondary}`}
-              >
-                <FaMoneyBillWave className="text-green-600" />
-                Amount (USD)
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={usdAmount}
-                onChange={handleUsdAmountChange}
-                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500 focus:border-emerald-500" : "focus:ring-red-500 focus:border-red-500"} text-sm font-semibold transition-all duration-300 ${TC.inputBg}`}
-              />
+              <span className="text-xs font-semibold text-gray-500">{symbol}</span>
             </div>
           </div>
+          <input
+            type="number"
+            placeholder="0.00"
+            value={coinAmount}
+            onChange={handleCoinAmountChange}
+            className={`${inputStyle} max-w-[150px]`}
+          />
+        </div>
+      </div>
 
-          { }
-          <div
-            className={`flex justify-between items-center text-xs rounded-lg px-3 py-2 border ${isBuyOperation ? "hover:border-emerald-500/50" : "hover:border-red-500/50"} transition-all duration-300 ${TC.bgCard}`}
-          >
-            <div className="flex items-center gap-1">
-              <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} text-xs animate-pulse`} />
-              <span className={`${TC.textSecondary}`}>
-                Available:{" "}
-                <span className={`${TC.textPrimary} font-bold`}>
-                  {maxAvailable.toFixed(6)}
-                </span>{" "}
-                {symbol}
-              </span>
-            </div>
-            <span className={`${TC.textTertiary}`}>
-              ≈{" "}
-              <span className={`${TC.textPrimary} font-bold`}>
-                $
-                {(parseFloat(coinAmount || 0) * (orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : currentPrice)).toLocaleString(
-                  "en-IN",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }
-                )}
-              </span>
-            </span>
-          </div>
+      {/* Advanced Options */}
+      <AdvancedOptions
+        orderType={orderType}
+        slippage={slippage}
+        setSlippage={setSlippage}
+      />
 
-          { }
-          <div
-            className={`p-3 md:p-4 rounded-xl space-y-3 transition-all duration-300 ${TC.bgCard} ${TC.hoverBorder}`}
-          >
-            <h4
-              className={`text-sm font-bold mb-2 flex items-center gap-2 ${TC.textSecondary}`}
-            >
-              <FaExchangeAlt className={`${isBuyOperation ? "text-emerald-600" : "text-red-600"} animate-pulse`} />
-              Transaction Details
-            </h4>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className={`text-xs ${TC.textTertiary}`}>
-                  {orderType === 'limit' ? 'Limit Price' : `Price per ${symbol}`}
-                </span>
-                <span className={`text-sm font-bold ${TC.textPrimary}`}>
-                  $
-                  {(orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : currentPrice).toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: (orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : currentPrice) < 1 ? 6 : 2,
-                  })}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className={`text-xs ${TC.textTertiary}`}>
-                  Slippage Tolerance
-                </span>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    value={slippage}
-                    onChange={(e) => setSlippage(parseFloat(e.target.value) || 1.0)}
-                    step="0.1"
-                    min="0.1"
-                    max="5"
-                    className={`w-16 border rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-2 ${isBuyOperation ? "focus:ring-emerald-500" : "focus:ring-red-500"} font-semibold transition-all duration-300 ${isLight
-                      ? "bg-gray-200 border-gray-300 text-gray-900"
-                      : "bg-gray-700 border-gray-600 text-white"
-                      }`}
-                  />
-                  <span className={`${TC.textTertiary} text-xs`}>%</span>
-                </div>
-              </div>
-              <div
-                className={`border-t ${isLight ? "border-gray-300" : "border-gray-600"
-                  } pt-2 mt-1`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className={`text-sm font-bold ${TC.textSecondary}`}>
-                    Total {isBuyOperation ? "Cost" : "You Receive"}
-                  </span>
-                  <span
-                    className={`text-lg font-bold ${isBuyOperation ? "text-green-600" : "text-red-600"
-                      }`}
-                  >
-                    ${calculateTotal}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Summary Footer */}
+      <div className={`flex justify-between items-center px-3 py-2 rounded-lg text-[10px] font-semibold ${isLight ? "bg-gray-50 text-gray-600" : "bg-white/5 text-gray-400"
+        }`}>
+        <span>Available: {maxAvailable.toFixed(4)} {isBuyOperation ? 'USD' : symbol}</span>
+        <span>Fee: ~0.1%</span>
+      </div>
 
-      { }
+      {/* Action Button */}
       <button
         onClick={handleSubmit}
-        disabled={
-          isAlertMode
-            ? (!alertTargetPrice || parseFloat(alertTargetPrice) <= 0 || isSubmitting)
-            : (
-              !usdAmount || parseFloat(usdAmount) <= 0 || parseFloat(coinAmount) <= 0 || isSubmitting ||
-              (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) ||
-              (orderType === 'stop_limit' && (!limitPrice || parseFloat(limitPrice) <= 0 || !stopPrice || parseFloat(stopPrice) <= 0)) ||
-              (orderType === 'stop_market' && (!stopPrice || parseFloat(stopPrice) <= 0))
-            )
-        }
-        className={`w-full py-3.5 px-4 font-bold text-sm rounded-xl 
-                    transition-all duration-200 
-                    disabled:opacity-50 disabled:cursor-not-allowed 
-                    flex items-center justify-center gap-2 
-                    group
-                    ${isAlertMode
-            ? "bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white"
-            : isBuyOperation
-              ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white"
-              : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white"
-          }`}
+        disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+        className={`
+          w-full py-4 rounded-xl font-bold text-sm shadow-lg transform active:scale-[0.98] transition-all duration-200
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+          flex items-center justify-center gap-2
+          ${isBuyOperation
+            ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/20"
+            : "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20"}
+        `}
       >
         {isSubmitting ? (
           <>
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             <span>Processing...</span>
-          </>
-        ) : isAlertMode ? (
-          <>
-            <FaBell className="text-sm" />
-            <span>Set Price Alert</span>
           </>
         ) : (
           <>
-            <FaExchangeAlt
-              className={`text-sm transition-all duration-300 ${isBuyOperation
-                ? "group-hover:rotate-180"
-                : "group-hover:-rotate-180"
-                }`}
-            />
-            <span>
-              {isBuyOperation ? "Deposit" : "Withdraw"} {symbol}
-            </span>
-
-            {isBuyOperation ? (
-              <FaArrowUp className="text-sm transition-transform duration-300 group-hover:-translate-y-1" />
-            ) : (
-              <FaArrowDown className="text-sm transition-transform duration-300 group-hover:translate-y-1" />
-            )}
+            <span>{isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}</span>
+            <span className="opacity-70 font-normal">| ${calculateTotal}</span>
           </>
         )}
       </button>
-
-      { }
-      <div
-        className={`flex items-center gap-2 text-xs rounded px-2 py-1 border ${TC.bgCard} ${TC.hoverBorder} transition-all duration-300`}
-      >
-        <FaInfoCircle className={`${isBuyOperation ? "text-emerald-500" : "text-red-500"} flex-shrink-0 text-xs animate-pulse`} />
-        <span className={TC.textTertiary}>
-          {isBuyOperation
-            ? "You'll receive the coins instantly after purchase confirmation."
-            : "Funds will be credited to your wallet immediately after sale."}
-        </span>
-      </div>
     </div>
   );
 });

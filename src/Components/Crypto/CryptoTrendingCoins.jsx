@@ -6,7 +6,7 @@ import { FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-function TrendingCoins() {
+function CryptoTrendingCoins() {
     const isLight = useThemeCheck();
     const [loading, setLoading] = useState(false);
     const [coins, setCoins] = useState([]);
@@ -206,4 +206,4 @@ function TrendingCoins() {
     );
 }
 
-export default TrendingCoins;
+export default CryptoTrendingCoins;

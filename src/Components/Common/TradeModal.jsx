@@ -77,71 +77,12 @@ function TradeModal({
     );
   }, [userHoldings]);
 
+
   const shouldShowHoldingsInfo = showHoldingsInfo || hasHoldings;
   const isBuyOperation = useMemo(
     () => (shouldShowHoldingsInfo ? activeTab === "deposit" : type === "buy"),
     [shouldShowHoldingsInfo, activeTab, type]
   );
-
-
-  const TC = useMemo(
-    () => ({
-
-      bgModal: isLight
-        ? "bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-        : "bg-[#0B0E14]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
-      bgCard: isLight
-        ? "bg-white/60 border border-gray-200 shadow-sm backdrop-blur-sm"
-        : "bg-gray-800/40 border border-white/5 shadow-inner backdrop-blur-sm",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-300",
-      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-
-      inputBg: isLight
-        ? `bg-gray-50 border-gray-200 focus:bg-white focus:border-${isBuyOperation ? "emerald" : "red"
-        }-500 focus:ring-4 focus:ring-${isBuyOperation ? "emerald" : "red"
-        }-500/10 text-gray-900 placeholder-gray-400 shadow-inner`
-        : `bg-gray-900/50 border-gray-700 focus:bg-gray-900 focus:border-${isBuyOperation ? "emerald" : "red"
-        }-500 focus:ring-4 focus:ring-${isBuyOperation ? "emerald" : "red"
-        }-500/10 text-white placeholder-gray-600 shadow-inner`,
-
-
-      bgTabBase: isLight
-        ? "bg-gray-50/80 backdrop-blur-sm"
-        : "bg-gray-900/50 backdrop-blur-sm",
-      borderTab: isLight ? "border-gray-200" : "border-gray-800",
-
-
-      bgCyanAccent: isLight
-        ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100"
-        : "bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border-b border-cyan-500/20",
-      bgGreenAccent: isLight
-        ? "bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100"
-        : "bg-gradient-to-r from-emerald-900/20 to-green-900/20 border-b border-emerald-500/20",
-      bgRedAccent: isLight
-        ? "bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100"
-        : "bg-gradient-to-r from-red-900/20 to-rose-900/20 border-b border-red-500/20",
-
-
-      bgGreenPill: isLight
-        ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-        : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
-      bgRedPill: isLight
-        ? "bg-red-100 text-red-700 border border-red-200"
-        : "bg-red-500/20 text-red-400 border border-red-500/30",
-
-
-      hoverBorder: isLight
-        ? `hover:border-${isBuyOperation ? "emerald" : "red"
-        }-400 transition-colors duration-200`
-        : `hover:border-${isBuyOperation ? "emerald" : "red"
-        }-500/50 transition-colors duration-200`,
-    }),
-    [isLight, isBuyOperation]
-  );
-
-
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -786,8 +727,10 @@ function TradeModal({
         onClick={handleBackdropClick}
       >
         <div
-          className={`${TC.bgModal
-            } rounded-3xl shadow-2xl w-[96vw] md:max-w-xl md:w-full mx-auto max-h-[90vh] md:max-h-[92vh] overflow-hidden transition-all duration-300 ease-out origin-center ${isVisible
+          className={`rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-[95%] sm:w-full max-w-[360px] sm:max-w-[440px] mx-auto overflow-hidden transition-all duration-300 ease-out origin-center backdrop-blur-3xl transform ${isLight
+            ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
+            : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
+            } ${isVisible
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-4 scale-95"
             }`}
@@ -801,7 +744,6 @@ function TradeModal({
             activeTab={activeTab}
             isBuyOperation={isBuyOperation}
             isLight={isLight}
-            TC={TC}
             handleClose={handleClose}
           />
 
@@ -810,18 +752,19 @@ function TradeModal({
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               isLight={isLight}
-              TC={TC}
             />
           )}
 
-          <div className="p-2 sm:p-4 overflow-y-auto max-h-[calc(75vh-100px)] custom-scrollbar">
+          <div className="p-3 sm:p-4 pt-1">
             {shouldShowHoldingsInfo && holdingsSummary && (
               <HoldingsInfo
                 holdingsSummary={holdingsSummary}
                 activeTab={activeTab}
                 isLight={isLight}
-                TC={TC}
                 symbol={symbol}
+                currentPrice={currentPrice}
+                coin={coin}
+                setActiveTab={setActiveTab}
               />
             )}
 
@@ -837,10 +780,8 @@ function TradeModal({
                 maxAvailable={maxAvailable}
                 symbol={symbol}
                 currentPrice={currentPrice}
-                TC={TC}
                 slippage={slippage}
                 setSlippage={setSlippage}
-                isLight={isLight}
                 calculateTotal={calculateTotal}
                 isBuyOperation={isBuyOperation}
                 handleSubmit={handleSubmit}
@@ -855,15 +796,6 @@ function TradeModal({
                 setAlertTargetPrice={setAlertTargetPrice}
                 stopPrice={stopPrice}
                 setStopPrice={setStopPrice}
-              />
-            )}
-
-            {shouldShowHoldingsInfo && activeTab === "details" && (
-              <HoldingsActions
-                setActiveTab={setActiveTab}
-                TC={TC}
-                currentPrice={currentPrice}
-                holdingsSummary={holdingsSummary}
               />
             )}
 
