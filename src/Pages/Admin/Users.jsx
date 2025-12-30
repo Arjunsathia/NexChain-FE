@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
-import ReactDOM from "react-dom";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Search,
-  Plus,
   Mail,
   Phone,
   Calendar,
@@ -12,24 +11,26 @@ import {
   Wallet,
   FileText,
   Clock,
-  Edit,
-  Trash2,
   Loader2,
   X,
   ArrowUpRight,
   ArrowDownLeft,
   User,
+  Archive,
+  RefreshCcw,
+  Unlock,
+  ChevronDown
 } from "lucide-react";
-import UserForm from "@/Components/Admin/Users/UserForm";
-import UserDeleteModal from "@/Components/Admin/Users/UserDeleteModal";
 import MessageUserModal from "@/Components/Admin/Users/MessageUserModal";
 import UserStatDetailModal from "@/Components/Admin/Users/UserStatDetailModal";
-import api, { getData, deleteById } from "@/api/axiosConfig";
+import ActionConfirmModal from "@/Components/Admin/Users/ActionConfirmModal";
+import { getData, updateById } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import { SERVER_URL } from "@/api/axiosConfig";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { jwtDecode } from "jwt-decode";
 
 const Users = () => {
   const isLight = useThemeCheck();
@@ -38,6 +39,30 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [filterRole, setFilterRole] = useState("all");
+
+  // Current User Role State
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+
+  useEffect(() => {
+    // 1. Try to get token from localStorage with the key used in AuthPage
+    let token = localStorage.getItem('NEXCHAIN_USER_TOKEN') || localStorage.getItem('token');
+
+    // 2. Fallback: Try reading from cookie if localStorage failed (e.g. strict cookie auth)
+    if (!token) {
+      const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+      if (match) token = match[2];
+    }
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        // Ensure role defaults to 'user' if missing in payload
+        setCurrentUserRole(decoded.role || 'user');
+      } catch (e) {
+        console.error("Token decode error", e);
+      }
+    }
+  }, []);
 
   // Detailed User Data State
   const [userDetails, setUserDetails] = useState({
@@ -49,39 +74,29 @@ const Users = () => {
   });
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Modal States
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [showUserForm, setShowUserForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  // Action Modal State
+  const [actionModal, setActionModal] = useState({
+    isOpen: false,
+    type: null, // 'archive', 'restore', 'role_switch'
+    user: null
+  });
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Message Modal State
   const [showMessageModal, setShowMessageModal] = useState(false);
 
   // Stat Detail Modal State
-  const [expandedStat, setExpandedStat] = useState(null); // 'joined', 'balance', 'assets', 'status'
+  const [expandedStat, setExpandedStat] = useState(null);
 
   // Tabs for Detail View
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    fetchUsers();
+  const [showArchived, setShowArchived] = useState(false);
 
-  }, []);
-
-  // Fetch detailed info when a user is selected
-  useEffect(() => {
-    if (selectedUser) {
-      fetchUserDetails(selectedUser.id || selectedUser._id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUser]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getData("/users");
+      const response = await getData(`/users?includeDeleted=${showArchived}`);
       let usersData = response?.users ?? response?.data ?? (Array.isArray(response) ? response : []);
 
       const NOW = new Date().getTime();
@@ -108,9 +123,13 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showArchived]);
 
-  const fetchUserDetails = async (userId) => {
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const fetchUserDetails = useCallback(async (userId) => {
     if (!userId) return;
     try {
       setLoadingDetails(true);
@@ -153,43 +172,88 @@ const Users = () => {
     } finally {
       setLoadingDetails(false);
     }
-  };
+  }, [selectedUser]);
+
+  // Fetch detailed info when a user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      fetchUserDetails(selectedUser.id || selectedUser._id);
+    }
+  }, [selectedUser, fetchUserDetails]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
-    return matchesSearch && matchesRole;
+
+    // Filter by archived status based on toggle
+    // If showArchived is true, show ONLY deleted users
+    // If showArchived is false, show ONLY active users
+    const matchesStatus = showArchived ? user.isDeleted : !user.isDeleted;
+
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleDelete = async () => {
-    if (!userToDelete) return;
+  const handleAction = async () => {
+    const { type, user } = actionModal;
+    if (!type || !user) return;
+
+    setActionLoading(true);
     try {
-      setDeleteLoading(true);
-      const targetId = userToDelete.id || userToDelete._id;
-      setUsers(users.filter((u) => u._id !== userToDelete._id));
-      if (selectedUser?._id === userToDelete._id) setSelectedUser(null);
-      setShowDeleteModal(false);
-      try {
-        await deleteById("/users", targetId);
-        toast.success("User deleted successfully");
-      } catch {
-        await api.post("/users/delete", { id: userToDelete._id });
-        toast.success("Delete successful (fallback)");
+      const targetId = user.id || user._id;
+      let updateData = {};
+
+      if (type === 'archive') {
+        updateData = { isDeleted: true };
+      } else if (type === 'restore') {
+        updateData = { isDeleted: false };
+      } else if (type === 'promote_admin') {
+        updateData = { role: 'admin' };
+      } else if (type === 'demote_admin') {
+        updateData = { role: 'user' };
+      } else if (type === 'promote_super') {
+        updateData = { role: 'superadmin' };
+      } else if (type === 'demote_super') {
+        updateData = { role: 'admin' };
       }
-    } catch {
-      toast.error("Failed to delete user");
+
+      await updateById("/users", targetId, updateData);
+
+      toast.success(
+        type === 'archive' ? "User archived successfully" :
+          type === 'restore' ? "User restored successfully" :
+            "User role updated successfully"
+      );
+
       fetchUsers();
+      if (selectedUser && (selectedUser.id === targetId || selectedUser._id === targetId)) {
+        // Refresh selected user details or clear if archived and viewing active list
+        if (type === 'archive' && !showArchived) {
+          setSelectedUser(null);
+        } else {
+          // Re-fetch to update local state logic or just patch local
+          const updatedUser = { ...user, ...updateData };
+          setSelectedUser(updatedUser);
+        }
+      }
+
+      setActionModal({ isOpen: false, type: null, user: null });
+
+    } catch (error) {
+      console.error("Action error:", error);
+      toast.error("Failed to perform action");
     } finally {
-      setDeleteLoading(false);
-      setUserToDelete(null);
+      setActionLoading(false);
     }
   };
 
-  const handleEdit = (user) => {
-    setEditingUser(user);
-    setShowUserForm(true);
+  const openActionModal = (type, user) => {
+    setActionModal({
+      isOpen: true,
+      type,
+      user
+    });
   };
 
   const TC = useMemo(() => ({
@@ -219,7 +283,7 @@ const Users = () => {
     headerGradient: "from-blue-600 to-cyan-500",
   }), [isLight]);
 
-  // Move sub-components outside or memoize them
+  // UserListItem Component
   const UserListItem = useMemo(() => {
     const Component = ({ user }) => (
       <div
@@ -266,11 +330,23 @@ const Users = () => {
             <h4 className={`text-sm font-bold truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-500' : TC.textPrimary}`}>
               {user.name}
             </h4>
-            {user.role === 'admin' && (
-              <div className="p-1 rounded-md bg-blue-500/10">
-                <Shield className="w-3 h-3 text-blue-500" />
-              </div>
-            )}
+            <div className="flex gap-1">
+              {user.isFrozen && (
+                <div className="p-1 rounded-md bg-orange-500/10" title="Account Frozen">
+                  <Ban className="w-3 h-3 text-orange-500" />
+                </div>
+              )}
+              {user.role === 'admin' && (
+                <div className="p-1 rounded-md bg-blue-500/10">
+                  <Shield className="w-3 h-3 text-blue-500" />
+                </div>
+              )}
+              {user.isDeleted && (
+                <div className="p-1 rounded-md bg-red-500/10" title="Archived">
+                  <Archive className="w-3 h-3 text-red-500" />
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <p className={`text-[10px] sm:text-xs truncate transition-colors ${selectedUser?._id === user._id ? 'text-blue-400/80' : TC.textSecondary}`}>
@@ -290,29 +366,6 @@ const Users = () => {
     return Component;
   }, [selectedUser, isLight, TC]);
 
-  const StatCard = useMemo(() => {
-    const Component = ({ label, value, icon: Icon, loading, onClick }) => (
-      <div
-        onClick={onClick}
-        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-      >
-        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />
-
-        <div className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}>
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-        </div>
-        <div className="flex-1 min-w-0 relative z-10">
-          <p className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}>{label}</p>
-          <p className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
-            {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : value}
-          </p>
-        </div>
-      </div>
-    );
-    Component.displayName = "StatCard";
-    return Component;
-  }, [TC]);
-
   return (
     // Updated Layout: Vertical Flex for Header + Content
     <div className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative fade-in`}>
@@ -326,14 +379,7 @@ const Users = () => {
             Manage system users, permissions, and accounts
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => { setEditingUser(null); setShowUserForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold"
-          >
-            <Plus className="w-4 h-4" /> Add User
-          </button>
-        </div>
+        {/* Removed "Add User" button */}
       </div>
 
       {/* 2. Main Content Area (Split View) */}
@@ -375,6 +421,17 @@ const Users = () => {
                 <Shield className="w-4 h-4" />
                 <span className="hidden sm:inline">Admin</span>
               </button>
+              <button
+                onClick={() => setShowArchived(!showArchived)}
+                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${showArchived
+                  ? "bg-red-500/10 border-red-500/50 text-red-500"
+                  : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
+                  }`}
+                title="Toggle Archived"
+              >
+                <Archive className="w-4 h-4" />
+                <span className="hidden sm:inline">Archived</span>
+              </button>
             </div>
           </div>
 
@@ -400,30 +457,22 @@ const Users = () => {
           userDetails={userDetails}
           loadingDetails={loadingDetails}
           setExpandedStat={setExpandedStat}
-          handleEdit={handleEdit}
-          userToDelete={userToDelete}
-          setUserToDelete={setUserToDelete}
-          setShowDeleteModal={setShowDeleteModal}
+
+          // Use current user role to determine what buttons to show
+          currentUserRole={currentUserRole}
+          openActionModal={openActionModal}
           setShowMessageModal={setShowMessageModal}
           isLight={isLight}
         />
 
-
-        <UserForm
-          open={showUserForm}
-          handleClose={() => setShowUserForm(false)}
-          fetchData={fetchUsers}
-          id={editingUser?.id || editingUser?._id}
-        />
-
-        <UserDeleteModal
-          showDeleteModal={showDeleteModal}
-          setShowDeleteModal={setShowDeleteModal}
-          userToDelete={userToDelete}
-          handleDelete={handleDelete}
-          deleteLoading={deleteLoading}
+        <ActionConfirmModal
+          isOpen={actionModal.isOpen}
+          onClose={() => setActionModal({ ...actionModal, isOpen: false })}
+          onConfirm={handleAction}
+          actionType={actionModal.type}
+          userName={actionModal.user?.name}
+          loading={actionLoading}
           TC={TC}
-          isLight={isLight}
         />
 
         <MessageUserModal
@@ -434,7 +483,7 @@ const Users = () => {
           isLight={isLight}
         />
 
-        {expandedStat && ReactDOM.createPortal(
+        {expandedStat && createPortal(
           <UserStatDetailModal
             isOpen={!!expandedStat}
             onClose={() => setExpandedStat(null)}
@@ -460,14 +509,113 @@ const UserDetailPane = ({
   userDetails,
   loadingDetails,
   setExpandedStat,
-  handleEdit,
-  setUserToDelete,
-  setShowDeleteModal,
+  openActionModal,
   setShowMessageModal,
+  currentUserRole,
   isLight
 }) => {
   // Simple media query hook
   const [isDesktop, setIsDesktop] = useState(window.matchMedia("(min-width: 768px)").matches);
+
+  const { email } = selectedUser || {};
+
+  // Permission Logic Helpers
+  const canModify = useCallback((targetRole) => {
+    // 1. Super Admin actor
+    if (currentUserRole === 'superadmin') {
+      // Cannot modify primary system admin
+      if (email === 'nexchainsystem@gmail.com') return false;
+      return true;
+    }
+
+    // 2. Admin actor
+    if (currentUserRole === 'admin') {
+      // Cannot modify Super Admin or other Admins
+      if (targetRole === 'superadmin') return false;
+      if (targetRole === 'admin') return false;
+      return true;
+    }
+
+    // 3. User actor (should not be here anyway)
+    return false;
+  }, [currentUserRole, email]);
+
+  const canArchive = useMemo(() => {
+    if (!selectedUser) return false;
+    // Hard Stop for Primary Super Admin
+    if (selectedUser.email === 'nexchainsystem@gmail.com') return false;
+
+    if (currentUserRole === 'superadmin') return true;
+    if (currentUserRole === 'admin' && selectedUser.role === 'user') return true;
+    return false;
+  }, [currentUserRole, selectedUser]);
+
+  const renderRoleButton = () => {
+    if (!selectedUser) return null;
+    const targetRole = selectedUser.role;
+
+    // Hard Stop for Primary Super Admin
+    if (selectedUser.email === 'nexchainsystem@gmail.com') return null;
+
+    // IF ACTOR IS SUPER ADMIN
+    if (currentUserRole === 'superadmin') {
+      if (targetRole === 'user') {
+        return (
+          <button
+            onClick={() => openActionModal('promote_admin', selectedUser)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+          >
+            <Shield className="w-4 h-4" /> Make Admin
+          </button>
+        );
+      }
+      if (targetRole === 'admin') {
+        return (
+          <div className="flex gap-2">
+            <button
+              onClick={() => openActionModal('demote_admin', selectedUser)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-bold text-sm shadow-lg shadow-gray-500/20 transition-all hover:-translate-y-0.5"
+            >
+              <RefreshCcw className="w-4 h-4" /> Revoke Admin
+            </button>
+            <button
+              onClick={() => openActionModal('promote_super', selectedUser)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:-translate-y-0.5"
+            >
+              <Shield className="w-4 h-4" /> Make Super Admin
+            </button>
+          </div>
+        );
+      }
+      if (targetRole === 'superadmin') {
+        return (
+          <button
+            onClick={() => openActionModal('demote_super', selectedUser)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5"
+          >
+            <RefreshCcw className="w-4 h-4" /> Demote Super Admin
+          </button>
+        );
+      }
+    }
+
+    // IF ACTOR IS ADMIN
+    if (currentUserRole === 'admin') {
+      if (targetRole === 'user') {
+        return (
+          <button
+            onClick={() => openActionModal('promote_admin', selectedUser)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+          >
+            <Shield className="w-4 h-4" /> Make Admin
+          </button>
+        );
+      }
+      // Admin cannot modify other admins or superadmins
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
@@ -520,6 +668,7 @@ const UserDetailPane = ({
                       {selectedUser.recentlyActive ? "Active" : "Inactive"}
                     </span>
                     {selectedUser.role === 'admin' && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500 text-white">Admin</span>}
+                    {selectedUser.isDeleted && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-500 text-white">Archived</span>}
                   </div>
                 </div>
               </div>
@@ -538,21 +687,27 @@ const UserDetailPane = ({
                     </button>
                   ))}
                 </div>
+                {/* Updated Action Buttons */}
                 <div className="flex gap-2 self-end md:self-auto">
-                  <button
-                    onClick={() => handleEdit(selectedUser)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5"
-                  >
-                    <Edit className="w-4 h-4" /> Edit Profile
-                  </button>
-                  {selectedUser.role !== 'admin' && (
+                  {renderRoleButton()}
+
+                  {/* Archive Logic */}
+                  {(selectedUser.isDeleted && canArchive) ? (
                     <button
-                      onClick={() => { setUserToDelete(selectedUser); setShowDeleteModal(true); }}
-                      className="p-2 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/30 transition-all"
+                      onClick={() => openActionModal('restore', selectedUser)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-sm shadow-lg shadow-green-500/20 transition-all hover:-translate-y-0.5"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Unlock className="w-4 h-4" /> Restore User
                     </button>
-                  )}
+                  ) : (canArchive && (
+                    <button
+                      onClick={() => openActionModal('archive', selectedUser)}
+                      className="p-2 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 hover:bg-orange-100 dark:bg-orange-900/10 dark:text-orange-400 dark:border-orange-900/30 transition-all"
+                      title="Archive User"
+                    >
+                      <Archive className="w-4 h-4" />
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -560,6 +715,7 @@ const UserDetailPane = ({
                 {activeTab === "overview" && (
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Stats cards logic same as before... */}
                       <div
                         onClick={() => setExpandedStat('joined')}
                         className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
@@ -663,6 +819,7 @@ const UserDetailPane = ({
                     </div>
                   </div>
                 )}
+                {/* History & Docs Tabs remain largely unchanged in rendering logic, just simple display */}
                 {activeTab === "history" && (
                   <div className="space-y-4">
                     {loadingDetails ? (
@@ -746,7 +903,7 @@ const UserDetailPane = ({
 
   // If NOT Desktop (Mobile) and a user is selected, render via Portal to body.
   if (!isDesktop) {
-    return ReactDOM.createPortal(content, document.body);
+    return createPortal(content, document.body);
   }
 
   // Otherwise (Desktop), render inline.

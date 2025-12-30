@@ -85,7 +85,7 @@ export default function Navbar() {
         { path: "/portfolio", label: "Portfolio" },
         { path: "/watchlist", label: "Watchlist" },
         { path: "/learning", label: "Learn" },
-        ...(role === "admin" ? [{ path: "/admin", label: "Admin" }] : []),
+        ...((role === "admin" || role === "superadmin") ? [{ path: "/admin", label: "Admin" }] : []),
     ], [role]);
 
     const isActive = (path) => {

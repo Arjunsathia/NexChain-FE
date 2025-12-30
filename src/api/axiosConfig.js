@@ -1,4 +1,5 @@
 import axios from "axios";
+import { TwoFactorEvent } from "../utils/twoFactorEvent";
 
 const getBaseUrl = () => {
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
@@ -48,7 +49,7 @@ export const setMemoryToken = (token) => {
   memoryToken = token;
 };
 
-// ... existing code ...
+
 
 api.interceptors.request.use(
   (config) => {
@@ -72,6 +73,22 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Check for 2FA requirement
+    if (error.response?.status === 403 && error.response?.data?.require2FA && !originalRequest._isRetry) {
+        originalRequest._isRetry = true;
+        
+        try {
+            // Request code from user via Modal
+            const code = await TwoFactorEvent.request({});
+            
+            // Add code to headers and retry
+            originalRequest.headers['X-Admin-2FA-Code'] = code;
+            return api(originalRequest);
+        } catch {
+             return Promise.reject(new Error("2FA Authentication Cancelled or Failed"));
+        }
+    }
 
     // If error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
