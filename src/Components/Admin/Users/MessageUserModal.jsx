@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { X, Send, Mail, MessageSquare } from "lucide-react";
 
 import toast from "react-hot-toast";
+import { postForm } from "@/api/axiosConfig";
 
 const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
     const [messageType, setMessageType] = useState("email"); // 'email' or 'internal'
@@ -21,14 +22,15 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
 
         try {
             setLoading(true);
-            // Determine endpoint based on type
 
+            const payload = {
+                userId: user.id || user._id,
+                type: messageType,
+                subject: messageType === 'email' ? subject : undefined,
+                message
+            };
 
-            // Simulating API call since backend might not have these specific routes yet
-            // In a real app: await api.post(endpoint, { userId: user._id || user.id, subject, message });
-
-            // Artificial delay for demo
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await postForm("/users/contact-user", payload);
 
             toast.success(`${messageType === 'email' ? 'Email' : 'Message'} sent successfully to ${user.name}`);
             onClose();
@@ -36,7 +38,9 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
             setMessage("");
         } catch (error) {
             console.error("Failed to send message:", error);
-            toast.error("Failed to send message");
+            // Error handling is already done in axiosConfig but we can show a specific toast if we want
+            // postForm throws, so we catch it here.
+            toast.error(error.response?.data?.error || "Failed to send message");
         } finally {
             setLoading(false);
         }
