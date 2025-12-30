@@ -520,25 +520,6 @@ const UserDetailPane = ({
   const { email } = selectedUser || {};
 
   // Permission Logic Helpers
-  const canModify = useCallback((targetRole) => {
-    // 1. Super Admin actor
-    if (currentUserRole === 'superadmin') {
-      // Cannot modify primary system admin
-      if (email === 'nexchainsystem@gmail.com') return false;
-      return true;
-    }
-
-    // 2. Admin actor
-    if (currentUserRole === 'admin') {
-      // Cannot modify Super Admin or other Admins
-      if (targetRole === 'superadmin') return false;
-      if (targetRole === 'admin') return false;
-      return true;
-    }
-
-    // 3. User actor (should not be here anyway)
-    return false;
-  }, [currentUserRole, email]);
 
   const canArchive = useMemo(() => {
     if (!selectedUser) return false;
