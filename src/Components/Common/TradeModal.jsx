@@ -11,7 +11,6 @@ import api from "@/api/axiosConfig";
 import TradeModalHeader from "../TradeModal/TradeModalHeader";
 import TradeModalTabs from "../TradeModal/TradeModalTabs";
 import HoldingsInfo from "../TradeModal/HoldingsInfo";
-import HoldingsActions from "../TradeModal/HoldingsActions";
 import TransactionForm from "../TradeModal/TransactionForm";
 import PurchaseSuccessModal from "./PurchaseSuccessModal";
 
