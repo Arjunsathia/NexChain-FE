@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
-import TrendingCoins from "@/Components/Dashboard/TrendingCoins";
+import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
 import LearningHub from "@/Components/Dashboard/LearningHubWidget";
 import { getCoins } from "@/api/coinApis";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -13,17 +13,7 @@ import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 import useThemeCheck from "@/hooks/useThemeCheck";
-
-const coinToSymbol = {
-  bitcoin: "btcusdt",
-  ethereum: "ethusdt",
-  "usd-coin": "usdcusdt",
-  binancecoin: "bnbusdt",
-  ripple: "xrpusdt",
-  cardano: "adausdt",
-  solana: "solusdt",
-  dogecoin: "dogeusdt",
-};
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 export default function Dashboard() {
   const isLight = useThemeCheck();
@@ -51,68 +41,11 @@ export default function Dashboard() {
     }
   }, [topCoins, selectedCoinId]);
 
-  const [liveData, setLiveData] = useState({});
-  const ws = useRef(null);
-  const bufferRef = useRef({});
+  const liveData = useBinanceTicker(topCoins, 200);
 
   const handleCoinClick = (coinId) => {
     setSelectedCoinId(coinId);
   };
-
-  useEffect(() => {
-    if (topCoins.length === 0) return;
-
-    const symbols = topCoins
-      .map((coin) => coinToSymbol[coin.id])
-      .filter(Boolean)
-      .map((symbol) => `${symbol}@ticker`)
-      .join("/");
-
-    if (!symbols) return;
-
-    const intervalId = setInterval(() => {
-      if (Object.keys(bufferRef.current).length > 0) {
-        setLiveData((prev) => ({
-          ...prev,
-          ...bufferRef.current,
-        }));
-        bufferRef.current = {};
-      }
-    }, 200);
-
-    try {
-      ws.current = new WebSocket(
-        `wss://stream.binance.com:9443/stream?streams=${symbols}`
-      );
-
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.stream && data.data) {
-          const symbol = data.stream.replace("@ticker", "");
-          const coinId = Object.keys(coinToSymbol).find(
-            (key) => coinToSymbol[key] === symbol
-          );
-
-          if (coinId) {
-            const newPrice = parseFloat(data.data.c);
-            const newChange = parseFloat(data.data.P);
-            bufferRef.current[coinId] = {
-              price: newPrice,
-              change: newChange,
-              isPositive: newChange >= 0,
-            };
-          }
-        }
-      };
-    } catch (error) {
-      console.warn("WebSocket setup failed:", error);
-    }
-
-    return () => {
-      clearInterval(intervalId);
-      if (ws.current) ws.current.close();
-    };
-  }, [topCoins]);
 
   const USERDATA_HEIGHT = "h-[150px]";
   const CHART_HEIGHT = "h-[620px]";
@@ -162,7 +95,7 @@ export default function Dashboard() {
         <div className="fade-in" style={{ animationDelay: "0.5s" }}>
           <div className="flex flex-col gap-4">
             <WatchlistPreview />
-            <TrendingCoins />
+            <TrendingCoinsWidget variant="dashboard" />
           </div>
         </div>
 
@@ -214,7 +147,7 @@ export default function Dashboard() {
               <WatchlistPreview />
             </div>
             <div className={`fade-in ${TRENDING_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
-              <TrendingCoins />
+              <TrendingCoinsWidget variant="dashboard" />
             </div>
             <div className={`fade-in ${LEARNING_HUB_HEIGHT}`} style={{ animationDelay: "0.4s" }}>
               <LearningHub />

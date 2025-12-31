@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-import LenisScroll from "../Components/Common/LenisScroll";
-import InteractiveGridPattern from "../Components/Landing/Background";
 import HeroSection from "../Components/Landing/HeroSection";
 import { TC } from "../Components/Landing/theme";
 
@@ -45,7 +43,6 @@ const MemoizedFeaturesSection = React.memo(FeaturesSection);
 const MemoizedMarketOverviewSection = React.memo(MarketOverviewSection);
 const MemoizedTestimonialsSection = React.memo(TestimonialsSection);
 const MemoizedCTASection = React.memo(CTASection);
-const MemoizedInteractiveGridPattern = React.memo(InteractiveGridPattern);
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -103,24 +100,16 @@ export default function Landing() {
   }, []);
 
   const scrollToFeatures = useCallback(() => {
-
     const element = document.getElementById('features-section');
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Robust calculation based scroll to prevent browser/library conflict
+      const top = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);
 
   return (
-    <div className={`min-h-screen ${TC.bgPage} font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden relative`}>
-      <LenisScroll />
-
-      { }
-      <MemoizedInteractiveGridPattern />
-
-      { }
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-cyan-400 pointer-events-none z-0" />
-      <div className="fixed bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-blue-500 pointer-events-none z-0" />
-
+    <div className="min-h-screen bg-transparent text-white font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
       { }
       <div className="relative z-10">
         <MemoizedHeroSection

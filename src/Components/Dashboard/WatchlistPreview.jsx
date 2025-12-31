@@ -1,23 +1,22 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate } from "react-router-dom";
 import { FaStar, FaExclamationTriangle, FaArrowRight } from "react-icons/fa";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 function WatchlistPreview() {
   const isLight = useThemeCheck();
   const { user } = useUserContext();
   const userId = user?.id;
   const [watchlistData, setWatchlistData] = useState([]);
-  const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  const ws = useRef(null);
-  const livePricesRef = useRef({});
+  const livePrices = useBinanceTicker(watchlistData);
 
   const TC = useMemo(() => ({
     bgContainer: isLight
@@ -35,10 +34,6 @@ function WatchlistPreview() {
     skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
-
-  useEffect(() => {
-    livePricesRef.current = livePrices;
-  }, [livePrices]);
 
   useEffect(() => {
     const fetchWatchlist = async () => {
@@ -66,61 +61,6 @@ function WatchlistPreview() {
 
     if (userId) fetchWatchlist();
   }, [userId]);
-
-  useEffect(() => {
-    if (watchlistData.length === 0) return;
-
-    const symbols = watchlistData
-      .map((coin) => {
-        const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
-          cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
-          "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt",
-          stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt",
-          "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt",
-          trxusdt: "trxusdt",
-        };
-        return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
-      })
-      .filter(Boolean);
-
-    if (symbols.length === 0) return;
-    const streams = symbols.join("/");
-
-    try {
-      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.stream && message.data) {
-          const symbol = message.stream.replace("@ticker", "");
-          const coinData = message.data;
-
-          const symbolToCoinId = {
-            btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple",
-            adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot",
-            maticusdt: "matic-network", ltcusdt: "litecoin", linkusdt: "chainlink", xlmusdt: "stellar",
-            atomusdt: "cosmos", xmusdt: "monero", etcusdt: "ethereum-classic", bchusdt: "bitcoin-cash",
-            filusdt: "filecoin", thetausdt: "theta", vetusdt: "vechain", trxusdt: "tron",
-          };
-          const foundId = symbolToCoinId[symbol];
-
-          if (foundId) {
-            setLivePrices((prev) => ({
-              ...prev,
-              [foundId]: {
-                current_price: parseFloat(coinData.c),
-                price_change_percentage_24h: parseFloat(coinData.P),
-                price_change_24h: parseFloat(coinData.p),
-              },
-            }));
-          }
-        }
-      };
-    } catch (err) {
-      console.error("WS error:", err);
-    }
-    return () => { if (ws.current) ws.current.close(); };
-  }, [watchlistData]);
 
 
   const mergedCoins = useMemo(() => {

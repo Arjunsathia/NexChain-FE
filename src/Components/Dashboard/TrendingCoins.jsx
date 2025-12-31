@@ -1,31 +1,16 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useEffect, useState, useRef, useMemo } from "react";
-import { getTrend, getTrendingCoinMarketData } from "@/api/coinApis";
+import React, { useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaFire, FaArrowRight, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useLiveTrendingCoins } from "@/hooks/useLiveTrendingCoins";
 
 function TrendingCoins() {
   const isLight = useThemeCheck();
   const navigate = useNavigate();
-  const ws = useRef(null);
-  const bufferRef = useRef({});
 
-  // Initialize from cache
-  const [trendingCoins, setTrendingCoins] = useState(() => {
-    try {
-      const cached = localStorage.getItem("trendingCoins");
-      if (cached) return JSON.parse(cached);
-    } catch (e) {
-      console.error("Cache parse error", e);
-    }
-    return [];
-  });
-
-  const [livePrices, setLivePrices] = useState({});
-  const [loading, setLoading] = useState(() => trendingCoins.length === 0);
-  const [error, setError] = useState(false);
+  const { coins: displayedCoins, loading, error, refetch: fetchTrending } = useLiveTrendingCoins(10);
 
   const TC = useMemo(() => ({
     bgContainer: isLight
@@ -44,123 +29,7 @@ function TrendingCoins() {
     skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
 
-  const fetchTrending = async () => {
-    try {
-      setError(false);
-      // Only show loading if we have no data
-      if (trendingCoins.length === 0) setLoading(true);
-
-      const trendData = await getTrend();
-      let idsArray = [];
-      if (trendData && Array.isArray(trendData.coins)) {
-        idsArray = trendData.coins.map((coin) => coin.item.id);
-      } else {
-        throw new Error("Invalid trend data format");
-      }
-
-      const marketData = await getTrendingCoinMarketData(idsArray.slice(0, 10));
-      setTrendingCoins(marketData);
-      localStorage.setItem("trendingCoins", JSON.stringify(marketData));
-
-    } catch (err) {
-      console.warn("Trending Coins API failed, using fallback:", err.message);
-      try {
-        const fallbackIds = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana", "cardano", "polkadot"];
-        const marketData = await getTrendingCoinMarketData(fallbackIds);
-        setTrendingCoins(marketData);
-        localStorage.setItem("trendingCoins", JSON.stringify(marketData));
-      } catch (fallbackErr) {
-        console.warn("Fallback Trending Error:", fallbackErr.message);
-        setError(true);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTrending();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (trendingCoins.length === 0) return;
-
-    const symbols = trendingCoins
-      .map((coin) => {
-        const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
-          cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
-          "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt",
-          stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt",
-          "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt",
-          tron: "trxusdt",
-        };
-        return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
-      })
-      .filter(Boolean);
-
-    if (symbols.length === 0) return;
-    const streams = symbols.join("/");
-
-    const interval = setInterval(() => {
-      if (Object.keys(bufferRef.current).length > 0) {
-        setLivePrices(prev => ({ ...prev, ...bufferRef.current }));
-        bufferRef.current = {};
-      }
-    }, 2000);
-
-    try {
-      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.stream && message.data) {
-          const symbol = message.stream.replace("@ticker", "");
-          const coinData = message.data;
-
-          const symbolToCoinId = {
-            btcusdt: "bitcoin", ethusdt: "ethereum", bnbusdt: "binancecoin", xrpusdt: "ripple",
-            adausdt: "cardano", solusdt: "solana", dogeusdt: "dogecoin", dotusdt: "polkadot",
-            maticusdt: "matic-network", ltcusdt: "litecoin", linkusdt: "chainlink", xlmusdt: "stellar",
-            atomusdt: "cosmos", xmusdt: "monero", etcusdt: "ethereum-classic", bchusdt: "bitcoin-cash",
-            filusdt: "filecoin", thetausdt: "theta", vetusdt: "vechain", trxusdt: "tron",
-          };
-
-          const coinId = symbolToCoinId[symbol];
-          if (coinId) {
-            bufferRef.current[coinId] = {
-              current_price: parseFloat(coinData.c),
-              price_change_percentage_24h: parseFloat(coinData.P),
-              price_change_24h: parseFloat(coinData.p),
-            };
-          }
-        }
-      };
-    } catch (error) {
-      console.error("Trending WS error:", error);
-    }
-
-    return () => {
-      clearInterval(interval);
-      if (ws.current) ws.current.close();
-    };
-  }, [trendingCoins]);
-
-  const coinsWithLiveData = useMemo(() =>
-    trendingCoins.map((coin) => {
-      const livePriceData = livePrices[coin.id];
-      return {
-        ...coin,
-        current_price: livePriceData?.current_price ?? coin.current_price,
-        price_change_percentage_24h: livePriceData?.price_change_percentage_24h ?? coin.price_change_percentage_24h,
-      };
-    }),
-    [trendingCoins, livePrices]
-  );
-
-  const displayedCoins = coinsWithLiveData;
-
-  if (loading && trendingCoins.length === 0) {
+  if (loading && displayedCoins.length === 0) {
     return (
       <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
         <div className="flex items-center gap-2 mb-3">

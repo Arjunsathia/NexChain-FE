@@ -1,5 +1,5 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
 import useCoinContext from "@/hooks/useCoinContext";
 import useUserContext from "@/hooks/useUserContext";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import toast from "react-hot-toast";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
     if (!data || data.length === 0) return <div className="w-24 h-6" />;
@@ -49,9 +50,6 @@ function CoinTable({ onTrade }) {
 
     const navigate = useNavigate();
 
-    const ws = useRef(null);
-    const coinsRef = useRef(coins);
-
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -87,10 +85,6 @@ function CoinTable({ onTrade }) {
     }), [isLight]);
 
     useEffect(() => {
-        coinsRef.current = coins;
-    }, [coins]);
-
-    useEffect(() => {
         if (Array.isArray(initialCoins) && initialCoins.length > 0) {
             setCoins(initialCoins.slice(0, 100));
         }
@@ -111,69 +105,8 @@ function CoinTable({ onTrade }) {
         fetchWatchlist();
     }, [fetchWatchlist]);
 
-    const [liveData, setLiveData] = useState({});
-    const bufferRef = useRef({});
-
-    useEffect(() => {
-        if (coins.length === 0) return;
-
-        const symbols = coins
-            .slice(0, 100)
-            .map(coin => {
-                const symbolMap = {
-                    bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", "stellar": "xlmusdt", "cosmos": "atomusdt", "monero": "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", "filecoin": "filusdt", "theta": "thetausdt", "vechain": "vetusdt", "tron": "trxusdt"
-                };
-                return symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null;
-            })
-            .filter(Boolean);
-
-        if (symbols.length === 0) return;
-
-        const streamUrl = `wss://stream.binance.com:9443/stream?streams=${symbols.join('/')}`;
-
-        const intervalId = setInterval(() => {
-            if (Object.keys(bufferRef.current).length > 0) {
-                setLiveData(prev => ({
-                    ...prev,
-                    ...bufferRef.current
-                }));
-                bufferRef.current = {};
-            }
-        }, 500); // Update UI every 500ms
-
-        try {
-            ws.current = new WebSocket(streamUrl);
-            ws.current.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.stream && data.data) {
-                    const symbol = data.stream.replace('@ticker', '');
-                    const coinData = data.data;
-
-                    const symbolToCoinId = {
-                        "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vechain": "vetusdt", "tron": "trxusdt"
-                    };
-
-                    const coinId = symbolToCoinId[symbol];
-                    if (coinId) {
-                        bufferRef.current[coinId] = {
-                            current_price: parseFloat(coinData.c),
-                            price_change_percentage_24h: parseFloat(coinData.P),
-                            price_change_24h: parseFloat(coinData.p),
-                            // Approximate market cap/volume updates
-                            total_volume: parseFloat(coinData.v) * parseFloat(coinData.c)
-                        };
-                    }
-                }
-            };
-        } catch (error) {
-            console.error('WebSocket setup failed:', error);
-        }
-
-        return () => {
-            clearInterval(intervalId);
-            if (ws.current) { ws.current.close(); }
-        };
-    }, [coins]); // Re-run if coins change (e.g. search or pagination)
+    // Use shared hook for live ticker (limit to first 100 to avoid connection overload)
+    const liveData = useBinanceTicker(coins.slice(0, 100), 500);
 
     const toggleWishlist = useCallback(async (coinId, coinData) => {
         if (!user?.id) {

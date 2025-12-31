@@ -5,6 +5,7 @@ import AuthRoute from "./AuthRoute";
 import PublicRoute from "./PublicRoute";
 import MainLayout from "@/Components/layout/MainLayout";
 import PublicLayout from "@/Components/layout/PublicLayout";
+import AnimatedLayout from "@/Components/layout/AnimatedLayout";
 
 
 import Dashboard from "../Pages/Dashboard";
@@ -45,18 +46,25 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        { }
+
+        {/* Animated Layout Group (Persistent Background) */}
+        <Route element={<AnimatedLayout />}>
+          <Route element={<PublicRoute />}>
+            <Route path="/" index element={<Landing />} />
+          </Route>
+          <Route element={<AuthRoute />}>
+            <Route path="/auth" element={<AuthPages />} />
+          </Route>
+        </Route>
+
+        {/* Other Public Pages */}
         <Route element={<PublicRoute />}>
-          <Route path="/" index element={<Landing />} />
           <Route element={<PublicLayout />}>
             <Route path="/public-learning" element={<LearningHub />} />
           </Route>
         </Route>
 
-        { }
-        <Route element={<AuthRoute />}>
-          <Route path="/auth" element={<AuthPages />} />
-        </Route>
+
 
         { }
         <Route element={<ProtectedRoute />}>

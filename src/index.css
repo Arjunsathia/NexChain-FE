@@ -183,12 +183,12 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
   }
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 2.6s ease-in-out infinite;
 }
 
 
@@ -240,6 +240,26 @@
 
 .animate-heartbeat {
   animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateY(-120%) scaleY(1);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-30%) scaleY(1.18);
+  }
+  100% {
+    transform: translateY(60%) scaleY(1);
+    opacity: 0.3;
+  }
+}
+
+.animate-scroll {
+  /* Using alternate creates the "mirror" effect (0->100->0) */
+  animation: scroll 1.9s ease-in-out infinite alternate;
 }
 
 

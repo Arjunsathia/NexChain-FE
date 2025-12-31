@@ -4,7 +4,7 @@ import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
-import CryptoTrendingCoins from "@/Components/Crypto/CryptoTrendingCoins";
+import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
@@ -204,7 +204,7 @@ function CryptoList() {
           </div>
 
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.05s' }}>
-            <CryptoTrendingCoins />
+            <TrendingCoinsWidget limit={5} showViewAll={false} />
           </div>
 
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>

@@ -1,126 +1,72 @@
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 
-const LATITUDE_LINES = [...Array(12)];
-const LONGITUDE_LINES = [...Array(12)];
-const PARTICLES = [...Array(15)];
 
 const HeroGlobe = () => {
-  // Generate orbital data nodes
-  const particles = useMemo(() =>
-    PARTICLES.map((_, i) => ({
-      id: i,
-      size: Math.random() * 3 + 2,
-      duration: Math.random() * 10 + 15,
-      delay: Math.random() * -20,
-      orbit: Math.random() * 360,
-      color: i % 3 === 0 ? '#818CF8' : i % 2 === 0 ? '#22D3EE' : '#FFFFFF',
-    })), []);
-
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center perspective-[2000px] select-none pointer-events-none">
+    <div className="relative w-full h-[400px] flex items-center justify-center select-none pointer-events-none overflow-hidden">
 
-      {/* 1. Atmospheric Glow Overlay */}
-      <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-indigo-500/10 rounded-full blur-[80px] animate-pulse pointer-events-none" />
+      {/* 1. Optimized Ambient Glow (Gradient instead of Blur for performance) */}
+      <div
+        className="absolute inset-0 bg-transparent"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 60%)'
+        }}
+      />
 
-      {/* 2. The 3D Rotating Wireframe */}
-      <motion.div
-        className="relative w-[280px] h-[280px] md:w-[500px] md:h-[500px] preserve-3d will-change-transform"
-        animate={{ rotateY: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      >
-        {/* Latitude Grid */}
-        {LATITUDE_LINES.map((_, i) => (
+      {/* 2. Cyber Rings System - Lower Motion Profile */}
+      <div className="relative w-[300px] h-[300px] md:w-[500px] md:h-[500px] flex items-center justify-center">
+
+        {/* Outer Ring - Static */}
+        <div className="absolute inset-10 border border-indigo-500/10 rounded-full" />
+
+        {/* Middle Ring - Slow Counter-Rotation for depth */}
+        <div
+          className="absolute inset-24 border border-cyan-500/10 border-dashed rounded-full opacity-50"
+          style={{ animation: 'spin 40s linear infinite' }}
+        />
+
+        {/* Inner Ring - Slow Rotation */}
+        <div
+          className="absolute inset-36 border border-white/5 rounded-full"
+          style={{ animation: 'spin 30s linear infinite', animationDirection: 'reverse' }}
+        />
+
+        {/* 4 Orbital Particles */}
+        {[0, 1, 2, 3].map((i) => (
           <div
-            key={`lat-${i}`}
-            className="absolute inset-0 rounded-full border-[0.5px] border-indigo-400/20"
-            style={{ transform: `rotateX(${i * (180 / LATITUDE_LINES.length)}deg)` }}
-          />
-        ))}
-
-        {/* Longitude Grid */}
-        {LONGITUDE_LINES.map((_, i) => (
-          <div
-            key={`long-${i}`}
-            className="absolute inset-0 rounded-full border-[0.5px] border-cyan-400/20"
-            style={{ transform: `rotateY(${i * (360 / LONGITUDE_LINES.length)}deg)` }}
-          />
-        ))}
-
-        {/* Orbital Data Particles */}
-        {particles.map((p) => (
-          <motion.div
-            key={p.id}
-            className="absolute inset-0 preserve-3d"
-            style={{ rotateY: p.orbit }}
-            animate={{ rotateZ: 360 }}
-            transition={{ duration: p.duration, repeat: Infinity, ease: "linear", delay: p.delay }}
+            key={i}
+            className="absolute inset-0"
+            style={{
+              animation: 'spin 20s linear infinite',
+              animationDelay: `-${i * 5}s`
+            }}
           >
-            <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full shadow-[0_0_10px_currentColor]"
-              style={{
-                width: p.size,
-                height: p.size,
-                backgroundColor: p.color,
-                color: p.color,
-                filter: `blur(${p.size < 4 ? '0px' : '1px'})`
-              }}
-            />
-          </motion.div>
+            <div className="absolute top-20 left-1/2 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_5px_currentColor] opacity-60" />
+          </div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* 3. Glassmorphic Central Branding Core */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="absolute z-20"
-      >
-        <div className="relative w-32 h-32 md:w-52 md:h-52 bg-slate-900/60 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/10 shadow-[0_0_60px_rgba(79,70,229,0.3)] overflow-hidden">
+      {/* 3. Stable High-Performance Core */}
+      <div className="absolute z-20">
+        <div className="relative w-40 h-40 md:w-56 md:h-56 bg-[#02040a]/80 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 shadow-2xl">
 
-          {/* Internal Kinetic Rings */}
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-2 border-t border-l border-indigo-500/40 rounded-full"
-          />
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-4 border-b border-r border-cyan-500/20 border-dashed rounded-full"
-          />
+          {/* Static Decorative Ring (No Rotation) */}
+          <div className="absolute inset-4 border border-white/5 rounded-full" />
 
-          {/* NEX Logo Text */}
-          <div className="relative flex flex-col items-center justify-center">
-            <div className="flex items-baseline text-4xl md:text-6xl font-black tracking-tighter">
-              <span className="text-white drop-shadow-2xl">NE</span>
-              <span className="text-6xl md:text-8xl bg-gradient-to-tr from-indigo-400 via-cyan-400 to-white bg-clip-text text-transparent italic transform -skew-x-12">
-                X
-              </span>
+          {/* Logo Content - Stable */}
+          <div className="relative flex flex-col items-center">
+            <div className="flex items-baseline text-5xl md:text-7xl font-black tracking-tighter">
+              <span className="text-white drop-shadow-xl">NE</span>
+              <span className="bg-gradient-to-br from-indigo-400 to-cyan-400 bg-clip-text text-transparent italic transform -skew-x-12 filter drop-shadow-lg">X</span>
             </div>
-            <div className="text-[8px] md:text-[10px] tracking-[0.4em] uppercase font-bold text-indigo-300/60 text-center">
-              Exchange Core
+            <div className="text-[10px] tracking-[0.3em] uppercase font-bold text-slate-500 mt-1">
+              Core
             </div>
           </div>
-
-          {/* Surface Shine */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
         </div>
-      </motion.div>
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .preserve-3d { transform-style: preserve-3d; }
-      `}} />
+      </div>
     </div>
   );
 };
 
-export default function App() {
-  return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <HeroGlobe />
-    </div>
-  );
-}
+export default HeroGlobe;

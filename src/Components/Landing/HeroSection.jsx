@@ -14,9 +14,10 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
   return (
     <section className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
-        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
+        <motion.div variants={{}} style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
           { }
           <motion.div
+            variants={{}}
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -67,10 +68,11 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
 
           { }
           <motion.div
+            variants={{}}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0"
+            className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0 pointer-events-none"
             style={{ y: fgParallaxY }}
           >
             <HeroGlobe />
