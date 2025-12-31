@@ -167,7 +167,7 @@ export default function Navbar() {
                                 >
                                     <Bell size={20} strokeWidth={2.5} />
                                     {unreadCount > 0 && (
-                                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-950 animate-pulse" />
+                                        <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-cyan-500 rounded-full border border-white dark:border-gray-950 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
                                     )}
                                 </button>
                                 <NotificationModal

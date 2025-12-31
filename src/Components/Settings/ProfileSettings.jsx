@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { getCroppedImgBlob } from "@/utils/canvasUtils";
 
-import { SERVER_URL } from "@/api/axiosConfig";
+import api, { SERVER_URL } from "@/api/axiosConfig";
 // import { Link } from 'react-router-dom'; // Unused
 
 const ProfileSettings = ({ TC, isLight }) => {
@@ -97,22 +97,9 @@ const ProfileSettings = ({ TC, isLight }) => {
     formData.append("image", file);
 
     try {
-      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN") || localStorage.getItem("token");
-
-      const response = await fetch(`${SERVER_URL}/api/users/profile-image/${user.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || "Failed to upload image");
-      }
-
-      const data = await response.json();
+      // Use the configured axios instance which handles headers/tokens automatically
+      const response = await api.put(`/users/profile-image/${user.id}`, formData);
+      const data = response.data;
 
       if (data.user) {
         toast.success("Profile image updated successfully");
@@ -121,7 +108,8 @@ const ProfileSettings = ({ TC, isLight }) => {
 
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "Failed to upload image";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -151,23 +139,9 @@ const ProfileSettings = ({ TC, isLight }) => {
         updateData.confirmPassword = formData.confirmPassword;
       }
 
-      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-
-      const response = await fetch(`${SERVER_URL}/api/users/${user.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || "Failed to update profile");
-      }
-
-      const data = await response.json();
+      // Use authenticated api instance instead of raw fetch
+      const response = await api.put(`/users/${user.id}`, updateData);
+      const data = response.data;
 
       if (data.user) {
         toast.success("Profile updated successfully");
@@ -175,7 +149,8 @@ const ProfileSettings = ({ TC, isLight }) => {
       }
     } catch (error) {
       console.error("Update error:", error);
-      toast.error(error.message || "Failed to update profile");
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "Failed to update profile";
+      toast.error(errorMessage);
     } finally {
       setIsSaving(false);
     }

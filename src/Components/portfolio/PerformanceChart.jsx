@@ -20,10 +20,10 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
     bgRangeButtonDefault: isLight ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200/50" : "text-gray-400 hover:text-gray-300 hover:bg-white/5",
     bgRangeContainer: isLight ? "bg-gray-100/80 border-gray-200" : "bg-gray-800/50 border-gray-700/50",
 
-    bgStatCard: isLight ? "bg-white/50 border-gray-100" : "bg-gray-800/20 border-border-gray-700/50",
+    bgStatCard: isLight ? "bg-gray-50 dark:bg-white/5" : "bg-white/5",
 
-    bgPillPositive: isLight ? "bg-emerald-100/50" : "bg-emerald-500/10",
-    bgPillNegative: isLight ? "bg-rose-100/50" : "bg-rose-500/10",
+    bgPillPositive: isLight ? "bg-emerald-50" : "bg-emerald-500/10",
+    bgPillNegative: isLight ? "bg-rose-50" : "bg-rose-500/10",
     textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
     textNegative: isLight ? "text-rose-600" : "text-rose-400",
 
@@ -240,14 +240,14 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
 
   return (
     <div className="grid grid-cols-3 gap-2 px-2 mb-4">
-      <div className={`border rounded-xl p-2 md:p-3 ${TC.bgStatCard}`}>
+      <div className={`rounded-xl p-2 md:p-3 ${TC.bgStatCard}`}>
         <p className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}>Invested</p>
         <p className={`text-sm md:text-base font-bold ${TC.textPrimary}`}>
           ${totalInvestment.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </p>
       </div>
 
-      <div className={`border rounded-xl p-2 md:p-3 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
+      <div className={`rounded-xl p-2 md:p-3 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
         <p className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}>Total P&L</p>
         <div className={`flex items-center gap-1 font-bold text-sm md:text-base ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}>
           {profitLoss >= 0 ? <FaArrowUp size={8} /> : <FaArrowDown size={8} />}
@@ -255,7 +255,7 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
         </div>
       </div>
 
-      <div className={`border rounded-xl p-2 md:p-3 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
+      <div className={`rounded-xl p-2 md:p-3 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}>
         <p className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}>{timeRange} Return</p>
         <div className={`flex items-center gap-1 font-bold text-sm md:text-base ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}>
           {periodReturns[timeRange] >= 0 ? <FaArrowUp size={8} /> : <FaArrowDown size={8} />}

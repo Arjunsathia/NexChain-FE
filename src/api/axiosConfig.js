@@ -105,14 +105,16 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, user should be logged out
-        console.error("Token refresh failed", refreshError);
-        // We might want to dispatch logout here, but we don't have store access
-        // For now, let the error propagate
+        // Refresh failed, silent fail or warn
+        // console.warn("Session expired or invalid refresh token");
       }
     }
 
-    console.error("API Error:", error.response?.status, error.response?.data || error.message);
+    // Silence 401 and 429 errors from cluttering console
+    if (error.response?.status !== 401 && error.response?.status !== 429) {
+      console.error("API Error:", error.response?.status, error.response?.data || error.message);
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -123,7 +125,6 @@ export const getData = async (url, params) => {
     const response = await api.get(url, params && { params });
     return response.data;
   } catch (error) {
-    console.error("GET Error for", url, error);
     throw error;
   }
 };
@@ -133,7 +134,6 @@ export const getById = async (url, id) => {
     const response = await api.get(`${url}/${id}`);
     return response.data;
   } catch (error) {
-    console.error("GET by ID Error for", `${url}/${id}`, error);
     throw error;
   }
 };
@@ -143,7 +143,6 @@ export const postForm = async (url, formData) => {
     const response = await api.post(url, formData);
     return response.data;
   } catch (error) {
-    console.error("POST Error for", url, error);
     throw error;
   }
 };
@@ -153,7 +152,6 @@ export const updateById = async (url, id, updateData) => {
     const response = await api.put(`${url}/${id}`, updateData);
     return response.data;
   } catch (error) {
-    console.error("Update Error for", `${url}/${id}`, error);
     throw error;
   }
 };
@@ -163,7 +161,6 @@ export const deleteById = async (url, id) => {
     const response = await api.delete(`${url}/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Delete Error for", `${url}/${id}`, error);
     throw error;
   }
 };
@@ -173,7 +170,6 @@ export const login = async (url, credentials) => {
     const response = await api.post(url, credentials);
     return response.data;
   } catch (error) {
-    console.error("Login Error", error);
     throw error;
   }
 };
@@ -182,7 +178,6 @@ export const logout = async () => {
   try {
     await api.post("/auth/logout");
   } catch (error) {
-    console.error("Logout Error", error);
     throw error;
   }
 };
@@ -192,7 +187,6 @@ export const deleteWatchList = async (url, params) => {
     const response = await api.delete(url, { params });
     return response.data;
   } catch (error) {
-    console.error("Delete Error", error);
     throw error;
   }
 };

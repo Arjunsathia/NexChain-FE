@@ -105,7 +105,7 @@ export default function Dashboard() {
         }
       };
     } catch (error) {
-      console.error("WebSocket setup failed:", error);
+      console.warn("WebSocket setup failed:", error);
     }
 
     return () => {

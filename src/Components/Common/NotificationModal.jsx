@@ -81,7 +81,6 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
     try {
       await api.delete('/notifications');
       setNotifications([]);
-      toast.success('All notifications cleared');
     } catch (error) {
       console.error('Error clearing notifications:', error);
       toast.error('Failed to clear notifications');
@@ -107,8 +106,8 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
-                ? 'bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]'
-                : 'bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
+              ? 'bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]'
+              : 'bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
               }`}
             ref={modalRef}
             style={{ pointerEvents: 'auto' }}

@@ -70,7 +70,7 @@ function TrendingCoins() {
         setTrendingCoins(marketData);
         localStorage.setItem("trendingCoins", JSON.stringify(marketData));
       } catch (fallbackErr) {
-        console.error("Fallback Trending Error:", fallbackErr.message);
+        console.warn("Fallback Trending Error:", fallbackErr.message);
         setError(true);
       }
     } finally {

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { FaTimes, FaMoneyBillWave } from "react-icons/fa";
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { FaCoins, FaArrowUp, FaArrowDown } from "react-icons/fa";
 

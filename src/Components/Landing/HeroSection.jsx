@@ -67,9 +67,9 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
 
           { }
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, x: 0 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0"
             style={{ y: fgParallaxY }}
           >

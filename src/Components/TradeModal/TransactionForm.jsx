@@ -1,4 +1,3 @@
-
 import React from 'react';
 import useThemeCheck from '@/hooks/useThemeCheck';
 import { FaArrowDown, FaChevronDown } from "react-icons/fa";
@@ -145,33 +144,32 @@ const TransactionForm = React.memo(({
 
       {/* Main Input Section */}
       <div className="flex flex-col gap-2.5 relative">
-        {/* Swap Arrow */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
-          <div className={`p-1.5 rounded-full shadow-lg border-2 ${isLight ? "bg-white border-gray-200 text-gray-400" : "bg-gray-900 border-gray-700 text-gray-500"
-            }`}>
-            <FaArrowDown size={10} />
-          </div>
-        </div>
-
         {/* Pay Input */}
         <div className={inputContainerStyle}>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Pay</span>
-            <span className="text-xs font-semibold text-gray-500">USD</span>
-          </div>
-          <div className="flex flex-col items-end gap-1.5">
+          <div className="flex flex-col items-start gap-1.5 flex-1">
             <input
               type="number"
               placeholder="0.00"
               value={usdAmount}
               onChange={handleUsdAmountChange}
-              className={`${inputStyle} max-w-[150px]`}
+              className={`${inputStyle.replace('text-right', 'text-left')} w-full`}
             />
             <div className="flex gap-1">
               {[25, 50, 75, 100].map((pct) => (
                 <button
                   key={pct}
-                  onClick={() => pct === 100 && setMaxAmount()}
+                  onClick={() => {
+                    if (pct === 100) {
+                      setMaxAmount();
+                    } else {
+                      const amount = maxAvailable * (pct / 100);
+                      if (isBuyOperation) {
+                        handleUsdAmountChange({ target: { value: amount.toString() } });
+                      } else {
+                        handleCoinAmountChange({ target: { value: amount.toString() } });
+                      }
+                    }
+                  }}
                   className={`text-[9px] px-2 py-0.5 rounded-md font-bold transition-all
                     ${isLight
                       ? "bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200"
@@ -183,26 +181,30 @@ const TransactionForm = React.memo(({
               ))}
             </div>
           </div>
+          <div className="flex flex-col gap-0.5 items-end pl-3">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Pay</span>
+            <span className="text-xs font-semibold text-gray-500">USD</span>
+          </div>
         </div>
 
         {/* Receive Input */}
         <div className={inputContainerStyle}>
-          <div className="flex flex-col gap-0.5">
+          <input
+            type="number"
+            placeholder="0.00"
+            value={coinAmount}
+            onChange={handleCoinAmountChange}
+            className={`${inputStyle.replace('text-right', 'text-left')} flex-1`}
+          />
+          <div className="flex flex-col gap-0.5 items-end pl-3">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Receive</span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 justify-end">
               <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-[8px] text-white font-bold shadow-sm">
                 {symbol ? symbol[0] : 'C'}
               </div>
               <span className="text-xs font-semibold text-gray-500">{symbol}</span>
             </div>
           </div>
-          <input
-            type="number"
-            placeholder="0.00"
-            value={coinAmount}
-            onChange={handleCoinAmountChange}
-            className={`${inputStyle} max-w-[150px]`}
-          />
         </div>
       </div>
 

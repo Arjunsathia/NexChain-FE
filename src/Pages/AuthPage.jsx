@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import InteractiveGridPattern from "@/Components/Landing/Background";
 import { Input } from "@/Components/ui/input.jsx";
 import { Button } from "@/Components/ui/button.jsx";
-import { Label } from "@/Components/ui/label.jsx";
-import { Card, CardContent } from "@/Components/ui/card.jsx";
-import { Mail, Lock, User, Phone, ArrowLeft, Rocket, ChevronRight, Sparkles, Eye, EyeOff } from "lucide-react";
+import { Rocket, Shield, Fingerprint, Globe, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { postForm, setMemoryToken } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import InteractiveGridPattern from "@/Components/Landing/Background";
 import useUserContext from "@/hooks/useUserContext";
 
 const initialRegisterKeys = {
@@ -24,39 +22,22 @@ const initialRegisterKeys = {
 const AuthPage = () => {
     const navigate = useNavigate();
     const { fetchUsers, setToken } = useUserContext();
+
+    // Auth State
+    const [activeTab, setActiveTab] = useState("login");
     const [loginData, setLoginData] = useState({ user_name: "", password: "" });
     const [registerData, setRegisterData] = useState(initialRegisterKeys);
-    const [activeTab, setActiveTab] = useState("login");
-    const [loading, setLoading] = useState(false);
-
-    // OTP States
-    const [showOtpInput, setShowOtpInput] = useState(false);
     const [otpCode, setOtpCode] = useState("");
+    const [showOtpInput, setShowOtpInput] = useState(false);
     const [emailForOtp, setEmailForOtp] = useState("");
 
-    const [showLoginPassword, setShowLoginPassword] = useState(false);
-    const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    // UI State
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const containerRef = useRef(null);
 
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
 
-    const handleMouseMove = (e) => {
-        if (containerRef.current) {
-            const x = e.clientX;
-            const y = e.clientY;
-            containerRef.current.style.setProperty("--mouse-x", `${x}px`);
-            containerRef.current.style.setProperty("--mouse-y", `${y}px`);
-        }
-    };
-
+    // Handlers
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -65,193 +46,255 @@ const AuthPage = () => {
                 email: loginData.user_name,
                 password: loginData.password
             });
-
             if (res.accessToken) {
                 setToken(res.accessToken);
                 setMemoryToken(res.accessToken);
                 localStorage.setItem("NEXCHAIN_USER_TOKEN", res.accessToken);
-
                 if (res?.user) localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
-
                 await fetchUsers();
-                toast.success(`Welcome back, ${res?.user?.name || "User"}!`);
+                toast.success(`Welcome back!`);
                 navigate("/dashboard");
             }
         } catch (err) {
             toast.error(err.response?.data?.message || "Invalid credentials");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        if (registerData.password !== registerData.confirm_password) {
-            return toast.error("Passwords do not match");
-        }
+        if (registerData.password !== registerData.confirm_password) return toast.error("Passwords do not match");
 
         setLoading(true);
         try {
             const res = await postForm("/auth/register", registerData);
             setEmailForOtp(res.email);
             setShowOtpInput(true);
-            toast.success("Registration successful! Check your email for OTP.");
+            toast.success("Check your email for OTP.");
         } catch (err) {
             toast.error(err.response?.data?.message || "Registration failed");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     const handleVerifyOTP = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Only used for email verification now
             await postForm("/auth/verify-email-otp", { email: emailForOtp, otp: otpCode });
-
-            toast.success("Email verified! You can now login.");
+            toast.success("Verified! Please login.");
             setShowOtpInput(false);
             setOtpCode("");
             setActiveTab("login");
         } catch (err) {
             toast.error(err.response?.data?.message || "Invalid OTP");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
+    const handleGoogleLogin = () => toast.loading("Google Login coming soon...");
+
     return (
-        <div ref={containerRef} onMouseMove={handleMouseMove} className="flex items-center justify-center min-h-screen bg-[#000108] text-white px-4 py-10 relative overflow-hidden">
+        <div className="relative min-h-screen w-full bg-transparent text-white flex items-center justify-center overflow-hidden font-sans selection:bg-cyan-500/30">
             <InteractiveGridPattern />
 
-            <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-cyan-400 pointer-events-none" />
-            <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-30 bg-blue-500 pointer-events-none" />
+            <div className="relative z-10 w-full max-w-[1000px] px-6 grid lg:grid-cols-2 gap-8 items-center">
 
-            <motion.div initial={{ x: "100%", opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 100, damping: 20 }} className="w-full max-w-xl relative z-10">
-                <Card className="w-full border-0 bg-transparent shadow-none">
-                    <div className="relative rounded-3xl overflow-hidden bg-gray-950/40 backdrop-blur-xl border border-gray-800/50 shadow-2xl shadow-black/50">
-                        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+                {/* Left Side: Brand Narrative - Compacted */}
+                <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="hidden lg:block space-y-6"
+                >
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
+                        <Globe className="w-3 h-3 animate-spin-slow" />
+                        Live Network Active
+                    </div>
 
-                        <CardContent className="p-5 md:p-10">
-                            <div className="text-center mb-6 md:mb-10">
-                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, delay: 0.2 }} className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 md:mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                                    <Rocket className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                                </motion.div>
-                                <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-2 md:mb-3 tracking-tight">
-                                    {showOtpInput ? "Verification" : "Welcome to "}
-                                    {!showOtpInput && <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">NexChain</span>}
+                    <h1 className="text-5xl font-bold leading-[1.1] tracking-tight">
+                        Trade the <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600">
+                            Future Grid.
+                        </span>
+                    </h1>
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="space-y-1">
+                            <p className="text-xl font-bold text-white">Real-time</p>
+                            <p className="text-slate-500 text-xs uppercase tracking-wider">Market Data</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xl font-bold text-white">Secure</p>
+                            <p className="text-slate-500 text-xs uppercase tracking-wider">Platform</p>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Right Side: Elegant Glass Terminal - Compacted */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative group"
+                >
+                    {/* Glowing Aura behind card */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-[1.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+
+                    <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] p-6 md:p-8 shadow-2xl">
+
+                        {/* Form Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">
+                                    {showOtpInput ? "Verify Email" : activeTab === "login" ? "Welcome Back" : "Create Account"}
                                 </h2>
-                                <p className="text-gray-400">
-                                    {showOtpInput ? `Enter the code sent to ${emailForOtp}` : activeTab === "login" ? "Access your professional trading dashboard" : "Join the future of digital asset trading"}
+                                <p className="text-slate-500 text-xs mt-1">
+                                    {showOtpInput ? "Enter the code sent to your email" : "Enter your details to continue"}
                                 </p>
                             </div>
+                            <Rocket className="w-6 h-6 text-cyan-500 opacity-50" />
+                        </div>
 
-                            {!showOtpInput && (
-                                <div className="grid grid-cols-2 bg-gray-900/50 p-1 md:p-1.5 rounded-lg md:rounded-xl border border-gray-800/50 mb-6 relative w-full max-w-[240px] md:max-w-full mx-auto">
-                                    <motion.div className="absolute top-1 md:top-1.5 bottom-1 md:bottom-1.5 rounded-md md:rounded-lg bg-gray-800 shadow-sm" animate={{ left: activeTab === "login" ? (isMobile ? "4px" : "6px") : "50%", width: isMobile ? "calc(50% - 6px)" : "calc(50% - 9px)", }} />
-                                    <button onClick={() => setActiveTab("login")} className={`relative z-10 py-1.5 md:py-2.5 text-xs md:text-sm font-semibold rounded-md md:rounded-lg transition-colors duration-200 ${activeTab === "login" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}>Sign In</button>
-                                    <button onClick={() => setActiveTab("register")} className={`relative z-10 py-1.5 md:py-2.5 text-xs md:text-sm font-semibold rounded-md md:rounded-lg transition-colors duration-200 ${activeTab === "register" ? "text-white" : "text-gray-400 hover:text-gray-200"}`}>Create Account</button>
+                        {/* Google Social Access - Hidden on OTP */}
+                        {!showOtpInput && (
+                            <>
+                                <Button
+                                    onClick={handleGoogleLogin}
+                                    variant="outline"
+                                    className="w-full h-11 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl flex items-center justify-center gap-3 transition-all duration-300 group text-sm"
+                                >
+                                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" />
+                                    </svg>
+                                    Google
+                                </Button>
+
+                                <div className="relative my-6">
+                                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/5" /></div>
+                                    <div className="relative flex justify-center text-[9px] uppercase tracking-[0.2em] text-slate-600"><span className="bg-[#0a0a0a] px-3">Or continue with email</span></div>
                                 </div>
-                            )}
+                            </>
+                        )}
 
-                            <AnimatePresence mode="wait">
-                                {showOtpInput ? (
-                                    <motion.form key="otp" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6" onSubmit={handleVerifyOTP}>
-                                        <div className="space-y-4">
-                                            <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center block">6-Digit OTP</Label>
-                                            <Input
-                                                type="text"
-                                                value={otpCode}
-                                                onChange={(e) => setOtpCode(e.target.value)}
-                                                placeholder="000000"
-                                                maxLength={6}
-                                                className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-14 md:h-20 text-center text-2xl md:text-4xl tracking-[0.5em] focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono"
-                                                required
-                                                autoFocus
-                                            />
-                                        </div>
-                                        <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg h-14 text-lg" disabled={loading || otpCode.length !== 6}>
-                                            {loading ? "Verifying..." : "Verify OTP"}
-                                        </Button>
-                                        <button type="button" onClick={() => setShowOtpInput(false)} className="w-full text-center text-sm text-gray-500 hover:text-cyan-400">Back</button>
-                                    </motion.form>
-                                ) : activeTab === "login" ? (
-                                    <motion.form key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5" onSubmit={handleLogin}>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Username / Email</Label>
-                                            <div className="relative group">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors" />
-                                                <Input type="text" value={loginData.user_name} onChange={(e) => setLoginData({ ...loginData, user_name: e.target.value })} placeholder="Enter username or email" className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-12 md:h-14 focus:border-cyan-500/50" required />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Password</Label>
-                                            <div className="relative group">
-                                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-cyan-400 transition-colors z-10" />
-                                                <Input type={showLoginPassword ? "text" : "password"} value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} placeholder="Enter your password" className="pl-12 pr-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-12 md:h-14 focus:border-cyan-500/50" required />
-                                                <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 z-10">{showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
-                                            </div>
-                                        </div>
-                                        <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg h-14 text-lg mt-4" disabled={loading}>
-                                            {loading ? "Processing..." : "Sign In"}
-                                        </Button>
-                                    </motion.form>
-                                ) : (
-                                    <motion.form key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4" onSubmit={handleRegister}>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Full Name</Label>
-                                            <div className="relative group"><User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" /><Input value={registerData.name} onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })} placeholder="Full Name" className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 focus:border-cyan-500" required /></div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Email</Label>
-                                            <div className="relative group"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" /><Input type="email" value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} placeholder="Email Address" className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 focus:border-cyan-500" required /></div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Phone</Label>
-                                                <div className="relative group"><Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" /><Input value={registerData.phone} onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })} placeholder="Phone" className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 focus:border-cyan-500" required /></div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Username</Label>
-                                                <div className="relative group"><User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" /><Input value={registerData.user_name} onChange={(e) => setRegisterData({ ...registerData, user_name: e.target.value })} placeholder="Username" className="pl-12 bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 focus:border-cyan-500" required /></div>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Password</Label>
-                                                <div className="relative group">
-                                                    <Input type={showRegisterPassword ? "text" : "password"} value={registerData.password} onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} placeholder="Password" className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 pr-10 focus:border-cyan-500" required />
-                                                    <button type="button" onClick={() => setShowRegisterPassword(!showRegisterPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Confirm</Label>
-                                                <div className="relative group">
-                                                    <Input type={showConfirmPassword ? "text" : "password"} value={registerData.confirm_password} onChange={(e) => setRegisterData({ ...registerData, confirm_password: e.target.value })} placeholder="Confirm" className="bg-gray-900/50 border-gray-800 text-white rounded-xl h-11 pr-10 focus:border-cyan-500" required />
-                                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-lg h-11 text-base mt-2" disabled={loading}>
+                        {/* Animated Form Content */}
+                        <AnimatePresence mode="wait">
+                            {showOtpInput ? (
+                                <motion.form
+                                    key="otp"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    onSubmit={handleVerifyOTP}
+                                    className="space-y-4"
+                                >
+                                    <Input
+                                        value={otpCode}
+                                        onChange={(e) => setOtpCode(e.target.value)}
+                                        className="h-16 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 text-center text-3xl tracking-[0.5em] font-mono transition-all px-4"
+                                        placeholder="000000"
+                                        maxLength={6}
+                                        autoFocus
+                                    />
+                                    <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                            {loading ? "Verifying..." : "Verify Email"}
+                                            <Shield className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                        </span>
+                                    </Button>
+                                    <button type="button" onClick={() => setShowOtpInput(false)} className="w-full text-center text-[10px] text-slate-500 hover:text-cyan-400">
+                                        Cancel
+                                    </button>
+                                </motion.form>
+                            ) : activeTab === "login" ? (
+                                <motion.form
+                                    key="login"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    onSubmit={handleLogin}
+                                    className="space-y-4"
+                                >
+                                    <div className="space-y-1">
+                                        <Input
+                                            value={loginData.user_name}
+                                            onChange={(e) => setLoginData({ ...loginData, user_name: e.target.value })}
+                                            className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 focus:bg-white/[0.06] transition-all px-4 text-sm"
+                                            placeholder="Email Address"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="relative space-y-1">
+                                        <Input
+                                            type={showPassword ? "text" : "password"}
+                                            value={loginData.password}
+                                            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                                            className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 px-4 pr-10 text-sm"
+                                            placeholder="Password"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-cyan-400"
+                                        >
+                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                    <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                            {loading ? "Signing in..." : "Sign In"}
+                                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                        <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                                    </Button>
+                                </motion.form>
+                            ) : (
+                                <motion.form
+                                    key="register"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    onSubmit={handleRegister}
+                                    className="space-y-3"
+                                >
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Input value={registerData.name} onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Full Name" required />
+                                        <Input value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Email Address" type="email" required />
+                                        <Input value={registerData.phone} onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Phone Number" required />
+                                        <Input value={registerData.user_name} onChange={(e) => setRegisterData({ ...registerData, user_name: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Username" required />
+                                        <Input value={registerData.password} onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Password" type="password" required />
+                                        <Input value={registerData.confirm_password} onChange={(e) => setRegisterData({ ...registerData, confirm_password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Confirm Password" type="password" required />
+                                    </div>
+                                    <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
                                             {loading ? "Creating Account..." : "Create Account"}
-                                        </Button>
-                                    </motion.form>
-                                )}
-                            </AnimatePresence>
+                                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                    </Button>
+                                </motion.form>
+                            )}
+                        </AnimatePresence>
 
-                            <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-800/50">
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-cyan-400 text-xs md:text-sm font-medium group" onClick={() => navigate("/")}>
-                                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Back to Home
-                                </button>
-                                <button className="text-cyan-500 hover:text-cyan-300 text-xs md:text-sm font-medium" onClick={() => navigate("/public-learning")}>Explore Learning Hub</button>
+                        {/* Elegant Tab Switcher */}
+                        {!showOtpInput && (
+                            <div className="mt-6 text-center">
+                                <p className="text-slate-500 text-xs">
+                                    {activeTab === "login" ? "Don't have an account?" : "Already have an account?"}
+                                    <button
+                                        onClick={() => setActiveTab(activeTab === "login" ? "register" : "login")}
+                                        className="ml-2 text-cyan-400 font-bold hover:text-cyan-300 transition-colors underline-offset-4 hover:underline"
+                                    >
+                                        {activeTab === "login" ? "Sign Up" : "Log In"}
+                                    </button>
+                                </p>
                             </div>
-                        </CardContent>
+                        )}
                     </div>
-                </Card>
-            </motion.div>
+                </motion.div>
+            </div>
         </div>
     );
+
 };
 
 export default AuthPage;

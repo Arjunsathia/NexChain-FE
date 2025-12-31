@@ -1,20 +1,16 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-
 import toast from "react-hot-toast";
+
 import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
 
-
 import TradeModalHeader from "../TradeModal/TradeModalHeader";
 import TradeModalTabs from "../TradeModal/TradeModalTabs";
 import HoldingsInfo from "../TradeModal/HoldingsInfo";
 import TransactionForm from "../TradeModal/TransactionForm";
-import PurchaseSuccessModal from "./PurchaseSuccessModal";
-
-
 
 function TradeModal({
   show,
@@ -30,7 +26,7 @@ function TradeModal({
   const { balance, refreshBalance } = useWalletContext();
   const { addPurchase, sellCoins, refreshPurchasedCoins } = usePurchasedCoins();
 
-
+  // State
   const [activeTab, setActiveTab] = useState("details");
   const [usdAmount, setUsdAmount] = useState("");
   const [coinAmount, setCoinAmount] = useState("");
@@ -39,12 +35,12 @@ function TradeModal({
   const [currentPrice, setCurrentPrice] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-
+  // Order Types
   const [orderType, setOrderType] = useState("market");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
-
+  // Alerts
   const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
   const [alertTargetPrice, setAlertTargetPrice] = useState("");
 
@@ -277,29 +273,19 @@ function TradeModal({
   const setMaxAmount = () => {
     const maxCoins = maxAvailable;
     if (maxCoins > 0) {
-      setCoinAmount(maxCoins.toFixed(8));
-      const calculatedUSD = maxCoins * effectivePrice;
-      setUsdAmount(calculatedUSD.toFixed(2));
+      // Truncate to 8 decimals to avoid rounding up issues
+      const factor = Math.pow(10, 8);
+      const truncated = Math.floor(maxCoins * factor) / factor;
 
+      setCoinAmount(truncated.toFixed(8));
+      const calculatedUSD = truncated * effectivePrice;
+      setUsdAmount(calculatedUSD.toFixed(2));
 
       const isSellMode = shouldShowHoldingsInfo
         ? activeTab === "withdraw"
         : type === "sell";
       if (isSellMode) {
-        toast.success(
-          `Set to maximum: ${maxCoins.toFixed(6)} ${coin.symbol?.toUpperCase()}`,
-          {
-            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-            style: {
-              background: "#DCFCE7",
-              color: "#166534",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              borderRadius: "8px",
-              border: "none",
-            },
-            iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-          }
-        );
+        toast.success(`Set to maximum: ${truncated.toFixed(6)} ${coin.symbol?.toUpperCase()}`);
       }
     }
   };
@@ -307,38 +293,22 @@ function TradeModal({
   const handleSellAll = () => {
     if (holdingsSummary && holdingsSummary.totalQuantity > 0) {
       const totalQuantity = holdingsSummary.totalQuantity;
-      setCoinAmount(totalQuantity.toFixed(8));
-      const calculatedUSD = totalQuantity * currentPrice;
+
+      // Truncate to 8 decimals to avoid rounding up issues
+      const factor = Math.pow(10, 8);
+      const truncated = Math.floor(totalQuantity * factor) / factor;
+
+      setCoinAmount(truncated.toFixed(8));
+      const calculatedUSD = truncated * currentPrice;
       setUsdAmount(calculatedUSD.toFixed(2));
 
       toast.success(
-        `Filled with entire holdings: ${totalQuantity.toFixed(6)} ${(
+        `Filled with entire holdings: ${truncated.toFixed(6)} ${(
           coin.symbol || coin.coinSymbol
-        )?.toUpperCase()}`,
-        {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#DCFCE7",
-            color: "#166534",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-        }
+        )?.toUpperCase()}`
       );
     } else {
-      toast.error("You don't have any holdings to sell", {
-        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
+      toast.error("You don't have any holdings to sell");
     }
   };
 
@@ -353,21 +323,39 @@ function TradeModal({
   const handleTradeSubmit = useCallback(
     async (tradeData) => {
       if (!user) {
-        toast.error("Please login to trade", {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#FEE2E2",
-            color: "#991B1B",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-        });
+        toast.error("Please login to trade");
         return;
       }
 
       const { type, symbol, coinAmount, total, coinData } = tradeData;
+
+      // Helper to run background updates without blocking UI flow
+      const runBackgroundUpdates = async () => {
+        try {
+          if (refreshPurchasedCoins) await refreshPurchasedCoins();
+        } catch (e) {
+          console.warn("Background refresh (coins) failed", e);
+        }
+
+        try {
+          let retryCount = 0;
+          const maxRetries = 3;
+          const refreshBalanceWithRetry = async () => {
+            try {
+              await refreshBalance();
+            } catch (error) {
+              retryCount++;
+              if (retryCount < maxRetries) {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                return refreshBalanceWithRetry();
+              }
+            }
+          };
+          await refreshBalanceWithRetry();
+        } catch (e) {
+          console.warn("Background refresh (balance) failed", e);
+        }
+      };
 
       if (isAlertMode) {
         const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
@@ -386,17 +374,7 @@ function TradeModal({
           throw new Error("Failed to create alert");
         }
 
-        toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`, {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#DCFCE7",
-            color: "#166534",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-        });
+        toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`);
         return;
       }
 
@@ -422,8 +400,9 @@ function TradeModal({
         }
 
         toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
-        refreshBalance();
-        refreshPurchasedCoins();
+
+        // Non-blocking updates
+        runBackgroundUpdates();
         return;
       } else {
 
@@ -449,26 +428,11 @@ function TradeModal({
           const result = await addPurchase(purchaseData);
           if (result.success) {
             toast.success(
-              `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
-              {
-                className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-                style: {
-                  background: "#DCFCE7",
-                  color: "#166534",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  borderRadius: "8px",
-                  border: "none",
-                },
-                iconTheme: {
-                  primary: "#16A34A",
-                  secondary: "#FFFFFF",
-                },
-              }
+              `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`
             );
 
-            if (refreshPurchasedCoins) {
-              await refreshPurchasedCoins();
-            }
+            // Non-blocking
+            runBackgroundUpdates();
           } else {
             throw new Error(result.error || "Purchase failed");
           }
@@ -492,50 +456,16 @@ function TradeModal({
             toast.success(
               `Successfully sold ${parseFloat(coinAmount).toFixed(
                 6
-              )} ${symbol.toUpperCase()}`,
-              {
-                className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-                style: {
-                  background: "#DCFCE7",
-                  color: "#166534",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  borderRadius: "8px",
-                  border: "none",
-                },
-                iconTheme: {
-                  primary: "#16A34A",
-                  secondary: "#FFFFFF",
-                },
-              }
+              )} ${symbol.toUpperCase()}`
             );
 
-            if (refreshPurchasedCoins) {
-              await refreshPurchasedCoins();
-            }
+            // Non-blocking
+            runBackgroundUpdates();
           } else {
             throw new Error(result.error || "Sell failed");
           }
         }
       }
-
-      let retryCount = 0;
-      const maxRetries = 3;
-      const refreshBalanceWithRetry = async () => {
-        try {
-          const newBalance = await refreshBalance();
-          return newBalance;
-        } catch (error) {
-          retryCount++;
-          if (retryCount < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return refreshBalanceWithRetry();
-          } else {
-            throw error;
-          }
-        }
-      };
-
-      await refreshBalanceWithRetry();
     },
     [
       user,
@@ -555,17 +485,7 @@ function TradeModal({
 
   const handleSubmit = async () => {
     if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
-      toast.error("Please enter a valid amount", {
-        className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
+      toast.error("Please enter a valid amount");
       return;
     }
 
@@ -577,69 +497,27 @@ function TradeModal({
       const availableQuantity = holdingsSummary?.totalQuantity || 0;
 
       if (quantity <= 0) {
-        toast.error("Please enter a valid amount to sell", {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#FEE2E2",
-            color: "#991B1B",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-        });
+        toast.error("Please enter a valid amount to sell");
         return;
       }
 
-      if (quantity > availableQuantity) {
+      if (quantity > availableQuantity + 1e-9) {
         toast.error(
-          `You only have ${availableQuantity.toFixed(6)} ${(
+          `You only have ${availableQuantity.toFixed(8)} ${(
             coin.symbol || coin.coinSymbol
-          )?.toUpperCase()} available`,
-          {
-            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-            style: {
-              background: "#FEE2E2",
-              color: "#991B1B",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              borderRadius: "8px",
-              border: "none",
-            },
-            iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-          }
+          )?.toUpperCase()} available`
         );
         return;
       }
 
       if (quantity < 0.000001) {
-        toast.error("Minimum sell amount is 0.000001", {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#FEE2E2",
-            color: "#991B1B",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-        });
+        toast.error("Minimum sell amount is 0.000001");
         return;
       }
 
       if (!holdingsSummary || availableQuantity === 0) {
         toast.error(
-          "No holdings found for this coin. Please refresh and try again.",
-          {
-            className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-            style: {
-              background: "#FEE2E2",
-              color: "#991B1B",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              borderRadius: "8px",
-              border: "none",
-            },
-            iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-          }
+          "No holdings found for this coin. Please refresh and try again."
         );
         return;
       }
@@ -651,17 +529,7 @@ function TradeModal({
     if (isBuyMode) {
       const quantity = parseFloat(coinAmount);
       if (quantity > maxAvailable) {
-        toast.error("Insufficient balance for this purchase", {
-          className: "!p-3 md:!p-4 !text-xs md:!text-sm font-semibold",
-          style: {
-            background: "#FEE2E2",
-            color: "#991B1B",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            border: "none",
-          },
-          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-        });
+        toast.error("Insufficient balance for this purchase");
         return;
       }
     }
@@ -694,19 +562,7 @@ function TradeModal({
         error.response?.data?.error ||
         error.message ||
         "Trade failed. Please try again.";
-      toast.error(errorMessage, {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -24,11 +24,11 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
     textTertiary: isLight ? "text-gray-500" : "text-gray-400",
 
-    bgPillPositive: isLight ? "bg-emerald-100/50" : "bg-emerald-500/10",
-    bgPillNegative: isLight ? "bg-rose-100/50" : "bg-rose-500/10",
+    bgPillPositive: isLight ? "bg-emerald-50" : "bg-emerald-500/10",
+    bgPillNegative: isLight ? "bg-rose-50" : "bg-rose-500/10",
 
-    bgSummaryCard: isLight ? "bg-white/50 border-gray-100" : "bg-gray-800/20 border-gray-700/50",
-    borderSummary: isLight ? "border-gray-200" : "border-gray-700/50",
+    bgSummaryCard: isLight ? "bg-gray-50" : "bg-white/5",
+    borderSummary: isLight ? "border-gray-200" : "border-white/5",
 
     skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
     skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
@@ -177,7 +177,7 @@ const ProfitLossSummary = ({ totalProfitLoss, totalProfitLossPercentage, TC }) =
   const bgPill = isPositive ? TC.bgPillPositive : TC.bgPillNegative;
 
   return (
-    <div className={`mb-4 mx-2 p-2.5 md:p-3 rounded-xl border fade-in ${bgPill}`} style={{ animationDelay: "0.1s" }}>
+    <div className={`mb-4 mx-2 p-2.5 md:p-3 rounded-xl fade-in ${bgPill}`} style={{ animationDelay: "0.1s" }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`${textPL}`}>
@@ -284,7 +284,7 @@ const CustomTooltip = ({ active, payload, isLight, TC, totalPortfolioValue }) =>
 
 const PortfolioSummary = ({ balance, totalPortfolioValue, groupedHoldings, TC }) => {
   return (
-    <div className={`mx-2 mb-2 space-y-2 p-3 rounded-xl border fade-in ${TC.bgSummaryCard}`} style={{ animationDelay: "0.2s" }}>
+    <div className={`mx-2 mb-2 space-y-2 p-3 rounded-xl fade-in ${TC.bgSummaryCard}`} style={{ animationDelay: "0.2s" }}>
       <div className="flex items-center justify-between text-xs">
         <div className={`flex items-center gap-2 ${TC.textSecondary} font-bold uppercase tracking-wider opacity-60`}>
           <FaWallet className="text-green-500" size={10} />

@@ -258,19 +258,7 @@ function CoinDetailsPage() {
 
   const toggleWatchlist = useCallback(async () => {
     if (!user?.id) {
-      toast.error("Please login to manage watchlist", {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
+      toast.error("Please login to manage watchlist");
       return;
     }
 
@@ -283,33 +271,9 @@ function CoinDetailsPage() {
 
 
     if (wasInWatchlist) {
-      toast.success("Removed from watchlist!", {
-        style: {
-          background: "#FEF2F2",
-          color: "#991B1B",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          border: "none",
-        },
-        iconTheme: { primary: "#EF4444", secondary: "#FFFFFF" },
-      });
+      toast.success("Removed from watchlist");
     } else {
-      toast.success("Added to watchlist!", {
-        style: {
-          background: "#FEFCE8",
-          color: "#854D0E",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          border: "none",
-        },
-        iconTheme: { primary: "#EAB308", secondary: "#FFFFFF" },
-      });
+      toast.success("Added to watchlist");
     }
 
     const coinData = displayCoin;
@@ -345,19 +309,7 @@ function CoinDetailsPage() {
     } catch (err) {
       console.error("Watchlist operation failed:", err);
       setIsInWatchlist(wasInWatchlist);
-      toast.error("Operation failed.", {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
+      toast.error("Operation failed");
     } finally {
       setLoadingWatchlist(false);
     }

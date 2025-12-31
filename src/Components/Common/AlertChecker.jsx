@@ -19,7 +19,7 @@ const AlertChecker = () => {
         setAlerts(res.data.alerts);
       }
     } catch (error) {
-      console.error("Failed to fetch alerts for checker", error);
+      // Silent fail for background polling
     }
   }, [user?.id]);
 
