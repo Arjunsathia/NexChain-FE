@@ -74,7 +74,7 @@ const QuantumNebulaBackground = React.memo(() => {
       stars.forEach(s => {
         s.opacity += s.blinkSpeed;
         if (s.opacity > 1 || s.opacity < 0) s.blinkSpeed *= -1;
-        
+
         // Drift movement
         s.x += s.driftX;
         s.y += s.driftY;
@@ -138,8 +138,8 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
       <QuantumNebulaBackground />
 
       {/* 2. High-Tech Grid Overlay */}
-      <div 
-        className="absolute inset-0 opacity-[0.15]" 
+      <div
+        className="absolute inset-0 opacity-[0.15]"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
                             linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,

@@ -7,10 +7,12 @@ import LenisScroll from '../Common/LenisScroll';
 const AnimatedLayout = () => {
     const location = useLocation();
 
-    // 1. Scroll Reset on Route Change (LayoutEffect for sync update before paint)
+    // 1. Disable Browser Scroll Restoration to prevent glitchy jumps
     useLayoutEffect(() => {
-        window.scrollTo(0, 0);
-    }, [location.pathname]);
+        if ("scrollRestoration" in window.history) {
+            window.history.scrollRestoration = "manual";
+        }
+    }, []);
 
     // 2. Index-based direction logic
     // / (Landing) = 0
@@ -25,16 +27,12 @@ const AnimatedLayout = () => {
             opacity: 0,
             scale: 0.95,
             filter: 'blur(10px)',
-            position: 'relative', // Relative to establish layout height immediately
-            zIndex: 10,
         }),
         center: {
             x: 0,
             opacity: 1,
             scale: 1,
             filter: 'blur(0px)',
-            position: 'relative',
-            zIndex: 1,
             transition: {
                 x: { type: "spring", stiffness: 300, damping: 30, mass: 1 },
                 opacity: { duration: 0.4, ease: "easeOut" },
@@ -47,11 +45,6 @@ const AnimatedLayout = () => {
             opacity: 0,
             scale: 0.95,
             filter: 'blur(10px)',
-            position: 'absolute', // Absolute to 'pop' out of layout flow
-            top: 0,
-            left: 0,
-            width: '100%',
-            zIndex: 0,
             transition: {
                 x: { type: "spring", stiffness: 300, damping: 30, mass: 1 },
                 opacity: { duration: 0.3, ease: "easeIn" },
@@ -76,9 +69,10 @@ const AnimatedLayout = () => {
 
             {/* 2. PAGE TRANSITION CONTAINER */}
             <AnimatePresence
-                mode="popLayout"
+                mode="wait"
                 custom={currentPage === 1 ? 1 : -1}
                 initial={false}
+                onExitComplete={() => window.scrollTo(0, 0)}
             >
                 <motion.div
                     key={location.pathname}
@@ -87,7 +81,7 @@ const AnimatedLayout = () => {
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    className="w-full"
+                    className="w-full relative z-10"
                 >
                     <Outlet />
                 </motion.div>

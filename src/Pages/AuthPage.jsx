@@ -104,14 +104,14 @@ const AuthPage = () => {
                 </button>
             </div>
 
-            <div className="relative z-10 w-full max-w-[1000px] px-6 grid lg:grid-cols-2 gap-8 items-center">
+            <div className="relative z-10 w-full max-w-[1000px] px-6 grid xl:grid-cols-2 gap-8 items-center justify-items-center">
 
                 {/* Left Side: Brand Narrative - Compacted */}
                 <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="hidden lg:block space-y-6"
+                    className="hidden xl:block space-y-6 w-full"
                 >
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
                         <Globe className="w-3 h-3 animate-spin-slow" />
@@ -141,7 +141,7 @@ const AuthPage = () => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="relative group"
+                    className="relative group w-full max-w-md mx-auto xl:max-w-none"
                 >
                     {/* Glowing Aura behind card */}
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-[1.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
