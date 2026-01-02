@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 const QuantumNebulaBackground = React.memo(() => {
@@ -110,6 +110,7 @@ const QuantumNebulaBackground = React.memo(() => {
 
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-0" />;
 });
+QuantumNebulaBackground.displayName = "QuantumNebulaBackground";
 
 // Advanced Beam Component for the "Handshake" effect
 const QuantumBeam = ({ vertical, position, color, delay }) => (

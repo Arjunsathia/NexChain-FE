@@ -517,7 +517,7 @@ const UserDetailPane = ({
   // Simple media query hook
   const [isDesktop, setIsDesktop] = useState(window.matchMedia("(min-width: 768px)").matches);
 
-  const { email } = selectedUser || {};
+
 
   // Permission Logic Helpers
 

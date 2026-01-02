@@ -104,7 +104,7 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
         }
-      } catch (refreshError) {
+      } catch {
         // Refresh failed, silent fail or warn
         // console.warn("Session expired or invalid refresh token");
       }
@@ -121,74 +121,42 @@ api.interceptors.response.use(
 
 
 export const getData = async (url, params) => {
-  try {
-    const response = await api.get(url, params && { params });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.get(url, params && { params });
+  return response.data;
 };
 
 export const getById = async (url, id) => {
-  try {
-    const response = await api.get(`${url}/${id}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.get(`${url}/${id}`);
+  return response.data;
 };
 
 export const postForm = async (url, formData) => {
-  try {
-    const response = await api.post(url, formData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post(url, formData);
+  return response.data;
 };
 
 export const updateById = async (url, id, updateData) => {
-  try {
-    const response = await api.put(`${url}/${id}`, updateData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.put(`${url}/${id}`, updateData);
+  return response.data;
 };
 
 export const deleteById = async (url, id) => {
-  try {
-    const response = await api.delete(`${url}/${id}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.delete(`${url}/${id}`);
+  return response.data;
 };
 
 export const login = async (url, credentials) => {
-  try {
-    const response = await api.post(url, credentials);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post(url, credentials);
+  return response.data;
 };
 
 export const logout = async () => {
-  try {
-    await api.post("/auth/logout");
-  } catch (error) {
-    throw error;
-  }
+  await api.post("/auth/logout");
 };
 
 export const deleteWatchList = async (url, params) => {
-  try {
-    const response = await api.delete(url, { params });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.delete(url, { params });
+  return response.data;
 };
 
 export default api;

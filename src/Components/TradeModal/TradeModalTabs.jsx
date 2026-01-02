@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCoins, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
-const TradeModalTabs = React.memo(({ activeTab, setActiveTab, isLight, TC }) => {
+const TradeModalTabs = React.memo(({ activeTab, setActiveTab, isLight }) => {
   return (
     <div className="px-4 pt-3 pb-1">
       <div className={`flex p-0.5 rounded-lg ${isLight ? "bg-gray-100 border border-gray-200" : "bg-gray-800 border-gray-700"}`}>

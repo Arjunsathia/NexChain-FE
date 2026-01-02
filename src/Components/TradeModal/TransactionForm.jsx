@@ -4,16 +4,13 @@ import { FaArrowDown, FaChevronDown } from "react-icons/fa";
 import AdvancedOptions from "./AdvancedOptions";
 
 const TransactionForm = React.memo(({
+  setMaxAmount,
   coinAmount,
   handleCoinAmountChange,
   usdAmount,
   handleUsdAmountChange,
-  shouldShowSellAll,
-  handleSellAll,
-  setMaxAmount,
   maxAvailable,
   symbol,
-  currentPrice,
   slippage,
   setSlippage,
   calculateTotal,
@@ -26,8 +23,6 @@ const TransactionForm = React.memo(({
   handleLimitPriceChange,
   isAlertMode,
   setIsAlertMode,
-  alertTargetPrice,
-  setAlertTargetPrice,
   stopPrice,
   setStopPrice,
 }) => {

@@ -6,18 +6,11 @@ const TradeModalHeader = React.memo(({
   coinName,
   symbol,
   currentPrice,
-  shouldShowHoldingsInfo,
-  activeTab,
-  isBuyOperation,
   isLight,
   handleClose,
 }) => {
 
-  const getAccentColor = () => {
-    if (shouldShowHoldingsInfo && activeTab === "details") return "text-cyan-500";
-    if (isBuyOperation) return "text-emerald-500";
-    return "text-rose-500";
-  };
+
 
   return (
     <div className={`relative flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 transition-colors duration-300 ${isLight ? "bg-white border-b border-gray-100" : "bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-b border-white/5"}`}>

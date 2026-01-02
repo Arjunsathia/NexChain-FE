@@ -343,7 +343,7 @@ function TradeModal({
           const refreshBalanceWithRetry = async () => {
             try {
               await refreshBalance();
-            } catch (error) {
+            } catch {
               retryCount++;
               if (retryCount < maxRetries) {
                 await new Promise((resolve) => setTimeout(resolve, 500));
@@ -369,9 +369,13 @@ function TradeModal({
           condition
         };
 
-        const res = await api.post("/alerts/create", alertData);
-        if (!res.data.success) {
-          throw new Error("Failed to create alert");
+        try {
+          const res = await api.post("/alerts/create", alertData);
+          if (!res.data.success) {
+            throw new Error("Failed to create alert");
+          }
+        } catch {
+          toast.error("Failed to create alert");
         }
 
         toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`);

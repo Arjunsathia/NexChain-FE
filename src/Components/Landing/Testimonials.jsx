@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { BadgeCheck, TrendingUp } from "lucide-react";
 
@@ -64,9 +64,8 @@ const TraderReviewCard = ({ testimonial, TC }) => {
           </div>
         </div>
 
-        {/* Message */}
         <p className={`text-sm leading-relaxed ${TC?.textSecondary || 'text-slate-400'} group-hover:text-slate-300 transition-colors`}>
-          "{testimonial.message}"
+          &quot;{testimonial.message}&quot;
         </p>
 
         {/* Footer */}

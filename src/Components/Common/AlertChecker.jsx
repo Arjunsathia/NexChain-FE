@@ -18,7 +18,7 @@ const AlertChecker = () => {
       if (res.data.success) {
         setAlerts(res.data.alerts);
       }
-    } catch (error) {
+    } catch {
       // Silent fail for background polling
     }
   }, [user?.id]);
@@ -126,8 +126,8 @@ const AlertChecker = () => {
 
             fetchAlerts();
           }
-        } catch (error) {
-          console.error("Error checking alerts", error);
+        } catch {
+          console.error("Failed to fetch alerts");
         }
       }
     };
