@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, User, ChevronRight, Rocket, Bell } from "lucide-react";
+import { Sun, Moon, Menu, X, User, ChevronRight, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
@@ -8,6 +8,7 @@ import NotificationModal from "@/Components/Common/NotificationModal";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import SiteLogo from '../../assets/Img/hero_globe_premium-removebg-preview.png';
 
 export default function Navbar() {
     const { toggleTheme } = useTheme();
@@ -120,8 +121,8 @@ export default function Navbar() {
                             onClick={() => navigate("/")}
                             className="flex items-center gap-3 group cursor-pointer"
                         >
-                            <div className={`w-9 h-9 rounded-full bg-gradient-to-tr ${TC.logoGradient} flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300`}>
-                                <Rocket size={18} className="fill-white" />
+                            <div className="w-9 h-9 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <img src={SiteLogo} alt="NexChain" className="w-full h-full object-contain drop-shadow-md" />
                             </div>
                             <span className={`text-xl font-bold tracking-tight ${TC.textPrimary}`}>
                                 Nex<span className={TC.textGradient}>Chain</span>
@@ -228,7 +229,7 @@ export default function Navbar() {
                             {/* Drawer Content */}
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-2">
-                                    <Rocket className="text-blue-600" size={24} />
+                                    <img src={SiteLogo} alt="NexChain" className="w-8 h-8 object-contain" />
                                     <span className={`text-xl font-bold ${TC.textPrimary}`}>NexChain</span>
                                 </div>
                                 <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-lg ${TC.actionBtnHover}`}>

@@ -1,3 +1,4 @@
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { FaChartLine, FaCoins, FaArrowRight, FaArrowUp, FaArrowDown } from "react-icons/fa";
@@ -11,11 +12,8 @@ function PortfolioCard() {
   const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
   const navigate = useNavigate();
 
-  const [livePrices, setLivePrices] = useState({});
-  const ws = useRef(null);
-
-
-
+  // Use the shared hook for live prices
+  const livePrices = useBinanceTicker(groupedHoldings);
 
   const TC = useMemo(() => ({
     bgContainer: isLight
@@ -24,11 +22,9 @@ function PortfolioCard() {
     textPrimary: isLight ? "text-gray-900" : "text-white",
     textSecondary: isLight ? "text-gray-500" : "text-gray-400",
 
-
     bgItem: isLight
       ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0 isolation-isolate"
       : "hover:bg-white/5 border-b border-gray-800 last:border-0 isolation-isolate",
-
 
     textProfit: isLight ? "text-green-600" : "text-green-400",
     textLoss: isLight ? "text-red-600" : "text-red-400",
@@ -36,45 +32,6 @@ function PortfolioCard() {
     bgIcon: isLight ? "bg-cyan-100 text-cyan-600" : "bg-cyan-500/20 text-cyan-400",
     bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
   }), [isLight]);
-
-
-  useEffect(() => {
-    if (groupedHoldings.length === 0) return;
-    const symbolMap = {
-      bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt",
-      cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt",
-      "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt",
-      stellar: "xlmusdt", cosmos: "atomusdt", monero: "xmusdt", "ethereum-classic": "etcusdt",
-      "bitcoin-cash": "bchusdt", filecoin: "filusdt", theta: "thetausdt", vechain: "vetusdt",
-      tron: "trxusdt",
-    };
-
-    const symbols = groupedHoldings
-      .map(c => symbolMap[c.coinId] ? `${symbolMap[c.coinId]}@ticker` : null)
-      .filter(Boolean);
-
-    if (symbols.length === 0) return;
-    const streams = symbols.join("/");
-
-    ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
-    ws.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.stream && message.data) {
-        const symbol = message.stream.replace("@ticker", "");
-        const coinId = Object.keys(symbolMap).find(key => symbolMap[key] === symbol);
-        if (coinId) {
-          setLivePrices(prev => ({
-            ...prev,
-            [coinId]: {
-              current_price: parseFloat(message.data.c),
-              price_change_percentage_24h: parseFloat(message.data.P)
-            }
-          }));
-        }
-      }
-    };
-    return () => ws.current?.close();
-  }, [groupedHoldings]);
 
 
   const allCoins = useMemo(() => {

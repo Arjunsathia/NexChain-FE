@@ -121,7 +121,7 @@ export default function Landing() {
       </div>
 
       { }
-      <SectionWrapper id="features-section" className="z-10 py-10 md:py-20">
+      <SectionWrapper id="features-section" className="z-10 py-16 md:py-20">
         <React.Suspense fallback={<div className="h-screen w-full flex items-center justify-center text-slate-500">Loading Features...</div>}>
           <MemoizedFeaturesSection
             TC={TC}
@@ -131,7 +131,7 @@ export default function Landing() {
       </SectionWrapper>
 
       { }
-      <SectionWrapper id="market-section" className="z-20 py-10 md:py-20">
+      <SectionWrapper id="market-section" className="z-20 py-12 md:py-16">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection
             TC={TC}
@@ -141,8 +141,8 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      { }
-      <SectionWrapper id="testimonials-section" className="z-30 py-10 md:py-20">
+      {/* Testimonials */}
+      <SectionWrapper id="testimonials-section" className="z-30 py-12 md:py-16">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedTestimonialsSection
             TC={TC}

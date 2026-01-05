@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRoute from "./AuthRoute";
@@ -61,6 +61,7 @@ export default function AppRoutes() {
         <Route element={<PublicRoute />}>
           <Route element={<PublicLayout />}>
             <Route path="/public-learning" element={<LearningHub />} />
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
           </Route>
         </Route>
 

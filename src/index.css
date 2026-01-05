@@ -609,3 +609,32 @@ html {
 .will-change-transform {
   will-change: transform;
 }
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    left: -100%;
+    top: -100%;
+  }
+  20%, 100% {
+    left: 200%;
+    top: 200%;
+  }
+}
+
+.animate-shine-sweep {
+  animation: shine-sweep 4s ease-in-out infinite;
+}
+

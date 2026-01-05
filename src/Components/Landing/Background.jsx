@@ -26,14 +26,14 @@ const QuantumNebulaBackground = React.memo(() => {
     // Cosmic Entities
     const stars = [];
     const nebulas = [];
-    const starCount = 150;
+    const starCount = 350; // Increased from 150
 
     // Initialize Starfield (Quantum Particles)
     for (let i = 0; i < starCount; i++) {
       stars.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 1.2,
+        size: Math.random() * 1.5, // Slightly varied size
         opacity: Math.random(),
         blinkSpeed: Math.random() * 0.02 + 0.005,
         driftX: (Math.random() - 0.5) * 0.2,
@@ -42,7 +42,8 @@ const QuantumNebulaBackground = React.memo(() => {
     }
 
     // Initialize Deep Glows (Nebula effects)
-    const colors = ['rgba(6, 182, 212,', 'rgba(139, 92, 246,', 'rgba(30, 58, 138,'];
+    // REMOVED greenish-cyan, shifted to Deep Blue & Royal Purple palette
+    const colors = ['rgba(37, 99, 235,', 'rgba(59, 130, 246,', 'rgba(30, 58, 138,'];
     for (let i = 0; i < 4; i++) {
       nebulas.push({
         x: Math.random() * width,
@@ -55,14 +56,14 @@ const QuantumNebulaBackground = React.memo(() => {
     }
 
     const animate = () => {
-      // 1. Deep Space Base
-      ctx.fillStyle = '#02040a';
+      // 1. Deep Space Base - Pitch Black
+      ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw Nebulas (Atmospheric depth)
+      // 2. Draw Nebulas (Atmospheric depth) - Reduced Opacity for darker feel
       nebulas.forEach(n => {
         n.pulse += n.pulseSpeed;
-        const currentOpacity = 0.03 + Math.sin(n.pulse) * 0.02;
+        const currentOpacity = 0.015 + Math.sin(n.pulse) * 0.01; // Kept low for dark aesthetic
         const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
         g.addColorStop(0, `${n.color} ${currentOpacity})`);
         g.addColorStop(1, `${n.color} 0)`);
@@ -85,12 +86,13 @@ const QuantumNebulaBackground = React.memo(() => {
 
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.opacity)})`;
+        // Reduced star brightness
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.opacity) * 0.4})`;
         ctx.fill();
 
         // Subtle glow for larger stars
         if (s.size > 1) {
-          ctx.shadowBlur = 5;
+          ctx.shadowBlur = 2;
           ctx.shadowColor = "white";
         } else {
           ctx.shadowBlur = 0;
@@ -134,13 +136,13 @@ const QuantumBeam = ({ vertical, position, color, delay }) => (
 
 const InteractiveGridPattern = React.memo(({ className = "" }) => {
   return (
-    <div className={`fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full bg-[#02040a] ${className}`}>
+    <div className={`fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full bg-[#000000] ${className}`}>
       {/* 1. Base Quantum Starfield */}
       <QuantumNebulaBackground />
 
-      {/* 2. High-Tech Grid Overlay */}
+      {/* 2. High-Tech Grid Overlay - Lower Opacity */}
       <div
-        className="absolute inset-0 opacity-[0.15]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
                             linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
@@ -148,8 +150,8 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
         }}
       />
 
-      {/* 3. Aesthetic Vignette */}
-      <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#02040a]/40 to-[#02040a]" />
+      {/* 3. Aesthetic Vignette - Stronger Darkening */}
+      <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#02040a]/70 to-[#02040a]" />
 
       {/* 4. Quantum Beams (The "Advanced" look) */}
       <QuantumBeam vertical position="20%" color="#06b6d4" delay={0} />
@@ -158,7 +160,7 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
       <QuantumBeam vertical={false} position="70%" color="#06b6d4" delay={3} />
 
       {/* 5. Noise Texture for premium feel */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.015] mix-blend-overlay"></div>
     </div>
   );
 });

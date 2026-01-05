@@ -254,6 +254,7 @@ const AuthPage = () => {
                                             onChange={(e) => setLoginData({ ...loginData, user_name: e.target.value })}
                                             className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 focus:bg-white/[0.06] transition-all px-4 text-sm"
                                             placeholder="Email Address"
+                                            autoComplete="username"
                                             required
                                         />
                                     </div>
@@ -264,6 +265,7 @@ const AuthPage = () => {
                                             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                                             className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 px-4 pr-10 text-sm"
                                             placeholder="Password"
+                                            autoComplete="current-password"
                                             required
                                         />
                                         <button
@@ -292,12 +294,12 @@ const AuthPage = () => {
                                     className="space-y-3"
                                 >
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Input value={registerData.name} onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Full Name" required />
-                                        <Input value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Email Address" type="email" required />
-                                        <Input value={registerData.phone} onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Phone Number" required />
-                                        <Input value={registerData.user_name} onChange={(e) => setRegisterData({ ...registerData, user_name: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Username" required />
-                                        <Input value={registerData.password} onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Password" type="password" required />
-                                        <Input value={registerData.confirm_password} onChange={(e) => setRegisterData({ ...registerData, confirm_password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Confirm Password" type="password" required />
+                                        <Input value={registerData.name} onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Full Name" autoComplete="name" required />
+                                        <Input value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} className="col-span-2 h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Email Address" type="email" autoComplete="email" required />
+                                        <Input value={registerData.phone} onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Phone Number" autoComplete="tel" required />
+                                        <Input value={registerData.user_name} onChange={(e) => setRegisterData({ ...registerData, user_name: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Username" autoComplete="username" required />
+                                        <Input value={registerData.password} onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Password" type="password" autoComplete="new-password" required />
+                                        <Input value={registerData.confirm_password} onChange={(e) => setRegisterData({ ...registerData, confirm_password: e.target.value })} className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm" placeholder="Confirm Password" type="password" autoComplete="new-password" required />
                                     </div>
                                     <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
                                         <span className="relative z-10 flex items-center justify-center gap-2">

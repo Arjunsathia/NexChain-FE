@@ -14,65 +14,105 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
   return (
     <section className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent" ref={ref}>
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
-        <motion.div variants={{}} style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12 items-center">
-          { }
+        <motion.div variants={{}} style={{ y: heroY, opacity: heroOpacity }} className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+
+
+          {/* MOBILE ONLY BADGE: Order 1 */}
+          <div className="order-1 lg:hidden w-full flex justify-center mb-2 relative z-30">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.2em] uppercase bg-[#0B0E14] text-cyan-200 border border-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+              <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              Next Gen Trading
+            </div>
+          </div>
+
+          {/* Text Content - Order 3 on Mobile (Bottom), Order 1 on Desktop (Left) */}
           <motion.div
             variants={{}}
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center lg:text-left space-y-3 md:space-y-8 order-2 lg:order-1 relative z-20"
+            className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 order-3 lg:order-1 relative z-20 max-w-[520px] mx-auto lg:mx-0"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className={`inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase bg-white/5 text-[#A5B4FC] border border-white/10 backdrop-blur-md`}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#728AD5]"></span>
-              </span>
+            {/* BADGE: Match Image - Sleek & Darker - DESKTOP ONLY */}
+            <div className="hidden lg:inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase bg-[#0B0E14] text-cyan-200 border border-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+              <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
               Next Gen Trading
-            </motion.div>
+            </div>
 
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-2 md:mb-6 font-manrope">
+            {/* HEADLINE: Bold & Refined Gradient */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight font-manrope text-white">
               The Future of <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C7D2FE] via-[#728AD5] to-[#312E81] drop-shadow-lg">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-700 filter drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">
                 Digital Assets
               </span>
             </h1>
 
-            <p className={`text-sm md:text-xl max-w-xl mx-auto lg:mx-0 ${TC.textSecondary} leading-relaxed font-light font-manrope`}>
-              Experience institutional-grade crypto trading with real-time analytics,
-              AI-powered insights, and zero-latency execution.
+            {/* SUBTEXT: Clean & Readable */}
+            <p className="text-slate-400 text-sm md:text-lg leading-relaxed font-normal max-w-[90%] mx-auto lg:mx-0">
+              Institutional-grade crypto trading with real-time analytics, AI-driven insights, and near-zero latency.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-5 items-center justify-center lg:justify-start pt-4">
+            {/* BUTTONS: CTA Row - Fixed Sizing & Styling */}
+            <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto pt-6">
+
+              {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
+              {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
               <button
                 onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
-                className={`group px-6 py-2.5 md:px-8 md:py-4 rounded-full font-bold text-sm tracking-wide transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${TC.btnPrimary}`}
+                className="
+    group relative 
+    px-10 py-3.5 
+    rounded-full 
+    font-bold text-sm md:text-base tracking-wide text-white 
+    transition-all duration-300 
+    overflow-hidden
+    backdrop-blur-md
+    
+    /* THE OUTER GLOW (Bloom effect) */
+    shadow-[0_0_20px_-5px_rgba(79,205,218,0.5)] 
+    
+    /* THE GLASS EFFECT BORDERS (The Key Part) */
+    /* 1. inset 0 1px 0: Creates the sharp white reflection on TOP */
+    /* 2. inset 0 -2px 0: Creates the shining cyan refraction on BOTTOM line */
+    shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_0_0_rgba(79,205,218,1)]
+    border border-cyan-400/30
+  "
               >
-                <span>Start Trading</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+                {/* 1. EXACT GRADIENT BACKGROUND - Slightly Transparent */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#4fcdda]/85 via-[#364abe]/85 to-[#233784]/95" />
 
+                {/* 2. SURFACE SHEEN (Top half gloss) */}
+                {/* This creates the 'dome' look by lightening the top half slightly */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/5 to-transparent opacity-80" />
+
+                {/* 3. CONTENT */}
+                <span className="relative flex items-center justify-center gap-2 drop-shadow-sm z-10">
+                  Start Trading
+                  <ChevronRight className="w-4 h-4 stroke-[3px] group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+              {/* Secondary Button: Matching Size & Thin Border */}
               <button
                 onClick={() => navigate(isLoggedIn ? "/learning" : "/public-learning")}
-                className={`group px-6 py-2.5 md:px-8 md:py-4 rounded-full font-bold text-sm tracking-wide transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${TC.btnSecondary}`}
+                className="group px-10 py-3.5 rounded-full font-bold text-sm md:text-base tracking-wide text-gray-300 transition-all duration-300 hover:text-white border border-white/10 hover:border-cyan-500/30 hover:bg-white/5 flex items-center justify-center gap-2 backdrop-blur-sm"
               >
                 <span>Learning Hub</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform opacity-50 group-hover:opacity-100" />
               </button>
             </div>
           </motion.div>
 
-          { }
+          {/* Visual Content - Order 2 on Mobile (Middle), Order 2 on Desktop (Right) */}
           <motion.div
             variants={{}}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative order-1 lg:order-2 h-[280px] md:h-[500px] flex flex-col items-center justify-center mb-2 md:mb-0 pointer-events-none"
+            className="relative order-2 lg:order-2 h-[320px] md:h-[600px] flex flex-col items-center justify-center mb-0 md:mb-0 pointer-events-none lg:translate-x-12"
             style={{ y: fgParallaxY }}
           >
             <HeroGlobe />

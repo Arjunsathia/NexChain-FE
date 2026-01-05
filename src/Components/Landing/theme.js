@@ -4,7 +4,7 @@ export const TC = {
   bgPage: "bg-[#02040a] text-white", 
   textPrimary: "text-white",
   textSecondary: "text-slate-400", 
-  textHeroGradient: "bg-gradient-to-r from-cyan-300 via-blue-500 to-purple-600",
+  textHeroGradient: "bg-gradient-to-r from-cyan-400 to-blue-700",
   
   
   btnPrimary: "bg-gradient-to-r from-[#728AD5] to-[#4338CA] text-white hover:shadow-[0_0_30px_rgba(114,138,213,0.5)] transition-all duration-300", 
