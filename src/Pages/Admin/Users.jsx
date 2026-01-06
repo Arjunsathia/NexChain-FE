@@ -19,7 +19,8 @@ import {
   Archive,
   RefreshCcw,
   Unlock,
-  ChevronDown
+  ChevronDown,
+  Lock
 } from "lucide-react";
 import MessageUserModal from "@/Components/Admin/Users/MessageUserModal";
 import UserStatDetailModal from "@/Components/Admin/Users/UserStatDetailModal";
@@ -248,6 +249,48 @@ const Users = () => {
     }
   };
 
+  const handleToggleFreeze = async (user, e) => {
+    if (e) e.stopPropagation();
+    if (!user) return;
+
+    // Permissions check (client side mostly visual, API enforces)
+    if (currentUserRole !== 'superadmin' && user.role === 'admin') {
+      toast.error("Admins cannot freeze other admins.");
+      return;
+    }
+    if (user.role === 'superadmin') {
+      toast.error("Cannot freeze Super Admin.");
+      return;
+    }
+
+    const targetId = user.id || user._id;
+    const newFrozenStatus = !user.isFrozen;
+
+    const toastId = toast.loading(newFrozenStatus ? "Freezing user..." : "Unfreezing user...");
+
+    try {
+      await updateById("/users", targetId, { isFrozen: newFrozenStatus });
+
+      toast.success(newFrozenStatus ? "User frozen successfully" : "User active again", { id: toastId });
+
+      // Update local state
+      setUsers(prev => prev.map(u => {
+        if (u.id === targetId || u._id === targetId) {
+          return { ...u, isFrozen: newFrozenStatus };
+        }
+        return u;
+      }));
+
+      if (selectedUser && (selectedUser.id === targetId || selectedUser._id === targetId)) {
+        setSelectedUser(prev => ({ ...prev, isFrozen: newFrozenStatus }));
+      }
+
+    } catch (error) {
+      console.error("Freeze error", error);
+      toast.error(error.message || "Failed to update user status", { id: toastId });
+    }
+  };
+
   const openActionModal = (type, user) => {
     setActionModal({
       isOpen: true,
@@ -285,7 +328,7 @@ const Users = () => {
 
   // UserListItem Component
   const UserListItem = useMemo(() => {
-    const Component = ({ user }) => (
+    const Component = ({ user, onToggleFreeze }) => (
       <div
         onClick={() => setSelectedUser(user)}
         className={`
@@ -303,9 +346,14 @@ const Users = () => {
         />
 
         <div className="relative flex-shrink-0 z-10">
-          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-0.5 shadow-md 
-          ${selectedUser?._id === user._id ? 'ring-2 ring-blue-500/20' : ''} 
-          group-hover:shadow-blue-500/30 transition-all`}>
+          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br p-0.5 shadow-md transition-all
+          ${user.isFrozen
+              ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
+              : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"}
+          ${selectedUser?._id === user._id
+              ? (user.isFrozen ? 'ring-2 ring-red-500/20' : 'ring-2 ring-blue-500/20')
+              : ''} 
+          `}>
             <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
               {user.image ? (
                 <img
@@ -331,11 +379,7 @@ const Users = () => {
               {user.name}
             </h4>
             <div className="flex gap-1">
-              {user.isFrozen && (
-                <div className="p-1 rounded-md bg-orange-500/10" title="Account Frozen">
-                  <Ban className="w-3 h-3 text-orange-500" />
-                </div>
-              )}
+              {/* Removed Ban Icon */}
               {user.role === 'admin' && (
                 <div className="p-1 rounded-md bg-blue-500/10">
                   <Shield className="w-3 h-3 text-blue-500" />
@@ -358,9 +402,11 @@ const Users = () => {
                 : 'bg-blue-500/10 text-blue-500/70 border border-blue-500/10'}`}>
               {user.role}
             </span>
+            {/* Freeze Toggle Removed from List per request */}
           </div>
         </div>
       </div>
+
     );
     Component.displayName = "UserListItem";
     return Component;
@@ -440,7 +486,7 @@ const Users = () => {
             {loading ? (
               <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map(user => <UserListItem key={user._id} user={user} />)
+              filteredUsers.map(user => <UserListItem key={user._id} user={user} onToggleFreeze={handleToggleFreeze} />)
             ) : (
               <div className={`p-8 text-center ${TC.textSecondary}`}>No users found</div>
             )}
@@ -463,6 +509,7 @@ const Users = () => {
           openActionModal={openActionModal}
           setShowMessageModal={setShowMessageModal}
           isLight={isLight}
+          onToggleFreeze={handleToggleFreeze}
         />
 
         <ActionConfirmModal
@@ -512,7 +559,8 @@ const UserDetailPane = ({
   openActionModal,
   setShowMessageModal,
   currentUserRole,
-  isLight
+  isLight,
+  onToggleFreeze
 }) => {
   // Simple media query hook
   const [isDesktop, setIsDesktop] = useState(window.matchMedia("(min-width: 768px)").matches);
@@ -526,6 +574,14 @@ const UserDetailPane = ({
     // Hard Stop for Primary Super Admin
     if (selectedUser.email === 'nexchainsystem@gmail.com') return false;
 
+    if (currentUserRole === 'superadmin') return true;
+    if (currentUserRole === 'admin' && selectedUser.role === 'user') return true;
+    return false;
+  }, [currentUserRole, selectedUser]);
+
+  const canFreeze = useMemo(() => {
+    if (!selectedUser) return false;
+    if (selectedUser.email === 'nexchainsystem@gmail.com') return false;
     if (currentUserRole === 'superadmin') return true;
     if (currentUserRole === 'admin' && selectedUser.role === 'user') return true;
     return false;
@@ -633,7 +689,12 @@ const UserDetailPane = ({
             {/* Cover - Updated styling to match Detail Panel roundedness */}
             <div className="relative h-48 bg-gradient-to-r from-blue-600 to-indigo-700">
               <div className="absolute bottom-6 left-6 md:left-8 flex items-end gap-5">
-                <div className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden border-white/20 bg-white/10 backdrop-blur-md`}>
+                <div className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden backdrop-blur-md
+                   ${selectedUser.isFrozen
+                    ? "border-red-500/50 bg-red-500/10 shadow-red-500/20"
+                    : "border-white/20 bg-white/10"
+                  }
+                `}>
                   {selectedUser.image ? (
                     <img src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} className="w-full h-full object-cover" />
                   ) : (
@@ -648,6 +709,7 @@ const UserDetailPane = ({
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"} text-white`}>
                       {selectedUser.recentlyActive ? "Active" : "Inactive"}
                     </span>
+                    {selectedUser.isFrozen && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-600 text-white animate-pulse">Frozen</span>}
                     {selectedUser.role === 'admin' && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500 text-white">Admin</span>}
                     {selectedUser.isDeleted && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-500 text-white">Archived</span>}
                   </div>
@@ -689,6 +751,24 @@ const UserDetailPane = ({
                       <Archive className="w-4 h-4" />
                     </button>
                   ))}
+
+                  {/* Freeze Logic */}
+                  {canFreeze && (
+                    <button
+                      onClick={(e) => onToggleFreeze(selectedUser, e)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all hover:-translate-y-0.5
+                        ${selectedUser.isFrozen
+                          ? "bg-green-600 hover:bg-green-700 text-white shadow-green-500/20"
+                          : "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20"
+                        }`}
+                    >
+                      {selectedUser.isFrozen ? (
+                        <> <Unlock className="w-4 h-4" /> Unfreeze User </>
+                      ) : (
+                        <> <Lock className="w-4 h-4" /> Freeze User </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
 

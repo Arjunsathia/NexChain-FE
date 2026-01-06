@@ -1,4 +1,4 @@
-import { getTopGainers } from "@/api/coinApis";
+import { getTopLosers } from "@/api/coinApis";
 import React, { useEffect, useState, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -6,9 +6,9 @@ import { FaChartLine, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-function TopGainers() {
+function TopLosers() {
     const isLight = useThemeCheck();
-    const [gainers, setGainers] = useState([]);
+    const [losers, setLosers] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -23,26 +23,25 @@ function TopGainers() {
             : "hover:bg-white/5 border-b border-gray-800 last:border-0 transition-colors",
         textPricePositive: isLight ? "text-emerald-700" : "text-emerald-400",
         textPriceNegative: isLight ? "text-rose-700" : "text-rose-400",
-        iconBg: isLight ? "bg-indigo-100/50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400",
+        iconBg: isLight ? "bg-rose-100/50 text-rose-600" : "bg-rose-500/10 text-rose-400",
         bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
         skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
         skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
     }), [isLight]);
 
-
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const data = await getTopGainers();
+                const data = await getTopLosers();
                 if (Array.isArray(data)) {
-                    setGainers(data.slice(0, 5));
+                    setLosers(data.slice(0, 5));
                 } else {
-                    setGainers([]);
+                    setLosers([]);
                 }
             } catch (error) {
-                console.error("Failed to fetch top gainers:", error);
-                setGainers([]);
+                console.error("Failed to fetch top losers:", error);
+                setLosers([]);
             } finally {
                 setLoading(false);
             }
@@ -56,9 +55,9 @@ function TopGainers() {
             <div className="px-4 pt-4 flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
-                        <FaChartLine className="text-base" />
+                        <FaChartLine className="text-base transform rotate-180" />
                     </div>
-                    <h3 className={`font-bold text-sm md:text-base ${TC.textPrimary}`}>Top Gainers</h3>
+                    <h3 className={`font-bold text-sm md:text-base ${TC.textPrimary}`}>Top Losers</h3>
                 </div>
             </div>
 
@@ -78,8 +77,8 @@ function TopGainers() {
                             </div>
                         ))}
                     </div>
-                ) : gainers.length > 0 ? (
-                    gainers.map((coin, index) => (
+                ) : losers.length > 0 ? (
+                    losers.map((coin, index) => (
                         <div
                             key={coin.id}
                             onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
@@ -100,8 +99,8 @@ function TopGainers() {
                                 <p className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}>
                                     ${coin.current_price?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                 </p>
-                                <p className={`text-[10px] font-semibold flex items-center ${TC.textPricePositive}`}>
-                                    +{coin.price_change_percentage_24h?.toFixed(2)}%
+                                <p className={`text-[10px] font-semibold flex items-center ${TC.textPriceNegative}`}>
+                                    {coin.price_change_percentage_24h?.toFixed(2)}%
                                 </p>
                             </div>
                         </div>
@@ -128,4 +127,4 @@ function TopGainers() {
     );
 }
 
-export default TopGainers;
+export default TopLosers;

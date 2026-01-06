@@ -7,6 +7,7 @@ import {
   FaWallet,
   FaCoins,
   FaStar,
+  FaChartBar,
   FaChartLine,
   FaSignOutAlt,
   FaCog,
@@ -136,9 +137,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
   const menus = [
     { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
+    { name: "Market Insights", path: "/user/insights", icon: FaChartBar },
+    { name: "API Keys", path: "/user/api", icon: FaCode },
     { name: "Support", path: "/user/support", icon: FaCommentDots },
     { name: "Settings", path: "/user/settings", icon: FaCog },
-    { name: "API Keys", path: "/user/api", icon: FaCode },
   ];
 
   const isActive = (path) => {

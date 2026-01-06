@@ -4,6 +4,8 @@ import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
+
+import TopLosers from "@/Components/Crypto/TopLosers";
 import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -147,13 +149,25 @@ function CryptoList() {
                   {loading ? <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `$${formatCompactNumber(globalData?.total_volume?.usd)}`}
                 </span>
               </div>
+              <div className="flex flex-col items-end">
+                <span className={TC.textTertiary}>BTC Dom</span>
+                <span className="font-semibold">
+                  {loading ? <Skeleton width={50} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`}
+                </span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={TC.textTertiary}>ETH Dom</span>
+                <span className="font-semibold">
+                  {loading ? <Skeleton width={50} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} /> : `${globalData?.market_cap_percentage?.eth?.toFixed(1)}%`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 auto-rows-fr">
           <div className={`rounded-xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
             <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
               <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
@@ -209,6 +223,10 @@ function CryptoList() {
 
           <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>
             <TopGainers />
+          </div>
+
+          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.15s' }}>
+            <TopLosers />
           </div>
         </div>
 

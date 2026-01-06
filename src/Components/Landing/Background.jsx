@@ -43,35 +43,13 @@ const QuantumNebulaBackground = React.memo(() => {
 
     // Initialize Deep Glows (Nebula effects)
     // REMOVED greenish-cyan, shifted to Deep Blue & Royal Purple palette
-    const colors = ['rgba(37, 99, 235,', 'rgba(59, 130, 246,', 'rgba(30, 58, 138,'];
-    for (let i = 0; i < 4; i++) {
-      nebulas.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        radius: Math.random() * 400 + 200,
-        color: colors[i % colors.length],
-        pulse: 0,
-        pulseSpeed: Math.random() * 0.005 + 0.002
-      });
-    }
 
     const animate = () => {
       // 1. Deep Space Base - Pitch Black
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw Nebulas (Atmospheric depth) - Reduced Opacity for darker feel
-      nebulas.forEach(n => {
-        n.pulse += n.pulseSpeed;
-        const currentOpacity = 0.015 + Math.sin(n.pulse) * 0.01; // Kept low for dark aesthetic
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
-        g.addColorStop(0, `${n.color} ${currentOpacity})`);
-        g.addColorStop(1, `${n.color} 0)`);
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, width, height);
-      });
-
-      // 3. Draw Quantum Stars
+      // 2. Draw Quantum Stars
       stars.forEach(s => {
         s.opacity += s.blinkSpeed;
         if (s.opacity > 1 || s.opacity < 0) s.blinkSpeed *= -1;

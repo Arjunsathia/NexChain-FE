@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { FaSearch } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { fetchCoins } from "@/redux/slices/coinSlice";
+import { freezeCoin, unfreezeCoin } from "@/api/coinApis";
+import { toast } from "react-hot-toast";
 import useCoinContext from "@/hooks/useCoinContext";
 import CryptoStats from "@/Components/Admin/Cryptocurrencies/CryptoStats";
 import CryptoTable from "@/Components/Admin/Cryptocurrencies/CryptoTable";
@@ -9,10 +13,35 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 
 const AdminCryptocurrencies = () => {
   const isLight = useThemeCheck();
-  const { coins } = useCoinContext() ?? { coins: [] };
+  /* Admin sees ALL coins (frozen and active) */
+  const { allCoins: coins } = useCoinContext() ?? { allCoins: [] };
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCoin, setSelectedCoin] = useState(null);
+
+  const dispatch = useDispatch();
+  const [loadingId, setLoadingId] = useState(null);
+
+  const handleToggleFreeze = async (coin) => {
+    if (loadingId) return;
+    setLoadingId(coin.id);
+
+    try {
+      if (coin.isFrozen) {
+        await unfreezeCoin(coin.id);
+        toast.success(`${coin.name} has been unfrozen`);
+      } else {
+        await freezeCoin({ coinId: coin.id, symbol: coin.symbol, name: coin.name });
+        toast.success(`${coin.name} has been frozen`);
+      }
+      dispatch(fetchCoins());
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to update coin status");
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   const coinsPerPage = 10;
 
@@ -110,6 +139,8 @@ const AdminCryptocurrencies = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             paginate={paginate}
+            onToggleFreeze={handleToggleFreeze}
+            loadingId={loadingId}
           />
         </div>
       </div>

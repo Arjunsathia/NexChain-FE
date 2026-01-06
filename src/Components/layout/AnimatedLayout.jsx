@@ -23,10 +23,10 @@ const AnimatedLayout = () => {
     // 3. Cinematic "Mechanical" Spring Variants
     const variants = {
         enter: (direction) => ({
-            x: direction > 0 ? '100%' : '-100%',
+            x: direction > 0 ? '20%' : '-20%',
             opacity: 0,
-            scale: 0.95,
-            filter: 'blur(10px)',
+            scale: 0.98,
+            filter: 'blur(4px)',
         }),
         center: {
             x: 0,
@@ -34,22 +34,20 @@ const AnimatedLayout = () => {
             scale: 1,
             filter: 'blur(0px)',
             transition: {
-                x: { type: "spring", stiffness: 300, damping: 30, mass: 1 },
-                opacity: { duration: 0.4, ease: "easeOut" },
-                scale: { duration: 0.4, ease: "easeOut" },
-                filter: { duration: 0.4 }
+                type: "tween",
+                ease: "circOut",
+                duration: 0.25
             }
         },
         exit: (direction) => ({
-            x: direction < 0 ? '100%' : '-100%',
+            x: direction < 0 ? '20%' : '-20%',
             opacity: 0,
-            scale: 0.95,
-            filter: 'blur(10px)',
+            scale: 0.98,
+            filter: 'blur(4px)',
             transition: {
-                x: { type: "spring", stiffness: 300, damping: 30, mass: 1 },
-                opacity: { duration: 0.3, ease: "easeIn" },
-                scale: { duration: 0.3 },
-                filter: { duration: 0.3 }
+                type: "tween",
+                ease: "circIn",
+                duration: 0.15
             }
         })
     };
@@ -77,6 +75,8 @@ const AnimatedLayout = () => {
                 <motion.div
                     key={location.pathname}
                     custom={currentPage === 1 ? 1 : -1}
+                    // Optimize rendering for performance
+                    style={{ willChange: "transform, opacity, filter" }}
                     variants={variants}
                     initial="enter"
                     animate="center"

@@ -13,6 +13,7 @@ import {
     FaHeart
 } from "react-icons/fa";
 import { X } from "lucide-react";
+import SiteLogo from '../../assets/Img/hero_globe_premium-removebg-preview.png';
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
@@ -119,8 +120,8 @@ export default function Footer() {
                         {/* Brand & Disclaimer Section */}
                         <div className="flex-1 space-y-3 sm:space-y-4">
                             <div className="flex items-center gap-2 mb-1">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                                    <FaRocket size={14} />
+                                <div className="w-8 h-8 flex items-center justify-center">
+                                    <img src={SiteLogo} alt="NexChain" className="w-full h-full object-contain drop-shadow-sm" />
                                 </div>
                                 <h3 className={`text-lg sm:text-xl font-bold ${TC.textPrimary} tracking-tight`}>
                                     NexChain

@@ -24,13 +24,15 @@ const UserDashboard = lazy(() => import("@/Pages/UserProfile/UserDashboard"));
 const UserSettings = lazy(() => import("@/Pages/UserProfile/Settings"));
 const UserSupport = lazy(() => import("@/Pages/UserProfile/Support"));
 
+const UserMarketInsights = lazy(() => import("@/Pages/UserProfile/MarketInsights"));
+
 
 const Admin = lazy(() => import("@/Pages/Admin/Admin"));
 const AdminDashboard = lazy(() => import("@/Pages/Admin/Dashboard"));
 const Users = lazy(() => import("@/Pages/Admin/Users"));
 const AdminCryptocurrencies = lazy(() => import("@/Pages/Admin/Cryptocurrencies"));
+
 const AdminFeedback = lazy(() => import("@/Pages/Admin/Feedback"));
-const MarketInsights = lazy(() => import("@/Pages/Admin/MarketInsights"));
 const AdminSettings = lazy(() => import("@/Pages/Admin/Settings"));
 
 
@@ -82,6 +84,8 @@ export default function AppRoutes() {
               <Route path="/user-profile/:userId" element={<UserDashboard />} />
               <Route path="/user/settings" element={<UserSettings />} />
               <Route path="/user/support" element={<UserSupport />} />
+
+              <Route path="/user/insights" element={<UserMarketInsights />} />
             </Route>
             <Route path="/admin" element={<Admin />}>
               <Route index element={<AdminDashboard />} />
@@ -89,7 +93,6 @@ export default function AppRoutes() {
               <Route path="users" element={<Users />} />
               <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} />
               <Route path="feedback" element={<AdminFeedback />} />
-              <Route path="insights" element={<MarketInsights />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Route>

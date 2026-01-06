@@ -19,13 +19,13 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
         textPrimary: isLight ? "text-gray-900" : "text-white",
         textSecondary: isLight ? "text-gray-500" : "text-gray-400",
         bgItem: isLight
-            ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0"
-            : "hover:bg-white/5 border-b border-gray-800 last:border-0",
-        textPricePositive: isLight ? "text-green-600" : "text-emerald-400", // Brighter green for dark mode
-        textPriceNegative: isLight ? "text-red-600" : "text-rose-400",
-        bgIcon: isLight ? "bg-orange-100/50 text-orange-600" : "bg-orange-500/10 text-orange-400",
+            ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0 transition-colors"
+            : "hover:bg-white/5 border-b border-gray-800 last:border-0 transition-colors",
+        textPricePositive: isLight ? "text-emerald-700" : "text-emerald-400",
+        textPriceNegative: isLight ? "text-rose-700" : "text-rose-400",
+        iconBg: isLight ? "bg-orange-100/50 text-orange-600" : "bg-orange-500/10 text-orange-400",
         bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
-        skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+        skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
         skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
     }), [isLight]);
 
@@ -38,25 +38,10 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
             : "bg-gray-800 text-gray-400 border-gray-700";
     };
 
-    if (loading && displayedCoins.length === 0) {
-        return (
-            <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer} ${className}`}>
-                <div className="flex items-center gap-2 mb-3">
-                    <Skeleton circle width={24} height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                    <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                </div>
-                <div className="space-y-2">
-                    <Skeleton height={40} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                    <Skeleton height={40} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer} ${className}`}>
+        <div className={`rounded-xl p-1 relative overflow-hidden group h-full flex flex-col hover:shadow-lg transition-all duration-300 ${TC.bgContainer} ${className}`}>
 
-            {/* Conditional Header Rendering */}
+            {/* Header */}
             {variant === 'dashboard' ? (
                 <div className="px-4 pt-3 flex items-center justify-between mb-2">
                     <h3 className="font-bold text-sm bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent flex items-center gap-2">
@@ -67,7 +52,7 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
             ) : (
                 <div className="px-4 pt-4 flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-lg ${TC.bgIcon}`}>
+                        <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
                             <FaFire className="text-base" />
                         </div>
                         <h3 className={`font-bold text-sm md:text-base ${TC.textPrimary}`}>{title}</h3>
@@ -75,7 +60,7 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[400px] md:max-h-full">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide max-h-[400px] md:max-h-full relative z-10">
                 {error && displayedCoins.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                         <div className={`p-2 rounded-full mb-2 bg-yellow-100 text-yellow-600`}>
@@ -83,6 +68,21 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
                         </div>
                         <p className={`text-xs ${TC.textSecondary}`}>Error loading</p>
                         <button onClick={() => fetchTrending()} className="text-[10px] text-blue-500 mt-1 hover:underline">Retry</button>
+                    </div>
+                ) : loading && displayedCoins.length === 0 ? (
+                    <div className="space-y-4">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="flex justify-between items-center p-2">
+                                <Skeleton circle width={24} height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                                <div className="flex-1 ml-2">
+                                    <Skeleton width={80} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                                    <Skeleton width={40} height={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <Skeleton width={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : displayedCoins.length === 0 ? (
                     <div className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty}`}>
@@ -101,7 +101,7 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
                         >
                             <div className="flex items-center gap-3">
                                 <div className="relative">
-                                    <img src={coin.image} alt={coin.name} className="w-8 h-8 rounded-full object-cover" />
+                                    <img src={coin.image} alt={coin.name} className="w-8 h-8 rounded-full object-cover shadow-sm" />
                                     <div className={`
                                         absolute -top-1.5 -left-1.5 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center border shadow-sm
                                         ${getRankStyle(index)}
@@ -130,7 +130,7 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
             </div>
 
             {showViewAll && (
-                <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700/50 text-center">
+                <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700/30 text-center relative z-10">
                     <button onClick={() => navigate("/cryptolist")} className={`text-[10px] font-medium flex items-center justify-center gap-1 mx-auto transition-colors ${TC.textSecondary} hover:text-blue-500`}>
                         View All <FaArrowRight size={8} />
                     </button>

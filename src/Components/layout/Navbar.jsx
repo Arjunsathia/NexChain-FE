@@ -66,16 +66,16 @@ export default function Navbar() {
 
         // New Shared Capsule Style for all 3 islands - Unified Premium Glass
         capsule: isLight
-            ? "bg-gray-50/60 backdrop-blur-xl shadow-sm border border-gray-200/60 hover:bg-white/90 hover:shadow-md hover:border-gray-300/50 transition-all duration-300 ease-out"
-            : "bg-white/5 backdrop-blur-xl shadow-lg border border-white/5 hover:bg-white/10 hover:border-white/10 hover:shadow-blue-900/10 transition-all duration-300 ease-out",
+            ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+            : "bg-gray-900/95 backdrop-blur-xl shadow-none border border-gray-700/50 glass-card",
 
         textPrimary: isLight ? "text-gray-900" : "text-white",
-        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-        linkIdle: isLight ? "text-gray-600 hover:bg-gray-50/80" : "text-gray-400 hover:bg-white/5",
+        textSecondary: isLight ? "text-slate-500" : "text-slate-400",
+        linkIdle: isLight ? "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50" : "text-slate-400 hover:text-cyan-400 hover:bg-white/5",
         linkActive: isLight
             ? "text-blue-600 bg-blue-50 font-semibold"
             : "text-cyan-400 bg-cyan-900/20 font-semibold",
-        actionBtnHover: isLight ? "hover:bg-gray-100 text-gray-600" : "hover:bg-gray-800 text-gray-300",
+        actionBtnHover: isLight ? "hover:bg-blue-50 text-slate-600" : "hover:bg-white/5 text-slate-300",
         logoGradient: "from-blue-600 to-cyan-500",
         textGradient: "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent",
     }), [isLight]);
@@ -108,10 +108,10 @@ export default function Navbar() {
                 <div className="relative flex items-center justify-between max-w-[1600px] mx-auto w-full h-full">
 
                     {/* Left Island - Branding */}
-                    <div className={`relative z-20 rounded-full ${TC.capsule} h-[52px] flex items-center pl-2.5 pr-6 gap-3 sm:gap-4`}>
+                    <div className={`relative z-20 rounded-full ${TC.capsule} h-[52px] flex items-center px-4 gap-3 sm:gap-4`}>
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className={`lg:hidden p-2 rounded-full transition-all duration-200 ${TC.actionBtnHover}`}
+                            className={`lg:hidden p-2 -ml-2 rounded-full transition-all duration-200 ${TC.actionBtnHover}`}
                             aria-label="Open Menu"
                         >
                             <Menu size={20} strokeWidth={2.5} />
@@ -119,13 +119,47 @@ export default function Navbar() {
 
                         <div
                             onClick={() => navigate("/")}
-                            className="flex items-center gap-3 group cursor-pointer"
+                            className="flex items-center gap-3 group cursor-pointer justify-center"
                         >
-                            <div className="w-9 h-9 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <div className="w-8 h-8 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <img src={SiteLogo} alt="NexChain" className="w-full h-full object-contain drop-shadow-md" />
                             </div>
-                            <span className={`text-xl font-bold tracking-tight ${TC.textPrimary}`}>
-                                Nex<span className={TC.textGradient}>Chain</span>
+                            <span className={`relative flex items-center text-lg md:text-xl font-bold tracking-tighter leading-none text-white`}>
+                                {/* "ne" part in white */}
+                                <span className="text-gray-100">ne</span>
+
+                                {/* X with enhanced button effects */}
+                                <span className="relative mx-[2px]">
+                                    {/* Background bloom/glow */}
+                                    <span className="absolute inset-0 bg-gradient-to-r from-[#4fcdda]/90 via-[#364abe] to-[#233784] bg-clip-text text-transparent blur-sm opacity-60">
+                                        X
+                                    </span>
+
+                                    {/* Main X with exact button gradient */}
+                                    <span className="relative bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent">
+                                        X
+                                    </span>
+
+                                    {/* Surface sheen (top gloss) */}
+                                    <span className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-transparent bg-clip-text text-transparent opacity-60">
+                                        X
+                                    </span>
+
+                                    {/* Bottom cyan refraction line */}
+                                    <span className="absolute inset-0 bg-gradient-to-t from-[#4fcdda] to-transparent bg-clip-text text-transparent opacity-80 translate-y-[0.5px]">
+                                        X
+                                    </span>
+
+                                    {/* Outer glow */}
+                                    <span className="absolute inset-0 bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent opacity-40 blur-[3px] -translate-y-[0.5px]">
+                                        X
+                                    </span>
+                                </span>
+
+                                {/* "chain" part with same gradient */}
+                                <span>
+                                    chain
+                                </span>
                             </span>
                         </div>
                     </div>

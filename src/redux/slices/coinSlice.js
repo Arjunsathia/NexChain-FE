@@ -3,7 +3,9 @@ import { getCoins } from "@/api/coinApis";
 
 export const fetchCoins = createAsyncThunk("coins/fetchCoins", async (_, { rejectWithValue }) => {
   try {
-    const data = await getCoins();
+    // Fetch ALL coins including frozen ones.
+    // The filtering will happen in selectors/hooks for user views.
+    const data = await getCoins({ includeFrozen: true });
     return data;
   } catch (error) {
     return rejectWithValue(error.message);

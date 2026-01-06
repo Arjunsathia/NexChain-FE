@@ -30,24 +30,24 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const TC = useMemo(() => ({
     // Glassmorphism & Backgrounds
     navContainer: isLight
-      ? "bg-white/80 backdrop-blur-xl border border-white/40 shadow-sm"
-      : "bg-gray-900/95 backdrop-blur-none border border-gray-700/50 shadow-none",
+      ? "bg-gradient-to-b from-white/90 to-blue-50/90 backdrop-blur-2xl border border-white/50 shadow-lg shadow-blue-500/5"
+      : "bg-gray-900/90 backdrop-blur-2xl border border-white/5 shadow-lg shadow-black/20",
 
     // Typography
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textSecondary: isLight ? "text-slate-500" : "text-slate-400",
     textAccent: "text-blue-500",
 
     // Interactive Elements
-    itemHover: isLight ? "hover:bg-gray-100" : "hover:bg-white/5",
+    itemHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
     activeItem: isLight
-      ? "bg-blue-50 text-blue-600 shadow-inner"
-      : "bg-blue-500/10 text-blue-400",
+      ? "bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-600 shadow-sm border border-blue-100"
+      : "bg-gradient-to-r from-blue-900/20 to-cyan-900/20 text-cyan-400 border border-blue-500/10",
 
     // Stats Cards
     statCard: isLight
-      ? "bg-gray-50 border border-gray-100"
-      : "bg-gray-800/20",
+      ? "bg-white/60 border border-blue-100 shadow-sm backdrop-blur-md"
+      : "bg-white/5 border border-white/5 shadow-inner backdrop-blur-md",
   }), [isLight]);
 
   // Admin Sidebar Menus
@@ -55,7 +55,6 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
     { name: "Users", path: "/admin/users", icon: FaUsers },
     { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
-    { name: "Market Insights", path: "/admin/insights", icon: FaChartBar },
     { name: "News Management", path: "/admin/news", icon: FaNewspaper },
     { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
     { name: "Settings", path: "/admin/settings", icon: FaCog },

@@ -1,381 +1,286 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   FaGraduationCap,
   FaBook,
   FaChartLine,
   FaShieldAlt,
-  FaLightbulb,
   FaRocket,
-  FaClock,
-  FaStar,
   FaPlay,
-  FaCheckCircle,
   FaArrowRight,
-  FaFire,
-  FaTrophy,
-  FaSearch
+  FaSearch,
+  FaBolt,
+  FaClock,
+  FaSignal
 } from "react-icons/fa";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
+// --- Mock Data ---
+const MOCK_COURSES = [
+  {
+    id: 1,
+    title: "Crypto Fundamentals",
+    subtitle: "Start your journey here. Understand the core concepts.",
+    category: "basics",
+    duration: "2h 15m",
+    lessons: 12,
+    level: "Beginner",
+    progress: 0,
+    color: "text-emerald-400",
+    bg: "bg-emerald-400/10",
+    border: "border-emerald-400/20"
+  },
+  {
+    id: 2,
+    title: "Technical Analysis",
+    subtitle: "Master candlesticks, indicators, and market trends.",
+    category: "trading",
+    duration: "4h 30m",
+    lessons: 18,
+    level: "Intermediate",
+    progress: 0,
+    color: "text-violet-400",
+    bg: "bg-violet-400/10",
+    border: "border-violet-400/20"
+  },
+  {
+    id: 3,
+    title: "Wallet Security",
+    subtitle: "Essential security practices for every crypto investor.",
+    category: "security",
+    duration: "1h 45m",
+    lessons: 8,
+    level: "Beginner",
+    progress: 0,
+    color: "text-blue-400",
+    bg: "bg-blue-400/10",
+    border: "border-blue-400/20"
+  },
+  {
+    id: 4,
+    title: "Smart Contracts",
+    subtitle: "Build your first dApp on Ethereum.",
+    category: "advanced",
+    duration: "6h 15m",
+    lessons: 24,
+    level: "Advanced",
+    progress: 0,
+    color: "text-orange-400",
+    bg: "bg-orange-400/10",
+    border: "border-orange-400/20"
+  },
+];
 
+const CATEGORIES = [
+  { id: "all", name: "Discover" },
+  { id: "basics", name: "Basics" },
+  { id: "trading", name: "Trading" },
+  { id: "security", name: "Security" },
+];
 
 function LearningHub() {
   const isLight = useThemeCheck();
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Simulate data fetching delay matching other pages
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Premium Styling Config
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+    textMuted: isLight ? "text-gray-400" : "text-gray-600",
 
-    bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
+    // Glass Cards (No solid backgrounds)
+    cardBase: isLight
+      ? "bg-white/60 backdrop-blur-md border border-gray-200"
+      : "bg-white/5 backdrop-blur-md border border-white/10",
 
-    bgHero: isLight
-      ? "bg-gradient-to-br from-cyan-50 to-blue-50 border border-white/20"
-      : "bg-gray-900/95 border border-gray-800",
+    cardHover: isLight
+      ? "hover:bg-white hover:border-gray-300 hover:shadow-xl hover:shadow-gray-200/50"
+      : "hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:shadow-black/20",
 
-    bgCategory: isLight
-      ? "bg-gray-100 hover:bg-cyan-50"
-      : "bg-gray-700/30 hover:bg-cyan-500/10",
+    accentGradient: "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500",
 
-    bgCategoryActive: isLight
-      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
-      : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white",
-
-    bgProgress: isLight ? "bg-gray-200" : "bg-gray-700",
-    bgProgressFill: "bg-gradient-to-r from-cyan-500 to-blue-500",
-
-    borderColor: isLight ? "border-gray-200" : "border-gray-800",
+    // Skeleton Colors (Matches Watchlist)
+    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
   }), [isLight]);
 
-  const categories = [
-    { id: "all", name: "All Topics", icon: FaBook },
-    { id: "basics", name: "Basics", icon: FaGraduationCap },
-    { id: "trading", name: "Trading", icon: FaChartLine },
-    { id: "security", name: "Security", icon: FaShieldAlt },
-    { id: "advanced", name: "Advanced", icon: FaRocket },
-  ];
-
-  const courses = [
-    {
-      id: 1,
-      title: "Cryptocurrency Fundamentals",
-      description: "Master the basics of cryptocurrency, blockchain technology, and digital assets",
-      category: "basics",
-      duration: "2 hours",
-      lessons: 12,
-      level: "Beginner",
-      progress: 0,
-      featured: true,
-      icon: FaGraduationCap,
-      color: "from-cyan-500 to-blue-500"
-    },
-    {
-      id: 2,
-      title: "Trading Strategies & Analysis",
-      description: "Learn technical analysis, chart patterns, and proven trading strategies",
-      category: "trading",
-      duration: "3 hours",
-      lessons: 18,
-      level: "Intermediate",
-      progress: 0,
-      featured: true,
-      icon: FaChartLine,
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      id: 3,
-      title: "Wallet Security Best Practices",
-      description: "Protect your crypto assets with advanced security measures and best practices",
-      category: "security",
-      duration: "1.5 hours",
-      lessons: 8,
-      level: "Beginner",
-      progress: 0,
-      featured: false,
-      icon: FaShieldAlt,
-      color: "from-green-500 to-teal-500"
-    },
-    {
-      id: 4,
-      title: "DeFi & Smart Contracts",
-      description: "Explore decentralized finance, yield farming, and smart contract interactions",
-      category: "advanced",
-      duration: "4 hours",
-      lessons: 24,
-      level: "Advanced",
-      progress: 0,
-      featured: true,
-      icon: FaRocket,
-      color: "from-orange-500 to-red-500"
-    },
-    {
-      id: 5,
-      title: "Risk Management Essentials",
-      description: "Learn to manage risk, set stop losses, and protect your investment portfolio",
-      category: "trading",
-      duration: "2 hours",
-      lessons: 10,
-      level: "Intermediate",
-      progress: 0,
-      featured: false,
-      icon: FaShieldAlt,
-      color: "from-yellow-500 to-orange-500"
-    },
-    {
-      id: 6,
-      title: "Blockchain Technology Deep Dive",
-      description: "Understand how blockchain works, consensus mechanisms, and distributed ledgers",
-      category: "advanced",
-      duration: "3.5 hours",
-      lessons: 20,
-      level: "Advanced",
-      progress: 0,
-      featured: false,
-      icon: FaLightbulb,
-      color: "from-indigo-500 to-purple-500"
-    },
-  ];
-
-  const filteredCourses = courses.filter(course => {
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const featuredCourses = courses.filter(c => c.featured);
+  const filteredCourses = MOCK_COURSES.filter(c => selectedCategory === "all" || c.category === selectedCategory);
 
   return (
-    <div className={`min-h-screen p-2 sm:p-4 lg:p-6`}>
-      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-6 sm:py-8">
+    // No global background, fits into parent
+    <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
 
-        {/* Hero Section */}
-        <div
-          className={`${TC.bgHero} rounded-2xl p-6 sm:p-8 lg:p-12 mb-8 fade-in`}
-          style={{ animationDelay: "0.1s" }}
-        >
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl">
-                  <FaGraduationCap className="text-2xl text-white" />
-                </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  Learning Hub
-                </h1>
+      {/* --- Hero: "Start Here" (Premium Banner) --- */}
+      {!loading && selectedCategory === 'all' && (
+        <div className="relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer animate-in fade-in slide-in-from-bottom-6 duration-700">
+          {/* Abstract Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
+          <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2"></div>
+
+          <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-300 text-xs font-bold mb-4 backdrop-blur-sm">
+                <FaBolt size={10} /> RECOMMENDED STARTER
               </div>
-              <p className={`text-base sm:text-lg mb-6 ${TC.textPrimary} max-w-2xl`}>
-                Master cryptocurrency trading, blockchain technology, and investment strategies with our comprehensive courses
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                Crypto 101: <br />The Foundation
+              </h2>
+              <p className="text-slate-300 text-lg mb-8 leading-relaxed">
+                Everything you need to know to start trading. From blockchain basics to setting up your first wallet securely.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                  <FaBook className="text-cyan-400" />
-                  <span className={`text-sm font-medium ${TC.textPrimary}`}>{courses.length} Courses</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                  <FaFire className="text-orange-400" />
-                  <span className={`text-sm font-medium ${TC.textPrimary}`}>{featuredCourses.length} Featured</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                  <FaTrophy className="text-yellow-400" />
-                  <span className={`text-sm font-medium ${TC.textPrimary}`}>Earn Certificates</span>
-                </div>
-              </div>
-            </div>
-            <div className="hidden lg:block">
-              <div className="relative">
-                <div className="w-48 h-48 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl absolute -top-10 -right-10"></div>
-                <FaGraduationCap className="text-9xl text-cyan-400/30 relative" />
-              </div>
-            </div>
-          </div>
-        </div>
 
-
-
-        {/* Category Filter */}
-        <div
-          className="mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 fade-in"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <div className="flex flex-wrap gap-3">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`
-                    flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-300
-                    ${isActive ? TC.bgCategoryActive : `${TC.bgCategory} ${TC.textSecondary}`}
-                    ${isActive ? 'shadow-md' : 'hover:bg-cyan-100 dark:hover:bg-cyan-900/30'}
-                  `}
-                >
-                  <Icon className="text-base sm:text-lg" />
-                  <span className="text-sm sm:text-base">{category.name}</span>
+              <div className="flex items-center gap-4">
+                <button className="px-8 py-3.5 bg-white text-slate-900 rounded-full font-bold text-sm hover:bg-cyan-50 transition-colors flex items-center gap-2">
+                  <FaPlay size={12} /> Start Lesson 1
                 </button>
-              );
-            })}
-          </div>
+                <span className="text-slate-400 text-sm font-medium">12 Lessons • 2h 15m</span>
+              </div>
+            </div>
 
-          {/* Search Bar */}
-          <div className="w-full lg:w-72">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 rounded-xl ${TC.bgCard} ${TC.textPrimary} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all shadow-sm`}
-              />
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            {/* Visual Element (Glass Card inside Hero) */}
+            <div className="hidden md:block">
+              <div className="w-64 h-40 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center transform group-hover:-translate-y-2 transition-transform duration-500">
+                <FaRocket className="text-6xl text-white/20" />
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Featured Courses */}
-        {selectedCategory === "all" && featuredCourses.length > 0 && (
-          <div
-            className="mb-8 fade-in"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <FaStar className="text-2xl text-yellow-400" />
-              <h2 className={`text-2xl font-bold ${TC.textPrimary}`}>Featured Courses</h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {featuredCourses.map((course, idx) => (
-                <CourseCardFeatured key={course.id} course={course} TC={TC} isLight={isLight} delay={`${0.4 + idx * 0.1}s`} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Course Grid */}
-        <div
-          className="fade-in"
-          style={{ animationDelay: "0.4s" }}
-        >
-          <h2 className={`text-2xl font-bold mb-6 ${TC.textPrimary}`}>
-            {selectedCategory === "all" ? "All Courses" : `${categories.find(c => c.id === selectedCategory)?.name} Courses`}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course, idx) => (
-              <CourseCard key={course.id} course={course} TC={TC} isLight={isLight} delay={`${0.5 + idx * 0.05}s`} />
-            ))}
-          </div>
-          {filteredCourses.length === 0 && (
-            <div className="text-center py-12">
-              <p className={`text-lg ${TC.textSecondary}`}>No courses found matching your criteria</p>
-            </div>
-          )}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 border-b border-gray-200 dark:border-gray-800 pb-1">
+        <div className="flex items-center gap-8 overflow-x-auto no-scrollbar w-full sm:w-auto">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`
+              pb-3 text-sm font-medium transition-all relative whitespace-nowrap
+              ${selectedCategory === cat.id ? TC.textPrimary : TC.textSecondary}
+              hover:${TC.textPrimary}
+            `}
+            >
+              {cat.name}
+              {selectedCategory === cat.id && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-500 rounded-full"></span>
+              )}
+            </button>
+          ))}
         </div>
 
+        {/* Search Bar (Moved Here) */}
+        <div className={`relative group w-full sm:w-64 mb-2 sm:mb-0`}>
+          <input
+            type="text"
+            placeholder="Search topics..."
+            className={`w-full py-2 px-4 pr-10 rounded-full text-sm outline-none transition-all duration-300
+                 ${isLight
+                ? 'bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500'
+                : 'bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500'
+              }
+               `}
+          />
+          <FaSearch className={`absolute right-3.5 top-2.5 text-gray-400 group-focus-within:text-cyan-500 transition-colors`} size={14} />
+        </div>
       </div>
+
+      {/* --- Premium Grid --- */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className={`rounded-2xl p-6 h-[260px] flex flex-col justify-between ${TC.cardBase}`}>
+              <div className="flex justify-between items-start">
+                <Skeleton circle width={48} height={48} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton width={60} height={20} borderRadius={6} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+              </div>
+              <div className="space-y-3">
+                <Skeleton width="90%" height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton width="70%" height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-white/5">
+                <Skeleton width={80} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton circle width={32} height={32} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {filteredCourses.map((course) => (
+            <PremiumCard key={course.id} course={course} TC={TC} />
+          ))}
+
+          {/* "Coming Soon" Placeholder for visual balance */}
+          <div className={`rounded-2xl border border-dashed ${isLight ? 'border-gray-300' : 'border-gray-800'} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[260px]`}>
+            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <span className="text-xl">✨</span>
+            </div>
+            <p className={`text-sm font-medium ${TC.textPrimary}`}>More coming soon</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
+// --- Sub-Components ---
 
-const CourseCardFeatured = ({ course, TC, delay }) => {
-  const Icon = course.icon;
-
+const PremiumCard = ({ course, TC }) => {
   return (
-    <div
-      className={`${TC.bgCard} rounded-2xl p-6 transition-all duration-300 cursor-pointer group shadow-lg hover:shadow-2xl fade-in`}
-      style={{ animationDelay: delay }}
-    >
-      <div className="flex items-start gap-4 mb-4">
-        <div className={`p-4 bg-gradient-to-r ${course.color} rounded-xl shadow-lg`}>
-          <Icon className="text-2xl text-white" />
+    <div className={`
+      group relative rounded-2xl p-6 transition-all duration-500 ease-out cursor-pointer
+      ${TC.cardBase} ${TC.cardHover}
+      flex flex-col h-full min-h-[260px]
+    `}>
+      {/* Icon Top Right */}
+      <div className="flex justify-between items-start mb-12">
+        <div className={`p-3 rounded-2xl ${course.bg} ${course.border} border`}>
+          {course.category === 'basics' && <FaGraduationCap className={course.color} size={20} />}
+          {course.category === 'trading' && <FaChartLine className={course.color} size={20} />}
+          {course.category === 'security' && <FaShieldAlt className={course.color} size={20} />}
+          {course.category === 'advanced' && <FaRocket className={course.color} size={20} />}
         </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 rounded-full text-xs font-bold">
-              FEATURED
-            </span>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${course.level === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-              course.level === 'Intermediate' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400'
-              }`}>
-              {course.level}
-            </span>
-          </div>
-          <h3 className={`text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors ${TC.textPrimary}`}>
-            {course.title}
-          </h3>
-          <p className={`text-sm mb-4 ${TC.textSecondary}`}>{course.description}</p>
-        </div>
-      </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <FaClock className="text-cyan-400" />
-            <span className={TC.textSecondary}>{course.duration}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <FaBook className="text-cyan-400" />
-            <span className={TC.textSecondary}>{course.lessons} lessons</span>
-          </div>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-cyan-500/25 transition-all">
-          <FaPlay className="text-sm" />
-          <span>Start</span>
-        </button>
-      </div>
-    </div>
-  );
-};
-
-
-const CourseCard = ({ course, TC, delay }) => {
-  const Icon = course.icon;
-
-  return (
-    <div
-      className={`${TC.bgCard} rounded-xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group fade-in`}
-      style={{ animationDelay: delay }}
-    >
-      <div className={`p-3 bg-gradient-to-r ${course.color} rounded-lg w-fit mb-4`}>
-        <Icon className="text-xl text-white" />
-      </div>
-
-      <div className="flex items-center gap-2 mb-3">
-        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${course.level === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-          course.level === 'Intermediate' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-            'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400'
-          }`}>
+        {/* Level Badge */}
+        <span className={`text-[10px] font-bold tracking-widest uppercase py-1 px-2 rounded-md ${TC.textSecondary} bg-gray-100/50 dark:bg-gray-800/50`}>
           {course.level}
         </span>
       </div>
 
-      <h3 className={`text-lg font-bold mb-2 group-hover:text-cyan-400 transition-colors ${TC.textPrimary}`}>
-        {course.title}
-      </h3>
-      <p className={`text-sm mb-4 line-clamp-2 ${TC.textSecondary}`}>{course.description}</p>
+      {/* Info */}
+      <div className="mt-auto">
+        <h3 className={`text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
+          {course.title}
+        </h3>
+        <p className={`text-sm ${TC.textSecondary} mb-6`}>
+          {course.subtitle}
+        </p>
 
-      <div className="flex items-center gap-3 text-xs mb-4">
-        <div className="flex items-center gap-1.5">
-          <FaClock className="text-cyan-400" />
-          <span className={TC.textSecondary}>{course.duration}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FaBook className="text-cyan-400" />
-          <span className={TC.textSecondary}>{course.lessons} lessons</span>
+        {/* Footer Meta */}
+        <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
+            <FaClock size={10} /> {course.duration}
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
+            <FaArrowRight size={10} className="-rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+          </div>
         </div>
       </div>
-
-      <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-cyan-500/25 transition-all">
-        <FaPlay className="text-sm" />
-        <span>Start Learning</span>
-        <FaArrowRight className="text-sm ml-auto" />
-      </button>
     </div>
   );
 };

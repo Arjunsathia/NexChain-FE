@@ -8,6 +8,7 @@ import {
   FaTelegramPlane,
   FaArrowRight
 } from "react-icons/fa";
+import SiteLogo from '../../assets/Img/hero_globe_premium-removebg-preview.png';
 
 const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
 
@@ -121,8 +122,8 @@ const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
           {/* Brand Column */}
           <div className="md:col-span-2 lg:col-span-2 space-y-4 md:space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4fcdda] to-[#364abe] flex items-center justify-center shadow-[0_0_15px_rgba(79,205,218,0.3)]">
-                <span className="text-white font-bold text-xl">N</span>
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img src={SiteLogo} alt="NextChain" className="w-full h-full object-contain drop-shadow-sm" />
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">NexChain</span>
             </div>

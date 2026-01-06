@@ -152,7 +152,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
     { name: "Users", path: "/admin/users", icon: FaUsers },
     { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
-    { name: "Market Insights", path: "/admin/insights", icon: FaChartBar },
     { name: "News Management", path: "/admin/news", icon: FaNewspaper },
     { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
     { name: "Settings", path: "/admin/settings", icon: FaCog },

@@ -173,6 +173,11 @@ const PortfolioPage = () => {
     return [...mergedHoldings].sort((a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0))[0];
   }, [mergedHoldings]);
 
+  const topLoser = useMemo(() => {
+    if (!mergedHoldings || mergedHoldings.length === 0) return null;
+    return [...mergedHoldings].sort((a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0))[0];
+  }, [mergedHoldings]);
+
   const handleTrade = useCallback((coin) => {
     setTradeModal({
       show: true,
@@ -198,6 +203,7 @@ const PortfolioPage = () => {
               balance={balance}
               loading={portfolioLoading}
               topPerformer={topPerformer}
+              topLoser={topLoser}
               TC={TC}
             />
           </div>

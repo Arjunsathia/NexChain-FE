@@ -1,5 +1,5 @@
 import React from "react";
-import { FaArrowUp, FaArrowDown, FaEye } from "react-icons/fa";
+import { FaArrowUp, FaArrowDown, FaEye, FaToggleOn, FaToggleOff, FaSpinner } from "react-icons/fa";
 
 function CryptoTable({
   currentCoins,
@@ -11,6 +11,8 @@ function CryptoTable({
   currentPage,
   totalPages,
   paginate,
+  onToggleFreeze,
+  loadingId
 }) {
   return (
     <div className={`${TC.bgCard} rounded-2xl overflow-hidden mt-6`}>
@@ -32,6 +34,9 @@ function CryptoTable({
               </th>
               <th className="py-3 px-3 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-semibold uppercase tracking-wider hidden lg:table-cell">
                 Volume (24h)
+              </th>
+              <th className="py-3 px-3 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-center">
+                Status
               </th>
               <th className="py-3 px-3 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-center">
                 Actions
@@ -94,15 +99,44 @@ function CryptoTable({
                   ${formatLargeNumber(coin.total_volume)}
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6 text-center">
-                  <button
-                    onClick={() => setSelectedCoin(coin)}
-                    className={`p-1.5 sm:p-2.5 rounded-xl transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-cyan-500/20 ${isLight
-                      ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
-                      : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
-                      }`}
-                  >
-                    <FaEye className="text-sm" />
-                  </button>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className={`px-2 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider ${coin.isFrozen
+                        ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                        : "bg-green-500/10 text-green-500 border border-green-500/20"
+                      }`}>
+                      {coin.isFrozen ? "Frozen" : "Active"}
+                    </span>
+
+                    <button
+                      onClick={() => onToggleFreeze && onToggleFreeze(coin)}
+                      disabled={loadingId === coin.id}
+                      className={`p-1.5 rounded-lg transition-all duration-300 hover:scale-110 ${coin.isFrozen
+                          ? "text-red-500 hover:bg-red-500/10"
+                          : "text-green-500 hover:bg-green-500/10"
+                        }`}
+                      title={coin.isFrozen ? "Unfreeze Coin" : "Freeze Coin"}
+                    >
+                      {loadingId === coin.id ? (
+                        <FaSpinner className="animate-spin text-sm" />
+                      ) : (
+                        coin.isFrozen ? <FaToggleOn size={18} className="rotate-180" /> : <FaToggleOff size={18} className="rotate-180" />
+                      )}
+                    </button>
+                  </div>
+                </td>
+                <td className="py-3 px-3 sm:py-4 sm:px-6 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setSelectedCoin(coin)}
+                      className={`p-1.5 sm:p-2.5 rounded-xl transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-cyan-500/20 ${isLight
+                        ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
+                        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
+                        }`}
+                      title="View Details"
+                    >
+                      <FaEye className="text-sm" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

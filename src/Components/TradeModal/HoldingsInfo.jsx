@@ -10,8 +10,8 @@ const HoldingsInfo = React.memo(({ holdingsSummary, activeTab, isLight, currentP
       {/* 1. Persistent Data Grid (Always Visible) */}
       <div
         className={`rounded-xl border transition-all duration-300 overflow-hidden ${activeTab === "details"
-            ? "bg-cyan-500/5 border-cyan-500/20 shadow-sm mb-4"
-            : `${isLight ? "bg-white border-gray-200" : "bg-gray-800/40 border-white/5"}`
+          ? "bg-cyan-500/5 border-cyan-500/20 shadow-sm mb-4"
+          : `${isLight ? "bg-white border-gray-200" : "bg-gray-800/40 border-white/5"}`
           }`}
       >
         {activeTab === 'details' && (
@@ -84,7 +84,7 @@ const HoldingsInfo = React.memo(({ holdingsSummary, activeTab, isLight, currentP
               <FaChartLine className={`text-[10px] ${isLight ? "text-blue-500" : "text-cyan-400"}`} />
               Market Information
             </h3>
-            <div className="flex justify-between items-center text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex flex-col">
                 <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}>Current Price</span>
                 <span className={`font-mono font-bold ${isLight ? "text-gray-900" : "text-white"}`}>
@@ -94,10 +94,23 @@ const HoldingsInfo = React.memo(({ holdingsSummary, activeTab, isLight, currentP
 
               <div className="flex flex-col items-end">
                 <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}>24h Change</span>
-                <span className={`font-mono font-bold flex items-center gap-1 ${(coin?.price_change_percentage_24h || 0) >= 0 ? "text-emerald-500" : "text-rose-500"
-                  }`}>
+                <span className={`font-mono font-bold flex items-center gap-1 ${(coin?.price_change_percentage_24h || 0) >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
                   {(coin?.price_change_percentage_24h || 0) >= 0 ? "+" : ""}
                   {(coin?.price_change_percentage_24h || 0).toFixed(2)}%
+                </span>
+              </div>
+
+              <div className="flex flex-col">
+                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}>24h High</span>
+                <span className={`font-mono font-bold ${isLight ? "text-gray-900" : "text-white"}`}>
+                  ${(coin?.high_24h || coin?.market_data?.high_24h?.usd || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-end">
+                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}>24h Low</span>
+                <span className={`font-mono font-bold ${isLight ? "text-gray-900" : "text-white"}`}>
+                  ${(coin?.low_24h || coin?.market_data?.low_24h?.usd || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
