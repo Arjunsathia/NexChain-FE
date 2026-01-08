@@ -14,7 +14,7 @@ function MarketTable({
   isLight,
   formatCurrency,
   formatCompactNumber,
-  formatCompactNumber,
+
   setSelectedCoin,
   disableAnimations = false,
 }) {

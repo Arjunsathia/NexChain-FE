@@ -179,7 +179,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading, disableA
       <Chart
         isLight={isLight}
         performanceData={performanceData}
-        performanceData={performanceData}
+
         currentMetrics={currentMetrics}
         TC={TC}
         disableAnimations={disableAnimations}
