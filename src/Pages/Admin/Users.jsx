@@ -33,13 +33,28 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { jwtDecode } from "jwt-decode";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import useTransitionDelay from "@/hooks/useTransitionDelay";
+
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+
 const Users = () => {
   const isLight = useThemeCheck();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [users, setUsers] = useState([]); // Removed in favor of React Query
+  // const [loading, setLoading] = useState(true); // Removed
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [filterRole, setFilterRole] = useState("all");
+  const queryClient = useQueryClient();
+  const isReady = useTransitionDelay();
+  const location = useLocation();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const [isFirstVisit] = useState(!isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
 
   // Current User Role State
   const [currentUserRole, setCurrentUserRole] = useState(null);
@@ -94,9 +109,10 @@ const Users = () => {
 
   const [showArchived, setShowArchived] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true);
+  // --- REACT QUERY IMPLEMENTATION ---
+  const { data: users = [], isLoading: loading, refetch: fetchUsers } = useQuery({
+    queryKey: ['adminUsers', showArchived],
+    queryFn: async () => {
       const response = await getData(`/users?includeDeleted=${showArchived}`);
       let usersData = response?.users ?? response?.data ?? (Array.isArray(response) ? response : []);
 
@@ -110,25 +126,20 @@ const Users = () => {
         }));
       }
 
-      setUsers(Array.isArray(usersData) ? usersData.sort((a, b) => {
+      return Array.isArray(usersData) ? usersData.sort((a, b) => {
         // 1. Admins always on top
         if (a.role === 'admin' && b.role !== 'admin') return -1;
         if (a.role !== 'admin' && b.role === 'admin') return 1;
 
         // 2. Then sort alphabetically by name
         return (a.name || "").localeCompare(b.name || "");
-      }) : []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Failed to fetch users");
-    } finally {
-      setLoading(false);
-    }
-  }, [showArchived]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+      }) : [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minute cache
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
   const fetchUserDetails = useCallback(async (userId) => {
     if (!userId) return;
@@ -227,7 +238,18 @@ const Users = () => {
             "User role updated successfully"
       );
 
-      fetchUsers();
+      // Optimistic Update or Refetch
+      queryClient.setQueryData(['adminUsers', showArchived], (oldUsers) => {
+        return oldUsers ? oldUsers.map(u => {
+          if (u.id === targetId || u._id === targetId) {
+            return { ...u, ...updateData };
+          }
+          return u;
+        }) : [];
+      });
+      // Also invalidate to be sure
+      queryClient.invalidateQueries(['adminUsers']);
+
       if (selectedUser && (selectedUser.id === targetId || selectedUser._id === targetId)) {
         // Refresh selected user details or clear if archived and viewing active list
         if (type === 'archive' && !showArchived) {
@@ -273,13 +295,15 @@ const Users = () => {
 
       toast.success(newFrozenStatus ? "User frozen successfully" : "User active again", { id: toastId });
 
-      // Update local state
-      setUsers(prev => prev.map(u => {
-        if (u.id === targetId || u._id === targetId) {
-          return { ...u, isFrozen: newFrozenStatus };
-        }
-        return u;
-      }));
+      // Update Query Cache
+      queryClient.setQueryData(['adminUsers', showArchived], (oldUsers) => {
+        return oldUsers ? oldUsers.map(u => {
+          if (u.id === targetId || u._id === targetId) {
+            return { ...u, isFrozen: newFrozenStatus };
+          }
+          return u;
+        }) : [];
+      });
 
       if (selectedUser && (selectedUser.id === targetId || selectedUser._id === targetId)) {
         setSelectedUser(prev => ({ ...prev, isFrozen: newFrozenStatus }));
@@ -328,12 +352,14 @@ const Users = () => {
 
   // UserListItem Component
   const UserListItem = useMemo(() => {
-    const Component = ({ user, onToggleFreeze }) => (
+    const Component = ({ user, onToggleFreeze, index, shouldAnimate }) => (
       <div
         onClick={() => setSelectedUser(user)}
+        style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
         className={`
         group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
         transition-all duration-300 border-l-4 relative overflow-hidden
+        ${shouldAnimate ? 'fade-in' : ''}
         ${selectedUser?._id === user._id
             ? `${isLight ? 'bg-white shadow-sm' : 'bg-white/10 shadow-none'} border-blue-500 scale-[1.02] z-10`
             : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
@@ -414,7 +440,7 @@ const Users = () => {
 
   return (
     // Updated Layout: Vertical Flex for Header + Content
-    <div className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative fade-in`}>
+    <div className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? 'fade-in' : ''}`}>
       {/* 1. Page Header (Admin Styled) */}
       <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -431,7 +457,7 @@ const Users = () => {
       {/* 2. Main Content Area (Split View) */}
       <div className={`
         flex-1 flex gap-4 overflow-hidden min-h-0
-        fade-in
+        ${isFirstVisit ? 'fade-in' : ''}
       `} style={{ animationDelay: "0.2s" }}>
         {/* Left Pane: User List */}
         <div className={`
@@ -483,10 +509,18 @@ const Users = () => {
 
           {/* List Items */}
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-            {loading ? (
+            {loading || !isReady ? (
               <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map(user => <UserListItem key={user._id} user={user} onToggleFreeze={handleToggleFreeze} />)
+              filteredUsers.map((user, index) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  onToggleFreeze={handleToggleFreeze}
+                  index={index}
+                  shouldAnimate={isFirstVisit}
+                />
+              ))
             ) : (
               <div className={`p-8 text-center ${TC.textSecondary}`}>No users found</div>
             )}

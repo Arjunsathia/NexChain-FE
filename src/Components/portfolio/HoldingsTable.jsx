@@ -4,7 +4,7 @@ import PriceAlertModal from '@/Components/Common/PriceAlertModal';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) => {
+const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC, disableAnimations = false }) => {
   const [alertModal, setAlertModal] = useState({ show: false, coin: null });
 
   const handleAlertClick = (e, coin) => {
@@ -87,7 +87,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) =>
 
 
   return (
-    <div className={`p-1 rounded-xl fade-in ${TC.bgCard}`}>
+    <div className={`p-1 rounded-xl ${TC.bgCard}`}>
       {/* Dashboard Style Header */}
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
@@ -233,7 +233,7 @@ const HoldingsTable = ({ isLight, holdings, loading, onTrade, TC: passedTC }) =>
           <div
             key={coin.coinId}
             className={`p-4 rounded-xl ${TC.bgCard} transition-all duration-300 cursor-pointer group relative overflow-hidden`}
-            style={{ animationDelay: `${index * 0.05}s` }}
+            style={disableAnimations ? {} : { animationDelay: `${index * 0.05}s` }}
             onClick={() => onTrade(coin)}
           >
 

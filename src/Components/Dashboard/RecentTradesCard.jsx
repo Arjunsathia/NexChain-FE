@@ -5,7 +5,7 @@ import { FaHistory, FaArrowUp, FaArrowDown, FaExchangeAlt } from "react-icons/fa
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-export default function RecentTradesCard() {
+export default function RecentTradesCard({ disableAnimations = false }) {
   const isLight = useThemeCheck();
   const { transactionHistory, loading } = usePurchasedCoins();
 
@@ -93,8 +93,8 @@ export default function RecentTradesCard() {
             return (
               <div
                 key={i}
-                style={{ animationDelay: `${i * 0.1}s` }}
-                className={`flex items-center justify-between p-2 rounded-lg transition-colors fade-in ${TC.bgItem}`}
+                style={disableAnimations ? {} : { animationDelay: `${i * 0.1}s` }}
+                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${disableAnimations ? '' : 'fade-in'} ${TC.bgItem}`}
               >
                 { }
                 <div className="flex items-center gap-3">

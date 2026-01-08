@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { BadgeCheck, TrendingUp, Quote } from "lucide-react";
 
@@ -81,7 +81,7 @@ const TraderReviewCard = ({ testimonial }) => {
 
         {/* Testimonial Message */}
         <p className="text-slate-400 text-base leading-relaxed group-hover:text-slate-200 transition-colors duration-300 flex-grow font-light">
-          "{testimonial.message}"
+          &quot;{testimonial.message}&quot;
         </p>
 
         {/* Footer / Timestamp */}
@@ -99,7 +99,7 @@ const TraderReviewCard = ({ testimonial }) => {
   );
 };
 
-const TestimonialGrid = ({ TC }) => {
+const TestimonialGrid = () => {
   return (
     <section className="py-0 relative overflow-visible font-manrope bg-transparent">
 

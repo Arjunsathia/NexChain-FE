@@ -10,7 +10,8 @@ function TrendingCoins() {
   const isLight = useThemeCheck();
   const navigate = useNavigate();
 
-  const { coins: displayedCoins, loading, error, refetch: fetchTrending } = useLiveTrendingCoins(10);
+  const { coins: displayedCoinsRaw, loading, error, refetch: fetchTrending } = useLiveTrendingCoins(10);
+  const displayedCoins = Array.isArray(displayedCoinsRaw) ? displayedCoinsRaw : [];
 
   const TC = useMemo(() => ({
     bgContainer: isLight

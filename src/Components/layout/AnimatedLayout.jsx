@@ -1,11 +1,13 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useEffect } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import InteractiveGridPattern from '../Landing/Background';
 import LenisScroll from '../Common/LenisScroll';
+import { useVisitedRoutes } from '../../hooks/useVisitedRoutes';
 
 const AnimatedLayout = () => {
     const location = useLocation();
+    const { isVisited, markVisited } = useVisitedRoutes();
 
     // 1. Disable Browser Scroll Restoration to prevent glitchy jumps
     useLayoutEffect(() => {
@@ -13,6 +15,14 @@ const AnimatedLayout = () => {
             window.history.scrollRestoration = "manual";
         }
     }, []);
+
+    // Mark as visited after render
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            markVisited(location.pathname);
+        }, 500); // Small delay to allow animation to start/finish before marking
+        return () => clearTimeout(timer);
+    }, [location.pathname, markVisited]);
 
     // 2. Index-based direction logic
     // / (Landing) = 0
@@ -23,33 +33,37 @@ const AnimatedLayout = () => {
     // 3. Cinematic "Mechanical" Spring Variants
     const variants = {
         enter: (direction) => ({
-            x: direction > 0 ? '20%' : '-20%',
+            x: direction > 0 ? "100%" : "-100%",
             opacity: 0,
-            scale: 0.98,
-            filter: 'blur(4px)',
+            scale: 1, // No zoom
+            filter: "blur(0px)", // No blur
         }),
         center: {
+            zIndex: 1,
             x: 0,
             opacity: 1,
             scale: 1,
-            filter: 'blur(0px)',
+            filter: "blur(0px)",
             transition: {
-                type: "tween",
-                ease: "circOut",
-                duration: 0.25
-            }
+                x: { type: "spring", stiffness: 200, damping: 25, mass: 1 },
+                opacity: { duration: 0.1, ease: "easeOut" },
+                scale: { duration: 0.1, ease: "easeOut" }, // Keep simple
+                filter: { duration: 0.1, ease: "easeOut" },
+            },
         },
         exit: (direction) => ({
-            x: direction < 0 ? '20%' : '-20%',
+            zIndex: 0,
+            x: direction < 0 ? "100%" : "-100%",
             opacity: 0,
-            scale: 0.98,
-            filter: 'blur(4px)',
+            scale: 1, // Remove zoom out
+            filter: "blur(0px)", // Remove blur for performance
             transition: {
-                type: "tween",
-                ease: "circIn",
-                duration: 0.15
-            }
-        })
+                x: { type: "spring", stiffness: 200, damping: 25, mass: 1 },
+                opacity: { duration: 0.1, ease: "easeIn" },
+                scale: { duration: 0.1, ease: "easeIn" },
+                filter: { duration: 0.1, ease: "easeIn" },
+            },
+        }),
     };
 
     return (
@@ -69,7 +83,7 @@ const AnimatedLayout = () => {
             <AnimatePresence
                 mode="wait"
                 custom={currentPage === 1 ? 1 : -1}
-                initial={false}
+                initial={true}
                 onExitComplete={() => window.scrollTo(0, 0)}
             >
                 <motion.div

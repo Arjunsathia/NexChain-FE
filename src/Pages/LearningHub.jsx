@@ -13,6 +13,8 @@ import {
   FaClock,
   FaSignal
 } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
@@ -81,8 +83,18 @@ const CATEGORIES = [
 
 function LearningHub() {
   const isLight = useThemeCheck();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const location = useLocation();
+  // Freeze validated state on mount
+  const [hasVisited] = useState(() => isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
+
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [loading, setLoading] = useState(true);
+  // Instant load if visited, otherwise simulate loading
+  const [loading, setLoading] = useState(!hasVisited);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -91,10 +103,11 @@ function LearningHub() {
   }, []);
 
   useEffect(() => {
+    if (hasVisited) return;
     // Simulate data fetching delay matching other pages
     const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [hasVisited]);
 
   // Premium Styling Config
   const TC = useMemo(() => ({
@@ -122,11 +135,11 @@ function LearningHub() {
 
   return (
     // No global background, fits into parent
-    <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+    <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans ${hasVisited ? '' : `transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}`}>
 
       {/* --- Hero: "Start Here" (Premium Banner) --- */}
       {!loading && selectedCategory === 'all' && (
-        <div className="relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer animate-in fade-in slide-in-from-bottom-6 duration-700">
+        <div className={`relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer ${hasVisited ? '' : 'animate-in fade-in slide-in-from-bottom-6 duration-700'}`}>
           {/* Abstract Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
           <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
@@ -219,7 +232,7 @@ function LearningHub() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${hasVisited ? '' : 'animate-in fade-in slide-in-from-bottom-4 duration-500'}`}>
           {filteredCourses.map((course) => (
             <PremiumCard key={course.id} course={course} TC={TC} />
           ))}

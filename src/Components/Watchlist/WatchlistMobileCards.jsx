@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { FaBell } from "react-icons/fa";
 import Sparkline from "./Sparkline";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-const WatchlistMobileCards = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal, handleAlertClick }) => {
+const WatchlistMobileCards = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal, handleAlertClick, disableAnimations = false }) => {
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
+
   return (
-    <div className="md:hidden space-y-3 fade-in" style={{ animationDelay: "0.2s" }}>
+    <div className={`md:hidden space-y-3 ${shouldAnimate ? 'fade-in' : ''}`} style={shouldAnimate ? { animationDelay: "0.2s" } : {}}>
       {coins.map((coin) => (
         <div
           key={coin.id}

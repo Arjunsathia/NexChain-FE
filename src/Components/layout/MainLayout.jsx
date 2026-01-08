@@ -1,11 +1,12 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useOutlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, Suspense } from "react";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ChatbotWidget from "@/Components/Common/ChatbotWidget";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 const LayoutLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -16,8 +17,12 @@ const LayoutLoader = () => (
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
   const { fetchRole } = useRoleContext();
+  const { isVisited, markVisited } = useVisitedRoutes();
 
   const location = useLocation();
+  // Capture the current outlet element (frozen route)
+  const element = useOutlet();
+
   const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
   const navigate = useNavigate();
 
@@ -30,7 +35,43 @@ export default function MainLayout() {
     }
   }, [fetchUsers, isLoggedIn, navigate, fetchRole]);
 
+  // Mark current route as visited
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
+
   const pageKey = location.pathname.startsWith("/admin") ? "admin" : location.pathname.startsWith("/user") ? "user" : location.pathname;
+
+  // Animation variants for instant parallel transition (cross-fade)
+  const pageVariants = {
+    initial: {
+      opacity: 0,
+      scale: 1, // Removed zoom for performance
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.1, // Ultra-fast
+        ease: "linear" // Linear is perceptually fastest for short durations
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 1,
+      transition: {
+        duration: 0.1, // Ultra-fast
+        ease: "linear"
+      }
+    }
+  };
+
+  // Scroll to top instantly when the page key changes (navigation start)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [pageKey]);
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
@@ -46,18 +87,23 @@ export default function MainLayout() {
 
       <Navbar />
 
-      <main className="flex-1 p-2 sm:p-4 transition-colors duration-300">
-        <motion.div
-          key={pageKey}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.1 }}
-          className="w-full h-full"
-        >
-          <Suspense fallback={<LayoutLoader />}>
-            <Outlet />
-          </Suspense>
-        </motion.div>
+      {/* Grid container allows overlapping (parallel) transitions */}
+      <main className="flex-1 p-2 sm:p-4 transition-colors duration-300 grid grid-cols-1 grid-rows-1">
+        <AnimatePresence>
+          <motion.div
+            key={pageKey}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="w-full h-full col-start-1 row-start-1 bg-transparent"
+            style={{ willChange: "opacity" }}
+          >
+            <Suspense fallback={<LayoutLoader />}>
+              {element}
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <Footer />

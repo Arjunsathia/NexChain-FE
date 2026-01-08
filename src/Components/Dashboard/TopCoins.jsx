@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaCrown, FaTrophy, FaAward, FaCoins } from "react-icons/fa";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 
 
@@ -138,7 +139,7 @@ const BentoCoinCard = React.memo(
               className="w-8 h-8 rounded-full object-cover"
             />
             <div>
-              <h3 className={`font-bold text-sm leading-tight ${TC.textPrimary}`}>{coin.symbol.toUpperCase()}</h3>
+              <h3 className={`font-bold text-sm leading-tight ${TC.textPrimary}`}>{coin.symbol?.toUpperCase()}</h3>
               <p className={`text-[10px] ${TC.textSecondary} truncate max-w-[80px]`}>{coin.name}</p>
             </div>
           </div>
@@ -165,7 +166,10 @@ BentoCoinCard.displayName = "BentoCoinCard";
 
 
 const TopCoins = React.memo(
-  ({ topCoins, selectedCoinId, setSelectedCoinId, isMobile, liveData, loading }) => {
+  ({ topCoins, selectedCoinId, setSelectedCoinId, isMobile, loading }) => {
+
+    // Internalize subscription to prevent Dashboard re-renders
+    const liveData = useBinanceTicker();
 
     const containerClasses = useMemo(() => {
       return isMobile
@@ -194,10 +198,10 @@ const TopCoins = React.memo(
 
     return (
       <div className={containerClasses}>
-        {topCoins.map((coin, index) => (
+        {topCoins && topCoins.map((coin, index) => (
           <BentoCoinCard
-            key={coin.id}
-            coin={coin}
+            key={coin.id || index}
+            coin={coin || {}}
             index={index}
             isSelected={selectedCoinId === coin.id}
             onSelect={setSelectedCoinId}

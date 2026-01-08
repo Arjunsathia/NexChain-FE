@@ -1,19 +1,23 @@
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { FaChartLine, FaCoins, FaArrowRight, FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { FaChartLine, FaCoins, FaArrowRight } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-function PortfolioCard() {
+function PortfolioCard({ disableAnimations = false }) {
   const isLight = useThemeCheck();
   const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
 
   // Use the shared hook for live prices
-  const livePrices = useBinanceTicker(groupedHoldings);
+  const livePrices = useBinanceTicker();
 
   const TC = useMemo(() => ({
     bgContainer: isLight
@@ -92,8 +96,8 @@ function PortfolioCard() {
             <div
               key={coin.coinId || i}
               onClick={() => navigate("/portfolio")}
-              style={{ animationDelay: `${i * 0.1}s` }}
-              className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group fade-in ${TC.bgItem}`}
+              style={shouldAnimate ? { animationDelay: `${i * 0.1}s` } : {}}
+              className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgItem}`}
             >
               <div className="flex items-center gap-3">
                 {coin.image ? (

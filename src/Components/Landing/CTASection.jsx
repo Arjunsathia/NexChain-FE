@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import SiteLogo from '../../assets/Img/hero_globe_premium-removebg-preview.png';
 
-const CTASection = React.memo(({ TC, sectionVariants, navigate }) => {
+const CTASection = React.memo(({ sectionVariants, navigate }) => {
 
   const footerLinks = useMemo(() => [
     {

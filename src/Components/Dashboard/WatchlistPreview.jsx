@@ -3,20 +3,56 @@ import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
 import Skeleton from "react-loading-skeleton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaStar, FaExclamationTriangle, FaArrowRight } from "react-icons/fa";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
-function WatchlistPreview() {
+function WatchlistPreview({ disableAnimations = false }) {
   const isLight = useThemeCheck();
   const { user } = useUserContext();
-  const userId = user?.id;
-  const [watchlistData, setWatchlistData] = useState([]);
+
+  // Determine User ID (Context or direct token decode for instant cache key availability)
+  const getInstantUserId = () => {
+    if (user?.id) return user.id;
+    // Fallback: Try decoding token for instant render
+    try {
+      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      if (token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const decoded = JSON.parse(jsonPayload);
+        return decoded.id;
+      }
+    } catch (e) { }
+    return null;
+  };
+
+  const effectiveUserId = getInstantUserId();
+
+  const [watchlistData, setWatchlistData] = useState(() => {
+    if (!effectiveUserId) return [];
+    try {
+      const cacheKey = `watchlist_${effectiveUserId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data } = JSON.parse(cached);
+        if (Array.isArray(data)) return data;
+      }
+    } catch (e) { console.error(e); }
+    return [];
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
 
-  const livePrices = useBinanceTicker(watchlistData);
+  const livePrices = useBinanceTicker();
 
   const TC = useMemo(() => ({
     bgContainer: isLight
@@ -37,10 +73,10 @@ function WatchlistPreview() {
 
   useEffect(() => {
     const fetchWatchlist = async () => {
-      setLoading(true);
+      if (watchlistData.length === 0) setLoading(true);
       setError(false);
       try {
-        const res = await getData("/watchlist", { user_id: userId });
+        const res = await getData("/watchlist", { user_id: effectiveUserId });
 
         let list = [];
         if (Array.isArray(res)) {
@@ -59,8 +95,8 @@ function WatchlistPreview() {
       }
     };
 
-    if (userId) fetchWatchlist();
-  }, [userId]);
+    if (effectiveUserId) fetchWatchlist();
+  }, [effectiveUserId]);
 
 
   const mergedCoins = useMemo(() => {
@@ -89,7 +125,7 @@ function WatchlistPreview() {
 
   // Removed isMounted logical class toggling to ensure unified dashboard animation
   return (
-    <div className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer}`}>
+    <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
       { }
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
@@ -126,8 +162,8 @@ function WatchlistPreview() {
             <div
               key={coin.id}
               onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-              style={{ animationDelay: `${index * 0.1}s` }}
-              className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group fade-in ${TC.bgItem}`}
+              style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+              className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgItem}`}
             >
               <div className="flex items-center gap-3">
                 {coin.image ? (

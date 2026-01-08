@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Activity } from "lucide-react";
 import MarketNetworkVisual from "./MarketNetworkVisual";
 
-const MarketOverviewSection = forwardRef(({ TC, sectionVariants, livePrices }, ref) => {
+const MarketOverviewSection = forwardRef(({ sectionVariants, livePrices }, ref) => {
   return (
     <motion.section
       ref={ref}

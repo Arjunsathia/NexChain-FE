@@ -3,14 +3,18 @@ import React, { useEffect, useState, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaChartLine, FaExclamationTriangle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-function TopGainers() {
+function TopGainers({ disableAnimations = false }) {
     const isLight = useThemeCheck();
     const [gainers, setGainers] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const location = useLocation();
+    const { isVisited } = useVisitedRoutes();
+    const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
 
     const TC = useMemo(() => ({
         bgContainer: isLight
@@ -31,12 +35,38 @@ function TopGainers() {
 
 
     useEffect(() => {
+        const CACHE_KEY = "target_top_gainers";
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
         const fetchData = async () => {
             setLoading(true);
+
+            // Check Cache
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    const now = Date.now();
+                    if (now - parsed.timestamp < CACHE_DURATION && Array.isArray(parsed.data)) {
+                        setGainers(parsed.data);
+                        setLoading(false);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error("Cache parse error", e);
+            }
+
+            // Fetch Fresh
             try {
                 const data = await getTopGainers();
                 if (Array.isArray(data)) {
-                    setGainers(data.slice(0, 5));
+                    const sliced = data.slice(0, 5);
+                    setGainers(sliced);
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        timestamp: Date.now(),
+                        data: sliced
+                    }));
                 } else {
                     setGainers([]);
                 }
@@ -52,7 +82,7 @@ function TopGainers() {
     }, []);
 
     return (
-        <div className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer}`}>
+        <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
             <div className="px-4 pt-4 flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
@@ -83,8 +113,8 @@ function TopGainers() {
                         <div
                             key={coin.id}
                             onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                            className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group fade-in ${TC.bgItem}`}
+                            style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+                            className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgItem}`}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="relative">

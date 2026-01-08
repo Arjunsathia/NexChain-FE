@@ -123,7 +123,7 @@ const PortfolioDistribution = ({ isLight, groupedHoldings, balance, loading }) =
   return (
     <div
       className={`
-        p-1 h-full flex flex-col fade-in
+        p-1 h-full flex flex-col
         ${TC.bgContainer}
       `}
     >

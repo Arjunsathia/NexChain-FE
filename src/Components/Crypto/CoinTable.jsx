@@ -1,9 +1,10 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
 import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
+import { FaStar, FaRegStar, FaSearch, FaExchangeAlt } from "react-icons/fa";
 import useCoinContext from "@/hooks/useCoinContext";
 import useUserContext from "@/hooks/useUserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import toast from "react-hot-toast";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
@@ -40,7 +41,119 @@ function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
     );
 }
 
-function CoinTable({ onTrade }) {
+const CoinRow = React.memo(({ coin, index, isLight, TC, toggleWishlist, navigate, handleTrade, disableAnimations, formatCurrency, liveData }) => {
+
+    // Derived display values from liveData OR fallback to coin static data
+    const displayPrice = liveData?.price !== undefined
+        ? liveData.price
+        : coin.current_price;
+
+    const displayChange = liveData?.change !== undefined
+        ? liveData.change
+        : coin.price_change_percentage_24h;
+
+    const isPositive = liveData?.isPositive !== undefined
+        ? liveData.isPositive
+        : (coin.price_change_percentage_24h || 0) >= 0;
+
+    const priceColor = isLight ? "text-gray-900" : "text-white";
+
+    // Memoize the Sparkline data? Usually sparkline doesn't update live over websocket unless backend sends it.
+    // Assuming sparkline is static for now.
+
+    const renderedPrice = typeof displayPrice === "number"
+        ? displayPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 6 })
+        : displayPrice;
+
+    return (
+        <tr
+            onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
+            className={`cursor-pointer transition-all duration-200 group ${disableAnimations ? '' : 'fade-in'} ${TC.bgHover}`}
+            style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05}s` }}
+        >
+            <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                <button
+                    onClick={() => toggleWishlist(coin.id, coin)}
+                    className={`flex justify-center w-full ${disableAnimations ? '' : 'fade-in'}`}
+                    style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.02}s` }}
+                >
+                    {coin.isInWatchlist ? (
+                        <FaStar className={`${TC.starFilled} hover:scale-110 transition-transform`} />
+                    ) : (
+                        <FaRegStar className={`${TC.starDefault} transition-colors`} />
+                    )}
+                </button>
+            </td>
+            <td className="py-4 px-6">
+                <div className={`flex items-center gap-3 ${disableAnimations ? '' : 'fade-in'}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.03}s` }}>
+                    <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300" />
+                    <div className="min-w-0 flex-1">
+                        <div className={`text-base font-semibold transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}>
+                            {coin.name}
+                        </div>
+                        <div className={`text-sm uppercase ${TC.textTertiary}`}>
+                            {coin.symbol.toUpperCase()}
+                        </div>
+                        {coin.userHolding && (
+                            <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
+                                Holding:{" "}
+                                {coin.userHolding.totalQuantity?.toFixed(6) ||
+                                    coin.userHolding.quantity?.toFixed(6)}{" "}
+                                {coin.symbol.toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </td>
+            <td className={`py-4 px-6 text-right ${disableAnimations ? '' : 'fade-in'} ${TC.textPrimary}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.04}s` }}>
+                <div className="text-base font-semibold">
+                    ${renderedPrice || "0"}
+                </div>
+            </td>
+            <td className={`py-4 px-6 text-right font-semibold ${disableAnimations ? '' : 'fade-in'} ${!isPositive ? "text-red-600" : "text-green-600"
+                }`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.05}s` }}>
+                {displayChange?.toFixed(2) || "0.00"}%
+            </td>
+            <td className={`py-4 px-6 text-right ${disableAnimations ? '' : 'fade-in'} ${TC.textSecondary}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.06}s` }}>
+                <div className="text-sm">
+                    {formatCurrency(coin.market_cap)}
+                </div>
+            </td>
+            <td className={`py-4 px-6 text-right ${disableAnimations ? '' : 'fade-in'} ${TC.textSecondary}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.07}s` }}>
+                <div className="text-sm">
+                    {formatCurrency(coin.total_volume)}
+                </div>
+            </td>
+            <td className={`py-4 px-6 ${disableAnimations ? '' : 'fade-in'}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.08}s` }}>
+                <div className="flex justify-center">
+                    <Sparkline
+                        data={coin.sparkline_in_7d?.price || []}
+                        width={100}
+                        height={40}
+                        positive={isPositive}
+                    />
+                </div>
+            </td>
+            <td className={`py-4 px-6 ${disableAnimations ? '' : 'fade-in'}`} style={disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05 + 0.09}s` }}>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleTrade(coin);
+                    }}
+                    className={`${TC.btnPrimary} px-4 py-2 transition-all duration-200 inline-flex items-center justify-center gap-2`}
+                >
+                    <FaExchangeAlt className="text-xs" />
+                    Trade
+                </button>
+            </td>
+        </tr>
+    );
+});
+
+CoinRow.displayName = "CoinRow";
+
+
+function CoinTable({ onTrade, disableAnimations = false }) {
     const isLight = useThemeCheck();
     const { user } = useUserContext();
     const { coins: initialCoins, coinsLoading } = useCoinContext();
@@ -49,6 +162,9 @@ function CoinTable({ onTrade }) {
     const [watchlist, setWatchlist] = useState([]);
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const { isVisited } = useVisitedRoutes();
+    const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
 
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -86,6 +202,9 @@ function CoinTable({ onTrade }) {
 
     useEffect(() => {
         if (Array.isArray(initialCoins) && initialCoins.length > 0) {
+            // Only update if we don't have coins yet or if the source data length changed significantly
+            // to avoid resetting local state on minor updates if any.
+            // Since initialCoins comes from Redux and is static after load, this is safe.
             setCoins(initialCoins.slice(0, 100));
         }
     }, [initialCoins]);
@@ -106,7 +225,7 @@ function CoinTable({ onTrade }) {
     }, [fetchWatchlist]);
 
     // Use shared hook for live ticker (limit to first 100 to avoid connection overload)
-    const liveData = useBinanceTicker(coins.slice(0, 100), 500);
+    const liveData = useBinanceTicker();
 
     const toggleWishlist = useCallback(async (coinId, coinData) => {
         if (!user?.id) {
@@ -194,17 +313,16 @@ function CoinTable({ onTrade }) {
                 pc => pc.coin_id === coin.id || pc.id === coin.id
             );
 
-            // Merge live data if available
-            const live = liveData[coin.id] || {};
+            // Removing liveData merge to ensure row stability.
+            // Live data is now passed directly to the CoinRow component.
 
             return {
                 ...coin,
-                ...live,
                 isInWatchlist,
                 userHolding: userHolding || null
             };
         });
-    }, [filteredCoins, watchlist, purchasedCoins, liveData]);
+    }, [filteredCoins, watchlist, purchasedCoins]);
 
     const formatCurrency = useCallback((value) => {
         if (!value) return "$0";
@@ -252,11 +370,11 @@ function CoinTable({ onTrade }) {
                 <button
                     key={page}
                     onClick={() => handlePageClick(page)}
-                    className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 fade-in ${currentPage === page
+                    className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 ${shouldAnimate ? 'fade-in' : ''} ${currentPage === page
                         ? TC.btnPaginationActive
                         : TC.btnPagination
                         }`}
-                    style={{ animationDelay: `${0.8 + index * 0.05}s` }}
+                    style={shouldAnimate ? { animationDelay: `${0.8 + index * 0.05}s` } : {}}
                 >
                     {page}
                 </button>
@@ -267,7 +385,7 @@ function CoinTable({ onTrade }) {
     if (coinsLoading && coins.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center p-6">
-                <div className={`rounded-xl p-8 text-center fade-in ${TC.bgLoading}`}>
+                <div className={`rounded-xl p-8 text-center ${disableAnimations ? '' : 'fade-in'} ${TC.bgLoading}`}>
                     <div className="flex justify-center items-center gap-3 text-cyan-400">
                         <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
                         <span className="text-base">Loading coins...</span>
@@ -279,7 +397,7 @@ function CoinTable({ onTrade }) {
 
     return (
         <div className={`w-full ${TC.textPrimary}`}>
-            <div className={`p-1 rounded-xl fade-in ${TC.bgCard}`}>
+            <div className={`p-1 rounded-xl ${shouldAnimate ? 'fade-in' : ''} ${TC.bgCard}`}>
                 <div className="px-4 pt-3 flex items-center justify-between mb-2">
                     <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
                         <FaExchangeAlt className="text-blue-500" size={14} />
@@ -326,8 +444,8 @@ function CoinTable({ onTrade }) {
                                     className={`p-4 rounded-xl border ${isLight
                                         ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
                                         : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
-                                        } cursor-pointer transition-all duration-300 group fade-in`}
-                                    style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                                        } cursor-pointer transition-all duration-300 group ${shouldAnimate ? 'fade-in' : ''}`}
+                                    style={shouldAnimate ? { animationDelay: `${0.5 + index * 0.1}s` } : {}}
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -393,7 +511,7 @@ function CoinTable({ onTrade }) {
                                                 handleTrade(coin);
                                             }}
                                             className={`${TC.btnPrimary} flex-1 px-4 py-2.5 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-                                            style={{ animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
+                                            style={disableAnimations ? {} : { animationDelay: `${0.5 + index * 0.1 + 0.05}s` }}
                                         >
                                             <FaExchangeAlt className="text-sm" />
                                             Trade
@@ -403,16 +521,16 @@ function CoinTable({ onTrade }) {
                             ))}
                         </div>
                     ) : (
-                        <div className={`text-center py-12 rounded-xl fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
+                        <div className={`text-center py-12 rounded-xl ${shouldAnimate ? 'fade-in' : ''} ${TC.textTertiary}`} style={shouldAnimate ? { animationDelay: "0.5s" } : {}}>
                             <div className="text-5xl mb-3">🔍</div>
                             No coins found matching &quot;{searchTerm}&quot;
                         </div>
                     )}
                 </div>
-                <div className="hidden lg:block fade-in" style={{ animationDelay: "0.4s" }}>
+                <div className={`hidden lg:block ${shouldAnimate ? 'fade-in' : ''}`} style={shouldAnimate ? { animationDelay: "0.4s" } : {}}>
                     <div>
                         {paginatedCoins.length === 0 ? (
-                            <div className={`p-12 text-center fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.5s" }}>
+                            <div className={`p-12 text-center ${shouldAnimate ? 'fade-in' : ''} ${TC.textTertiary}`} style={shouldAnimate ? { animationDelay: "0.5s" } : {}}>
                                 <div className="text-6xl mb-4">🔍</div>
                                 <div className="text-xl">
                                     No coins found matching &quot;{searchTerm}&quot;
@@ -435,95 +553,26 @@ function CoinTable({ onTrade }) {
                                     </thead>
                                     <tbody className={`divide-y ${TC.tableDivide}`}>
                                         {paginatedCoins.map((coin, index) => (
-                                            <tr
+                                            <CoinRow
                                                 key={coin.id}
-                                                onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
-                                                className={`cursor-pointer transition-all duration-200 group fade-in ${TC.bgHover}`}
-                                                style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                                            >
-                                                <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                                                    <button
-                                                        onClick={() => toggleWishlist(coin.id, coin)}
-                                                        className="flex justify-center w-full fade-in"
-                                                        style={{ animationDelay: `${0.6 + index * 0.05 + 0.02}s` }}
-                                                    >
-                                                        {coin.isInWatchlist ? (
-                                                            <FaStar className={`${TC.starFilled} hover:scale-110 transition-transform`} />
-                                                        ) : (
-                                                            <FaRegStar className={`${TC.starDefault} transition-colors`} />
-                                                        )}
-                                                    </button>
-                                                </td>
-                                                <td className="py-4 px-6">
-                                                    <div className="flex items-center gap-3 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.03}s` }}>
-                                                        <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <div className={`text-base font-semibold transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}>
-                                                                {coin.name}
-                                                            </div>
-                                                            <div className={`text-sm uppercase ${TC.textTertiary}`}>
-                                                                {coin.symbol.toUpperCase()}
-                                                            </div>
-                                                            {coin.userHolding && (
-                                                                <div className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}>
-                                                                    Holding:{" "}
-                                                                    {coin.userHolding.totalQuantity?.toFixed(6) ||
-                                                                        coin.userHolding.quantity?.toFixed(6)}{" "}
-                                                                    {coin.symbol.toUpperCase()}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className={`py-4 px-6 text-right fade-in ${TC.textPrimary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.04}s` }}>
-                                                    <div className="text-base font-semibold">
-                                                        ${coin.current_price?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 6 }) || "0"}
-                                                    </div>
-                                                </td>
-                                                <td className={`py-4 px-6 text-right font-semibold fade-in ${coin.price_change_percentage_24h < 0 ? "text-red-600" : "text-green-600"
-                                                    }`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.05}s` }}>
-                                                    {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
-                                                </td>
-                                                <td className={`py-4 px-6 text-right fade-in ${TC.textSecondary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.06}s` }}>
-                                                    <div className="text-sm">
-                                                        {formatCurrency(coin.market_cap)}
-                                                    </div>
-                                                </td>
-                                                <td className={`py-4 px-6 text-right fade-in ${TC.textSecondary}`} style={{ animationDelay: `${0.6 + index * 0.05 + 0.07}s` }}>
-                                                    <div className="text-sm">
-                                                        {formatCurrency(coin.total_volume)}
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.08}s` }}>
-                                                    <div className="flex justify-center">
-                                                        <Sparkline
-                                                            data={coin.sparkline_in_7d?.price || []}
-                                                            width={100}
-                                                            height={40}
-                                                            positive={coin.price_change_percentage_24h >= 0}
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 px-6 fade-in" style={{ animationDelay: `${0.6 + index * 0.05 + 0.09}s` }}>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleTrade(coin);
-                                                        }}
-                                                        className={`${TC.btnPrimary} px-4 py-2 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-                                                    >
-                                                        <FaExchangeAlt className="text-xs" />
-                                                        Trade
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                                coin={coin}
+                                                index={index}
+                                                isLight={isLight} // Pass this if CoinRow needs it
+                                                TC={TC}
+                                                toggleWishlist={toggleWishlist}
+                                                navigate={navigate}
+                                                handleTrade={handleTrade}
+                                                disableAnimations={!shouldAnimate}
+                                                formatCurrency={formatCurrency}
+                                                liveData={liveData[coin.id]}
+                                            />
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
                         )}
                         {paginatedCoins.length > 0 && (
-                            <div className={`px-6 py-4 fade-in ${TC.bgTableFooter} rounded-b-2xl`} style={{ animationDelay: "0.7s" }}>
+                            <div className={`px-6 py-4 ${shouldAnimate ? 'fade-in' : ''} ${TC.bgTableFooter} rounded-b-2xl`} style={shouldAnimate ? { animationDelay: "0.7s" } : {}}>
                                 <div className={`flex justify-between items-center text-sm ${TC.textTertiary}`}>
                                     <span>
                                         Showing {paginatedCoins.length} of {enhancedCoins.length} coins
@@ -538,13 +587,13 @@ function CoinTable({ onTrade }) {
                     </div>
                 </div>
                 {totalPages > 1 && (
-                    <div className={`flex flex-col items-center gap-4 pt-6 pb-6 fade-in ${TC.textTertiary}`} style={{ animationDelay: "0.8s" }}>
+                    <div className={`flex flex-col items-center gap-4 pt-6 pb-6 ${shouldAnimate ? 'fade-in' : ''} ${TC.textTertiary}`} style={shouldAnimate ? { animationDelay: "0.8s" } : {}}>
                         <div className="flex justify-center items-center gap-2">
                             <button
                                 onClick={handlePrev}
                                 disabled={currentPage === 1}
-                                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${TC.btnPagination}`}
-                                style={{ animationDelay: "0.85s" }}
+                                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 ${shouldAnimate ? 'fade-in' : ''} ${TC.btnPagination}`}
+                                style={shouldAnimate ? { animationDelay: "0.85s" } : {}}
                             >
                                 Prev
                             </button>
@@ -552,13 +601,13 @@ function CoinTable({ onTrade }) {
                             <button
                                 onClick={handleNext}
                                 disabled={currentPage === totalPages}
-                                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 fade-in ${TC.btnPagination}`}
-                                style={{ animationDelay: "0.9s" }}
+                                className={`px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 ${shouldAnimate ? 'fade-in' : ''} ${TC.btnPagination}`}
+                                style={shouldAnimate ? { animationDelay: "0.9s" } : {}}
                             >
                                 Next
                             </button>
                         </div>
-                        <div className="text-sm fade-in" style={{ animationDelay: "0.95s" }}>
+                        <div className={`text-sm ${shouldAnimate ? 'fade-in' : ''}`} style={shouldAnimate ? { animationDelay: "0.95s" } : {}}>
                             Page {currentPage} of {totalPages}
                         </div>
                     </div>

@@ -104,6 +104,11 @@ export default function Navbar() {
                     ${TC.navContainer}
                     ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
                 `}
+                style={{
+                    willChange: "transform, opacity",
+                    backfaceVisibility: "hidden",
+                    transform: "translateZ(0)" // Force GPU layer
+                }}
             >
                 <div className="relative flex items-center justify-between max-w-[1600px] mx-auto w-full h-full">
 
@@ -129,29 +134,29 @@ export default function Navbar() {
                                 <span className="text-gray-100">ne</span>
 
                                 {/* X with enhanced button effects */}
-                                <span className="relative mx-[2px]">
+                                <span className="relative mx-[2px] inline-flex justify-center items-center">
                                     {/* Background bloom/glow */}
-                                    <span className="absolute inset-0 bg-gradient-to-r from-[#4fcdda]/90 via-[#364abe] to-[#233784] bg-clip-text text-transparent blur-sm opacity-60">
+                                    <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#4fcdda]/90 via-[#364abe] to-[#233784] bg-clip-text text-transparent blur-sm opacity-60 select-none">
                                         X
                                     </span>
 
                                     {/* Main X with exact button gradient */}
-                                    <span className="relative bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent">
+                                    <span className="relative bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent transform translate-y-[1px]">
                                         X
                                     </span>
 
                                     {/* Surface sheen (top gloss) */}
-                                    <span className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-transparent bg-clip-text text-transparent opacity-60">
+                                    <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-transparent bg-clip-text text-transparent opacity-60 select-none">
                                         X
                                     </span>
 
                                     {/* Bottom cyan refraction line */}
-                                    <span className="absolute inset-0 bg-gradient-to-t from-[#4fcdda] to-transparent bg-clip-text text-transparent opacity-80 translate-y-[0.5px]">
+                                    <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#4fcdda] to-transparent bg-clip-text text-transparent opacity-80 translate-y-[0.5px] select-none">
                                         X
                                     </span>
 
                                     {/* Outer glow */}
-                                    <span className="absolute inset-0 bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent opacity-40 blur-[3px] -translate-y-[0.5px]">
+                                    <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent opacity-40 blur-[3px] -translate-y-[0.5px] select-none">
                                         X
                                     </span>
                                 </span>

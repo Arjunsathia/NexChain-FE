@@ -1,5 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import {
+  FaUsers,
+  FaCoins,
+  FaChartLine,
+  FaStar,
+  FaTimes,
+} from "react-icons/fa";
+
 import UserLineChart from "@/Components/Admin/Dashboard/LineChart";
 import StatCard from "@/Components/Admin/Dashboard/StatCard";
 import RecentReports from "@/Components/Admin/Dashboard/RecentReports";
@@ -9,24 +18,25 @@ import QuickActions from "@/Components/Admin/Dashboard/QuickActions";
 import { getData, default as api } from "@/api/axiosConfig";
 import MarketCoinDetailsModal from "@/Components/Admin/MarketInsights/MarketCoinDetailsModal";
 import { getTrendingCoinMarketData } from "@/api/coinApis";
-
-
-import {
-  FaUsers,
-  FaCoins,
-  FaChartLine,
-  FaStar,
-  FaTimes,
-} from "react-icons/fa";
 import useThemeCheck from "@/hooks/useThemeCheck";
-
+import useTransitionDelay from "@/hooks/useTransitionDelay";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 const formatCompactNumber = (number) => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(number);
 
-function AdminDashboard() {
+const AdminDashboard = () => {
   const navigate = useNavigate();
   const isLight = useThemeCheck();
+  const isReady = useTransitionDelay();
+  const location = useLocation();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const [isFirstVisit] = useState(!isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
 
   const TC = useMemo(
     () => ({
@@ -59,206 +69,82 @@ function AdminDashboard() {
     [isLight]
   );
 
-  const [users, setUsers] = useState([]);
-  const [reports, setReports] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [trendingCoinData, setTrendingCoinData] = useState(null);
+  // 1. Users Query
+  const { data: users = [], isLoading: isUsersLoading } = useQuery({
+    queryKey: ['adminUsers'],
+    queryFn: async () => {
+      const res = await getData("/users");
+      const payload = res?.data ?? res;
+      return payload?.users ?? payload ?? [];
+    },
+    staleTime: 30000,
+    refetchInterval: 30000
+  });
 
-  // Granular loading states
-  const [isUsersLoading, setIsUsersLoading] = useState(true);
-  const [isReportsLoading, setIsReportsLoading] = useState(true);
-  const [isActivityLoading, setIsActivityLoading] = useState(true);
-  const [isTrendingLoading, setIsTrendingLoading] = useState(true);
-  const [isStatsLoading, setIsStatsLoading] = useState(true);
+  // 2. Reports Query
+  const { data: reports = [], isLoading: isReportsLoading } = useQuery({
+    queryKey: ['adminReports'],
+    queryFn: async () => {
+      const res = await getData("/feedback");
+      const feedbackData = res?.data ?? res ?? [];
+      return Array.isArray(feedbackData)
+        ? feedbackData
+          .filter((fb) => fb && (fb.type === "bug" || fb.type === "issue"))
+          .map((fb) => {
+            /* ... mapping logic ... */
+            const message = fb.message || "";
+            const trimmedTitle =
+              message.length > 0
+                ? message.length > 60 ? `${message.substring(0, 60)}...` : message
+                : "No title";
+            return {
+              id: fb._id || fb.id,
+              type: fb.type || "bug",
+              title: trimmedTitle,
+              status: fb.status || "new",
+              createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
+            };
+          })
+          .slice(0, 4)
+        : [];
+    },
+    staleTime: 30000,
+    refetchInterval: 30000
+  });
 
+  // 3. Recent Activity Query
+  const { data: recentActivity = [], isLoading: isActivityLoading } = useQuery({
+    queryKey: ['adminActivity'],
+    queryFn: async () => {
+      const res = await getData("/activity");
+      return res?.data ?? res ?? [];
+    },
+    staleTime: 30000,
+    refetchInterval: 30000,
+    retry: false
+  });
 
-  const [timeRange, setTimeRange] = useState("Month");
-  const [platformStats, setPlatformStats] = useState({ tradesToday: 0 });
-  const [isTradesModalOpen, setIsTradesModalOpen] = useState(false);
-  const [todayTransactions, setTodayTransactions] = useState([]);
-  const [isModalLoading, setIsModalLoading] = useState(false);
-  const [selectedCoinDetails, setSelectedCoinDetails] = useState(null);
+  // 4. Trending Coin Query
+  const { data: trendingCoinData, isLoading: isTrendingLoading } = useQuery({
+    queryKey: ['adminTrending'],
+    queryFn: async () => {
+      const res = await getData("/watchlist/trending");
+      return res?.data ?? res;
+    },
+    staleTime: 60000, // 1 min for trending
+    refetchInterval: 60000
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    let pollInterval;
-
-    const fetchUsers = async () => {
-      // Don't set loading on updates to prevent UI flash
-      if (users.length === 0) setIsUsersLoading(true);
-      try {
-        const res = await getData("/users");
-        const payload = res?.data ?? res;
-        const usersList = payload?.users ?? payload ?? [];
-        if (mounted) {
-          const newList = Array.isArray(usersList) ? usersList : [];
-          setUsers(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(newList)) return prev;
-            return newList;
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch users:", err);
-        if (mounted && users.length === 0) setUsers([]);
-      } finally {
-        if (mounted) setIsUsersLoading(false);
-      }
-    };
-
-    const fetchReports = async () => {
-      if (reports.length === 0) setIsReportsLoading(true);
-      try {
-        const res = await getData("/feedback");
-        const feedbackData = res?.data ?? res ?? [];
-        const reportsFromFeedback = Array.isArray(feedbackData)
-          ? feedbackData
-            .filter((fb) => fb && (fb.type === "bug" || fb.type === "issue"))
-            .map((fb) => {
-              const message = fb.message || "";
-              const trimmedTitle =
-                message.length > 0
-                  ? message.length > 60
-                    ? `${message.substring(0, 60)}...`
-                    : message
-                  : "No title";
-
-              return {
-                id: fb._id || fb.id,
-                type: fb.type || "bug",
-                title: trimmedTitle,
-                status: fb.status || "new",
-                createdAt: fb.createdAt || fb.timestamp || new Date().toISOString(),
-              };
-            })
-            .slice(0, 4)
-          : [];
-
-        if (mounted) {
-          setReports(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(reportsFromFeedback)) return prev;
-            return reportsFromFeedback;
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch feedback reports:", err);
-        if (mounted && reports.length === 0) setReports([]);
-      } finally {
-        if (mounted) setIsReportsLoading(false);
-      }
-    };
-
-    const fetchRecentActivity = async () => {
-      if (recentActivity.length === 0) setIsActivityLoading(true);
-      try {
-        const res = await getData("/activity");
-        const activityData = res?.data ?? res ?? [];
-        const newList = Array.isArray(activityData) ? activityData : [];
-        if (mounted) {
-          setRecentActivity(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(newList)) return prev;
-            return newList;
-          });
-        }
-      } catch {
-        // Fallback mock data if endpoint fails
-        const now = Date.now();
-        const mockActivity = [
-          {
-            type: "user_registered",
-            message: `New user registered: User${Math.floor(Math.random() * 1000)}`,
-            timestamp: new Date(now - 120000).toISOString(),
-            colorClass: "text-green-400",
-          },
-          {
-            type: "trade_completed",
-            message: `Trade completed: ${Math.floor(Math.random() * 10)} BTC`,
-            timestamp: new Date(now - 300000).toISOString(),
-            colorClass: "text-blue-400",
-          },
-          {
-            type: "watchlist_added",
-            message: "Watchlist updated",
-            timestamp: new Date(now - 600000).toISOString(),
-            colorClass: "text-yellow-400",
-          },
-          {
-            type: "report_submitted",
-            message: "New feedback received",
-            timestamp: new Date(now - 900000).toISOString(),
-            colorClass: "text-purple-400",
-          },
-        ];
-        if (mounted) {
-          setRecentActivity(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(mockActivity)) return prev;
-            return mockActivity;
-          });
-        }
-      } finally {
-        if (mounted) setIsActivityLoading(false);
-      }
-    };
-
-    const fetchTrendingCoin = async () => {
-      if (!trendingCoinData) setIsTrendingLoading(true);
-      try {
-        const res = await getData("/watchlist/trending");
-        const data = res?.data ?? res;
-        if (mounted) {
-          setTrendingCoinData(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
-            return data;
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch trending coin:", err);
-      } finally {
-        if (mounted) setIsTrendingLoading(false);
-      }
-    };
-
-    const fetchPlatformStats = async () => {
-      if (platformStats.tradesToday === 0) setIsStatsLoading(true);
-      try {
-        const res = await api.get('/purchases/platform-stats');
-        if (res.data.success && mounted) {
-          const newStats = { tradesToday: res.data.stats.tradesToday };
-          setPlatformStats(prev => {
-            if (prev.tradesToday === newStats.tradesToday) return prev;
-            return newStats;
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch platform stats:", err);
-      } finally {
-        if (mounted) setIsStatsLoading(false);
-      }
-    };
-
-    fetchUsers();
-    fetchReports();
-    fetchRecentActivity();
-    fetchTrendingCoin();
-    fetchPlatformStats();
-
-
-
-    pollInterval = setInterval(() => {
-      if (mounted) {
-        fetchUsers();
-        fetchReports();
-        fetchRecentActivity();
-        fetchTrendingCoin();
-        fetchPlatformStats();
-      }
-    }, 30000);
-
-    return () => {
-      mounted = false;
-      if (pollInterval) clearInterval(pollInterval);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // 5. Platform Stats
+  const { data: platformStats = { tradesToday: 0 }, isLoading: isStatsLoading } = useQuery({
+    queryKey: ['adminPlatformStats'],
+    queryFn: async () => {
+      const res = await api.get('/purchases/platform-stats');
+      return res.data.success ? { tradesToday: res.data.stats.tradesToday } : { tradesToday: 0 };
+    },
+    staleTime: 30000,
+    refetchInterval: 30000
+  });
 
   const adminStats = useMemo(() => {
     const totalUsers = users.length;
@@ -290,6 +176,12 @@ function AdminDashboard() {
         image: u.image,
       }));
   }, [users]);
+
+  const [isTradesModalOpen, setIsTradesModalOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [todayTransactions, setTodayTransactions] = useState([]);
+  const [selectedCoinDetails, setSelectedCoinDetails] = useState(null);
+  const [timeRange, setTimeRange] = useState('Month'); // Default to 'Month'
 
   const handleTradeCardClick = async () => {
     setIsTradesModalOpen(true);
@@ -351,7 +243,7 @@ function AdminDashboard() {
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+          <div className={isFirstVisit ? "fade-in" : ""} style={{ animationDelay: "0.1s" }}>
             <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
               Admin <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Dashboard</span>
             </h1>
@@ -361,13 +253,13 @@ function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-3 fade-in" style={{ animationDelay: "0.2s" }}>
-            {(isUsersLoading || isStatsLoading || isActivityLoading) && (
+            {(!isReady || isUsersLoading || isStatsLoading || isActivityLoading) && (
               <div className={`flex items-center text-xs font-medium backdrop-blur-sm px-4 py-2 rounded-full border shadow-sm ${isLight ? 'bg-white/50 border-gray-100 text-gray-500' : 'bg-gray-800/50 border-gray-700 text-gray-400'}`}>
                 <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
                 Updating live data...
               </div>
             )}
-            {!isUsersLoading && !isStatsLoading && !isActivityLoading && (
+            {isReady && !isUsersLoading && !isStatsLoading && !isActivityLoading && (
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium shadow-sm border border-green-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                 System Operational
@@ -379,7 +271,7 @@ function AdminDashboard() {
         {/* Main Content */}
         <div className="flex flex-col gap-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 ${isFirstVisit ? 'fade-in' : ''}`} style={{ animationDelay: "0.3s" }}>
             {[
               {
                 label: "Total Users",
@@ -420,12 +312,12 @@ function AdminDashboard() {
                 isLoading: isTrendingLoading
               },
             ].map((stat, i) => (
-              <StatCard key={i} {...stat} TC={TC} />
+              <StatCard key={i} {...stat} isLoading={!isReady || stat.isLoading} TC={TC} />
             ))}
           </div>
 
           {/* Charts & Actions Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.4s" }}>
+          <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isFirstVisit ? 'fade-in' : ''}`} style={{ animationDelay: "0.4s" }}>
             {/* Main Chart Card (User Registration) */}
             <div className={`lg:col-span-2 ${TC.bgCard} rounded-2xl p-5 sm:p-6 relative overflow-hidden group`}>
               {/* Background Decorative Gradient */}
@@ -462,7 +354,7 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              {isUsersLoading ? (
+              {!isReady || isUsersLoading ? (
                 <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/10 rounded-xl" />
               ) : (
                 <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full relative z-10">
@@ -483,7 +375,7 @@ function AdminDashboard() {
           </div>
 
           {/* Bottom Reports & Users */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style={{ animationDelay: "0.5s" }}>
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${isFirstVisit ? 'fade-in' : ''}`} style={{ animationDelay: "0.5s" }}>
             <RecentReports reports={reports} isLoading={isReportsLoading} TC={TC} />
             <LatestUsers users={latestUsers} isLoading={isUsersLoading} TC={TC} />
           </div>

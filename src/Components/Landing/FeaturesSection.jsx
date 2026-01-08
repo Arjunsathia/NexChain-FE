@@ -110,7 +110,7 @@ const WaveConnection = ({ activeIndex }) => {
 };
 
 // --- Main Component ---
-const FeaturesSection = forwardRef(({ TC }, ref) => {
+const FeaturesSection = forwardRef((props, ref) => {
   const [activeFeature, setActiveFeature] = useState(0);
 
   return (

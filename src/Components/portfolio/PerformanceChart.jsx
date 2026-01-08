@@ -4,7 +4,7 @@ import { FaArrowUp, FaArrowDown, FaChartLine } from "react-icons/fa";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
+const PerformanceChart = ({ isLight, groupedHoldings, balance, loading, disableAnimations = false }) => {
   const [timeRange, setTimeRange] = useState('7d');
 
 
@@ -159,7 +159,7 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
   return (
     <div
       className={`
-        p-1 h-full flex flex-col fade-in
+        p-1 h-full flex flex-col
         ${TC.bgContainer}
       `}
     >
@@ -179,8 +179,10 @@ const PerformanceChart = ({ isLight, groupedHoldings, balance, loading }) => {
       <Chart
         isLight={isLight}
         performanceData={performanceData}
+        performanceData={performanceData}
         currentMetrics={currentMetrics}
         TC={TC}
+        disableAnimations={disableAnimations}
       />
     </div>
   );
@@ -190,7 +192,7 @@ const EmptyState = ({ TC }) => {
   return (
     <div
       className={`
-        rounded-2xl p-6 fade-in h-full
+        rounded-2xl p-6 h-full
         ${TC.bgContainer}
         transition-all duration-300 ease-in-out
       `}
@@ -266,7 +268,7 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
   );
 };
 
-const Chart = ({ performanceData, currentMetrics, TC }) => {
+const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
   const isPositive = currentMetrics.profitLoss >= 0;
   const gradientId = `performanceGradient`;
 
@@ -335,7 +337,7 @@ const Chart = ({ performanceData, currentMetrics, TC }) => {
             stroke="none"
             fill={`url(#${gradientId})`}
             fillOpacity={1}
-            isAnimationActive={false}
+            isAnimationActive={!disableAnimations}
           />
           <Line
             type="monotone"
@@ -344,7 +346,7 @@ const Chart = ({ performanceData, currentMetrics, TC }) => {
             strokeWidth={3}
             dot={false}
             activeDot={{ r: 6, strokeWidth: 0 }}
-            isAnimationActive={false}
+            isAnimationActive={!disableAnimations}
           />
         </LineChart>
       </ResponsiveContainer>

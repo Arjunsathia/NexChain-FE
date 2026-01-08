@@ -25,7 +25,6 @@ const QuantumNebulaBackground = React.memo(() => {
 
     // Cosmic Entities
     const stars = [];
-    const nebulas = [];
     const starCount = 350; // Increased from 150
 
     // Initialize Starfield (Quantum Particles)

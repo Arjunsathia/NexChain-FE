@@ -1,9 +1,9 @@
 import React from "react";
 import { FaStar, FaChartLine, FaTrophy, FaFire } from "react-icons/fa";
 
-const WatchlistStats = ({ stats, TC }) => {
+const WatchlistStats = ({ stats, TC, disableAnimations = false }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 fade-in" style={{ animationDelay: "0.1s" }}>
+    <div className={`grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 ${disableAnimations ? '' : 'fade-in'}`} style={disableAnimations ? {} : { animationDelay: "0.1s" }}>
       {[
         { label: "Total Coins", value: stats.total, icon: FaStar, color: "from-amber-500 to-yellow-400" },
         { label: "Portfolio Value", value: `$${stats.totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, icon: FaChartLine, color: "from-purple-500 to-violet-400" },

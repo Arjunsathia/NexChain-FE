@@ -3,11 +3,29 @@ import ReactApexChart from "react-apexcharts";
 import { getMarketChart } from "@/api/coinApis";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-const ChartSection = ({ coinId }) => {
+const ChartSection = ({ coinId, disableAnimations = false }) => {
   const isLight = useThemeCheck();
-  const [series, setSeries] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [days, setDays] = useState(1);
+  const [series, setSeries] = useState(() => {
+    try {
+      if (coinId) {
+        // Use the default days value (1) directly or use the state variable if available
+        // Since we just declared `days`, it should be available.
+        const cacheKey = `chart_${coinId}_${days}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { data } = JSON.parse(cached);
+          if (data?.prices && Array.isArray(data.prices)) {
+            return [{ name: "Price", data: data.prices }];
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Chart cache init error", e);
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(false);
 
 
   const validateData = (data) => {
@@ -26,11 +44,16 @@ const ChartSection = ({ coinId }) => {
 
     const fetchChart = async () => {
       if (!coinId) return;
-      setLoading(true);
 
       const cacheKey = `chart_${coinId}_${days}`;
       const now = Date.now();
       const cached = localStorage.getItem(cacheKey);
+
+      // If we already have data from useState init (or simple re-render), check if it matches cache
+      // Optimization: If series is populated, we might still want to stale-validate or just trust it.
+      // For "perfect caching" request, let's trust the cache if it's recent.
+
+      let shouldFetch = true;
 
       // Helper to set data
       const setData = (data) => {
@@ -42,20 +65,31 @@ const ChartSection = ({ coinId }) => {
         }
       };
 
-      try {
-        // 1. Try to use fresh cache first (5 minutes)
-        if (cached) {
+      // 1. Check Cache Validity (similar to logic used in init)
+      if (cached) {
+        try {
           const { timestamp, data } = JSON.parse(cached);
+          // 5 minutes TTL
           if (now - timestamp < 5 * 60 * 1000) {
-            if (active) {
+            // Cache is valid.
+            // If series is already set (from init), we don't need to do anything, just ensure loading is false.
+            if (series.length === 0) {
               setData(data);
-              setLoading(false);
             }
-            return;
+            shouldFetch = false;
           }
-        }
+        } catch (e) { }
+      }
 
-        // 2. If no fresh cache, fetch from API
+      if (!shouldFetch) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      // 2. Fetch from API
+      try {
         const data = await getMarketChart(coinId, days);
 
         if (active) {
@@ -153,7 +187,7 @@ const ChartSection = ({ coinId }) => {
   ];
 
   return (
-    <div className={`p-4 rounded-2xl transition-all duration-300 ease-in-out hover:shadow-lg ${isLight
+    <div className={`p-4 rounded-2xl ${isLight
       ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
       : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
       }`}>

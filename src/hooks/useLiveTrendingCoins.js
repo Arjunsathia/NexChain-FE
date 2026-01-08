@@ -8,7 +8,15 @@ export function useLiveTrendingCoins(limit = 10) {
   const [trendingCoins, setTrendingCoins] = useState(() => {
     try {
       const cached = localStorage.getItem("trendingCoins");
-      if (cached) return JSON.parse(cached);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.data && Array.isArray(parsed.data)) {
+          return parsed.data;
+        }
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error("Cache parse error", e);
     }
@@ -19,9 +27,27 @@ export function useLiveTrendingCoins(limit = 10) {
   const [error, setError] = useState(null);
 
   const fetchTrending = useCallback(async () => {
+    const CACHE_KEY = "trendingCoins";
+    const CACHE_DURATION = 5 * 60 * 1000;
+
     try {
       setError(null);
-      if (trendingCoins.length === 0) setLoading(true);
+      
+      // 1. Check Cache Validity
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          const now = Date.now();
+          if (parsed.timestamp && (now - parsed.timestamp < CACHE_DURATION) && Array.isArray(parsed.data) && parsed.data.length > 0) {
+             setTrendingCoins(parsed.data);
+             setLoading(false);
+             return; // EXIT EARLY
+          }
+        } catch(e) { /* ignore parse error */ }
+      }
+
+      setLoading(true);
 
       const trendData = await getTrend();
       let idsArray = [];
@@ -33,15 +59,36 @@ export function useLiveTrendingCoins(limit = 10) {
 
       // Slice to requested limit
       const marketData = await getTrendingCoinMarketData(idsArray.slice(0, limit));
+      
+      const toCache = {
+          timestamp: Date.now(),
+          data: marketData
+      };
+      
       setTrendingCoins(marketData);
-      localStorage.setItem("trendingCoins", JSON.stringify(marketData));
+      localStorage.setItem(CACHE_KEY, JSON.stringify(toCache));
 
     } catch (err) {
-      console.warn("Trending Coins API failed, using fallback:", err.message);
+      console.warn("Trending Coins API failed, checking fallback cache or static list:", err.message);
+      
+      // Fallback Strategy:
+      // 1. If we have OLD cache, use it instead of crashing, even if expired.
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+           try {
+               const parsed = JSON.parse(cached);
+               if(Array.isArray(parsed.data)) {
+                  setTrendingCoins(parsed.data);
+                  setLoading(false);
+                  return;
+               }
+           } catch(e) {}
+      }
+
+      // 2. If no cache at all, try static fallback
       try {
         const marketData = await getTrendingCoinMarketData(FALLBACK_IDS.slice(0, limit));
         setTrendingCoins(marketData);
-        localStorage.setItem("trendingCoins", JSON.stringify(marketData));
       } catch (fallbackErr) {
         console.warn("Fallback Trending Error:", fallbackErr.message);
         setError("Unable to load trending coins.");
@@ -49,7 +96,7 @@ export function useLiveTrendingCoins(limit = 10) {
     } finally {
       setLoading(false);
     }
-  }, [limit, trendingCoins.length]);
+  }, [limit]);
 
   useEffect(() => {
     fetchTrending();
@@ -57,10 +104,11 @@ export function useLiveTrendingCoins(limit = 10) {
   }, []); // Only run once on mount
 
   // WebSocket Logic reused
-  const livePrices = useBinanceTicker(trendingCoins);
+  const livePrices = useBinanceTicker();
 
   // Merge Data
-  const coinsWithLive = trendingCoins.map(c => {
+  const safeTrendingCoins = Array.isArray(trendingCoins) ? trendingCoins : [];
+  const coinsWithLive = safeTrendingCoins.map(c => {
     const live = livePrices[c.id];
     return {
       ...c,

@@ -1,25 +1,42 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
-import { useDispatch } from "react-redux";
-import { fetchCoins } from "@/redux/slices/coinSlice";
-import { freezeCoin, unfreezeCoin } from "@/api/coinApis";
 import { toast } from "react-hot-toast";
-import useCoinContext from "@/hooks/useCoinContext";
 import CryptoStats from "@/Components/Admin/Cryptocurrencies/CryptoStats";
 import CryptoTable from "@/Components/Admin/Cryptocurrencies/CryptoTable";
 import CryptoDetailsModal from "@/Components/Admin/Cryptocurrencies/CryptoDetailsModal";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCoins, freezeCoin, unfreezeCoin } from "@/api/coinApis";
+import useTransitionDelay from "@/hooks/useTransitionDelay";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+
 const AdminCryptocurrencies = () => {
   const isLight = useThemeCheck();
-  /* Admin sees ALL coins (frozen and active) */
-  const { allCoins: coins } = useCoinContext() ?? { allCoins: [] };
+  const queryClient = useQueryClient();
+  const isReady = useTransitionDelay();
+  const location = useLocation();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const [isFirstVisit] = useState(!isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
+
+  // React Query Implementation
+  const { data: coins = [], isLoading } = useQuery({
+    queryKey: ['adminCoins'],
+    queryFn: () => getCoins({ includeFrozen: true }),
+    staleTime: 60000
+    // keepPreviousData is deprecated/removed in v5, safe to omit or use placeholderData
+  });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCoin, setSelectedCoin] = useState(null);
 
-  const dispatch = useDispatch();
   const [loadingId, setLoadingId] = useState(null);
 
   const handleToggleFreeze = async (coin) => {
@@ -34,7 +51,10 @@ const AdminCryptocurrencies = () => {
         await freezeCoin({ coinId: coin.id, symbol: coin.symbol, name: coin.name });
         toast.success(`${coin.name} has been frozen`);
       }
-      dispatch(fetchCoins());
+
+      // Update local cache
+      queryClient.invalidateQueries(['adminCoins']);
+
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Failed to update coin status");
@@ -44,8 +64,7 @@ const AdminCryptocurrencies = () => {
   };
 
   const coinsPerPage = 10;
-
-
+  // ... rest of the component ...
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -107,7 +126,7 @@ const AdminCryptocurrencies = () => {
 
   return (
     <>
-      <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}>
+      <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? 'fade-in' : ''}`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
@@ -127,21 +146,29 @@ const AdminCryptocurrencies = () => {
           </div>
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-          <CryptoStats coins={coins} TC={TC} />
-          <CryptoTable
-            currentCoins={currentCoins}
-            TC={TC}
-            isLight={isLight}
-            formatCurrency={formatCurrency}
-            formatLargeNumber={formatLargeNumber}
-            setSelectedCoin={setSelectedCoin}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            paginate={paginate}
-            onToggleFreeze={handleToggleFreeze}
-            loadingId={loadingId}
-          />
+        <div className={isFirstVisit ? "fade-in" : ""} style={{ animationDelay: "0.2s" }}>
+          {!isReady || isLoading ? (
+            <div className="flex justify-center p-12">
+              <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <>
+              <CryptoStats coins={coins} TC={TC} />
+              <CryptoTable
+                currentCoins={currentCoins}
+                TC={TC}
+                isLight={isLight}
+                formatCurrency={formatCurrency}
+                formatLargeNumber={formatLargeNumber}
+                setSelectedCoin={setSelectedCoin}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                paginate={paginate}
+                onToggleFreeze={handleToggleFreeze}
+                loadingId={loadingId}
+              />
+            </>
+          )}
         </div>
       </div>
 

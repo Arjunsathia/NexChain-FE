@@ -9,9 +9,21 @@ import MarketCoinDetailsModal from "@/Components/Admin/MarketInsights/MarketCoin
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 import { coinGecko } from "@/api/axiosConfig";
+import { VisitedRoutesContext } from "@/context/VisitedRoutesContext";
+import { useContext } from "react";
+import { useLocation } from "react-router-dom";
 
 const UserMarketInsights = () => {
     const isLight = useThemeCheck();
+    const { isVisited, markVisited } = useContext(VisitedRoutesContext);
+    const location = useLocation();
+    const hasVisited = isVisited(location.pathname);
+
+    useEffect(() => {
+        if (!hasVisited) {
+            markVisited(location.pathname);
+        }
+    }, [location.pathname, hasVisited, markVisited]);
 
 
     const TC = useMemo(
@@ -55,9 +67,43 @@ const UserMarketInsights = () => {
         [isLight]
     );
 
-    const [marketData, setMarketData] = useState([]);
-    const [globalStats, setGlobalStats] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Helper for stats calculation (moved up or used inside useMemo)
+    const calculateStats = (data) => {
+        if (!data || data.length === 0) return null;
+        const totalMarketCap = data.reduce((acc, coin) => acc + coin.market_cap, 0);
+        const totalVolume = data.reduce((acc, coin) => acc + coin.total_volume, 0);
+        const btcDominance = (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) * 100;
+        const ethDominance = (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) * 100;
+        return {
+            marketCap: totalMarketCap,
+            volume: totalVolume,
+            btcDominance: btcDominance || 0,
+            ethDominance: ethDominance || 0,
+        };
+    };
+
+    const [marketData, setMarketData] = useState(() => {
+        try {
+            const cacheKey = "marketInsightsData_v1";
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const { data } = JSON.parse(cached);
+                if (Array.isArray(data)) return data;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        return [];
+    });
+
+    const [loading, setLoading] = useState(() => {
+        // If we have data, we aren't "loading" in the sense of blocking UI
+        return marketData.length === 0;
+    });
+
+    // Derived state for stats
+    const globalStats = useMemo(() => calculateStats(marketData), [marketData]);
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCoin, setSelectedCoin] = useState(null);
     const [showTopGainers, setShowTopGainers] = useState(false);
@@ -73,21 +119,31 @@ const UserMarketInsights = () => {
     }, []);
 
     const fetchMarketData = async () => {
-
         const cacheKey = "marketInsightsData_v1";
+        const now = Date.now();
         const cached = localStorage.getItem(cacheKey);
-        let hasCachedData = false;
 
+        // Background refresh check
+        let shouldFetch = true;
         if (cached) {
             try {
-                const { data } = JSON.parse(cached);
-                setMarketData(data);
-                calculateGlobalStats(data);
-                hasCachedData = true;
-            } catch (e) {
-                console.error("Cache parse error", e);
-            }
+                const { timestamp } = JSON.parse(cached);
+                // 5 min cache
+                if (now - timestamp < 5 * 60 * 1000) {
+                    // valid cache, and we already initialized state from it.
+                    // Just ensure loading is false.
+                    shouldFetch = false;
+                }
+            } catch (e) { }
         }
+
+        if (!shouldFetch && marketData.length > 0) {
+            setLoading(false);
+            return;
+        }
+
+        // Only show full skeleton loading if we have NO data
+        if (marketData.length === 0) setLoading(true);
 
         try {
             const response = await coinGecko.get("/coins/markets", {
@@ -108,8 +164,7 @@ const UserMarketInsights = () => {
             }
 
             setMarketData(data);
-            calculateGlobalStats(data);
-
+            // Stats updated automatically via useMemo
 
             localStorage.setItem(cacheKey, JSON.stringify({
                 data,
@@ -118,50 +173,17 @@ const UserMarketInsights = () => {
 
         } catch (error) {
             console.error("Error fetching market data:", error);
-            if (!hasCachedData) {
-                toast.error("Failed to fetch market data.", {
-                    style: {
-                        background: "#FEE2E2",
-                        color: "#991B1B",
-                        boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                        borderRadius: "8px",
-                        fontWeight: "600",
-                        fontSize: "14px",
-                        padding: "12px 16px",
-                        border: "none",
-                    },
-                    iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-                });
-                setMarketData([]);
+            if (marketData.length === 0) {
+                // Only show error toast if we have no data to show
+                toast.error("Failed to fetch market data.");
+                setMarketData([]); // Clear data to show empty state/skeleton? Or keep empty.
             }
         } finally {
             setLoading(false);
         }
     };
 
-    const calculateGlobalStats = (data) => {
-        const totalMarketCap = data.reduce(
-            (acc, coin) => acc + coin.market_cap,
-            0
-        );
-        const totalVolume = data.reduce(
-            (acc, coin) => acc + coin.total_volume,
-            0
-        );
 
-        const btcDominance =
-            (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
-            100;
-
-        setGlobalStats({
-            marketCap: totalMarketCap,
-            volume: totalVolume,
-            btcDominance: btcDominance || 0,
-            ethDominance:
-                (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
-                100 || 0,
-        });
-    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat("en-US", {
@@ -242,8 +264,8 @@ const UserMarketInsights = () => {
     return (
         <>
             <div
-                className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
-                style={{ animationDelay: "0.1s" }}
+                className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${hasVisited ? '' : 'fade-in'}`}
+                style={hasVisited ? {} : { animationDelay: "0.1s" }}
             >
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -276,14 +298,15 @@ const UserMarketInsights = () => {
                     <MarketSkeleton />
                 ) : (
                     <div
-                        className="space-y-4 lg:space-y-6 fade-in"
-                        style={{ animationDelay: "0.2s" }}
+                        className={`space-y-4 lg:space-y-6 ${hasVisited ? '' : 'fade-in'}`}
+                        style={hasVisited ? {} : { animationDelay: "0.2s" }}
                     >
                         {/* Global Stats */}
                         <GlobalStats
                             globalStats={globalStats}
                             TC={TC}
                             formatCompactNumber={formatCompactNumber}
+                            disableAnimations={hasVisited}
                         />
 
                         {/* Market Movers */}
@@ -294,6 +317,7 @@ const UserMarketInsights = () => {
                             setShowTopLosers={setShowTopLosers}
                             TC={TC}
                             formatCurrency={formatCurrency}
+                            disableAnimations={hasVisited}
                         />
 
                         {/* Main Market Table */}
@@ -310,6 +334,7 @@ const UserMarketInsights = () => {
                             formatCurrency={formatCurrency}
                             formatCompactNumber={formatCompactNumber}
                             setSelectedCoin={setSelectedCoin}
+                            disableAnimations={hasVisited}
                         />
                     </div>
                 )}

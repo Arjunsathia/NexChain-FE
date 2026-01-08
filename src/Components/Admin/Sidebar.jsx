@@ -20,6 +20,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 import { createPortal } from "react-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 // Logout Modal (Identical to UserSidebar's)
 const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
@@ -96,8 +97,26 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const { user } = useUserContext();
+  const { visitedRoutes } = useVisitedRoutes();
   const [isMounted, setIsMounted] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Check if we have been to any admin page before to skip animation
+  const hasVisitedAdmin = useMemo(() => {
+    return Array.from(visitedRoutes).some(path => path.startsWith('/admin'));
+  }, [visitedRoutes]);
+
+  // If visited, mount immediately. Else wait for 100ms.
+  useEffect(() => {
+    if (hasVisitedAdmin) {
+      setIsMounted(true);
+    } else {
+      const timer = setTimeout(() => {
+        setIsMounted(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [hasVisitedAdmin]);
 
   // Admin Data Specifics
   const [dashboardStats, setDashboardStats] = useState({ onlineUsers: 0, activeTrades: 0 });
@@ -121,12 +140,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+
 
   const TC = useMemo(() => ({
     textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -194,7 +208,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         `}
       >
         {/* Profile Header */}
-        <Link to="/admin/settings" className="block mb-6 group relative z-10 slide-in shrink-0" style={{ animationDelay: '0s' }}>
+        <Link to="/admin/settings" className={`block mb-6 group relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`} style={hasVisitedAdmin ? {} : { animationDelay: '0s' }}>
           <div className="flex items-center gap-4">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -233,8 +247,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             return (
               <div
                 key={item.name}
-                className="slide-in"
-                style={{ animationDelay: `${0.05 + index * 0.03}s` }}
+                className={hasVisitedAdmin ? "" : "slide-in"}
+                style={hasVisitedAdmin ? {} : { animationDelay: `${0.05 + index * 0.03}s` }}
               >
                 <Link
                   to={item.path}
@@ -267,8 +281,11 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
         {/* Bottom Stats & Logout */}
         <div
-          className="mt-auto pt-6 border-t border-dashed relative z-10 slide-in shrink-0"
-          style={{ borderColor: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)', animationDelay: '0.2s' }}
+          className={`mt-auto pt-6 border-t border-dashed relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`}
+          style={{
+            borderColor: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
+            ...(hasVisitedAdmin ? {} : { animationDelay: '0.2s' })
+          }}
         >
           {/* Quick Stats Grid - Admin Version */}
           <div className={`rounded-2xl p-4 mb-4 ${TC.bgStats}`}>
@@ -300,7 +317,18 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             </div>
           </div>
 
-
+          {/* Logout Button */}
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isLight
+              ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
+              : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
+              }`}
+          >
+            <FaSignOutAlt className="text-lg" />
+            <span className="font-medium text-sm">Sign Out</span>
+            <FaChevronRight className="ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
         </div>
 
         {/* Background Decor */}

@@ -14,7 +14,9 @@ function MarketTable({
   isLight,
   formatCurrency,
   formatCompactNumber,
+  formatCompactNumber,
   setSelectedCoin,
+  disableAnimations = false,
 }) {
   return (
     <div className={`${TC.bgCard} rounded-2xl overflow-hidden`}>
@@ -61,7 +63,8 @@ function MarketTable({
             {currentItems.map((coin) => (
               <tr
                 key={coin.id}
-                className={`${TC.tableRow} transition-all duration-200 hover:bg-gray-800/30`}
+                className={`${TC.tableRow} transition-all duration-200 hover:bg-gray-800/30 ${disableAnimations ? '' : 'fade-in'}`}
+                style={disableAnimations ? {} : { animationDelay: `${(currentItems.indexOf(coin) % 20) * 0.05}s` }}
               >
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
                   <div className="flex items-center gap-2 sm:gap-3">

@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaExchangeAlt, FaBell } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import Sparkline from "./Sparkline";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal, handleAlertClick }) => {
+const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setRemoveModal, handleAlertClick, disableAnimations = false }) => {
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
+
   return (
-    <div className={`hidden md:block p-1 rounded-xl fade-in ${TC.bgCard}`} style={{ animationDelay: "0.2s" }}>
+    <div className={`hidden md:block p-1 rounded-xl ${shouldAnimate ? 'fade-in' : ''} ${TC.bgCard}`} style={shouldAnimate ? { animationDelay: "0.2s" } : {}}>
       {/* Dashboard Style Header */}
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
@@ -37,8 +43,8 @@ const WatchlistTable = ({ coins, TC, isLight, handleCoinClick, handleTrade, setR
               <tr
                 key={coin.id}
                 onClick={() => handleCoinClick(coin)}
-                className={`transition-all duration-200 cursor-pointer group fade-in ${TC.bgHover || (isLight ? "hover:bg-gray-50" : "hover:bg-white/5")}`}
-                style={{ animationDelay: `${0.3 + index * 0.05}s` }}
+                className={`transition-all duration-200 cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgHover || (isLight ? "hover:bg-gray-50" : "hover:bg-white/5")}`}
+                style={shouldAnimate ? { animationDelay: `${0.3 + index * 0.05}s` } : {}}
               >
                 { }
                 <td className="py-4 px-6">

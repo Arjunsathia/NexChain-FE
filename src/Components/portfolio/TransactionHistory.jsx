@@ -77,7 +77,7 @@ const TransactionHistory = () => {
   if (!transactionHistory || transactionHistory.length === 0) return <EmptyState TC={TC} />;
 
   return (
-    <div className={`p-1 fade-in ${TC.bgContainer}`}>
+    <div className={`p-1 ${TC.bgContainer}`}>
       <Header
         TC={TC}
         transactionCount={filteredTransactions.length}

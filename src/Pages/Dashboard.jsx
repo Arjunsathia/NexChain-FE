@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
@@ -13,7 +13,6 @@ import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 export default function Dashboard() {
   const isLight = useThemeCheck();
@@ -28,8 +27,6 @@ export default function Dashboard() {
       }
       return [];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
-    refetchOnWindowFocus: false,
   });
 
   const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
@@ -41,11 +38,12 @@ export default function Dashboard() {
     }
   }, [topCoins, selectedCoinId]);
 
-  const liveData = useBinanceTicker(topCoins, 200);
+  /* Removed global ticker subscription to prevent full-page re-renders */
+  // const liveData = useBinanceTicker();
 
-  const handleCoinClick = (coinId) => {
+  const handleCoinClick = useCallback((coinId) => {
     setSelectedCoinId(coinId);
-  };
+  }, []);
 
   const USERDATA_HEIGHT = "h-[150px]";
   const CHART_HEIGHT = "h-[620px]";
@@ -64,11 +62,11 @@ export default function Dashboard() {
       className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
       <div className="xl:hidden flex flex-col gap-4">
-        <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+        <div>
           <UserProfileCard />
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+        <div>
           <div className="space-y-1">
             <h2 className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
               Top <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Cryptos</span>
@@ -78,36 +76,35 @@ export default function Dashboard() {
               selectedCoinId={selectedCoinId}
               setSelectedCoinId={handleCoinClick}
               isMobile={true}
-              liveData={liveData}
               loading={loading}
             />
           </div>
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+        <div>
           <ChartSection coinId={selectedCoinId} />
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+        <div>
           <PortfolioCard />
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+        <div>
           <div className="flex flex-col gap-4">
             <WatchlistPreview />
             <TrendingCoinsWidget variant="dashboard" />
           </div>
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.6s" }}>
+        <div>
           <NewsPanel />
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.7s" }}>
+        <div>
           <RecentTradesCard />
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.8s" }}>
+        <div>
           <LearningHub />
         </div>
       </div>
@@ -115,47 +112,46 @@ export default function Dashboard() {
       <div className="hidden xl:flex flex-col gap-6">
         <div className="grid grid-cols-12 gap-6 items-start">
           <div className="col-span-3 flex flex-col gap-6">
-            <div className={`fade-in ${USERDATA_HEIGHT}`} style={{ animationDelay: "0.1s" }}>
+            <div className={`${USERDATA_HEIGHT}`}>
               <UserProfileCard />
             </div>
-            <div className={`fade-in ${PORTFOLIO_HEIGHT}`} style={{ animationDelay: "0.2s" }}>
+            <div className={`${PORTFOLIO_HEIGHT}`}>
               <PortfolioCard />
             </div>
-            <div className={`fade-in ${TRADES_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
+            <div className={`${TRADES_HEIGHT}`}>
               <RecentTradesCard />
             </div>
           </div>
 
           <div className="col-span-6 flex flex-col gap-6">
-            <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+            <div>
               <TopCoins
                 topCoins={topCoins}
                 selectedCoinId={selectedCoinId}
                 setSelectedCoinId={handleCoinClick}
                 isMobile={false}
-                liveData={liveData}
                 loading={loading}
               />
             </div>
-            <div className={`fade-in ${CHART_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
+            <div className={`${CHART_HEIGHT}`}>
               <ChartSection coinId={selectedCoinId} />
             </div>
           </div>
 
           <div className="col-span-3 flex flex-col gap-6">
-            <div className={`fade-in ${WATCHLIST_HEIGHT}`} style={{ animationDelay: "0.2s" }}>
+            <div className={`${WATCHLIST_HEIGHT}`}>
               <WatchlistPreview />
             </div>
-            <div className={`fade-in ${TRENDING_HEIGHT}`} style={{ animationDelay: "0.3s" }}>
+            <div className={`${TRENDING_HEIGHT}`}>
               <TrendingCoinsWidget variant="dashboard" />
             </div>
-            <div className={`fade-in ${LEARNING_HUB_HEIGHT}`} style={{ animationDelay: "0.4s" }}>
+            <div className={`${LEARNING_HUB_HEIGHT}`}>
               <LearningHub />
             </div>
           </div>
         </div>
 
-        <div className="fade-in" style={{ animationDelay: "0.5s" }}>
+        <div>
           <NewsPanel />
         </div>
       </div>

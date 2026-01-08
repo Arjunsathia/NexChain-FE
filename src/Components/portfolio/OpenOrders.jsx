@@ -99,7 +99,7 @@ const OpenOrders = ({ livePrices }) => {
   if (!user || (orders.length === 0 && !loading)) return null;
 
   return (
-    <div className={`p-1 fade-in ${TC.bgContainer}`}>
+    <div className={`p-1 ${TC.bgContainer}`}>
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3 className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2 tracking-tight">
           <FaClock className="text-amber-500" size={14} />

@@ -1,16 +1,23 @@
 import useThemeCheck from '@/hooks/useThemeCheck';
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaFire, FaArrowRight, FaExclamationTriangle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLiveTrendingCoins } from "@/hooks/useLiveTrendingCoins";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending", className = "", variant = "market" }) {
+function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending", className = "", variant = "market", disableAnimations = false }) {
     const isLight = useThemeCheck();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { isVisited } = useVisitedRoutes();
 
-    const { coins: displayedCoins, loading, error, refetch: fetchTrending } = useLiveTrendingCoins(limit);
+    // Animate only if it's the first visit to this page
+    const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
+
+    const { coins, loading, error, refetch: fetchTrending } = useLiveTrendingCoins(limit);
+    const displayedCoins = Array.isArray(coins) ? coins : [];
 
     const TC = useMemo(() => ({
         bgContainer: isLight
@@ -96,8 +103,8 @@ function TrendingCoinsWidget({ limit = 10, showViewAll = true, title = "Trending
                         <div
                             key={coin.id}
                             onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                            className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group fade-in ${TC.bgItem}`}
+                            style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+                            className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgItem}`}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="relative">

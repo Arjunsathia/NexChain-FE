@@ -1,7 +1,7 @@
 import React from "react";
 import { FaGlobe, FaChartLine, FaGasPump } from "react-icons/fa";
 
-function GlobalStats({ globalStats, TC, formatCompactNumber }) {
+function GlobalStats({ globalStats, TC, formatCompactNumber, disableAnimations = false }) {
   if (!globalStats) return null;
 
   return (
@@ -14,7 +14,8 @@ function GlobalStats({ globalStats, TC, formatCompactNumber }) {
       ].map((stat, i) => (
         <div
           key={i}
-          className={`${TC.bgStatsCard} p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md h-full`}
+          className={`${TC.bgStatsCard} p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md h-full ${disableAnimations ? '' : 'fade-in'}`}
+          style={disableAnimations ? {} : { animationDelay: `${i * 0.1}s` }}
         >
           {/* Background Gradient Splash */}
           <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br ${stat.color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`} />

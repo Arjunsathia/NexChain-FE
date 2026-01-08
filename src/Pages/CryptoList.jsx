@@ -14,20 +14,30 @@ import TradeModal from "@/Components/Common/TradeModal";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { FaGlobeAmericas, FaChartLine, FaFire, FaLayerGroup } from "react-icons/fa";
-
 function CryptoList() {
   const isLight = useThemeCheck();
-  const [globalData, setGlobalData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const { purchasedCoins } = usePurchasedCoins();
-  const [isMounted, setIsMounted] = useState(false);
+  // Freeze validated state on mount so it doesn't change during the visit (allowing animation to finish)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+
+  const [globalData, setGlobalData] = useState(() => {
+    try {
+      const cached = localStorage.getItem("globalMarketStats_v1");
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        // 5 min cache for stats
+        if (Date.now() - timestamp < 5 * 60 * 1000) {
+          return data;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return {};
+  });
+
+  const [loading, setLoading] = useState(() => Object.keys(globalData).length === 0);
+  const { purchasedCoins } = usePurchasedCoins();
+
 
   const [tradeModal, setTradeModal] = useState({
     show: false,
@@ -60,10 +70,16 @@ function CryptoList() {
   }), [isLight]);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    // Only show loading if we don't have data
+    if (Object.keys(globalData).length === 0) setLoading(true);
+
     try {
       const res = await getGlobalMarketStats();
       setGlobalData(res);
+      localStorage.setItem("globalMarketStats_v1", JSON.stringify({
+        data: res,
+        timestamp: Date.now()
+      }));
     } catch (err) {
       console.error("Failed to fetch global market stats", err);
     } finally {
@@ -72,7 +88,12 @@ function CryptoList() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    // Defer fetching until after page transition (350ms)
+    // This allows the "enter" animation to play at 60fps without network contention
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 350);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
   const handleTrade = useCallback((coin, options = {}) => {
@@ -117,7 +138,7 @@ function CryptoList() {
   };
 
   return (
-    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6`}>
       <div
         className={`
           hidden sm:block sticky top-2 z-40 max-w-7xl mx-auto rounded-xl shadow-md
@@ -166,9 +187,10 @@ function CryptoList() {
         </div>
       </div>
 
+
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 auto-rows-fr">
-          <div className={`rounded-xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard} fade-in`} style={{ animationDelay: '0s' }}>
+          <div className={`rounded-xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard}`}>
             <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
               <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
             </div>
@@ -217,24 +239,24 @@ function CryptoList() {
             </div>
           </div>
 
-          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.05s' }}>
+          <div className={`flex flex-col h-full`}>
             <TrendingCoinsWidget limit={5} showViewAll={false} />
           </div>
 
-          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className={`flex flex-col h-full`}>
             <TopGainers />
           </div>
 
-          <div className="flex flex-col h-full fade-in" style={{ animationDelay: '0.15s' }}>
+          <div className={`flex flex-col h-full`}>
             <TopLosers />
           </div>
         </div>
 
-        <div className="fade-in" style={{ animationDelay: '0.15s' }}>
+        <div>
           <CoinTable onTrade={handleTrade} />
         </div>
 
-        <div className="pt-8 border-t border-gray-200/10 fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className={`pt-8 border-t border-gray-200/10`}>
           <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
             <FaFire className="text-orange-500" />
             Latest Crypto News

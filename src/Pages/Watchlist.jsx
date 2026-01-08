@@ -5,7 +5,8 @@ import useCoinContext from "@/hooks/useCoinContext";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import useThemeCheck from '@/hooks/useThemeCheck';
 
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import toast from "react-hot-toast";
 import TradeModal from "@/Components/Common/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
@@ -27,7 +28,16 @@ const Watchlist = () => {
   const { user } = useUserContext();
   const { coins: liveCoins } = useCoinContext();
   const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
+
   const navigate = useNavigate();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const location = useLocation();
+  // Freeze validated state on mount
+  const [hasVisited] = useState(() => isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
 
   const userFromLocalStorage = JSON.parse(localStorage.getItem("NEXCHAIN_USER"));
   const userId = user?.id || userFromLocalStorage?.id;
@@ -297,7 +307,7 @@ const Watchlist = () => {
 
   return (
     <>
-      <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+      <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 ${hasVisited ? '' : `transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}`}>
         <Outlet />
 
         {/* Sticky Header */}
@@ -306,14 +316,15 @@ const Watchlist = () => {
           isLight={isLight}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          disableAnimations={hasVisited}
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          <div className={`transition-all duration-300 ease-out delay-[100ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <WatchlistStats stats={stats} TC={TC} isLight={isLight} />
+          <div className={hasVisited ? '' : `transition-all duration-300 ease-out delay-[100ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <WatchlistStats stats={stats} TC={TC} isLight={isLight} disableAnimations={hasVisited} />
           </div>
 
-          <div className={`transition-all duration-300 ease-out delay-[150ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={hasVisited ? '' : `transition-all duration-300 ease-out delay-[150ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             {loading ? (
               <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
                 <div className="p-8">
@@ -345,6 +356,7 @@ const Watchlist = () => {
                   handleTrade={handleTrade}
                   setRemoveModal={setRemoveModal}
                   handleAlertClick={handleAlertClick}
+                  disableAnimations={hasVisited}
                 />
 
                 { }
@@ -356,18 +368,20 @@ const Watchlist = () => {
                   handleTrade={handleTrade}
                   setRemoveModal={setRemoveModal}
                   handleAlertClick={handleAlertClick}
+                  disableAnimations={hasVisited}
                 />
               </>
             )}
           </div>
 
-          <div className={`transition-all duration-300 ease-out delay-[200ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={hasVisited ? '' : `transition-all duration-300 ease-out delay-[200ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <WatchlistPagination
               currentPage={currentPage}
               totalPages={totalPages}
               setCurrentPage={setCurrentPage}
               TC={TC}
               isLight={isLight}
+              disableAnimations={hasVisited}
             />
           </div>
         </div>

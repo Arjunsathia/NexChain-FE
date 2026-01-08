@@ -13,14 +13,29 @@ import OpenOrders from "@/Components/portfolio/OpenOrders";
 
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
+
+
+
 const PortfolioPage = () => {
   const isLight = useThemeCheck();
+  // Freeze validated state on mount so animations play fully on first visit
+
   const { balance } = useWalletContext();
   const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
   const { purchasedCoins } = usePurchasedCoins();
 
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
+
+  // Defer heavy connections until after page transition (approx 350ms)
+  const [transitionComplete, setTransitionComplete] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTransitionComplete(true);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, []);
 
 
   const [tradeModal, setTradeModal] = useState({
@@ -65,6 +80,7 @@ const PortfolioPage = () => {
   const bufferRef = useRef({});
 
   useEffect(() => {
+    if (!transitionComplete) return; // Wait for transition
     if (!groupedHoldings || groupedHoldings.length === 0) return;
 
     const symbols = groupedHoldings
@@ -196,7 +212,7 @@ const PortfolioPage = () => {
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
 
           {/* Header Section */}
-          <div className="fade-in" style={{ animationDelay: "0.1s" }}>
+          <div className="">
             <PortfolioHeader
               isLight={isLight}
               portfolioSummary={liveSummary}
@@ -208,7 +224,7 @@ const PortfolioPage = () => {
             />
           </div>
 
-          <div className="space-y-4 fade-in" style={{ animationDelay: "0.2s" }}>
+          <div className="space-y-4">
             <HoldingsTable
               isLight={isLight}
               holdings={mergedHoldings}
@@ -218,7 +234,7 @@ const PortfolioPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <PerformanceChart
                 isLight={isLight}
@@ -239,13 +255,13 @@ const PortfolioPage = () => {
             </div>
           </div>
 
-          <div className="fade-in" style={{ animationDelay: "0.4s" }}>
+          <div className="">
             <OpenOrders isLight={isLight} livePrices={livePrices} TC={TC} />
           </div>
 
 
 
-          <div className={`pt-8 border-t ${isLight ? 'border-gray-200' : 'border-white/5'} fade-in`} style={{ animationDelay: "0.5s" }}>
+          <div className={`pt-8 border-t ${isLight ? 'border-gray-200' : 'border-white/5'}`}>
             <TransactionHistory TC={TC} />
           </div>
 
