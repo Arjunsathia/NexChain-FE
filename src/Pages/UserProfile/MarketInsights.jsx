@@ -140,7 +140,9 @@ const UserMarketInsights = () => {
           // Just ensure loading is false.
           shouldFetch = false;
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
 
     if (!shouldFetch && marketData.length > 0) {

@@ -188,7 +188,7 @@ const PortfolioPage = () => {
         ws.current.close();
       }
     };
-  }, [groupedHoldings]); // Re-run if holdings change
+  }, [groupedHoldings, transitionComplete]); // Re-run if holdings change
 
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];

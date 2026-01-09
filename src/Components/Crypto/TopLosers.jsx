@@ -111,31 +111,41 @@ function TopLosers({ disableAnimations = false }) {
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2"
+                className="flex justify-between items-center p-2.5"
               >
                 <Skeleton
                   circle
-                  width={24}
-                  height={24}
+                  width={32}
+                  height={32}
                   baseColor={TC.skeletonBase}
                   highlightColor={TC.skeletonHighlight}
                 />
-                <div className="flex-1 ml-2">
+                <div className="flex-1 ml-3">
                   <Skeleton
-                    width={60}
+                    width={35}
+                    height={12}
                     baseColor={TC.skeletonBase}
                     highlightColor={TC.skeletonHighlight}
+                    className="mb-0.5"
                   />
                   <Skeleton
-                    width={40}
-                    height={10}
+                    width={55}
+                    height={8}
                     baseColor={TC.skeletonBase}
                     highlightColor={TC.skeletonHighlight}
                   />
                 </div>
                 <div className="flex flex-col items-end">
                   <Skeleton
-                    width={60}
+                    width={45}
+                    height={12}
+                    baseColor={TC.skeletonBase}
+                    highlightColor={TC.skeletonHighlight}
+                    className="mb-0.5"
+                  />
+                  <Skeleton
+                    width={30}
+                    height={8}
                     baseColor={TC.skeletonBase}
                     highlightColor={TC.skeletonHighlight}
                   />

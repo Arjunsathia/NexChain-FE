@@ -57,7 +57,7 @@ export function useLiveTrendingCoins(limit = 10) {
             setLoading(false);
             return; // EXIT EARLY
           }
-        } catch (e) {
+        } catch {
           /* ignore parse error */
         }
       }
@@ -101,7 +101,9 @@ export function useLiveTrendingCoins(limit = 10) {
             setLoading(false);
             return;
           }
-        } catch (e) {}
+        } catch {
+          // ignore parse error
+        }
       }
 
       // 2. If no cache at all, try static fallback

@@ -1,9 +1,9 @@
 import api, { coinGecko } from "./axiosConfig";
 
-// --- Blacklist Cache System ---
+// Cache for blacklisted/frozen coins to minimize API overhead
 let frozenCoinsCache = [];
 let lastFetchTime = 0;
-const CACHE_DURATION = 60000; // 1 minute cache
+const CACHE_DURATION = 60000;
 
 const ensureFrozenCache = async (force = false) => {
   if (
@@ -23,7 +23,7 @@ const ensureFrozenCache = async (force = false) => {
   }
 };
 
-// Exposed helper to force refresh (e.g., after Admin action)
+// Forcefully refresh the frozen coins cache (e.g., after an admin update)
 export const refreshFrozenCache = async () => {
   await ensureFrozenCache(true);
 };
@@ -91,9 +91,7 @@ export const getTrendingCoinMarketData = async (idsArray) => {
   try {
     await ensureFrozenCache();
 
-    // Filter IDs before requesting if possible, or after?
-    // Let's filter after to ensure we don't break expected array length if that matters (it doesn't usually)
-    // Actually, asking for a frozen ID might return data, but we shouldn't show it.
+    // Ensure frozen coins are excluded from the request logic
 
     const ids = idsArray.join(",");
     const response = await coinGecko.get("/coins/markets", {
@@ -191,7 +189,7 @@ export const getCoinById = async (id) => {
     const response = await coinGecko.get(`/coins/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching coin by ID:", error.message);
+    if (import.meta.env.DEV) console.error("Error fetching coin by ID:", error.message);
     throw error;
   }
 };
@@ -201,7 +199,7 @@ export const getGlobalMarketStats = async () => {
     const response = await coinGecko.get("/global");
     return response.data.data;
   } catch (error) {
-    console.error("Error fetching global market stats:", error.message);
+    if (import.meta.env.DEV) console.error("Error fetching global market stats:", error.message);
     throw error;
   }
 };
@@ -216,7 +214,7 @@ export const getMarketChart = async (id, days = 7) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching market chart:", error.message);
+    if (import.meta.env.DEV) console.error("Error fetching market chart:", error.message);
     throw error;
   }
 };

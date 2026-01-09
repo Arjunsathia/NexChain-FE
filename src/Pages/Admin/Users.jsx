@@ -115,30 +115,34 @@ const Users = () => {
   const {
     data: users = [],
     isLoading: loading,
-    refetch: fetchUsers,
   } = useQuery({
     queryKey: ["adminUsers", showArchived],
     queryFn: async () => {
-      const response = await getData(`/users?includeDeleted=${showArchived}`);
-      let usersData =
-        response?.users ??
-        response?.data ??
-        (Array.isArray(response) ? response : []);
+      try {
+        const response = await getData(`/users?includeDeleted=${showArchived}`);
 
-      const NOW = new Date().getTime();
-      const INACTIVE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
+        // Ensure response is valid
+        if (!response) return [];
 
-      if (Array.isArray(usersData)) {
-        usersData = usersData.map((user) => ({
-          ...user,
-          recentlyActive: user.lastLogin
-            ? NOW - new Date(user.lastLogin).getTime() < INACTIVE_THRESHOLD
-            : false,
-        }));
-      }
+        let usersData =
+          response?.users ??
+          response?.data ??
+          (Array.isArray(response) ? response : []);
 
-      return Array.isArray(usersData)
-        ? usersData.sort((a, b) => {
+        const NOW = new Date().getTime();
+        const INACTIVE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+        if (Array.isArray(usersData)) {
+          usersData = usersData.map((user) => ({
+            ...user,
+            recentlyActive: user.lastLogin
+              ? NOW - new Date(user.lastLogin).getTime() < INACTIVE_THRESHOLD
+              : false,
+          }));
+        }
+
+        return Array.isArray(usersData)
+          ? usersData.sort((a, b) => {
             // 1. Admins always on top
             if (a.role === "admin" && b.role !== "admin") return -1;
             if (a.role !== "admin" && b.role === "admin") return 1;
@@ -146,7 +150,11 @@ const Users = () => {
             // 2. Then sort alphabetically by name
             return (a.name || "").localeCompare(b.name || "");
           })
-        : [];
+          : [];
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+        return [];
+      }
     },
     staleTime: 5 * 60 * 1000, // 5 minute cache
     keepPreviousData: true,
@@ -263,11 +271,11 @@ const Users = () => {
       queryClient.setQueryData(["adminUsers", showArchived], (oldUsers) => {
         return oldUsers
           ? oldUsers.map((u) => {
-              if (u.id === targetId || u._id === targetId) {
-                return { ...u, ...updateData };
-              }
-              return u;
-            })
+            if (u.id === targetId || u._id === targetId) {
+              return { ...u, ...updateData };
+            }
+            return u;
+          })
           : [];
       });
       // Also invalidate to be sure
@@ -329,11 +337,11 @@ const Users = () => {
       queryClient.setQueryData(["adminUsers", showArchived], (oldUsers) => {
         return oldUsers
           ? oldUsers.map((u) => {
-              if (u.id === targetId || u._id === targetId) {
-                return { ...u, isFrozen: newFrozenStatus };
-              }
-              return u;
-            })
+            if (u.id === targetId || u._id === targetId) {
+              return { ...u, isFrozen: newFrozenStatus };
+            }
+            return u;
+          })
           : [];
       });
 
@@ -395,7 +403,7 @@ const Users = () => {
 
   // UserListItem Component
   const UserListItem = useMemo(() => {
-    const Component = ({ user, onToggleFreeze, index, shouldAnimate }) => (
+    const Component = ({ user, index, shouldAnimate }) => (
       <div
         onClick={() => setSelectedUser(user)}
         style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
@@ -403,11 +411,10 @@ const Users = () => {
         group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
         transition-all duration-300 border-l-4 relative overflow-hidden
         ${shouldAnimate ? "fade-in" : ""}
-        ${
-          selectedUser?._id === user._id
+        ${selectedUser?._id === user._id
             ? `${isLight ? "bg-white shadow-sm" : "bg-white/10 shadow-none"} border-blue-500 scale-[1.02] z-10`
             : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
-        }
+          }
       `}
       >
         {/* Subtle background glow on hover */}
@@ -419,18 +426,16 @@ const Users = () => {
         <div className="relative flex-shrink-0 z-10">
           <div
             className={`w-11 h-11 rounded-xl bg-gradient-to-br p-0.5 shadow-md transition-all
-          ${
-            user.isFrozen
-              ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
-              : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"
-          }
-          ${
-            selectedUser?._id === user._id
-              ? user.isFrozen
-                ? "ring-2 ring-red-500/20"
-                : "ring-2 ring-blue-500/20"
-              : ""
-          } 
+          ${user.isFrozen
+                ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
+                : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"
+              }
+          ${selectedUser?._id === user._id
+                ? user.isFrozen
+                  ? "ring-2 ring-red-500/20"
+                  : "ring-2 ring-blue-500/20"
+                : ""
+              } 
           `}
           >
             <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
@@ -486,11 +491,10 @@ const Users = () => {
             </p>
             <span
               className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
-            ${
-              selectedUser?._id === user._id
-                ? "bg-blue-500 text-white"
-                : "bg-blue-500/10 text-blue-500/70 border border-blue-500/10"
-            }`}
+            ${selectedUser?._id === user._id
+                  ? "bg-blue-500 text-white"
+                  : "bg-blue-500/10 text-blue-500/70 border border-blue-500/10"
+                }`}
             >
               {user.role}
             </span>
@@ -555,22 +559,20 @@ const Users = () => {
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none border transition-all ${
-                    isLight
-                      ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500"
-                      : "bg-gray-900/50 border-white/10 focus:bg-black/50 focus:border-cyan-500 text-white placeholder-gray-500"
-                  }`}
+                  className={`w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none border transition-all ${isLight
+                    ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500"
+                    : "bg-gray-900/50 border-white/10 focus:bg-black/50 focus:border-cyan-500 text-white placeholder-gray-500"
+                    }`}
                 />
               </div>
               <button
                 onClick={() =>
                   setFilterRole(filterRole === "all" ? "admin" : "all")
                 }
-                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${
-                  filterRole === "admin"
-                    ? "bg-purple-500/10 border-purple-500/50 text-purple-500"
-                    : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
-                }`}
+                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${filterRole === "admin"
+                  ? "bg-purple-500/10 border-purple-500/50 text-purple-500"
+                  : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
+                  }`}
                 title="Toggle Admin Filter"
               >
                 <Shield className="w-4 h-4" />
@@ -578,11 +580,10 @@ const Users = () => {
               </button>
               <button
                 onClick={() => setShowArchived(!showArchived)}
-                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${
-                  showArchived
-                    ? "bg-red-500/10 border-red-500/50 text-red-500"
-                    : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
-                }`}
+                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${showArchived
+                  ? "bg-red-500/10 border-red-500/50 text-red-500"
+                  : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
+                  }`}
                 title="Toggle Archived"
               >
                 <Archive className="w-4 h-4" />
@@ -678,10 +679,10 @@ const UserDetailPane = ({
   userDetails,
   loadingDetails,
   setExpandedStat,
-  openActionModal,
-  setShowMessageModal,
   currentUserRole,
   isLight,
+  openActionModal,
+  setShowMessageModal,
   onToggleFreeze,
 }) => {
   // Simple media query hook
@@ -795,11 +796,10 @@ const UserDetailPane = ({
       md:backdrop-blur-xl md:shadow-sm md:glass-card
       transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)
       flex flex-col
-      ${
-        selectedUser
+      ${selectedUser
           ? "translate-y-0 opacity-100 md:!translate-y-0 md:translate-x-0"
           : "translate-y-[110%] opacity-100 md:opacity-0 pointers-events-none md:!translate-y-0 md:w-0 md:translate-x-20"
-      }
+        }
     `}
     >
       {selectedUser && (
@@ -819,11 +819,10 @@ const UserDetailPane = ({
               <div className="absolute bottom-6 left-6 md:left-8 flex items-end gap-5">
                 <div
                   className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden backdrop-blur-md
-                   ${
-                     selectedUser.isFrozen
-                       ? "border-red-500/50 bg-red-500/10 shadow-red-500/20"
-                       : "border-white/20 bg-white/10"
-                   }
+                   ${selectedUser.isFrozen
+                      ? "border-red-500/50 bg-red-500/10 shadow-red-500/20"
+                      : "border-white/20 bg-white/10"
+                    }
                 `}
                 >
                   {selectedUser.image ? (
@@ -877,11 +876,10 @@ const UserDetailPane = ({
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab.toLowerCase())}
-                      className={`pb-2 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
-                        activeTab === tab.toLowerCase()
-                          ? "text-blue-500 border-blue-500"
-                          : "text-gray-400 border-transparent hover:text-gray-500"
-                      }`}
+                      className={`pb-2 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.toLowerCase()
+                        ? "text-blue-500 border-blue-500"
+                        : "text-gray-400 border-transparent hover:text-gray-500"
+                        }`}
                     >
                       {tab}
                     </button>
@@ -916,10 +914,9 @@ const UserDetailPane = ({
                     <button
                       onClick={(e) => onToggleFreeze(selectedUser, e)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all hover:-translate-y-0.5
-                        ${
-                          selectedUser.isFrozen
-                            ? "bg-green-600 hover:bg-green-700 text-white shadow-green-500/20"
-                            : "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20"
+                        ${selectedUser.isFrozen
+                          ? "bg-green-600 hover:bg-green-700 text-white shadow-green-500/20"
+                          : "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20"
                         }`}
                     >
                       {selectedUser.isFrozen ? (

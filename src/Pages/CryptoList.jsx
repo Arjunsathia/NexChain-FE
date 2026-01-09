@@ -106,7 +106,7 @@ function CryptoList() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [globalData]);
 
   useEffect(() => {
     // Defer fetching until after page transition (350ms)

@@ -5,7 +5,6 @@ import {
   FaChartLine,
   FaUsers,
   FaCoins,
-  FaChartBar,
   FaNewspaper,
   FaCommentAlt,
   FaCog,
@@ -13,7 +12,6 @@ import {
   FaSignOutAlt,
   FaChevronRight,
   FaGlobe, // Icon for "Online"
-  FaExchangeAlt, // Icon for "Trades"
 } from "react-icons/fa";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -46,9 +44,8 @@ const LogoutConfirmationModal = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${
-              isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
-            }`}
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
+              }`}
           >
             <div
               className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
@@ -56,9 +53,8 @@ const LogoutConfirmationModal = ({
 
             <div className="text-center relative z-10">
               <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                  isLight ? "bg-red-50" : "bg-red-500/10"
-                }`}
+                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
+                  }`}
               >
                 <FaSignOutAlt
                   className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
@@ -80,11 +76,10 @@ const LogoutConfirmationModal = ({
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
-                    isLight
-                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    }`}
                 >
                   Cancel
                 </button>
@@ -304,9 +299,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               >
                 <Link
                   to={item.path}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 group overflow-hidden ${
-                    active ? "" : TC.menuItemBase
-                  }`}
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 group overflow-hidden ${active ? "" : TC.menuItemBase
+                    }`}
                 >
                   {active && (
                     <motion.div
@@ -400,11 +394,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-              isLight
-                ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
-                : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isLight
+              ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
+              : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
+              }`}
           >
             <FaSignOutAlt className="text-lg" />
             <span className="font-medium text-sm">Sign Out</span>

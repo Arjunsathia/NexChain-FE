@@ -7,7 +7,7 @@ import { useVisitedRoutes } from "../../hooks/useVisitedRoutes";
 
 const AnimatedLayout = () => {
   const location = useLocation();
-  const { isVisited, markVisited } = useVisitedRoutes();
+  const { markVisited } = useVisitedRoutes();
 
   // 1. Disable Browser Scroll Restoration to prevent glitchy jumps
   useLayoutEffect(() => {

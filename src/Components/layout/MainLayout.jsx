@@ -17,7 +17,7 @@ const LayoutLoader = () => (
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
   const { fetchRole } = useRoleContext();
-  const { isVisited, markVisited } = useVisitedRoutes();
+  const { markVisited } = useVisitedRoutes();
 
   const location = useLocation();
   // Capture the current outlet element (frozen route)
@@ -79,7 +79,7 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
-      {}
+      { }
       <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
         style={{
@@ -115,7 +115,7 @@ export default function MainLayout() {
 
       <Footer />
 
-      {}
+      { }
       <ChatbotWidget />
     </div>
   );

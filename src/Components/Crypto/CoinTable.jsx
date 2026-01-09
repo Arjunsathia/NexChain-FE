@@ -68,17 +68,13 @@ const CoinRow = React.memo(
         ? liveData.isPositive
         : (coin.price_change_percentage_24h || 0) >= 0;
 
-    const priceColor = isLight ? "text-gray-900" : "text-white";
-
-    // Memoize the Sparkline data? Usually sparkline doesn't update live over websocket unless backend sends it.
-    // Assuming sparkline is static for now.
-
+    // Sparkline data is static and does not update via WebSocket, so standard memoization is sufficient.
     const renderedPrice =
       typeof displayPrice === "number"
         ? displayPrice.toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
-          })
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        })
         : displayPrice;
 
     return (
@@ -160,9 +156,8 @@ const CoinRow = React.memo(
           <div className="text-base font-semibold">${renderedPrice || "0"}</div>
         </td>
         <td
-          className={`py-4 px-6 text-right font-semibold ${disableAnimations ? "" : "fade-in"} ${
-            !isPositive ? "text-red-600" : "text-green-600"
-          }`}
+          className={`py-4 px-6 text-right font-semibold ${disableAnimations ? "" : "fade-in"} ${!isPositive ? "text-red-600" : "text-green-600"
+            }`}
           style={
             disableAnimations
               ? {}
@@ -307,9 +302,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
 
   useEffect(() => {
     if (Array.isArray(initialCoins) && initialCoins.length > 0) {
-      // Only update if we don't have coins yet or if the source data length changed significantly
-      // to avoid resetting local state on minor updates if any.
-      // Since initialCoins comes from Redux and is static after load, this is safe.
+      // Initialize local coins state from the global context data.
       setCoins(initialCoins.slice(0, 100));
     }
   }, [initialCoins]);
@@ -432,8 +425,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
         (pc) => pc.coin_id === coin.id || pc.id === coin.id,
       );
 
-      // Removing liveData merge to ensure row stability.
-      // Live data is now passed directly to the CoinRow component.
+      // Pass live ticker data directly to child components to maintain performance.
 
       return {
         ...coin,
@@ -494,9 +486,8 @@ function CoinTable({ onTrade, disableAnimations = false }) {
         <button
           key={page}
           onClick={() => handlePageClick(page)}
-          className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 ${shouldAnimate ? "fade-in" : ""} ${
-            currentPage === page ? TC.btnPaginationActive : TC.btnPagination
-          }`}
+          className={`px-3 py-2 rounded text-sm font-medium transition-all duration-200 ${shouldAnimate ? "fade-in" : ""} ${currentPage === page ? TC.btnPaginationActive : TC.btnPagination
+            }`}
           style={
             shouldAnimate ? { animationDelay: `${0.8 + index * 0.05}s` } : {}
           }
@@ -505,7 +496,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
         </button>
       );
     });
-  }, [totalPages, currentPage, TC]);
+  }, [totalPages, currentPage, TC, shouldAnimate]);
 
   if (coinsLoading && coins.length === 0) {
     return (
@@ -580,11 +571,10 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                       state: { coin },
                     })
                   }
-                  className={`p-4 rounded-xl border ${
-                    isLight
-                      ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
-                      : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
-                  } cursor-pointer transition-all duration-300 group ${shouldAnimate ? "fade-in" : ""}`}
+                  className={`p-4 rounded-xl border ${isLight
+                    ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
+                    : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
+                    } cursor-pointer transition-all duration-300 group ${shouldAnimate ? "fade-in" : ""}`}
                   style={
                     shouldAnimate
                       ? { animationDelay: `${0.5 + index * 0.1}s` }
@@ -637,11 +627,10 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                       </div>
                     </div>
                     <div
-                      className={`font-semibold text-sm px-2 py-1 rounded-lg ${
-                        coin.price_change_percentage_24h < 0
-                          ? TC.bgPillNegative
-                          : TC.bgPillPositive
-                      }`}
+                      className={`font-semibold text-sm px-2 py-1 rounded-lg ${coin.price_change_percentage_24h < 0
+                        ? TC.bgPillNegative
+                        : TC.bgPillPositive
+                        }`}
                     >
                       {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
                     </div>

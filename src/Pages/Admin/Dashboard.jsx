@@ -45,7 +45,7 @@ const AdminDashboard = () => {
       textSecondary: isLight ? "text-gray-500" : "text-gray-400",
       textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
-      // Chromium Compositor Fix: Disable heavy backdrop-blur in dark mode to stop 1px pixel-snapping flicker
+      // Optimized for Chromium browsers to prevent flickering in dark mode
       // Premium Glassmorphism Cards - Optimized for stability
       bgCard: isLight
         ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
@@ -74,7 +74,7 @@ const AdminDashboard = () => {
     [isLight],
   );
 
-  // 1. Users Query
+  // Fetch user data
   const { data: users = [], isLoading: isUsersLoading } = useQuery({
     queryKey: ["adminUsers"],
     queryFn: async () => {
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
     refetchInterval: 30000,
   });
 
-  // 2. Reports Query
+  // Fetch system reports
   const { data: reports = [], isLoading: isReportsLoading } = useQuery({
     queryKey: ["adminReports"],
     queryFn: async () => {
@@ -94,34 +94,34 @@ const AdminDashboard = () => {
       const feedbackData = res?.data ?? res ?? [];
       return Array.isArray(feedbackData)
         ? feedbackData
-            .filter((fb) => fb && (fb.type === "bug" || fb.type === "issue"))
-            .map((fb) => {
-              /* ... mapping logic ... */
-              const message = fb.message || "";
-              const trimmedTitle =
-                message.length > 0
-                  ? message.length > 60
-                    ? `${message.substring(0, 60)}...`
-                    : message
-                  : "No title";
-              return {
-                id: fb._id || fb.id,
-                type: fb.type || "bug",
-                title: trimmedTitle,
-                status: fb.status || "new",
-                createdAt:
-                  fb.createdAt || fb.timestamp || new Date().toISOString(),
-              };
-            })
-            .slice(0, 4)
+          .filter((fb) => fb && (fb.type === "bug" || fb.type === "issue"))
+          .map((fb) => {
+            /* ... mapping logic ... */
+            const message = fb.message || "";
+            const trimmedTitle =
+              message.length > 0
+                ? message.length > 60
+                  ? `${message.substring(0, 60)}...`
+                  : message
+                : "No title";
+            return {
+              id: fb._id || fb.id,
+              type: fb.type || "bug",
+              title: trimmedTitle,
+              status: fb.status || "new",
+              createdAt:
+                fb.createdAt || fb.timestamp || new Date().toISOString(),
+            };
+          })
+          .slice(0, 4)
         : [];
     },
     staleTime: 30000,
     refetchInterval: 30000,
   });
 
-  // 3. Recent Activity Query
-  const { data: recentActivity = [], isLoading: isActivityLoading } = useQuery({
+  // Fetch recent platform activity
+  const { isLoading: isActivityLoading } = useQuery({
     queryKey: ["adminActivity"],
     queryFn: async () => {
       const res = await getData("/activity");
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
     retry: false,
   });
 
-  // 4. Trending Coin Query
+  // Fetch trending coin data
   const { data: trendingCoinData, isLoading: isTrendingLoading } = useQuery({
     queryKey: ["adminTrending"],
     queryFn: async () => {
@@ -143,7 +143,7 @@ const AdminDashboard = () => {
     refetchInterval: 60000,
   });
 
-  // 5. Platform Stats
+  // Fetch platform statistics
   const {
     data: platformStats = { tradesToday: 0 },
     isLoading: isStatsLoading,
@@ -282,13 +282,13 @@ const AdminDashboard = () => {
               isUsersLoading ||
               isStatsLoading ||
               isActivityLoading) && (
-              <div
-                className={`flex items-center text-xs font-medium backdrop-blur-sm px-4 py-2 rounded-full border shadow-sm ${isLight ? "bg-white/50 border-gray-100 text-gray-500" : "bg-gray-800/50 border-gray-700 text-gray-400"}`}
-              >
-                <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
-                Updating live data...
-              </div>
-            )}
+                <div
+                  className={`flex items-center text-xs font-medium backdrop-blur-sm px-4 py-2 rounded-full border shadow-sm ${isLight ? "bg-white/50 border-gray-100 text-gray-500" : "bg-gray-800/50 border-gray-700 text-gray-400"}`}
+                >
+                  <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
+                  Updating live data...
+                </div>
+              )}
             {isReady &&
               !isUsersLoading &&
               !isStatsLoading &&
@@ -345,7 +345,7 @@ const AdminDashboard = () => {
                 color: "from-amber-500 to-yellow-400",
                 badge:
                   adminStats.trendingCoin &&
-                  adminStats.trendingCoin.price_change_percentage_24h != null
+                    adminStats.trendingCoin.price_change_percentage_24h != null
                     ? `${Number(adminStats.trendingCoin.price_change_percentage_24h).toFixed(2)}%`
                     : "No data",
                 onClick: handleTrendingCardClick,
@@ -398,15 +398,14 @@ const AdminDashboard = () => {
                       onClick={() => setTimeRange(range)}
                       className={`
                       px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-300
-                      ${
-                        timeRange === range
+                      ${timeRange === range
                           ? isLight
                             ? "bg-white text-cyan-600 shadow-sm"
                             : "bg-gray-700 text-white shadow-sm border border-white/5"
                           : isLight
                             ? "text-gray-500 hover:text-gray-900"
                             : "text-gray-400 hover:text-white"
-                      }
+                        }
                     `}
                     >
                       {range}
