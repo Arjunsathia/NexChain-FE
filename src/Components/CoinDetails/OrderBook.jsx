@@ -1,4 +1,4 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, {
   useEffect,
   useState,
@@ -8,48 +8,48 @@ import React, {
   memo,
 } from "react";
 
-
-
-const OrderBook = memo(({ symbol = 'btcusdt' }) => {
+const OrderBook = memo(({ symbol = "btcusdt" }) => {
   const isLight = useThemeCheck();
   const [orderBook, setOrderBook] = useState({ bids: [], asks: [] });
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
   const ws = useRef(null);
   const maxVolumeRef = useRef(0);
-  const TC = useMemo(() => ({
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-500" : "text-gray-500",
+  const TC = useMemo(
+    () => ({
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
+      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
 
-    bgCard: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
-    borderHeader: isLight ? "border-gray-100" : "border-gray-700/50",
+      bgCard: isLight
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
+      borderHeader: isLight ? "border-gray-100" : "border-gray-700/50",
 
+      headerGradient:
+        "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
 
-    headerGradient: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
+      bgTabBar: isLight ? "bg-gray-100/50" : "bg-gray-900/50",
+      textTabInactive: isLight
+        ? "text-gray-600 hover:text-gray-900"
+        : "text-gray-400 hover:text-white",
+      bgTabActiveCyan: "bg-cyan-600 text-white",
+      bgTabActiveGreen: "bg-green-600 text-white",
+      bgTabActiveRed: "bg-red-600 text-white",
 
+      bgBidVolume: isLight ? "bg-green-500/10" : "bg-green-500/10",
+      bgAskVolume: isLight ? "bg-red-500/10" : "bg-red-500/10",
+      textBidPrice: isLight ? "text-green-700" : "text-green-400",
+      textAskPrice: isLight ? "text-red-700" : "text-red-400",
+      textAmount: isLight ? "text-gray-800" : "text-gray-300",
+      textTotal: isLight ? "text-gray-500" : "text-gray-400",
 
-    bgTabBar: isLight ? "bg-gray-100/50" : "bg-gray-900/50",
-    textTabInactive: isLight ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-white",
-    bgTabActiveCyan: "bg-cyan-600 text-white",
-    bgTabActiveGreen: "bg-green-600 text-white",
-    bgTabActiveRed: "bg-red-600 text-white",
-
-
-    bgBidVolume: isLight ? "bg-green-500/10" : "bg-green-500/10",
-    bgAskVolume: isLight ? "bg-red-500/10" : "bg-red-500/10",
-    textBidPrice: isLight ? "text-green-700" : "text-green-400",
-    textAskPrice: isLight ? "text-red-700" : "text-red-400",
-    textAmount: isLight ? "text-gray-800" : "text-gray-300",
-    textTotal: isLight ? "text-gray-500" : "text-gray-400",
-
-
-    bgSpread: isLight ? "bg-gray-100/50 border-gray-300/50" : "bg-gray-900/50 border-gray-700/50",
-    textSpreadValue: isLight ? "text-blue-600" : "text-cyan-400",
-
-  }), [isLight]);
-
+      bgSpread: isLight
+        ? "bg-gray-100/50 border-gray-300/50"
+        : "bg-gray-900/50 border-gray-700/50",
+      textSpreadValue: isLight ? "text-blue-600" : "text-cyan-400",
+    }),
+    [isLight],
+  );
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -68,7 +68,7 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
             volume: parseFloat(volume),
           }));
 
-          const allVolumes = [...newBids, ...newAsks].map(o => o.volume);
+          const allVolumes = [...newBids, ...newAsks].map((o) => o.volume);
           maxVolumeRef.current = Math.max(...allVolumes);
 
           setOrderBook({ bids: newBids, asks: newAsks });
@@ -76,7 +76,7 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
       };
 
       ws.current.onerror = (error) => {
-        console.error('OrderBook WebSocket error:', error);
+        console.error("OrderBook WebSocket error:", error);
       };
     };
 
@@ -89,36 +89,54 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
     };
   }, [symbol]);
 
-  const renderOrderRow = useCallback((order, type) => {
-    const percentage = maxVolumeRef.current > 0 ? (order.volume / maxVolumeRef.current) * 100 : 0;
-    const bgColor = type === 'bid' ? TC.bgBidVolume : TC.bgAskVolume;
-    const textColor = type === 'bid' ? TC.textBidPrice : TC.textAskPrice;
-    const amountColor = TC.textAmount;
-    const totalColor = TC.textTotal;
+  const renderOrderRow = useCallback(
+    (order, type) => {
+      const percentage =
+        maxVolumeRef.current > 0
+          ? (order.volume / maxVolumeRef.current) * 100
+          : 0;
+      const bgColor = type === "bid" ? TC.bgBidVolume : TC.bgAskVolume;
+      const textColor = type === "bid" ? TC.textBidPrice : TC.textAskPrice;
+      const amountColor = TC.textAmount;
+      const totalColor = TC.textTotal;
 
-    return (
-      <div key={`${type}-${order.price}`} className="relative">
-        <div
-          className={`absolute inset-0 ${bgColor}`}
-          style={{ width: `${percentage}%`, right: type === 'bid' ? undefined : 0, left: type === 'ask' ? undefined : 0 }}
-        />
-        <div className="relative grid grid-cols-3 gap-2 px-3 py-1 text-xs">
-          <span className={`${textColor} font-mono font-medium`}>
-            {order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          <span className={`${amountColor} text-right font-mono`}>
-            {order.volume.toFixed(5)}
-          </span>
-          <span className={`${totalColor} text-right font-mono text-xs`}>
-            {(order.price * order.volume).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </span>
+      return (
+        <div key={`${type}-${order.price}`} className="relative">
+          <div
+            className={`absolute inset-0 ${bgColor}`}
+            style={{
+              width: `${percentage}%`,
+              right: type === "bid" ? undefined : 0,
+              left: type === "ask" ? undefined : 0,
+            }}
+          />
+          <div className="relative grid grid-cols-3 gap-2 px-3 py-1 text-xs">
+            <span className={`${textColor} font-mono font-medium`}>
+              {order.price.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+            <span className={`${amountColor} text-right font-mono`}>
+              {order.volume.toFixed(5)}
+            </span>
+            <span className={`${totalColor} text-right font-mono text-xs`}>
+              {(order.price * order.volume).toLocaleString("en-US", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </span>
+          </div>
         </div>
-      </div>
-    );
-  }, [TC]);
+      );
+    },
+    [TC],
+  );
 
   return (
-    <div className={`${TC.bgCard} rounded-lg md:rounded-2xl overflow-hidden h-full flex flex-col`}>
+    <div
+      className={`${TC.bgCard} rounded-lg md:rounded-2xl overflow-hidden h-full flex flex-col`}
+    >
       <div className={`p-3 border-b ${TC.borderHeader} flex-shrink-0`}>
         <div className="flex items-center justify-between mb-2">
           <h3 className={`text-base font-bold ${TC.headerGradient}`}>
@@ -126,36 +144,35 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
           </h3>
           <div className={`flex gap-1 rounded-lg p-0.5 ${TC.bgTabBar}`}>
             <button
-              onClick={() => setActiveTab('all')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'all'
-                ? TC.bgTabActiveCyan
-                : TC.textTabInactive
-                }`}
+              onClick={() => setActiveTab("all")}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${
+                activeTab === "all" ? TC.bgTabActiveCyan : TC.textTabInactive
+              }`}
             >
               All
             </button>
             <button
-              onClick={() => setActiveTab('bids')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'bids'
-                ? TC.bgTabActiveGreen
-                : TC.textTabInactive
-                }`}
+              onClick={() => setActiveTab("bids")}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${
+                activeTab === "bids" ? TC.bgTabActiveGreen : TC.textTabInactive
+              }`}
             >
               Bids
             </button>
             <button
-              onClick={() => setActiveTab('asks')}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${activeTab === 'asks'
-                ? TC.bgTabActiveRed
-                : TC.textTabInactive
-                }`}
+              onClick={() => setActiveTab("asks")}
+              className={`px-2 py-0.5 rounded text-xs transition-all ${
+                activeTab === "asks" ? TC.bgTabActiveRed : TC.textTabInactive
+              }`}
             >
               Asks
             </button>
           </div>
         </div>
 
-        <div className={`grid grid-cols-3 gap-2 px-3 text-xs font-semibold ${TC.textSecondary}`}>
+        <div
+          className={`grid grid-cols-3 gap-2 px-3 text-xs font-semibold ${TC.textSecondary}`}
+        >
           <span>Price</span>
           <span className="text-right">Amount</span>
           <span className="text-right">Total</span>
@@ -163,27 +180,33 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        {(activeTab === 'all' || activeTab === 'asks') && (
+        {(activeTab === "all" || activeTab === "asks") && (
           <div className="flex flex-col-reverse">
-            {orderBook.asks.map(ask => renderOrderRow(ask, 'ask'))}
+            {orderBook.asks.map((ask) => renderOrderRow(ask, "ask"))}
           </div>
         )}
 
-        {activeTab === 'all' && orderBook.bids.length > 0 && orderBook.asks.length > 0 && (
-          <div className={`py-1.5 px-3 border-y flex-shrink-0 ${TC.bgSpread}`}>
-            <div className="flex items-center justify-between text-xs">
-              <span className={TC.textSecondary}>Spread</span>
-              <span className={`${TC.textSpreadValue} font-mono font-semibold`}>
-                {(orderBook.asks[0].price - orderBook.bids[0].price).toFixed(2)}
-              </span>
+        {activeTab === "all" &&
+          orderBook.bids.length > 0 &&
+          orderBook.asks.length > 0 && (
+            <div
+              className={`py-1.5 px-3 border-y flex-shrink-0 ${TC.bgSpread}`}
+            >
+              <div className="flex items-center justify-between text-xs">
+                <span className={TC.textSecondary}>Spread</span>
+                <span
+                  className={`${TC.textSpreadValue} font-mono font-semibold`}
+                >
+                  {(orderBook.asks[0].price - orderBook.bids[0].price).toFixed(
+                    2,
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {(activeTab === 'all' || activeTab === 'bids') && (
-          <div>
-            {orderBook.bids.map(bid => renderOrderRow(bid, 'bid'))}
-          </div>
+        {(activeTab === "all" || activeTab === "bids") && (
+          <div>{orderBook.bids.map((bid) => renderOrderRow(bid, "bid"))}</div>
         )}
       </div>
 
@@ -200,6 +223,6 @@ const OrderBook = memo(({ symbol = 'btcusdt' }) => {
   );
 });
 
-OrderBook.displayName = 'OrderBook';
+OrderBook.displayName = "OrderBook";
 
 export default OrderBook;

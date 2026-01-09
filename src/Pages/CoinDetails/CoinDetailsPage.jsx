@@ -1,4 +1,4 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, {
   useEffect,
   useState,
@@ -16,7 +16,6 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
 
 import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
 import OrderBook from "@/Components/CoinDetails/OrderBook";
@@ -42,7 +41,8 @@ function CoinDetailsPage() {
   }, [liveCoins, coinId]);
 
   const userHoldings = useMemo(() => {
-    if (!coinId || !purchasedCoins || !Array.isArray(purchasedCoins)) return null;
+    if (!coinId || !purchasedCoins || !Array.isArray(purchasedCoins))
+      return null;
     return purchasedCoins.find((holding) => holding.coinId === coinId);
   }, [coinId, purchasedCoins]);
 
@@ -75,12 +75,13 @@ function CoinDetailsPage() {
       skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
       skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
 
-      btnPrimary: "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+      btnPrimary:
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
 
       textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
       textNegative: isLight ? "text-rose-600" : "text-rose-400",
     }),
-    [isLight]
+    [isLight],
   );
 
   useEffect(() => {
@@ -101,27 +102,55 @@ function CoinDetailsPage() {
 
       return {
         ...passedCoin,
-        image: typeof passedCoin.image === 'string'
-          ? { large: passedCoin.image, small: passedCoin.image, thumb: passedCoin.image }
-          : (passedCoin.image || {}),
+        image:
+          typeof passedCoin.image === "string"
+            ? {
+                large: passedCoin.image,
+                small: passedCoin.image,
+                thumb: passedCoin.image,
+              }
+            : passedCoin.image || {},
         market_data: {
-          current_price: { usd: existingMarket.current_price?.usd || flatData.current_price || 0 },
-          price_change_percentage_24h: existingMarket.price_change_percentage_24h || flatData.price_change_percentage_24h || 0,
-          market_cap: { usd: existingMarket.market_cap?.usd || flatData.market_cap || 0 },
-          total_volume: { usd: existingMarket.total_volume?.usd || flatData.total_volume || 0 },
-          high_24h: { usd: existingMarket.high_24h?.usd || flatData.high_24h || 0 },
-          low_24h: { usd: existingMarket.low_24h?.usd || flatData.low_24h || 0 },
-          price_change_24h: existingMarket.price_change_24h || flatData.price_change_24h || 0,
+          current_price: {
+            usd:
+              existingMarket.current_price?.usd || flatData.current_price || 0,
+          },
+          price_change_percentage_24h:
+            existingMarket.price_change_percentage_24h ||
+            flatData.price_change_percentage_24h ||
+            0,
+          market_cap: {
+            usd: existingMarket.market_cap?.usd || flatData.market_cap || 0,
+          },
+          total_volume: {
+            usd: existingMarket.total_volume?.usd || flatData.total_volume || 0,
+          },
+          high_24h: {
+            usd: existingMarket.high_24h?.usd || flatData.high_24h || 0,
+          },
+          low_24h: {
+            usd: existingMarket.low_24h?.usd || flatData.low_24h || 0,
+          },
+          price_change_24h:
+            existingMarket.price_change_24h || flatData.price_change_24h || 0,
 
           ath: { usd: existingMarket.ath?.usd || flatData.ath || 0 },
           atl: { usd: existingMarket.atl?.usd || flatData.atl || 0 },
-          ath_date: { usd: existingMarket.ath_date?.usd || flatData.ath_date || null },
-          atl_date: { usd: existingMarket.atl_date?.usd || flatData.atl_date || null },
-          circulating_supply: existingMarket.circulating_supply || flatData.circulating_supply || 0,
-          total_supply: existingMarket.total_supply || flatData.total_supply || 0,
+          ath_date: {
+            usd: existingMarket.ath_date?.usd || flatData.ath_date || null,
+          },
+          atl_date: {
+            usd: existingMarket.atl_date?.usd || flatData.atl_date || null,
+          },
+          circulating_supply:
+            existingMarket.circulating_supply ||
+            flatData.circulating_supply ||
+            0,
+          total_supply:
+            existingMarket.total_supply || flatData.total_supply || 0,
           max_supply: existingMarket.max_supply || flatData.max_supply || 0,
-        }
-      }
+        },
+      };
     }
 
     if (liveCoin) {
@@ -129,26 +158,35 @@ function CoinDetailsPage() {
         ...liveCoin,
         name: liveCoin.name,
         symbol: liveCoin.symbol,
-        image: typeof liveCoin.image === 'string'
-          ? { large: liveCoin.image, small: liveCoin.image, thumb: liveCoin.image }
-          : (liveCoin.image || {}),
+        image:
+          typeof liveCoin.image === "string"
+            ? {
+                large: liveCoin.image,
+                small: liveCoin.image,
+                thumb: liveCoin.image,
+              }
+            : liveCoin.image || {},
         market_data: {
           current_price: { usd: liveCoin.current_price || 0 },
-          price_change_percentage_24h: liveCoin.price_change_percentage_24h || 0,
+          price_change_percentage_24h:
+            liveCoin.price_change_percentage_24h || 0,
           market_cap: { usd: liveCoin.market_cap || 0 },
           total_volume: { usd: liveCoin.total_volume || 0 },
           high_24h: { usd: liveCoin.high_24h || 0 },
           low_24h: { usd: liveCoin.low_24h || 0 },
 
-          ath: { usd: 0 }, atl: { usd: 0 },
-          ath_date: { usd: null }, atl_date: { usd: null },
-          circulating_supply: 0, total_supply: 0, max_supply: 0
-        }
-      }
+          ath: { usd: 0 },
+          atl: { usd: 0 },
+          ath_date: { usd: null },
+          atl_date: { usd: null },
+          circulating_supply: 0,
+          total_supply: 0,
+          max_supply: 0,
+        },
+      };
     }
     return null;
   }, [coin, passedCoin, liveCoin]);
-
 
   const coinSymbol = useMemo(() => {
     const symbolMap = {
@@ -164,9 +202,11 @@ function CoinDetailsPage() {
       litecoin: "ltcusdt",
       chainlink: "linkusdt",
     };
-    return symbolMap[coinId] || (displayCoin?.symbol ? `${displayCoin.symbol}usdt`.toLowerCase() : null);
+    return (
+      symbolMap[coinId] ||
+      (displayCoin?.symbol ? `${displayCoin.symbol}usdt`.toLowerCase() : null)
+    );
   }, [coinId, displayCoin]);
-
 
   useEffect(() => {
     if (!coinSymbol) return;
@@ -194,15 +234,13 @@ function CoinDetailsPage() {
     };
   }, [coinSymbol]);
 
-
   const checkWatchlistStatus = useCallback(async () => {
     if (!user?.id || !coinId) return;
-
 
     try {
       const res = await getData("/watchlist", { user_id: user.id });
 
-      const list = Array.isArray(res) ? res : (res?.data || res?.watchlist || []);
+      const list = Array.isArray(res) ? res : res?.data || res?.watchlist || [];
       const watchlistIds = list.map((item) => item.id || item.coin_id);
       setIsInWatchlist(watchlistIds.includes(coinId));
     } catch (err) {
@@ -214,10 +252,7 @@ function CoinDetailsPage() {
     checkWatchlistStatus();
   }, [checkWatchlistStatus]);
 
-
   const fetchCoin = useCallback(async () => {
-
-
     if (!liveCoin) setLoading(true);
 
     try {
@@ -255,7 +290,6 @@ function CoinDetailsPage() {
     setTradeModal({ show: true, coin: tradeCoin, type: "buy" });
   }, [displayCoin, user, liveCoin]);
 
-
   const toggleWatchlist = useCallback(async () => {
     if (!user?.id) {
       toast.error("Please login to manage watchlist");
@@ -266,9 +300,7 @@ function CoinDetailsPage() {
 
     const wasInWatchlist = isInWatchlist;
 
-
     setIsInWatchlist(!wasInWatchlist);
-
 
     if (wasInWatchlist) {
       toast.success("Removed from watchlist");
@@ -277,7 +309,10 @@ function CoinDetailsPage() {
     }
 
     const coinData = displayCoin;
-    const currentP = livePrice?.price || coinData.market_data?.current_price?.usd || coinData.current_price;
+    const currentP =
+      livePrice?.price ||
+      coinData.market_data?.current_price?.usd ||
+      coinData.current_price;
 
     const postData = {
       user_id: user.id,
@@ -287,9 +322,14 @@ function CoinDetailsPage() {
       name: coinData.name,
       current_price: currentP,
       price_change_percentage_24h:
-        livePrice?.change24h || coinData.market_data?.price_change_percentage_24h || coinData.price_change_percentage_24h,
+        livePrice?.change24h ||
+        coinData.market_data?.price_change_percentage_24h ||
+        coinData.price_change_percentage_24h,
       market_cap: coinData.market_data?.market_cap?.usd || coinData.market_cap,
-      total_volume: livePrice?.volume24h || coinData.market_data?.total_volume?.usd || coinData.total_volume,
+      total_volume:
+        livePrice?.volume24h ||
+        coinData.market_data?.total_volume?.usd ||
+        coinData.total_volume,
       sparkline_in_7d: { price: [] },
     };
 
@@ -300,10 +340,8 @@ function CoinDetailsPage() {
           id: coinId,
           user_id: user.id,
         });
-
       } else {
         await postForm("/watchlist/add", postData);
-
       }
       await checkWatchlistStatus();
     } catch (err) {
@@ -341,25 +379,42 @@ function CoinDetailsPage() {
     return Number(value).toLocaleString("en-US");
   }, []);
 
-
   if (loading && !displayCoin) {
     return (
       <div
-        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${isMounted ? "opacity-100" : "opacity-0"
-          }`}
+        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${
+          isMounted ? "opacity-100" : "opacity-0"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
-          { }
+          {}
           <div className={`rounded-2xl ${TC.bgCard} p-6 h-[200px]`}>
-            <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} borderRadius="1rem" />
+            <Skeleton
+              height="100%"
+              baseColor={TC.skeletonBase}
+              highlightColor={TC.skeletonHighlight}
+              borderRadius="1rem"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={`col-span-2 rounded-2xl ${TC.bgCard} h-[500px] p-6`}>
-              <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+            <div
+              className={`col-span-2 rounded-2xl ${TC.bgCard} h-[500px] p-6`}
+            >
+              <Skeleton
+                height="100%"
+                baseColor={TC.skeletonBase}
+                highlightColor={TC.skeletonHighlight}
+              />
             </div>
-            <div className={`col-span-1 rounded-2xl ${TC.bgCard} h-[500px] p-6`}>
-              <Skeleton height="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+            <div
+              className={`col-span-1 rounded-2xl ${TC.bgCard} h-[500px] p-6`}
+            >
+              <Skeleton
+                height="100%"
+                baseColor={TC.skeletonBase}
+                highlightColor={TC.skeletonHighlight}
+              />
             </div>
           </div>
         </div>
@@ -370,16 +425,19 @@ function CoinDetailsPage() {
   const currentPrice =
     livePrice?.price || displayCoin?.market_data?.current_price?.usd || 0;
   const priceChange24h =
-    livePrice?.change24h || displayCoin?.market_data?.price_change_percentage_24h || 0;
+    livePrice?.change24h ||
+    displayCoin?.market_data?.price_change_percentage_24h ||
+    0;
   const isPositive = priceChange24h >= 0;
 
   return (
     <>
       <div
-        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? "opacity-100" : "opacity-0"
-          }`}
+        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${
+          isMounted ? "opacity-100" : "opacity-0"
+        }`}
       >
-        { }
+        {}
         <CoinHeader
           coin={displayCoin}
           currentPrice={currentPrice}
@@ -395,9 +453,7 @@ function CoinDetailsPage() {
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-
-
-          { }
+          {}
           <CoinStats
             coin={displayCoin}
             livePrice={livePrice}
@@ -406,11 +462,11 @@ function CoinDetailsPage() {
             isLight={isLight}
           />
 
-          { }
+          {}
           <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
-            { }
+            {}
             <div className="contents lg:block lg:col-span-8 lg:space-y-6">
-              { }
+              {}
               <div
                 className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
                 style={{ animationDelay: "0.1s" }}
@@ -422,12 +478,17 @@ function CoinDetailsPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Skeleton height="100%" width="100%" baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                    <Skeleton
+                      height="100%"
+                      width="100%"
+                      baseColor={TC.skeletonBase}
+                      highlightColor={TC.skeletonHighlight}
+                    />
                   </div>
                 )}
               </div>
 
-              { }
+              {}
               <AdditionalStats
                 coin={displayCoin}
                 formatNumber={formatNumber}
@@ -436,11 +497,11 @@ function CoinDetailsPage() {
                 isLight={isLight}
               />
 
-              { }
+              {}
               <QuickLinks coin={displayCoin} TC={TC} isLight={isLight} />
             </div>
 
-            { }
+            {}
             <div className="contents lg:block lg:col-span-4 lg:space-y-6">
               <div
                 className="fade-in order-2 h-[350px] md:h-[450px]"
@@ -450,7 +511,11 @@ function CoinDetailsPage() {
                   <OrderBook symbol={coinSymbol} />
                 ) : (
                   <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
-                    <Skeleton count={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                    <Skeleton
+                      count={10}
+                      baseColor={TC.skeletonBase}
+                      highlightColor={TC.skeletonHighlight}
+                    />
                   </div>
                 )}
               </div>
@@ -462,7 +527,11 @@ function CoinDetailsPage() {
                   <TradeHistory symbol={coinSymbol} />
                 ) : (
                   <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
-                    <Skeleton count={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                    <Skeleton
+                      count={10}
+                      baseColor={TC.skeletonBase}
+                      highlightColor={TC.skeletonHighlight}
+                    />
                   </div>
                 )}
               </div>
@@ -471,8 +540,8 @@ function CoinDetailsPage() {
         </div>
       </div>
 
-      { }
-      { }
+      {}
+      {}
       <TradeModal
         show={tradeModal.show}
         onClose={() => setTradeModal((prev) => ({ ...prev, show: false }))}

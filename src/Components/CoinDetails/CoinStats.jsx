@@ -12,7 +12,7 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
     {
       label: "24h Volume",
       value: formatCurrency(
-        livePrice?.volume24h || coin.market_data?.total_volume?.usd
+        livePrice?.volume24h || coin.market_data?.total_volume?.usd,
       ),
       icon: FaCoins,
       color: "purple",
@@ -20,7 +20,7 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
     {
       label: "24h High",
       value: formatCurrency(
-        livePrice?.high24h || coin.market_data?.high_24h?.usd
+        livePrice?.high24h || coin.market_data?.high_24h?.usd,
       ),
       icon: FaArrowUp,
       color: "green",
@@ -28,7 +28,7 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
     {
       label: "24h Low",
       value: formatCurrency(
-        livePrice?.low24h || coin.market_data?.low_24h?.usd
+        livePrice?.low24h || coin.market_data?.low_24h?.usd,
       ),
       icon: FaArrowDown,
       color: "red",
@@ -47,7 +47,8 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
         >
           <div className="flex items-center justify-between mb-2">
             <div
-              className={`p-2 rounded-lg ${stat.color === "cyan"
+              className={`p-2 rounded-lg ${
+                stat.color === "cyan"
                   ? isLight
                     ? "bg-cyan-50 text-cyan-600"
                     : "bg-cyan-500/10 text-cyan-400"
@@ -62,7 +63,7 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
                       : isLight
                         ? "bg-red-50 text-red-600"
                         : "bg-red-500/10 text-red-400"
-                }`}
+              }`}
             >
               <stat.icon className="text-lg" />
             </div>

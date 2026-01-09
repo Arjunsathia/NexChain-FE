@@ -27,9 +27,9 @@ const AdminCryptocurrencies = () => {
 
   // React Query Implementation
   const { data: coins = [], isLoading } = useQuery({
-    queryKey: ['adminCoins'],
+    queryKey: ["adminCoins"],
     queryFn: () => getCoins({ includeFrozen: true }),
-    staleTime: 60000
+    staleTime: 60000,
     // keepPreviousData is deprecated/removed in v5, safe to omit or use placeholderData
   });
 
@@ -48,13 +48,16 @@ const AdminCryptocurrencies = () => {
         await unfreezeCoin(coin.id);
         toast.success(`${coin.name} has been unfrozen`);
       } else {
-        await freezeCoin({ coinId: coin.id, symbol: coin.symbol, name: coin.name });
+        await freezeCoin({
+          coinId: coin.id,
+          symbol: coin.symbol,
+          name: coin.name,
+        });
         toast.success(`${coin.name} has been frozen`);
       }
 
       // Update local cache
-      queryClient.invalidateQueries(['adminCoins']);
-
+      queryClient.invalidateQueries(["adminCoins"]);
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Failed to update coin status");
@@ -84,22 +87,27 @@ const AdminCryptocurrencies = () => {
         ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
         : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
 
-      tableHead: isLight ? "bg-gray-100/80 text-gray-600" : "bg-white/5 text-gray-400",
-      tableRow: isLight ? "hover:bg-gray-50 transition-colors" : "hover:bg-white/5 transition-colors",
+      tableHead: isLight
+        ? "bg-gray-100/80 text-gray-600"
+        : "bg-white/5 text-gray-400",
+      tableRow: isLight
+        ? "hover:bg-gray-50 transition-colors"
+        : "hover:bg-white/5 transition-colors",
 
       modalOverlay: "bg-black/40 backdrop-blur-sm",
-      modalContent: isLight ? "bg-white shadow-2xl" : "bg-[#0B0E11] border border-gray-800 glass-card",
-
+      modalContent: isLight
+        ? "bg-white shadow-2xl"
+        : "bg-[#0B0E11] border border-gray-800 glass-card",
 
       headerGradient: "from-blue-600 to-cyan-500",
     }),
-    [isLight]
+    [isLight],
   );
 
   const filteredCoins = coins.filter(
     (coin) =>
       coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+      coin.symbol.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const indexOfLastCoin = currentPage * coinsPerPage;
@@ -126,16 +134,27 @@ const AdminCryptocurrencies = () => {
 
   return (
     <>
-      <div className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? 'fade-in' : ''}`}>
+      <div
+        className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? "fade-in" : ""}`}
+      >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
-              Crypto <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Management</span>
+            <h1
+              className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
+            >
+              Crypto{" "}
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                Management
+              </span>
             </h1>
-            <p className={`text-sm font-medium ${TC.textSecondary}`}>Monitor market prices and coin performance</p>
+            <p className={`text-sm font-medium ${TC.textSecondary}`}>
+              Monitor market prices and coin performance
+            </p>
           </div>
           <div className="relative group w-full sm:w-72">
-            <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`} />
+            <FaSearch
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`}
+            />
             <input
               type="text"
               placeholder="Search coins..."
@@ -146,7 +165,10 @@ const AdminCryptocurrencies = () => {
           </div>
         </div>
 
-        <div className={isFirstVisit ? "fade-in" : ""} style={{ animationDelay: "0.2s" }}>
+        <div
+          className={isFirstVisit ? "fade-in" : ""}
+          style={{ animationDelay: "0.2s" }}
+        >
           {!isReady || isLoading ? (
             <div className="flex justify-center p-12">
               <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>

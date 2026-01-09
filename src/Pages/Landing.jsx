@@ -5,22 +5,25 @@ import { motion } from "framer-motion";
 import HeroSection from "../Components/Landing/HeroSection";
 import { TC } from "../Components/Landing/theme";
 
-
-const FeaturesSection = React.lazy(() => import("../Components/Landing/FeaturesSection"));
-const MarketOverviewSection = React.lazy(() => import("../Components/Landing/MarketOverviewSection"));
-const TestimonialsSection = React.lazy(() => import("../Components/Landing/TestimonialsSection"));
+const FeaturesSection = React.lazy(
+  () => import("../Components/Landing/FeaturesSection"),
+);
+const MarketOverviewSection = React.lazy(
+  () => import("../Components/Landing/MarketOverviewSection"),
+);
+const TestimonialsSection = React.lazy(
+  () => import("../Components/Landing/TestimonialsSection"),
+);
 const CTASection = React.lazy(() => import("../Components/Landing/CTASection"));
-
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 40 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: "easeOut" }
-  }
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
 };
-
 
 const SectionWrapper = ({ children, className, id }) => {
   return (
@@ -37,7 +40,6 @@ const SectionWrapper = ({ children, className, id }) => {
   );
 };
 
-
 const MemoizedHeroSection = React.memo(HeroSection);
 const MemoizedFeaturesSection = React.memo(FeaturesSection);
 const MemoizedMarketOverviewSection = React.memo(MarketOverviewSection);
@@ -50,40 +52,36 @@ export default function Landing() {
   const [livePrices, setLivePrices] = useState({});
   const [isMobile, setIsMobile] = useState(false);
 
-
   useEffect(() => {
     const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
     setIsLoggedIn(!!token);
   }, []);
 
-
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
 
   useEffect(() => {
     const initialPrices = {
-      bitcoin: { price: 43250.00, change: 2.4 },
-      ethereum: { price: 2280.50, change: 1.8 },
+      bitcoin: { price: 43250.0, change: 2.4 },
+      ethereum: { price: 2280.5, change: 1.8 },
       cardano: { price: 0.52, change: -0.5 },
       dogecoin: { price: 0.08, change: 4.2 },
-      solana: { price: 98.40, change: 5.1 },
+      solana: { price: 98.4, change: 5.1 },
       ripple: { price: 0.58, change: -1.2 },
-      polkadot: { price: 7.20, change: 0.8 },
+      polkadot: { price: 7.2, change: 0.8 },
     };
     setLivePrices(initialPrices);
 
     const interval = setInterval(() => {
-      setLivePrices(prev => {
+      setLivePrices((prev) => {
         const newPrices = { ...prev };
         let hasChanges = false;
 
-
-        Object.keys(newPrices).forEach(key => {
+        Object.keys(newPrices).forEach((key) => {
           if (Math.random() > 0.3) return;
           hasChanges = true;
           const change = (Math.random() - 0.5) * (newPrices[key].price * 0.002);
@@ -100,17 +98,17 @@ export default function Landing() {
   }, []);
 
   const scrollToFeatures = useCallback(() => {
-    const element = document.getElementById('features-section');
+    const element = document.getElementById("features-section");
     if (element) {
       // Robust calculation based scroll to prevent browser/library conflict
       const top = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top, behavior: "smooth" });
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-transparent text-white font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
-      { }
+      {}
       <div className="relative z-10">
         <MemoizedHeroSection
           navigate={navigate}
@@ -120,17 +118,20 @@ export default function Landing() {
         />
       </div>
 
-      { }
+      {}
       <SectionWrapper id="features-section" className="z-10 py-16 md:py-20">
-        <React.Suspense fallback={<div className="h-screen w-full flex items-center justify-center text-slate-500">Loading Features...</div>}>
-          <MemoizedFeaturesSection
-            TC={TC}
-            sectionVariants={sectionVariants}
-          />
+        <React.Suspense
+          fallback={
+            <div className="h-screen w-full flex items-center justify-center text-slate-500">
+              Loading Features...
+            </div>
+          }
+        >
+          <MemoizedFeaturesSection TC={TC} sectionVariants={sectionVariants} />
         </React.Suspense>
       </SectionWrapper>
 
-      { }
+      {}
       <SectionWrapper id="market-section" className="z-20 py-12 md:py-16">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection
@@ -152,7 +153,7 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      { }
+      {}
       <SectionWrapper id="contact-section" className="z-30 pb-20">
         <React.Suspense fallback={<div className="h-64 w-full" />}>
           <MemoizedCTASection

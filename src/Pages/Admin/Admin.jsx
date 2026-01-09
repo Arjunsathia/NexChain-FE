@@ -30,8 +30,8 @@ function Admin() {
       }
     };
 
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, [isMobileMenuOpen]);
 
   const handleLogout = async () => {
@@ -49,17 +49,19 @@ function Admin() {
   };
 
   return (
-    <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"} transition-colors duration-150`}>
-      { }
+    <div
+      className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"} transition-colors duration-150`}
+    >
+      {}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}
 
-      { }
+      {}
       <div className="flex-1 flex flex-col min-h-screen relative min-w-0">
-        { }
+        {}
         {!isDesktop && (
           <div className="sticky top-0 z-50">
             <MobileNavbar
@@ -71,7 +73,7 @@ function Admin() {
           </div>
         )}
 
-        { }
+        {}
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4">
           <Suspense fallback={<AdminLoader />}>
             <Outlet />

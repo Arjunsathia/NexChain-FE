@@ -37,9 +37,13 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
                 }`}
               >
                 {selectedUser.image ? (
-                  <img 
-                    src={selectedUser.image.startsWith('http') ? selectedUser.image : `${SERVER_URL}/uploads/${selectedUser.image}`} 
-                    alt={selectedUser.name} 
+                  <img
+                    src={
+                      selectedUser.image.startsWith("http")
+                        ? selectedUser.image
+                        : `${SERVER_URL}/uploads/${selectedUser.image}`
+                    }
+                    alt={selectedUser.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -72,52 +76,85 @@ function UserDetailsModal({ selectedUser, setSelectedUser, TC, isLight }) {
         <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
           {}
           <div className="grid grid-cols-1 gap-2">
-            <div className={`p-3 rounded-lg flex items-center justify-between ${TC.bgItem}`}>
+            <div
+              className={`p-3 rounded-lg flex items-center justify-between ${TC.bgItem}`}
+            >
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className={`p-2 rounded-full bg-cyan-500/10`}>
-                   <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                  <Mail className="w-3.5 h-3.5 text-cyan-400" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className={`text-[10px] uppercase tracking-wider ${TC.textSecondary}`}>Email</span>
-                  <span className={`text-xs font-medium truncate ${TC.textPrimary}`}>{selectedUser.email}</span>
+                  <span
+                    className={`text-[10px] uppercase tracking-wider ${TC.textSecondary}`}
+                  >
+                    Email
+                  </span>
+                  <span
+                    className={`text-xs font-medium truncate ${TC.textPrimary}`}
+                  >
+                    {selectedUser.email}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className={`p-3 rounded-lg flex items-center justify-between ${TC.bgItem}`}>
-               <div className="flex items-center gap-3">
-                 <div className={`p-2 rounded-full bg-purple-500/10`}>
-                   <Phone className="w-3.5 h-3.5 text-purple-400" />
-                 </div>
-                 <div className="flex flex-col">
-                   <span className={`text-[10px] uppercase tracking-wider ${TC.textSecondary}`}>Phone</span>
-                   <span className={`text-xs font-medium ${TC.textPrimary}`}>{selectedUser.phone || "Not provided"}</span>
-                 </div>
-               </div>
+            <div
+              className={`p-3 rounded-lg flex items-center justify-between ${TC.bgItem}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full bg-purple-500/10`}>
+                  <Phone className="w-3.5 h-3.5 text-purple-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span
+                    className={`text-[10px] uppercase tracking-wider ${TC.textSecondary}`}
+                  >
+                    Phone
+                  </span>
+                  <span className={`text-xs font-medium ${TC.textPrimary}`}>
+                    {selectedUser.phone || "Not provided"}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-                <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-                   <p className={`text-[10px] uppercase mb-1 ${TC.textSecondary}`}>Joined Date</p>
-                   <div className={`flex items-center gap-1.5 font-medium text-xs ${TC.textPrimary}`}>
-                     <Calendar className="w-3 h-3 text-blue-400" />
-                     {new Date(selectedUser.createdAt).toLocaleDateString()}
-                   </div>
+              <div className={`p-3 rounded-lg ${TC.bgItem}`}>
+                <p className={`text-[10px] uppercase mb-1 ${TC.textSecondary}`}>
+                  Joined Date
+                </p>
+                <div
+                  className={`flex items-center gap-1.5 font-medium text-xs ${TC.textPrimary}`}
+                >
+                  <Calendar className="w-3 h-3 text-blue-400" />
+                  {new Date(selectedUser.createdAt).toLocaleDateString()}
                 </div>
-                <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-                   <p className={`text-[10px] uppercase mb-1 ${TC.textSecondary}`}>Status</p>
-                   <div className={`flex items-center gap-1.5 font-medium text-xs ${selectedUser.isActive ? "text-green-400" : "text-red-400"}`}>
-                     {selectedUser.isActive ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                     {selectedUser.isActive ? "Active" : "Inactive"}
-                   </div>
+              </div>
+              <div className={`p-3 rounded-lg ${TC.bgItem}`}>
+                <p className={`text-[10px] uppercase mb-1 ${TC.textSecondary}`}>
+                  Status
+                </p>
+                <div
+                  className={`flex items-center gap-1.5 font-medium text-xs ${selectedUser.isActive ? "text-green-400" : "text-red-400"}`}
+                >
+                  {selectedUser.isActive ? (
+                    <CheckCircle className="w-3 h-3" />
+                  ) : (
+                    <Ban className="w-3 h-3" />
+                  )}
+                  {selectedUser.isActive ? "Active" : "Inactive"}
                 </div>
+              </div>
             </div>
           </div>
 
           {}
           <div>
-            <h3 className={`text-sm font-bold mb-3 flex items-center gap-1.5 ${TC.textPrimary}`}>
-              <LineChart className="w-3.5 h-3.5 text-cyan-400" /> Investment Overview
+            <h3
+              className={`text-sm font-bold mb-3 flex items-center gap-1.5 ${TC.textPrimary}`}
+            >
+              <LineChart className="w-3.5 h-3.5 text-cyan-400" /> Investment
+              Overview
             </h3>
             <div className="grid grid-cols-3 gap-2">
               <div className={`p-3 rounded-lg text-center ${TC.bgItem}`}>

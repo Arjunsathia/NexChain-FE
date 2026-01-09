@@ -12,7 +12,7 @@ function MarketMovers({
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-      { }
+      {}
       <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h3
@@ -32,8 +32,10 @@ function MarketMovers({
           {topGainers.map((coin, index) => (
             <div
               key={coin.id}
-              className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200 hover:scale-[1.02] ${disableAnimations ? '' : 'fade-in'}`}
-              style={disableAnimations ? {} : { animationDelay: `${index * 0.1}s` }}
+              className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200 hover:scale-[1.02] ${disableAnimations ? "" : "fade-in"}`}
+              style={
+                disableAnimations ? {} : { animationDelay: `${index * 0.1}s` }
+              }
             >
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <img
@@ -64,7 +66,7 @@ function MarketMovers({
         </div>
       </div>
 
-      { }
+      {}
       <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6`}>
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h3
@@ -84,8 +86,10 @@ function MarketMovers({
           {topLosers.map((coin, index) => (
             <div
               key={coin.id}
-              className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200 hover:scale-[1.02] ${disableAnimations ? '' : 'fade-in'}`}
-              style={disableAnimations ? {} : { animationDelay: `${index * 0.1}s` }}
+              className={`flex items-center justify-between p-2 sm:p-3 rounded-xl ${TC.bgItem} transition-all duration-200 hover:scale-[1.02] ${disableAnimations ? "" : "fade-in"}`}
+              style={
+                disableAnimations ? {} : { animationDelay: `${index * 0.1}s` }
+              }
             >
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <img

@@ -9,7 +9,7 @@ const QuantumNebulaBackground = React.memo(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext("2d", { alpha: false });
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -21,7 +21,7 @@ const QuantumNebulaBackground = React.memo(() => {
     };
 
     setCanvasSize();
-    window.addEventListener('resize', setCanvasSize);
+    window.addEventListener("resize", setCanvasSize);
 
     // Cosmic Entities
     const stars = [];
@@ -45,11 +45,11 @@ const QuantumNebulaBackground = React.memo(() => {
 
     const animate = () => {
       // 1. Deep Space Base - Pitch Black
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, width, height);
 
       // 2. Draw Quantum Stars
-      stars.forEach(s => {
+      stars.forEach((s) => {
         s.opacity += s.blinkSpeed;
         if (s.opacity > 1 || s.opacity < 0) s.blinkSpeed *= -1;
 
@@ -82,12 +82,17 @@ const QuantumNebulaBackground = React.memo(() => {
     animate();
 
     return () => {
-      window.removeEventListener('resize', setCanvasSize);
+      window.removeEventListener("resize", setCanvasSize);
       cancelAnimationFrame(animationRef.current);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-0" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+    />
+  );
 });
 QuantumNebulaBackground.displayName = "QuantumNebulaBackground";
 
@@ -95,7 +100,11 @@ QuantumNebulaBackground.displayName = "QuantumNebulaBackground";
 const QuantumBeam = ({ vertical, position, color, delay }) => (
   <motion.div
     initial={vertical ? { y: "-100%", opacity: 0 } : { x: "-100%", opacity: 0 }}
-    animate={vertical ? { y: "200%", opacity: [0, 0.5, 0] } : { x: "200%", opacity: [0, 0.5, 0] }}
+    animate={
+      vertical
+        ? { y: "200%", opacity: [0, 0.5, 0] }
+        : { x: "200%", opacity: [0, 0.5, 0] }
+    }
     transition={{
       duration: 5,
       repeat: Infinity,
@@ -104,8 +113,10 @@ const QuantumBeam = ({ vertical, position, color, delay }) => (
     }}
     className="absolute pointer-events-none z-1"
     style={{
-      background: `linear-gradient(${vertical ? 'to bottom' : 'to right'}, transparent, ${color}, transparent)`,
-      ...(vertical ? { left: position, width: "1px", height: "40vh" } : { top: position, height: "1px", width: "40vw" }),
+      background: `linear-gradient(${vertical ? "to bottom" : "to right"}, transparent, ${color}, transparent)`,
+      ...(vertical
+        ? { left: position, width: "1px", height: "40vh" }
+        : { top: position, height: "1px", width: "40vw" }),
       filter: "blur(1px) drop-shadow(0 0 10px " + color + ")",
     }}
   />
@@ -113,7 +124,9 @@ const QuantumBeam = ({ vertical, position, color, delay }) => (
 
 const InteractiveGridPattern = React.memo(({ className = "" }) => {
   return (
-    <div className={`fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full bg-[#000000] ${className}`}>
+    <div
+      className={`fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full bg-[#000000] ${className}`}
+    >
       {/* 1. Base Quantum Starfield */}
       <QuantumNebulaBackground />
 
@@ -123,7 +136,7 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
                             linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
+          backgroundSize: "50px 50px",
         }}
       />
 

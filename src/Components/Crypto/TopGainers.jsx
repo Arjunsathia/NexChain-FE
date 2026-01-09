@@ -8,154 +8,216 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 function TopGainers({ disableAnimations = false }) {
-    const isLight = useThemeCheck();
-    const [gainers, setGainers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { isVisited } = useVisitedRoutes();
-    const [shouldAnimate] = useState(!disableAnimations && !isVisited(location.pathname));
+  const isLight = useThemeCheck();
+  const [gainers, setGainers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [shouldAnimate] = useState(
+    !disableAnimations && !isVisited(location.pathname),
+  );
 
-    const TC = useMemo(() => ({
-        bgContainer: isLight
-            ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-            : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-        textPrimary: isLight ? "text-gray-900" : "text-white",
-        textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-        bgItem: isLight
-            ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0 transition-colors"
-            : "hover:bg-white/5 border-b border-gray-800 last:border-0 transition-colors",
-        textPricePositive: isLight ? "text-emerald-700" : "text-emerald-400",
-        textPriceNegative: isLight ? "text-rose-700" : "text-rose-400",
-        iconBg: isLight ? "bg-indigo-100/50 text-indigo-600" : "bg-indigo-500/10 text-indigo-400",
-        bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
-        skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
-        skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-    }), [isLight]);
+  const TC = useMemo(
+    () => ({
+      bgContainer: isLight
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      bgItem: isLight
+        ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0 transition-colors"
+        : "hover:bg-white/5 border-b border-gray-800 last:border-0 transition-colors",
+      textPricePositive: isLight ? "text-emerald-700" : "text-emerald-400",
+      textPriceNegative: isLight ? "text-rose-700" : "text-rose-400",
+      iconBg: isLight
+        ? "bg-indigo-100/50 text-indigo-600"
+        : "bg-indigo-500/10 text-indigo-400",
+      bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
+      skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
+      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+    }),
+    [isLight],
+  );
 
+  useEffect(() => {
+    const CACHE_KEY = "target_top_gainers";
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-    useEffect(() => {
-        const CACHE_KEY = "target_top_gainers";
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    const fetchData = async () => {
+      setLoading(true);
 
-        const fetchData = async () => {
-            setLoading(true);
+      // Check Cache
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const now = Date.now();
+          if (
+            now - parsed.timestamp < CACHE_DURATION &&
+            Array.isArray(parsed.data)
+          ) {
+            setGainers(parsed.data);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Cache parse error", e);
+      }
 
-            // Check Cache
-            try {
-                const cached = localStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    const parsed = JSON.parse(cached);
-                    const now = Date.now();
-                    if (now - parsed.timestamp < CACHE_DURATION && Array.isArray(parsed.data)) {
-                        setGainers(parsed.data);
-                        setLoading(false);
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.error("Cache parse error", e);
-            }
+      // Fetch Fresh
+      try {
+        const data = await getTopGainers();
+        if (Array.isArray(data)) {
+          const sliced = data.slice(0, 5);
+          setGainers(sliced);
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({
+              timestamp: Date.now(),
+              data: sliced,
+            }),
+          );
+        } else {
+          setGainers([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch top gainers:", error);
+        setGainers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-            // Fetch Fresh
-            try {
-                const data = await getTopGainers();
-                if (Array.isArray(data)) {
-                    const sliced = data.slice(0, 5);
-                    setGainers(sliced);
-                    localStorage.setItem(CACHE_KEY, JSON.stringify({
-                        timestamp: Date.now(),
-                        data: sliced
-                    }));
-                } else {
-                    setGainers([]);
-                }
-            } catch (error) {
-                console.error("Failed to fetch top gainers:", error);
-                setGainers([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+    fetchData();
+  }, []);
 
-        fetchData();
-    }, []);
-
-    return (
-        <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
-            <div className="px-4 pt-4 flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
-                        <FaChartLine className="text-base" />
-                    </div>
-                    <h3 className={`font-bold text-sm md:text-base ${TC.textPrimary}`}>Top Gainers</h3>
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide">
-                {loading ? (
-                    <div className="space-y-2">
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <div key={index} className="flex justify-between items-center p-2">
-                                <Skeleton circle width={24} height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                                <div className="flex-1 ml-2">
-                                    <Skeleton width={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                                    <Skeleton width={40} height={10} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <Skeleton width={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : gainers.length > 0 ? (
-                    gainers.map((coin, index) => (
-                        <div
-                            key={coin.id}
-                            onClick={() => navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })}
-                            style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
-                            className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? 'fade-in' : ''} ${TC.bgItem}`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <img src={coin.image} alt={coin.name} className="w-8 h-8 rounded-full object-cover shadow-sm" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className={`text-xs font-bold leading-none ${TC.textPrimary}`}>{coin.symbol?.toUpperCase()}</span>
-                                    <span className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}>{coin.name}</span>
-                                </div>
-                            </div>
-
-                            <div className="text-right flex flex-col items-end">
-                                <p className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}>
-                                    ${coin.current_price?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
-                                </p>
-                                <p className={`text-[10px] font-semibold flex items-center ${TC.textPricePositive}`}>
-                                    +{coin.price_change_percentage_24h?.toFixed(2)}%
-                                </p>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty} min-h-[200px]`}>
-                        <div className={`p-3 rounded-full mb-2 ${isLight ? "bg-white" : "bg-gray-700"}`}>
-                            <FaExclamationTriangle className={TC.textSecondary} />
-                        </div>
-                        <p className={`text-xs ${TC.textSecondary}`}>No data available</p>
-                    </div>
-                )}
-            </div>
-            <style jsx>{`
-                .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-                }
-                .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-                }
-            `}</style>
+  return (
+    <div className={`p-1 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
+      <div className="px-4 pt-4 flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
+            <FaChartLine className="text-base" />
+          </div>
+          <h3 className={`font-bold text-sm md:text-base ${TC.textPrimary}`}>
+            Top Gainers
+          </h3>
         </div>
-    );
+      </div>
+
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide">
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center p-2"
+              >
+                <Skeleton
+                  circle
+                  width={24}
+                  height={24}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
+                <div className="flex-1 ml-2">
+                  <Skeleton
+                    width={60}
+                    baseColor={TC.skeletonBase}
+                    highlightColor={TC.skeletonHighlight}
+                  />
+                  <Skeleton
+                    width={40}
+                    height={10}
+                    baseColor={TC.skeletonBase}
+                    highlightColor={TC.skeletonHighlight}
+                  />
+                </div>
+                <div className="flex flex-col items-end">
+                  <Skeleton
+                    width={60}
+                    baseColor={TC.skeletonBase}
+                    highlightColor={TC.skeletonHighlight}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : gainers.length > 0 ? (
+          gainers.map((coin, index) => (
+            <div
+              key={coin.id}
+              onClick={() =>
+                navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })
+              }
+              style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+              className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={coin.image}
+                    alt={coin.name}
+                    className="w-8 h-8 rounded-full object-cover shadow-sm"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span
+                    className={`text-xs font-bold leading-none ${TC.textPrimary}`}
+                  >
+                    {coin.symbol?.toUpperCase()}
+                  </span>
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}
+                  >
+                    {coin.name}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-right flex flex-col items-end">
+                <p
+                  className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}
+                >
+                  $
+                  {coin.current_price?.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 6,
+                  })}
+                </p>
+                <p
+                  className={`text-[10px] font-semibold flex items-center ${TC.textPricePositive}`}
+                >
+                  +{coin.price_change_percentage_24h?.toFixed(2)}%
+                </p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div
+            className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty} min-h-[200px]`}
+          >
+            <div
+              className={`p-3 rounded-full mb-2 ${isLight ? "bg-white" : "bg-gray-700"}`}
+            >
+              <FaExclamationTriangle className={TC.textSecondary} />
+            </div>
+            <p className={`text-xs ${TC.textSecondary}`}>No data available</p>
+          </div>
+        )}
+      </div>
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+    </div>
+  );
 }
 
 export default TopGainers;

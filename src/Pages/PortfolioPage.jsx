@@ -1,5 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import useThemeCheck from '@/hooks/useThemeCheck';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import useThemeCheck from "@/hooks/useThemeCheck";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import useWalletContext from "@/hooks/useWalletContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
@@ -12,9 +18,6 @@ import TransactionHistory from "@/Components/portfolio/TransactionHistory";
 import OpenOrders from "@/Components/portfolio/OpenOrders";
 
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
-
-
-
 
 const PortfolioPage = () => {
   const isLight = useThemeCheck();
@@ -37,13 +40,11 @@ const PortfolioPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-
   const [tradeModal, setTradeModal] = useState({
     show: false,
     coin: null,
     type: "buy",
   });
-
 
   const TC = useMemo(
     () => ({
@@ -74,7 +75,7 @@ const PortfolioPage = () => {
       textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
       textNegative: isLight ? "text-rose-600" : "text-rose-400",
     }),
-    [isLight]
+    [isLight],
   );
 
   const bufferRef = useRef({});
@@ -84,23 +85,44 @@ const PortfolioPage = () => {
     if (!groupedHoldings || groupedHoldings.length === 0) return;
 
     const symbols = groupedHoldings
-      .map(coin => {
+      .map((coin) => {
         const symbolMap = {
-          bitcoin: "btcusdt", ethereum: "ethusdt", binancecoin: "bnbusdt", ripple: "xrpusdt", cardano: "adausdt", solana: "solusdt", dogecoin: "dogeusdt", polkadot: "dotusdt", "matic-network": "maticusdt", litecoin: "ltcusdt", chainlink: "linkusdt", "stellar": "xlmusdt", "cosmos": "atomusdt", "monero": "xmusdt", "ethereum-classic": "etcusdt", "bitcoin-cash": "bchusdt", "filecoin": "filusdt", "theta": "thetausdt", "vechain": "vetusdt", "tron": "trxusdt"
+          bitcoin: "btcusdt",
+          ethereum: "ethusdt",
+          binancecoin: "bnbusdt",
+          ripple: "xrpusdt",
+          cardano: "adausdt",
+          solana: "solusdt",
+          dogecoin: "dogeusdt",
+          polkadot: "dotusdt",
+          "matic-network": "maticusdt",
+          litecoin: "ltcusdt",
+          chainlink: "linkusdt",
+          stellar: "xlmusdt",
+          cosmos: "atomusdt",
+          monero: "xmusdt",
+          "ethereum-classic": "etcusdt",
+          "bitcoin-cash": "bchusdt",
+          filecoin: "filusdt",
+          theta: "thetausdt",
+          vechain: "vetusdt",
+          tron: "trxusdt",
         };
-        return symbolMap[coin.coinId] ? `${symbolMap[coin.coinId]}@ticker` : null;
+        return symbolMap[coin.coinId]
+          ? `${symbolMap[coin.coinId]}@ticker`
+          : null;
       })
       .filter(Boolean);
 
     if (symbols.length === 0) return;
 
-    const streams = symbols.join('/');
+    const streams = symbols.join("/");
 
     const intervalId = setInterval(() => {
       if (Object.keys(bufferRef.current).length > 0) {
-        setLivePrices(prev => ({
+        setLivePrices((prev) => ({
           ...prev,
-          ...bufferRef.current
+          ...bufferRef.current,
         }));
         bufferRef.current = {};
       }
@@ -109,16 +131,37 @@ const PortfolioPage = () => {
     try {
       if (ws.current) ws.current.close();
 
-      ws.current = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+      ws.current = new WebSocket(
+        `wss://stream.binance.com:9443/stream?streams=${streams}`,
+      );
 
       ws.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         if (message.stream && message.data) {
-          const symbol = message.stream.replace('@ticker', '');
+          const symbol = message.stream.replace("@ticker", "");
           const coinData = message.data;
 
           const symbolToCoinId = {
-            "btcusdt": "bitcoin", "ethusdt": "ethereum", "bnbusdt": "binancecoin", "xrpusdt": "ripple", "adausdt": "cardano", "solusdt": "solana", "dogeusdt": "dogecoin", "dotusdt": "polkadot", "maticusdt": "matic-network", "ltcusdt": "litecoin", "linkusdt": "chainlink", "xlmusdt": "stellar", "atomusdt": "cosmos", "xmusdt": "monero", "etcusdt": "ethereum-classic", "bchusdt": "bitcoin-cash", "filusdt": "filecoin", "thetausdt": "theta", "vechain": "vetusdt", "tron": "trxusdt"
+            btcusdt: "bitcoin",
+            ethusdt: "ethereum",
+            bnbusdt: "binancecoin",
+            xrpusdt: "ripple",
+            adausdt: "cardano",
+            solusdt: "solana",
+            dogeusdt: "dogecoin",
+            dotusdt: "polkadot",
+            maticusdt: "matic-network",
+            ltcusdt: "litecoin",
+            linkusdt: "chainlink",
+            xlmusdt: "stellar",
+            atomusdt: "cosmos",
+            xmusdt: "monero",
+            etcusdt: "ethereum-classic",
+            bchusdt: "bitcoin-cash",
+            filusdt: "filecoin",
+            thetausdt: "theta",
+            vechain: "vetusdt",
+            tron: "trxusdt",
           };
 
           const coinId = symbolToCoinId[symbol];
@@ -132,28 +175,35 @@ const PortfolioPage = () => {
         }
       };
 
-      ws.current.onerror = (error) => { console.error('Portfolio WebSocket error:', error); };
-
-    } catch (error) { console.error('Portfolio WebSocket setup failed:', error); }
+      ws.current.onerror = (error) => {
+        console.error("Portfolio WebSocket error:", error);
+      };
+    } catch (error) {
+      console.error("Portfolio WebSocket setup failed:", error);
+    }
 
     return () => {
       clearInterval(intervalId);
-      if (ws.current) { ws.current.close(); }
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, [groupedHoldings]); // Re-run if holdings change
-
 
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];
 
-    return groupedHoldings.map(coin => {
+    return groupedHoldings.map((coin) => {
       const liveData = livePrices[coin.coinId];
       if (liveData) {
         const currentPrice = liveData.current_price;
         const totalCurrentValue = (coin.totalQuantity || 0) * currentPrice;
         const remainingInvestment = coin.remainingInvestment || 0;
         const profitLoss = totalCurrentValue - remainingInvestment;
-        const profitLossPercentage = remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
+        const profitLossPercentage =
+          remainingInvestment > 0
+            ? (profitLoss / remainingInvestment) * 100
+            : 0;
 
         return {
           ...coin,
@@ -161,37 +211,46 @@ const PortfolioPage = () => {
           priceChange24h: liveData.price_change_percentage_24h,
           totalCurrentValue,
           profitLoss,
-          profitLossPercentage
+          profitLossPercentage,
         };
       }
       return coin;
     });
   }, [groupedHoldings, livePrices]);
 
-
   const liveSummary = useMemo(() => {
-    const totalCurrentValue = mergedHoldings.reduce((sum, coin) => sum + (coin.totalCurrentValue || 0), 0);
-    const totalInvested = mergedHoldings.reduce((sum, coin) => sum + (coin.remainingInvestment || 0), 0);
+    const totalCurrentValue = mergedHoldings.reduce(
+      (sum, coin) => sum + (coin.totalCurrentValue || 0),
+      0,
+    );
+    const totalInvested = mergedHoldings.reduce(
+      (sum, coin) => sum + (coin.remainingInvestment || 0),
+      0,
+    );
     const totalProfitLoss = totalCurrentValue - totalInvested;
-    const totalProfitLossPercentage = totalInvested > 0 ? (totalProfitLoss / totalInvested) * 100 : 0;
+    const totalProfitLossPercentage =
+      totalInvested > 0 ? (totalProfitLoss / totalInvested) * 100 : 0;
 
     return {
       totalCurrentValue,
       remainingInvestment: totalInvested,
       totalProfitLoss,
-      totalProfitLossPercentage
+      totalProfitLossPercentage,
     };
   }, [mergedHoldings]);
 
-
   const topPerformer = useMemo(() => {
     if (!mergedHoldings || mergedHoldings.length === 0) return null;
-    return [...mergedHoldings].sort((a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0))[0];
+    return [...mergedHoldings].sort(
+      (a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0),
+    )[0];
   }, [mergedHoldings]);
 
   const topLoser = useMemo(() => {
     if (!mergedHoldings || mergedHoldings.length === 0) return null;
-    return [...mergedHoldings].sort((a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0))[0];
+    return [...mergedHoldings].sort(
+      (a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0),
+    )[0];
   }, [mergedHoldings]);
 
   const handleTrade = useCallback((coin) => {
@@ -203,14 +262,9 @@ const PortfolioPage = () => {
   }, []);
 
   return (
-
     <>
-      <div
-        className={`min-h-screen p-2 sm:p-4 lg:p-6 ${TC.textPrimary}`}
-      >
-
+      <div className={`min-h-screen p-2 sm:p-4 lg:p-6 ${TC.textPrimary}`}>
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 pb-8 space-y-8">
-
           {/* Header Section */}
           <div className="">
             <PortfolioHeader
@@ -259,12 +313,11 @@ const PortfolioPage = () => {
             <OpenOrders isLight={isLight} livePrices={livePrices} TC={TC} />
           </div>
 
-
-
-          <div className={`pt-8 border-t ${isLight ? 'border-gray-200' : 'border-white/5'}`}>
+          <div
+            className={`pt-8 border-t ${isLight ? "border-gray-200" : "border-white/5"}`}
+          >
             <TransactionHistory TC={TC} />
           </div>
-
         </div>
       </div>
 

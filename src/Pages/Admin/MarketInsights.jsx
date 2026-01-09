@@ -13,7 +13,6 @@ import { coinGecko } from "@/api/axiosConfig";
 const MarketInsights = () => {
   const isLight = useThemeCheck();
 
-
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -44,15 +43,21 @@ const MarketInsights = () => {
         ? "bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20"
         : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20",
 
-      tableHead: isLight ? "bg-gray-100/80 text-gray-600" : "bg-white/5 text-gray-400",
-      tableRow: isLight ? "hover:bg-gray-50 transition-colors" : "hover:bg-white/5 transition-colors",
+      tableHead: isLight
+        ? "bg-gray-100/80 text-gray-600"
+        : "bg-white/5 text-gray-400",
+      tableRow: isLight
+        ? "hover:bg-gray-50 transition-colors"
+        : "hover:bg-white/5 transition-colors",
 
       modalOverlay: "bg-black/40 backdrop-blur-sm",
-      modalContent: isLight ? "bg-white" : "bg-[#0B0E11] border border-gray-800 glass-card",
+      modalContent: isLight
+        ? "bg-white"
+        : "bg-[#0B0E11] border border-gray-800 glass-card",
 
       headerGradient: "from-blue-600 to-cyan-500",
     }),
-    [isLight]
+    [isLight],
   );
 
   const [marketData, setMarketData] = useState([]);
@@ -63,7 +68,6 @@ const MarketInsights = () => {
   const [showTopGainers, setShowTopGainers] = useState(false);
   const [showTopLosers, setShowTopLosers] = useState(false);
 
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
 
@@ -73,7 +77,6 @@ const MarketInsights = () => {
   }, []);
 
   const fetchMarketData = async () => {
-
     const cacheKey = "marketInsightsData_v1";
     const cached = localStorage.getItem(cacheKey);
     let hasCachedData = false;
@@ -97,8 +100,8 @@ const MarketInsights = () => {
           per_page: 50,
           page: 1,
           sparkline: true,
-          price_change_percentage: "24h,7d"
-        }
+          price_change_percentage: "24h,7d",
+        },
       });
 
       const data = response.data;
@@ -110,12 +113,13 @@ const MarketInsights = () => {
       setMarketData(data);
       calculateGlobalStats(data);
 
-
-      localStorage.setItem(cacheKey, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
-
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          data,
+          timestamp: Date.now(),
+        }),
+      );
     } catch (error) {
       console.error("Error fetching market data:", error);
       if (!hasCachedData) {
@@ -140,18 +144,11 @@ const MarketInsights = () => {
   };
 
   const calculateGlobalStats = (data) => {
-    const totalMarketCap = data.reduce(
-      (acc, coin) => acc + coin.market_cap,
-      0
-    );
-    const totalVolume = data.reduce(
-      (acc, coin) => acc + coin.total_volume,
-      0
-    );
+    const totalMarketCap = data.reduce((acc, coin) => acc + coin.market_cap, 0);
+    const totalVolume = data.reduce((acc, coin) => acc + coin.total_volume, 0);
 
     const btcDominance =
-      (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) *
-      100;
+      (data.find((c) => c.symbol === "btc")?.market_cap / totalMarketCap) * 100;
 
     setGlobalStats({
       marketCap: totalMarketCap,
@@ -159,7 +156,7 @@ const MarketInsights = () => {
       btcDominance: btcDominance || 0,
       ethDominance:
         (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
-        100 || 0,
+          100 || 0,
     });
   };
 
@@ -182,9 +179,8 @@ const MarketInsights = () => {
   const filteredData = marketData.filter(
     (coin) =>
       coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+      coin.symbol.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -193,16 +189,19 @@ const MarketInsights = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const topGainers = [...marketData]
-    .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
+    .sort(
+      (a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h,
+    )
     .slice(0, 5);
   const topLosers = [...marketData]
-    .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
+    .sort(
+      (a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h,
+    )
     .slice(0, 5);
-
 
   const MarketSkeleton = () => (
     <div className="space-y-6">
-      { }
+      {}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[...Array(4)].map((_, i) => (
           <div
@@ -212,7 +211,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      { }
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {[...Array(2)].map((_, i) => (
           <div
@@ -222,7 +221,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      { }
+      {}
       <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
         <div className="space-y-4">
           <div
@@ -245,11 +244,16 @@ const MarketInsights = () => {
         className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
         style={{ animationDelay: "0.1s" }}
       >
-        { }
+        {}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
-              Market <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">Insights</span>
+            <h1
+              className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
+            >
+              Market{" "}
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                Insights
+              </span>
             </h1>
             <p className={`text-sm font-medium ${TC.textSecondary}`}>
               Global crypto market analysis and trends
@@ -279,14 +283,14 @@ const MarketInsights = () => {
             className="space-y-4 lg:space-y-6 fade-in"
             style={{ animationDelay: "0.2s" }}
           >
-            { }
+            {}
             <GlobalStats
               globalStats={globalStats}
               TC={TC}
               formatCompactNumber={formatCompactNumber}
             />
 
-            { }
+            {}
             <MarketMovers
               topGainers={topGainers}
               topLosers={topLosers}
@@ -296,7 +300,7 @@ const MarketInsights = () => {
               formatCurrency={formatCurrency}
             />
 
-            { }
+            {}
             <MarketTable
               currentItems={currentItems}
               filteredData={filteredData}
@@ -315,7 +319,7 @@ const MarketInsights = () => {
         )}
       </div>
 
-      { }
+      {}
       <MarketCoinDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}
@@ -325,7 +329,7 @@ const MarketInsights = () => {
         formatCompactNumber={formatCompactNumber}
       />
 
-      { }
+      {}
       {showTopGainers && (
         <CoinListModal
           title="Top Gainers (24h)"
@@ -333,7 +337,7 @@ const MarketInsights = () => {
             .filter((coin) => coin.price_change_percentage_24h > 0)
             .sort(
               (a, b) =>
-                b.price_change_percentage_24h - a.price_change_percentage_24h
+                b.price_change_percentage_24h - a.price_change_percentage_24h,
             )}
           onClose={() => setShowTopGainers(false)}
           TC={TC}
@@ -342,7 +346,7 @@ const MarketInsights = () => {
         />
       )}
 
-      { }
+      {}
       {showTopLosers && (
         <CoinListModal
           title="Top Losers (24h)"
@@ -350,7 +354,7 @@ const MarketInsights = () => {
             .filter((coin) => coin.price_change_percentage_24h < 0)
             .sort(
               (a, b) =>
-                a.price_change_percentage_24h - b.price_change_percentage_24h
+                a.price_change_percentage_24h - b.price_change_percentage_24h,
             )}
           onClose={() => setShowTopLosers(false)}
           TC={TC}

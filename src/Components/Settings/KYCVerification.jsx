@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { FaIdCard, FaCheckCircle, FaTimesCircle, FaSpinner, FaUpload } from 'react-icons/fa';
-import api from '@/api/axiosConfig';
-import useUserContext from '@/hooks/useUserContext';
-import toast from 'react-hot-toast';
-
+import React, { useState, useEffect } from "react";
+import {
+  FaIdCard,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSpinner,
+  FaUpload,
+} from "react-icons/fa";
+import api from "@/api/axiosConfig";
+import useUserContext from "@/hooks/useUserContext";
+import toast from "react-hot-toast";
 
 const KYCVerification = ({ TC, isLight }) => {
   const { user } = useUserContext();
   const isDark = !isLight;
-  const [status, setStatus] = useState('loading');
+  const [status, setStatus] = useState("loading");
   const [formData, setFormData] = useState({
-    fullName: '',
-    dob: '',
-    address: '',
-    idType: 'passport',
-    idNumber: '',
+    fullName: "",
+    dob: "",
+    address: "",
+    idType: "passport",
+    idNumber: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,7 +32,7 @@ const KYCVerification = ({ TC, isLight }) => {
         }
       } catch (error) {
         console.error("Failed to fetch KYC status", error);
-        setStatus('unverified');
+        setStatus("unverified");
       }
     };
 
@@ -44,14 +49,14 @@ const KYCVerification = ({ TC, isLight }) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await api.post('/kyc/submit', {
+      const res = await api.post("/kyc/submit", {
         user_id: user.id,
         ...formData,
-        documentImage: 'mock_image_url'
+        documentImage: "mock_image_url",
       });
       if (res.data.success) {
         toast.success("KYC Submitted Successfully!");
-        setStatus('pending');
+        setStatus("pending");
       }
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to submit KYC");
@@ -60,55 +65,87 @@ const KYCVerification = ({ TC, isLight }) => {
     }
   };
 
-  if (status === 'loading') return (
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-6"></div>
-      <div className="h-64 w-full bg-gray-100 dark:bg-gray-800/50 rounded-xl"></div>
-    </div>
-  );
+  if (status === "loading")
+    return (
+      <div className="animate-pulse space-y-4">
+        <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-6"></div>
+        <div className="h-64 w-full bg-gray-100 dark:bg-gray-800/50 rounded-xl"></div>
+      </div>
+    );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      <h2 className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}>
+      <h2
+        className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}
+      >
         <FaIdCard className="text-cyan-500" />
         Identity Verification (KYC)
       </h2>
 
-      {status === 'verified' && (
-        <div className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}>
+      {status === "verified" && (
+        <div
+          className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}
+        >
           <div className="p-4 rounded-full bg-green-500/10 mb-4">
             <FaCheckCircle className="text-4xl text-green-500" />
           </div>
-          <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-green-400" : "text-green-700"}`}>Identity Verified</h3>
-          <p className={`text-sm ${isDark ? "text-green-300/80" : "text-green-600"}`}>Your identity has been verified. You have full access to all features.</p>
+          <h3
+            className={`text-xl font-bold mb-2 ${isDark ? "text-green-400" : "text-green-700"}`}
+          >
+            Identity Verified
+          </h3>
+          <p
+            className={`text-sm ${isDark ? "text-green-300/80" : "text-green-600"}`}
+          >
+            Your identity has been verified. You have full access to all
+            features.
+          </p>
         </div>
       )}
 
-      {status === 'pending' && (
-        <div className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-yellow-900/10 border-yellow-500/20" : "bg-yellow-50 border-yellow-200"}`}>
+      {status === "pending" && (
+        <div
+          className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-yellow-900/10 border-yellow-500/20" : "bg-yellow-50 border-yellow-200"}`}
+        >
           <div className="p-4 rounded-full bg-yellow-500/10 mb-4">
             <FaSpinner className="text-4xl text-yellow-500 animate-spin" />
           </div>
-          <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-yellow-400" : "text-yellow-700"}`}>Verification Pending</h3>
-          <p className={`text-sm ${isDark ? "text-yellow-300/80" : "text-yellow-600"}`}>Your documents are under review. This usually takes 24-48 hours.</p>
+          <h3
+            className={`text-xl font-bold mb-2 ${isDark ? "text-yellow-400" : "text-yellow-700"}`}
+          >
+            Verification Pending
+          </h3>
+          <p
+            className={`text-sm ${isDark ? "text-yellow-300/80" : "text-yellow-600"}`}
+          >
+            Your documents are under review. This usually takes 24-48 hours.
+          </p>
         </div>
       )}
 
-      {(status === 'unverified' || status === 'rejected') && (
+      {(status === "unverified" || status === "rejected") && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {status === 'rejected' && (
-            <div className={`border p-4 rounded-xl flex items-center gap-3 mb-6 ${isDark ? "bg-red-900/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700"}`}>
+          {status === "rejected" && (
+            <div
+              className={`border p-4 rounded-xl flex items-center gap-3 mb-6 ${isDark ? "bg-red-900/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700"}`}
+            >
               <FaTimesCircle className="text-xl shrink-0" />
               <div>
                 <p className="font-bold text-sm">Verification Rejected</p>
-                <p className="text-xs opacity-90">Please check your details and try again.</p>
+                <p className="text-xs opacity-90">
+                  Please check your details and try again.
+                </p>
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}>Full Name</label>
+              <label
+                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
+              >
+                Full Name
+              </label>
               <input
                 type="text"
                 name="fullName"
@@ -120,7 +157,11 @@ const KYCVerification = ({ TC, isLight }) => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}>Date of Birth</label>
+              <label
+                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
+              >
+                Date of Birth
+              </label>
               <input
                 type="date"
                 name="dob"
@@ -133,7 +174,11 @@ const KYCVerification = ({ TC, isLight }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}>Address</label>
+            <label
+              className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
+            >
+              Address
+            </label>
             <textarea
               name="address"
               required
@@ -147,7 +192,11 @@ const KYCVerification = ({ TC, isLight }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}>ID Type</label>
+              <label
+                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
+              >
+                ID Type
+              </label>
               <select
                 name="idType"
                 value={formData.idType}
@@ -160,7 +209,11 @@ const KYCVerification = ({ TC, isLight }) => {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}>ID Number</label>
+              <label
+                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
+              >
+                ID Number
+              </label>
               <input
                 type="text"
                 name="idNumber"
@@ -173,10 +226,18 @@ const KYCVerification = ({ TC, isLight }) => {
             </div>
           </div>
 
-          <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer group ${isDark ? "border-gray-700 hover:border-cyan-500/50 hover:bg-gray-800" : "border-gray-300 hover:border-cyan-500 hover:bg-gray-50"}`}>
-            <FaUpload className={`text-3xl mx-auto mb-3 transition-colors ${isDark ? "text-gray-600 group-hover:text-cyan-500" : "text-gray-400 group-hover:text-cyan-500"}`} />
-            <p className={`text-sm font-medium ${TC.textPrimary}`}>Click to upload ID Document</p>
-            <p className={`text-xs mt-1 ${TC.textSecondary}`}>(Mock Upload - No file needed)</p>
+          <div
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer group ${isDark ? "border-gray-700 hover:border-cyan-500/50 hover:bg-gray-800" : "border-gray-300 hover:border-cyan-500 hover:bg-gray-50"}`}
+          >
+            <FaUpload
+              className={`text-3xl mx-auto mb-3 transition-colors ${isDark ? "text-gray-600 group-hover:text-cyan-500" : "text-gray-400 group-hover:text-cyan-500"}`}
+            />
+            <p className={`text-sm font-medium ${TC.textPrimary}`}>
+              Click to upload ID Document
+            </p>
+            <p className={`text-xs mt-1 ${TC.textSecondary}`}>
+              (Mock Upload - No file needed)
+            </p>
           </div>
 
           <div className="flex justify-end pt-4">
@@ -190,7 +251,7 @@ const KYCVerification = ({ TC, isLight }) => {
                   <FaSpinner className="animate-spin" /> Submitting...
                 </span>
               ) : (
-                'Submit Verification'
+                "Submit Verification"
               )}
             </button>
           </div>

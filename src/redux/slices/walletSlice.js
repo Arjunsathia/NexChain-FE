@@ -1,50 +1,59 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
-import { jwtDecode } from "jwt-decode"; 
-
+import { jwtDecode } from "jwt-decode";
 
 const getUserId = () => {
-    const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-    if(token) {
-        try {
-            const decoded = jwtDecode(token);
-            return decoded.id;
-        } catch { return null; }
+  const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded.id;
+    } catch {
+      return null;
     }
-    return null;
-}
-
-export const refreshBalance = createAsyncThunk("wallet/refreshBalance", async (_, { rejectWithValue }) => {
-  const userId = getUserId();
-  if (!userId) return rejectWithValue("No user ID");
-
-  try {
-    const response = await getData(`/purchases/balance/${userId}`);
-    if (response.success) {
-      return response.virtualBalance;
-    } else {
-      return rejectWithValue(response.error);
-    }
-  } catch (error) {
-    return rejectWithValue(error.message);
   }
-});
+  return null;
+};
 
-export const resetBalance = createAsyncThunk("wallet/resetBalance", async (_, { rejectWithValue }) => {
-  const userId = getUserId();
-  if (!userId) return rejectWithValue("No user ID");
+export const refreshBalance = createAsyncThunk(
+  "wallet/refreshBalance",
+  async (_, { rejectWithValue }) => {
+    const userId = getUserId();
+    if (!userId) return rejectWithValue("No user ID");
 
-  try {
-    const res = await postForm('/purchases/reset-balance', { user_id: userId });
-    if (res.success) {
-      return res.newBalance;
-    } else {
-      return rejectWithValue(res.error);
+    try {
+      const response = await getData(`/purchases/balance/${userId}`);
+      if (response.success) {
+        return response.virtualBalance;
+      } else {
+        return rejectWithValue(response.error);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
+  },
+);
+
+export const resetBalance = createAsyncThunk(
+  "wallet/resetBalance",
+  async (_, { rejectWithValue }) => {
+    const userId = getUserId();
+    if (!userId) return rejectWithValue("No user ID");
+
+    try {
+      const res = await postForm("/purchases/reset-balance", {
+        user_id: userId,
+      });
+      if (res.success) {
+        return res.newBalance;
+      } else {
+        return rejectWithValue(res.error);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
 const walletSlice = createSlice({
   name: "wallet",
@@ -60,7 +69,7 @@ const walletSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-        
+
       .addCase(refreshBalance.pending, (state) => {
         state.loading = true;
       })
@@ -72,7 +81,7 @@ const walletSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       .addCase(resetBalance.pending, (state) => {
         state.loading = true;
       })

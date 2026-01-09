@@ -16,26 +16,28 @@ const getInitialUser = () => {
   return {};
 };
 
+export const fetchUser = createAsyncThunk(
+  "user/fetchUser",
+  async (_, { rejectWithValue }) => {
+    const storedToken = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+    if (!storedToken) return rejectWithValue("No token found");
 
-export const fetchUser = createAsyncThunk("user/fetchUser", async (_, { rejectWithValue }) => {
-  const storedToken = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-  if (!storedToken) return rejectWithValue("No token found");
-
-  try {
-    const decoded = jwtDecode(storedToken);
-    const uId = decoded?.id;
-    if (uId) {
-      const data = await getById("/users", uId);
-      if (data) {
-        localStorage.setItem("NEXCHAIN_USER", JSON.stringify(data));
-        return data;
+    try {
+      const decoded = jwtDecode(storedToken);
+      const uId = decoded?.id;
+      if (uId) {
+        const data = await getById("/users", uId);
+        if (data) {
+          localStorage.setItem("NEXCHAIN_USER", JSON.stringify(data));
+          return data;
+        }
       }
+      return rejectWithValue("Failed to fetch user");
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-    return rejectWithValue("Failed to fetch user");
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
+  },
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -47,8 +49,8 @@ const userSlice = createSlice({
   },
   reducers: {
     setUser: (state, action) => {
-        state.user = action.payload;
-        localStorage.setItem("NEXCHAIN_USER", JSON.stringify(action.payload));
+      state.user = action.payload;
+      localStorage.setItem("NEXCHAIN_USER", JSON.stringify(action.payload));
     },
     logout: (state) => {
       state.user = {};

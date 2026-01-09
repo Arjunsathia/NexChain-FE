@@ -3,7 +3,11 @@ import { Slot } from "@radix-ui/react-slot";
 import { Controller, FormProvider } from "react-hook-form";
 import { cn } from "@/utils/utils";
 import { Label } from "@/Components/ui/label";
-import { useFormField, FormFieldContext, FormItemContext } from "./use-form-field";
+import {
+  useFormField,
+  FormFieldContext,
+  FormItemContext,
+} from "./use-form-field";
 
 const Form = FormProvider;
 
@@ -20,7 +24,11 @@ const FormItem = ({ className, ...props }) => {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn("grid gap-2", className)} {...props} />
+      <div
+        data-slot="form-item"
+        className={cn("grid gap-2", className)}
+        {...props}
+      />
     </FormItemContext.Provider>
   );
 };
@@ -40,7 +48,8 @@ const FormLabel = ({ className, ...props }) => {
 };
 
 const FormControl = ({ ...props }) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const { error, formItemId, formDescriptionId, formMessageId } =
+    useFormField();
 
   return (
     <Slot

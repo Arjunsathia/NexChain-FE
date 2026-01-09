@@ -19,7 +19,7 @@ export default function Dashboard() {
 
   // React Query for caching Top Coins (prevents reload on navigation)
   const { data: topCoins = [], isLoading: loading } = useQuery({
-    queryKey: ['dashboardTopCoins'],
+    queryKey: ["dashboardTopCoins"],
     queryFn: async () => {
       const data = await getCoins({ per_page: 5 });
       if (Array.isArray(data)) {
@@ -33,7 +33,11 @@ export default function Dashboard() {
 
   // Sync selectedCoinId when data loads if not set (or typically default to bitcoin)
   useEffect(() => {
-    if (topCoins.length > 0 && selectedCoinId === "bitcoin" && !topCoins.find(c => c.id === "bitcoin")) {
+    if (
+      topCoins.length > 0 &&
+      selectedCoinId === "bitcoin" &&
+      !topCoins.find((c) => c.id === "bitcoin")
+    ) {
       setSelectedCoinId(topCoins[0].id);
     }
   }, [topCoins, selectedCoinId]);
@@ -68,8 +72,13 @@ export default function Dashboard() {
 
         <div>
           <div className="space-y-1">
-            <h2 className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
-              Top <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Cryptos</span>
+            <h2
+              className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}
+            >
+              Top{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                Cryptos
+              </span>
             </h2>
             <TopCoins
               topCoins={topCoins}
@@ -158,4 +167,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

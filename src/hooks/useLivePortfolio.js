@@ -1,46 +1,58 @@
-import { useMemo } from 'react';
-import useCoinContext from '@/hooks/useCoinContext';
-import { usePurchasedCoins } from './usePurchasedCoins';
+import { useMemo } from "react";
+import useCoinContext from "@/hooks/useCoinContext";
+import { usePurchasedCoins } from "./usePurchasedCoins";
 
 export const useLivePortfolio = () => {
   const { coins: liveCoins } = useCoinContext();
   const { purchasedCoins, loading, error, refetch } = usePurchasedCoins();
 
-  
   const livePortfolio = useMemo(() => {
-    
     if (!Array.isArray(purchasedCoins)) {
       return [];
     }
-    
+
     if (purchasedCoins.length === 0) {
       return [];
     }
 
-    return purchasedCoins.map(purchasedCoin => {
-      const liveCoin = Array.isArray(liveCoins) ? liveCoins.find(coin => 
-        coin.id === purchasedCoin.coinId || 
-        coin.id === purchasedCoin.coin_id
-      ) : null;
-      
+    return purchasedCoins.map((purchasedCoin) => {
+      const liveCoin = Array.isArray(liveCoins)
+        ? liveCoins.find(
+            (coin) =>
+              coin.id === purchasedCoin.coinId ||
+              coin.id === purchasedCoin.coin_id,
+          )
+        : null;
+
       if (!liveCoin) {
-        console.warn(`No live data found for coin: ${purchasedCoin.coinName || purchasedCoin.coin_name}`);
+        console.warn(
+          `No live data found for coin: ${purchasedCoin.coinName || purchasedCoin.coin_name}`,
+        );
         return {
           ...purchasedCoin,
-          currentPrice: purchasedCoin.coinPriceUSD || purchasedCoin.coin_price_usd || 0,
+          currentPrice:
+            purchasedCoin.coinPriceUSD || purchasedCoin.coin_price_usd || 0,
           priceChange24h: 0,
           marketData: null,
-          totalCurrentValue: (purchasedCoin.totalQuantity || purchasedCoin.quantity || 0) * (purchasedCoin.coinPriceUSD || purchasedCoin.coin_price_usd || 0),
+          totalCurrentValue:
+            (purchasedCoin.totalQuantity || purchasedCoin.quantity || 0) *
+            (purchasedCoin.coinPriceUSD || purchasedCoin.coin_price_usd || 0),
           profitLoss: 0,
-          profitLossPercentage: 0
+          profitLossPercentage: 0,
         };
       }
 
-      const totalQuantity = purchasedCoin.totalQuantity || purchasedCoin.quantity || 0;
-      const remainingInvestment = purchasedCoin.remainingInvestment || purchasedCoin.totalCost || purchasedCoin.total_cost || 0;
+      const totalQuantity =
+        purchasedCoin.totalQuantity || purchasedCoin.quantity || 0;
+      const remainingInvestment =
+        purchasedCoin.remainingInvestment ||
+        purchasedCoin.totalCost ||
+        purchasedCoin.total_cost ||
+        0;
       const totalCurrentValue = totalQuantity * (liveCoin.current_price || 0);
       const profitLoss = totalCurrentValue - remainingInvestment;
-      const profitLossPercentage = remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
+      const profitLossPercentage =
+        remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
 
       return {
         ...purchasedCoin,
@@ -58,25 +70,24 @@ export const useLivePortfolio = () => {
         totalCurrentValue,
         profitLoss,
         profitLossPercentage,
-        marketData: liveCoin
+        marketData: liveCoin,
       };
     });
   }, [purchasedCoins, liveCoins]);
 
-  
   const groupedHoldings = useMemo(() => {
     if (!livePortfolio || livePortfolio.length === 0) return [];
-    
+
     const holdingsMap = {};
-    
-    livePortfolio.forEach(coin => {
+
+    livePortfolio.forEach((coin) => {
       const coinId = coin.coinId;
-      
+
       if (!coinId) {
-        console.warn('Coin without ID found:', coin);
+        console.warn("Coin without ID found:", coin);
         return;
       }
-      
+
       if (!holdingsMap[coinId]) {
         holdingsMap[coinId] = {
           ...coin,
@@ -84,30 +95,45 @@ export const useLivePortfolio = () => {
           remainingInvestment: 0,
           totalCurrentValue: 0,
           totalFees: 0,
-          transactionCount: 0
+          transactionCount: 0,
         };
       }
-      
-      holdingsMap[coinId].totalQuantity += coin.totalQuantity || coin.quantity || 0;
-      holdingsMap[coinId].remainingInvestment += coin.remainingInvestment || coin.totalCost || 0;
+
+      holdingsMap[coinId].totalQuantity +=
+        coin.totalQuantity || coin.quantity || 0;
+      holdingsMap[coinId].remainingInvestment +=
+        coin.remainingInvestment || coin.totalCost || 0;
       holdingsMap[coinId].totalCurrentValue += coin.totalCurrentValue || 0;
       holdingsMap[coinId].totalFees += coin.fees || 0;
       holdingsMap[coinId].transactionCount += coin.transactionCount || 1;
     });
 
-    return Object.values(holdingsMap).map(coin => ({
+    return Object.values(holdingsMap).map((coin) => ({
       ...coin,
       profitLoss: coin.totalCurrentValue - coin.remainingInvestment,
-      profitLossPercentage: coin.remainingInvestment > 0 ? 
-        ((coin.totalCurrentValue - coin.remainingInvestment) / coin.remainingInvestment) * 100 : 0
+      profitLossPercentage:
+        coin.remainingInvestment > 0
+          ? ((coin.totalCurrentValue - coin.remainingInvestment) /
+              coin.remainingInvestment) *
+            100
+          : 0,
     }));
   }, [livePortfolio]);
 
   const portfolioSummary = useMemo(() => {
-    const remainingInvestment = livePortfolio.reduce((sum, coin) => sum + (coin.remainingInvestment || coin.totalCost || 0), 0);
-    const totalCurrentValue = livePortfolio.reduce((sum, coin) => sum + (coin.totalCurrentValue || 0), 0);
+    const remainingInvestment = livePortfolio.reduce(
+      (sum, coin) => sum + (coin.remainingInvestment || coin.totalCost || 0),
+      0,
+    );
+    const totalCurrentValue = livePortfolio.reduce(
+      (sum, coin) => sum + (coin.totalCurrentValue || 0),
+      0,
+    );
     const totalProfitLoss = totalCurrentValue - remainingInvestment;
-    const totalProfitLossPercentage = remainingInvestment > 0 ? (totalProfitLoss / remainingInvestment) * 100 : 0;
+    const totalProfitLossPercentage =
+      remainingInvestment > 0
+        ? (totalProfitLoss / remainingInvestment) * 100
+        : 0;
 
     return {
       remainingInvestment,
@@ -115,7 +141,7 @@ export const useLivePortfolio = () => {
       totalCurrentValue,
       totalProfitLoss,
       totalProfitLossPercentage,
-      totalCoins: groupedHoldings.length
+      totalCoins: groupedHoldings.length,
     };
   }, [livePortfolio, groupedHoldings]);
 
@@ -125,6 +151,6 @@ export const useLivePortfolio = () => {
     portfolioSummary,
     loading,
     error,
-    refetch
+    refetch,
   };
 };

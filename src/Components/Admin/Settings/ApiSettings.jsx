@@ -39,7 +39,9 @@ function ApiSettings({ apiSettings, setApiSettings, TC }) {
               >
                 Rate Limiting
               </h4>
-              <p className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}
+              >
                 Enable API rate limiting
               </p>
             </div>

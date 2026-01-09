@@ -1,5 +1,12 @@
 import React from "react";
-import { FaEye, FaTrash, FaBug, FaLightbulb, FaStar, FaComments } from "react-icons/fa";
+import {
+  FaEye,
+  FaTrash,
+  FaBug,
+  FaLightbulb,
+  FaStar,
+  FaComments,
+} from "react-icons/fa";
 
 function FeedbackTable({
   filteredFeedbacks,

@@ -19,15 +19,26 @@ function Sparkline({ data = [], width = 100, height = 40, positive = true }) {
   const color = positive ? "#10B981" : "#EF4444";
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="drop-shadow-sm">
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      className="drop-shadow-sm"
+    >
       <defs>
-        <linearGradient id={`gradient-${positive ? 'up' : 'down'}`} x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient
+          id={`gradient-${positive ? "up" : "down"}`}
+          x1="0%"
+          y1="0%"
+          x2="0%"
+          y2="100%"
+        >
           <stop offset="0%" stopColor={color} stopOpacity="0.3" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
       <polyline
-        fill={`url(#gradient-${positive ? 'up' : 'down'})`}
+        fill={`url(#gradient-${positive ? "up" : "down"})`}
         stroke={color}
         strokeWidth="2"
         points={`0,${height} ${points} ${width},${height}`}

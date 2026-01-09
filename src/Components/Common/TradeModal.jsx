@@ -1,4 +1,4 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 
@@ -72,11 +72,10 @@ function TradeModal({
     );
   }, [userHoldings]);
 
-
   const shouldShowHoldingsInfo = showHoldingsInfo || hasHoldings;
   const isBuyOperation = useMemo(
     () => (shouldShowHoldingsInfo ? activeTab === "deposit" : type === "buy"),
-    [shouldShowHoldingsInfo, activeTab, type]
+    [shouldShowHoldingsInfo, activeTab, type],
   );
 
   const handleBackdropClick = (e) => {
@@ -124,7 +123,9 @@ function TradeModal({
   }, [shouldShowHoldingsInfo, coin, currentPrice, userHoldings]);
 
   const effectivePrice = useMemo(() => {
-    return (orderType === "limit" || orderType === "stop_limit") && limitPrice ? parseFloat(limitPrice) : currentPrice;
+    return (orderType === "limit" || orderType === "stop_limit") && limitPrice
+      ? parseFloat(limitPrice)
+      : currentPrice;
   }, [orderType, limitPrice, currentPrice]);
 
   const maxAvailable = useMemo(() => {
@@ -221,13 +222,6 @@ function TradeModal({
     }
   }, [coin, show, currentPrice, orderType]);
 
-
-
-
-
-
-
-
   const handleUsdAmountChange = (e) => {
     const value = e.target.value;
     setUsdAmount(value);
@@ -262,7 +256,6 @@ function TradeModal({
     const value = e.target.value;
     setLimitPrice(value);
 
-
     if (coinAmount && value > 0) {
       const price = parseFloat(value);
       const calculatedUSD = parseFloat(coinAmount) * price;
@@ -285,7 +278,9 @@ function TradeModal({
         ? activeTab === "withdraw"
         : type === "sell";
       if (isSellMode) {
-        toast.success(`Set to maximum: ${truncated.toFixed(6)} ${coin.symbol?.toUpperCase()}`);
+        toast.success(
+          `Set to maximum: ${truncated.toFixed(6)} ${coin.symbol?.toUpperCase()}`,
+        );
       }
     }
   };
@@ -305,7 +300,7 @@ function TradeModal({
       toast.success(
         `Filled with entire holdings: ${truncated.toFixed(6)} ${(
           coin.symbol || coin.coinSymbol
-        )?.toUpperCase()}`
+        )?.toUpperCase()}`,
       );
     } else {
       toast.error("You don't have any holdings to sell");
@@ -317,8 +312,6 @@ function TradeModal({
     const amount = parseFloat(usdAmount);
     return amount.toFixed(2);
   }, [usdAmount]);
-
-
 
   const handleTradeSubmit = useCallback(
     async (tradeData) => {
@@ -358,7 +351,8 @@ function TradeModal({
       };
 
       if (isAlertMode) {
-        const condition = parseFloat(alertTargetPrice) > currentPrice ? 'above' : 'below';
+        const condition =
+          parseFloat(alertTargetPrice) > currentPrice ? "above" : "below";
         const alertData = {
           user_id: user.id,
           coin_id: coinData.coinId || coinData.id,
@@ -366,7 +360,7 @@ function TradeModal({
           coin_name: coinData.name || coinData.coinName,
           coin_image: coinData.image,
           target_price: parseFloat(alertTargetPrice),
-          condition
+          condition,
         };
 
         try {
@@ -378,10 +372,11 @@ function TradeModal({
           toast.error("Failed to create alert");
         }
 
-        toast.success(`Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`);
+        toast.success(
+          `Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`,
+        );
         return;
       }
-
 
       if (orderType === "limit" || orderType === "stop_limit") {
         const orderData = {
@@ -393,8 +388,9 @@ function TradeModal({
           type: type,
           category: orderType,
           limit_price: parseFloat(limitPrice),
-          stop_price: orderType === 'stop_limit' ? parseFloat(stopPrice) : undefined,
-          quantity: parseFloat(coinAmount)
+          stop_price:
+            orderType === "stop_limit" ? parseFloat(stopPrice) : undefined,
+          quantity: parseFloat(coinAmount),
         };
 
         const res = await api.post("/orders/create", orderData);
@@ -403,13 +399,14 @@ function TradeModal({
           throw new Error(res.data.error || "Failed to create order");
         }
 
-        toast.success(`${orderType === 'stop_limit' ? 'Stop-Limit' : 'Limit'} Order Placed Successfully!`);
+        toast.success(
+          `${orderType === "stop_limit" ? "Stop-Limit" : "Limit"} Order Placed Successfully!`,
+        );
 
         // Non-blocking updates
         runBackgroundUpdates();
         return;
       } else {
-
         if (isBuyOperation) {
           if (!coinData) {
             throw new Error("Coin data not found");
@@ -432,7 +429,7 @@ function TradeModal({
           const result = await addPurchase(purchaseData);
           if (result.success) {
             toast.success(
-              `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`
+              `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
             );
 
             // Non-blocking
@@ -441,7 +438,6 @@ function TradeModal({
             throw new Error(result.error || "Purchase failed");
           }
         } else {
-
           if (!coinData) {
             throw new Error("Coin data not found");
           }
@@ -459,8 +455,8 @@ function TradeModal({
           if (result.success) {
             toast.success(
               `Successfully sold ${parseFloat(coinAmount).toFixed(
-                6
-              )} ${symbol.toUpperCase()}`
+                6,
+              )} ${symbol.toUpperCase()}`,
             );
 
             // Non-blocking
@@ -483,8 +479,8 @@ function TradeModal({
       stopPrice,
       isAlertMode,
       alertTargetPrice,
-      isBuyOperation
-    ]
+      isBuyOperation,
+    ],
   );
 
   const handleSubmit = async () => {
@@ -509,7 +505,7 @@ function TradeModal({
         toast.error(
           `You only have ${availableQuantity.toFixed(8)} ${(
             coin.symbol || coin.coinSymbol
-          )?.toUpperCase()} available`
+          )?.toUpperCase()} available`,
         );
         return;
       }
@@ -521,7 +517,7 @@ function TradeModal({
 
       if (!holdingsSummary || availableQuantity === 0) {
         toast.error(
-          "No holdings found for this coin. Please refresh and try again."
+          "No holdings found for this coin. Please refresh and try again.",
         );
         return;
       }
@@ -558,7 +554,6 @@ function TradeModal({
         coinData: coin,
       });
 
-
       handleClose();
     } catch (error) {
       console.error("Trade error:", error);
@@ -579,20 +574,24 @@ function TradeModal({
 
   return (
     <>
-
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          } ${isLight ? "bg-black/30" : "bg-black/70"}`}
+        className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
+          isVisible
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        } ${isLight ? "bg-black/30" : "bg-black/70"}`}
         onClick={handleBackdropClick}
       >
         <div
-          className={`rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-[95%] sm:w-full max-w-[360px] sm:max-w-[440px] mx-auto overflow-hidden transition-all duration-300 ease-out origin-center backdrop-blur-3xl transform ${isLight
-            ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
-            : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
-            } ${isVisible
+          className={`rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-[95%] sm:w-full max-w-[360px] sm:max-w-[440px] mx-auto overflow-hidden transition-all duration-300 ease-out origin-center backdrop-blur-3xl transform ${
+            isLight
+              ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
+              : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
+          } ${
+            isVisible
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-4 scale-95"
-            }`}
+          }`}
         >
           <TradeModalHeader
             coin={coin}
@@ -657,8 +656,6 @@ function TradeModal({
                 setStopPrice={setStopPrice}
               />
             )}
-
-
           </div>
         </div>
       </div>

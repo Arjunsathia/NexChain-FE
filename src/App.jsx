@@ -12,7 +12,6 @@ import DataLoader from "./Components/Common/DataLoader";
 import Admin2FAModal from "./Components/Admin/Security/Admin2FAModal";
 import { initTheme } from "@/utils/theme-manager";
 
-
 initTheme();
 
 function App() {
@@ -31,16 +30,19 @@ function App() {
     }
   }, [isLoading]);
 
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes (Aggressive caching for instant feel)
-        gcTime: 1000 * 60 * 10,   // 10 minutes
-        retry: 1,
-        refetchOnWindowFocus: false,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes (Aggressive caching for instant feel)
+            gcTime: 1000 * 60 * 10, // 10 minutes
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  );
 
   return (
     <Provider store={store}>

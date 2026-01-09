@@ -3,9 +3,12 @@ import { FaExclamationTriangle } from "react-icons/fa";
 function RecentReports({ reports, isLoading, TC }) {
   const getIconColor = (type) => {
     switch (type?.toLowerCase()) {
-      case 'security': return "text-red-400 bg-red-400/10";
-      case 'bug': return "text-amber-400 bg-amber-400/10";
-      default: return "text-blue-400 bg-blue-400/10";
+      case "security":
+        return "text-red-400 bg-red-400/10";
+      case "bug":
+        return "text-amber-400 bg-amber-400/10";
+      default:
+        return "text-blue-400 bg-blue-400/10";
     }
   };
 
@@ -50,31 +53,42 @@ function RecentReports({ reports, isLoading, TC }) {
               className={`group flex items-start gap-3 p-3.5 rounded-2xl ${TC.bgItem} transition-all duration-300 hover:shadow-md hover:shadow-black/5`}
             >
               {/* Icon Indicator */}
-              <div className={`mt-0.5 p-2 rounded-lg ${getIconColor(report.type)} flex-shrink-0`}>
+              <div
+                className={`mt-0.5 p-2 rounded-lg ${getIconColor(report.type)} flex-shrink-0`}
+              >
                 <FaExclamationTriangle className="text-xs" />
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
-                  <h4 className={`font-bold text-xs sm:text-sm ${TC.textPrimary} line-clamp-1 mb-1`}>
+                  <h4
+                    className={`font-bold text-xs sm:text-sm ${TC.textPrimary} line-clamp-1 mb-1`}
+                  >
                     {report.title}
                   </h4>
-                  <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md whitespace-nowrap ml-2 ${report.status === "open"
-                    ? "bg-red-500/10 text-red-500 border border-red-500/10"
-                    : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/10"
-                    }`}>
+                  <span
+                    className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md whitespace-nowrap ml-2 ${
+                      report.status === "open"
+                        ? "bg-red-500/10 text-red-500 border border-red-500/10"
+                        : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/10"
+                    }`}
+                  >
                     {report.status}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-[10px] font-medium ${TC.textSecondary} capitalize`}>
+                  <span
+                    className={`text-[10px] font-medium ${TC.textSecondary} capitalize`}
+                  >
                     {report.type}
                   </span>
                   <span className={`text-[10px] ${TC.textTertiary}`}>•</span>
                   <span className={`text-[10px] ${TC.textTertiary}`}>
-                    {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown"}
+                    {report.createdAt
+                      ? new Date(report.createdAt).toLocaleDateString()
+                      : "Unknown"}
                   </span>
                 </div>
               </div>
@@ -82,7 +96,9 @@ function RecentReports({ reports, isLoading, TC }) {
           ))
         )}
         {!isLoading && reports.length === 0 && (
-          <div className={`text-center ${TC.textSecondary} py-8 text-xs sm:text-sm`}>
+          <div
+            className={`text-center ${TC.textSecondary} py-8 text-xs sm:text-sm`}
+          >
             No active reports
           </div>
         )}

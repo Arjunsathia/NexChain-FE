@@ -21,7 +21,9 @@ export default function PublicLayout() {
     : "bg-gradient-to-tl from-white via-slate-50 to-blue-50";
 
   return (
-    <div className={`min-h-screen flex flex-col ${backgroundClass} ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+    <div
+      className={`min-h-screen flex flex-col ${backgroundClass} ${isDarkMode ? "text-white" : "text-gray-900"}`}
+    >
       <main className="flex-1 p-4">
         <motion.div
           key={location.pathname}

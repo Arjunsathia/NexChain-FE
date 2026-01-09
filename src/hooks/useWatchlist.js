@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getData } from '@/api/axiosConfig';
-import useUserContext from '@/hooks/useUserContext';
+import { useState, useEffect, useCallback } from "react";
+import { getData } from "@/api/axiosConfig";
+import useUserContext from "@/hooks/useUserContext";
 
 export const useWatchlist = () => {
   const { user } = useUserContext();
@@ -14,10 +14,10 @@ export const useWatchlist = () => {
     }
 
     try {
-      const res = await getData('/watchlist', { user_id: user.id });
+      const res = await getData("/watchlist", { user_id: user.id });
       setWatchlist(res || []);
     } catch (err) {
-      console.error('Failed to fetch watchlist:', err);
+      console.error("Failed to fetch watchlist:", err);
       setWatchlist([]);
     } finally {
       setLoading(false);
@@ -31,6 +31,6 @@ export const useWatchlist = () => {
   return {
     watchlist,
     loading,
-    refreshWatchlist: fetchWatchlist
+    refreshWatchlist: fetchWatchlist,
   };
 };

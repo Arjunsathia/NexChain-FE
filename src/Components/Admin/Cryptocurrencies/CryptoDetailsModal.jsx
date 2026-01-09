@@ -50,7 +50,9 @@ function CryptoDetailsModal({
         <div className="p-4 space-y-3 sm:space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 Current Price
               </p>
               <p className={`text-sm sm:text-lg font-bold ${TC.textPrimary}`}>
@@ -58,7 +60,9 @@ function CryptoDetailsModal({
               </p>
             </div>
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 Market Cap
               </p>
               <p className={`text-sm sm:text-lg font-bold ${TC.textPrimary}`}>
@@ -66,7 +70,9 @@ function CryptoDetailsModal({
               </p>
             </div>
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 24h High
               </p>
               <p className="text-sm sm:text-lg font-bold text-green-400">
@@ -74,7 +80,9 @@ function CryptoDetailsModal({
               </p>
             </div>
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 24h Low
               </p>
               <p className="text-sm sm:text-lg font-bold text-red-400">
@@ -85,7 +93,9 @@ function CryptoDetailsModal({
 
           <div className="grid grid-cols-2 gap-2 sm:gap-4">
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 All Time High
               </p>
               <p className={`text-sm sm:text-lg font-bold ${TC.textPrimary}`}>
@@ -96,7 +106,9 @@ function CryptoDetailsModal({
               </p>
             </div>
             <div className={`p-3 rounded-lg ${TC.bgItem}`}>
-              <p className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}>
+              <p
+                className={`text-[10px] sm:text-xs uppercase mb-1 ${TC.textSecondary}`}
+              >
                 Circulating Supply
               </p>
               <p className={`text-sm sm:text-lg font-bold ${TC.textPrimary}`}>

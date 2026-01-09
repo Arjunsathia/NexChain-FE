@@ -4,7 +4,6 @@ import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
 
-
 const SecuritySettings = ({ TC, isLight }) => {
   const { user } = useUserContext();
   const isDark = !isLight;
@@ -40,7 +39,10 @@ const SecuritySettings = ({ TC, isLight }) => {
   const handleVerify2FA = async () => {
     setLoading(true);
     try {
-      const res = await api.post("/2fa/verify", { user_id: user.id, token: otp });
+      const res = await api.post("/2fa/verify", {
+        user_id: user.id,
+        token: otp,
+      });
       if (res.data.success) {
         toast.success("2FA Enabled Successfully");
         setSecurity({ ...security, twoFactor: true });
@@ -55,7 +57,12 @@ const SecuritySettings = ({ TC, isLight }) => {
   };
 
   const handleDisable2FA = async () => {
-    if (!window.confirm("Are you sure you want to disable 2FA? This will reduce your account security.")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to disable 2FA? This will reduce your account security.",
+      )
+    )
+      return;
 
     setLoading(true);
     try {
@@ -69,19 +76,26 @@ const SecuritySettings = ({ TC, isLight }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      <h3 className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}>
+      <h3
+        className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}
+      >
         <FaShieldAlt className="text-cyan-500" /> Security Configuration
       </h3>
 
       {/* 2FA Section */}
-      <div className={`pb-8 border-b border-dashed`} style={{ borderColor: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)' }}>
+      <div
+        className={`pb-8 border-b border-dashed`}
+        style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
+      >
         <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4">
           <div className="text-center sm:text-left">
-            <h3 className={`font-bold text-lg ${TC.textPrimary}`}>Two-Factor Authentication (2FA)</h3>
+            <h3 className={`font-bold text-lg ${TC.textPrimary}`}>
+              Two-Factor Authentication (2FA)
+            </h3>
             <p className={`text-sm mt-1 ${TC.textSecondary}`}>
               {security.twoFactor
                 ? "Your account is secured with 2FA."
@@ -111,8 +125,12 @@ const SecuritySettings = ({ TC, isLight }) => {
 
         {/* QR Code Setup */}
         {showSetup && !security.twoFactor && (
-          <div className={`mt-8 p-6 rounded-2xl border animate-in slide-in-from-top-4 duration-300 ${isDark ? "bg-black/20 border-white/5" : "bg-gray-50 border-gray-100"}`}>
-            <h4 className={`font-bold mb-6 flex items-center gap-2 ${TC.textPrimary}`}>
+          <div
+            className={`mt-8 p-6 rounded-2xl border animate-in slide-in-from-top-4 duration-300 ${isDark ? "bg-black/20 border-white/5" : "bg-gray-50 border-gray-100"}`}
+          >
+            <h4
+              className={`font-bold mb-6 flex items-center gap-2 ${TC.textPrimary}`}
+            >
               <FaQrcode className="text-cyan-500" /> Scan QR Code
             </h4>
             <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -121,7 +139,8 @@ const SecuritySettings = ({ TC, isLight }) => {
               </div>
               <div className="flex-1 space-y-6 text-center md:text-left">
                 <p className={`text-sm leading-relaxed ${TC.textSecondary}`}>
-                  1. Open your authenticator app (Google Authenticator, Authy, etc.) <br />
+                  1. Open your authenticator app (Google Authenticator, Authy,
+                  etc.) <br />
                   2. Scan the QR code. <br />
                   3. Enter the 6-digit code below to verify.
                 </p>

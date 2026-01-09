@@ -1,14 +1,7 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 
-const CoinListModal = ({
-  title,
-  coins,
-  onClose,
-  TC,
-  formatCurrency,
-
-}) => {
+const CoinListModal = ({ title, coins, onClose, TC, formatCurrency }) => {
   if (!coins) return null;
 
   return (
@@ -43,7 +36,9 @@ const CoinListModal = ({
                   className="w-6 h-6 rounded-full"
                 />
                 <div className="min-w-0">
-                  <p className={`font-bold text-xs ${TC.textPrimary} truncate max-w-[80px] sm:max-w-none`}>
+                  <p
+                    className={`font-bold text-xs ${TC.textPrimary} truncate max-w-[80px] sm:max-w-none`}
+                  >
                     {coin.name}
                   </p>
                   <p className={`text-[10px] ${TC.textSecondary}`}>
@@ -56,10 +51,11 @@ const CoinListModal = ({
                   {formatCurrency(coin.current_price)}
                 </p>
                 <p
-                  className={`text-[10px] font-bold ${coin.price_change_percentage_24h >= 0
+                  className={`text-[10px] font-bold ${
+                    coin.price_change_percentage_24h >= 0
                       ? "text-green-400"
                       : "text-red-400"
-                    }`}
+                  }`}
                 >
                   {coin.price_change_percentage_24h >= 0 ? "+" : ""}
                   {coin.price_change_percentage_24h.toFixed(2)}%

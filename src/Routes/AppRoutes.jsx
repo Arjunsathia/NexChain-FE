@@ -7,7 +7,6 @@ import MainLayout from "@/Components/layout/MainLayout";
 import PublicLayout from "@/Components/layout/PublicLayout";
 import AnimatedLayout from "@/Components/layout/AnimatedLayout";
 
-
 import Dashboard from "../Pages/Dashboard";
 import CryptoList from "../Pages/CryptoList";
 import PortfolioPage from "@/Pages/PortfolioPage";
@@ -16,27 +15,28 @@ import LearningHub from "@/Pages/LearningHub";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
 
-
-const CoinDetailsPage = lazy(() => import("@/Pages/CoinDetails/CoinDetailsPage"));
+const CoinDetailsPage = lazy(
+  () => import("@/Pages/CoinDetails/CoinDetailsPage"),
+);
 const CoinPageOutlet = lazy(() => import("@/Pages/CoinDetails/CoinPageOutlet"));
 const User = lazy(() => import("@/Pages/UserProfile/User"));
 const UserDashboard = lazy(() => import("@/Pages/UserProfile/UserDashboard"));
 const UserSettings = lazy(() => import("@/Pages/UserProfile/Settings"));
 const UserSupport = lazy(() => import("@/Pages/UserProfile/Support"));
 
-const UserMarketInsights = lazy(() => import("@/Pages/UserProfile/MarketInsights"));
-
+const UserMarketInsights = lazy(
+  () => import("@/Pages/UserProfile/MarketInsights"),
+);
 
 const Admin = lazy(() => import("@/Pages/Admin/Admin"));
 const AdminDashboard = lazy(() => import("@/Pages/Admin/Dashboard"));
 const Users = lazy(() => import("@/Pages/Admin/Users"));
-const AdminCryptocurrencies = lazy(() => import("@/Pages/Admin/Cryptocurrencies"));
+const AdminCryptocurrencies = lazy(
+  () => import("@/Pages/Admin/Cryptocurrencies"),
+);
 
 const AdminFeedback = lazy(() => import("@/Pages/Admin/Feedback"));
 const AdminSettings = lazy(() => import("@/Pages/Admin/Settings"));
-
-
-
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -48,7 +48,6 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-
         {/* Animated Layout Group (Persistent Background) */}
         <Route element={<AnimatedLayout />}>
           <Route element={<PublicRoute />}>
@@ -67,9 +66,7 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
-
-
-        { }
+        {}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -77,8 +74,11 @@ export default function AppRoutes() {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/learning" element={<LearningHub />} />
-            <Route path="/coin" element={<CoinPageOutlet />} >
-              <Route path="coin-details/:coinId" element={<CoinDetailsPage />} />
+            <Route path="/coin" element={<CoinPageOutlet />}>
+              <Route
+                path="coin-details/:coinId"
+                element={<CoinDetailsPage />}
+              />
             </Route>
             <Route element={<User />}>
               <Route path="/user-profile/:userId" element={<UserDashboard />} />
@@ -91,7 +91,10 @@ export default function AppRoutes() {
               <Route index element={<AdminDashboard />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<Users />} />
-              <Route path="cryptocurrencies" element={<AdminCryptocurrencies />} />
+              <Route
+                path="cryptocurrencies"
+                element={<AdminCryptocurrencies />}
+              />
               <Route path="feedback" element={<AdminFeedback />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>

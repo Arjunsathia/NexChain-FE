@@ -37,7 +37,7 @@ function HoldingsBadge({ hasHoldings, userHoldings, coin, isLight }) {
             }`}
           >
             {(userHoldings.totalQuantity || userHoldings.quantity || 0).toFixed(
-              6
+              6,
             )}{" "}
             {coin.symbol?.toUpperCase()}
           </p>

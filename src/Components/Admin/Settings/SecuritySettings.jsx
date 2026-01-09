@@ -28,7 +28,7 @@ function SecuritySettings({ security, setSecurity, TC }) {
     try {
       await api.post("/auth/verify-totp", {
         token: otp,
-        secret: setupData.secret
+        secret: setupData.secret,
       });
       toast.success("2FA Enabled Successfully!");
       setSecurity({ ...security, twoFactor: true });
@@ -45,7 +45,9 @@ function SecuritySettings({ security, setSecurity, TC }) {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}>
+        <h3
+          className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}
+        >
           Security Settings
         </h3>
 
@@ -56,11 +58,15 @@ function SecuritySettings({ security, setSecurity, TC }) {
                 <FaShieldAlt className="text-base sm:text-xl" />
               </div>
               <div>
-                <h4 className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}>
+                <h4
+                  className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}
+                >
                   Two-Factor Authentication
                 </h4>
                 <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
-                  {security.twoFactor ? "Your account is secured with 2FA" : "Add an extra layer of security"}
+                  {security.twoFactor
+                    ? "Your account is secured with 2FA"
+                    : "Add an extra layer of security"}
                 </p>
               </div>
             </div>
@@ -83,34 +89,48 @@ function SecuritySettings({ security, setSecurity, TC }) {
           {/* SETUP AREA */}
           {showSetup && setupData && (
             <div className="mt-4 p-4 border border-cyan-500/30 rounded-xl bg-cyan-500/5 animate-in fade-in slide-in-from-top-4">
-              <h5 className={`font-bold mb-4 ${TC.textPrimary} flex items-center gap-2`}>
+              <h5
+                className={`font-bold mb-4 ${TC.textPrimary} flex items-center gap-2`}
+              >
                 <FaQrcode /> Scan QR Code
               </h5>
 
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="bg-white p-2 rounded-xl w-fit h-fit">
-                  <img src={setupData.qrCode} alt="2FA QR" className="w-32 h-32 sm:w-40 sm:h-40" />
+                  <img
+                    src={setupData.qrCode}
+                    alt="2FA QR"
+                    className="w-32 h-32 sm:w-40 sm:h-40"
+                  />
                 </div>
 
                 <div className="flex-1 space-y-4">
                   <div>
-                    <label className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary}`}>
+                    <label
+                      className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary}`}
+                    >
                       Manual Entry Code
                     </label>
-                    <p className={`font-mono text-lg ${TC.textPrimary} break-all select-all`}>
+                    <p
+                      className={`font-mono text-lg ${TC.textPrimary} break-all select-all`}
+                    >
                       {setupData.secret}
                     </p>
                   </div>
 
                   <div>
-                    <label className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary} mb-2 block`}>
+                    <label
+                      className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary} mb-2 block`}
+                    >
                       Verify Code
                     </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        onChange={(e) =>
+                          setOtp(e.target.value.replace(/\D/g, ""))
+                        }
                         maxLength={6}
                         placeholder="000 000"
                         className={`w-full max-w-[200px] rounded-xl px-4 py-2 text-center tracking-[0.2em] font-mono outline-none border ${TC.bgInput}`}
@@ -165,7 +185,9 @@ function SecuritySettings({ security, setSecurity, TC }) {
             </div>
           </div>
         </div>
-        <p className="text-xs text-center mt-2 text-yellow-500">Password changes currently disabled in this demo.</p>
+        <p className="text-xs text-center mt-2 text-yellow-500">
+          Password changes currently disabled in this demo.
+        </p>
       </div>
     </div>
   );

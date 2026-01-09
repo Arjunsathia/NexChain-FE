@@ -52,7 +52,11 @@ function LatestUsers({ users, isLoading, TC }) {
                   <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
                     {user.image ? (
                       <img
-                        src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`}
+                        src={
+                          user.image.startsWith("http")
+                            ? user.image
+                            : `${SERVER_URL}/uploads/${user.image}`
+                        }
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />
@@ -66,19 +70,27 @@ function LatestUsers({ users, isLoading, TC }) {
               {/* Info Details - Split Layout */}
               <div className="min-w-0 flex-1 flex flex-col justify-center gap-0.5">
                 <div className="flex justify-between items-center">
-                  <h4 className={`font-bold ${TC.textPrimary} text-xs sm:text-sm truncate pr-2`}>
+                  <h4
+                    className={`font-bold ${TC.textPrimary} text-xs sm:text-sm truncate pr-2`}
+                  >
                     {user.name}
                   </h4>
-                  <span className={`text-[10px] font-medium ${TC.textTertiary} whitespace-nowrap opacity-70`}>
+                  <span
+                    className={`text-[10px] font-medium ${TC.textTertiary} whitespace-nowrap opacity-70`}
+                  >
                     {user.joinDate}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <p className={`text-[10px] sm:text-xs ${TC.textSecondary} truncate mr-2`}>
+                  <p
+                    className={`text-[10px] sm:text-xs ${TC.textSecondary} truncate mr-2`}
+                  >
                     {user.email}
                   </p>
-                  <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/10`}>
+                  <span
+                    className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/10`}
+                  >
                     {user.role}
                   </span>
                 </div>
@@ -87,7 +99,9 @@ function LatestUsers({ users, isLoading, TC }) {
           ))
         )}
         {!isLoading && users.length === 0 && (
-          <div className={`text-center ${TC.textSecondary} py-8 text-xs sm:text-sm`}>
+          <div
+            className={`text-center ${TC.textSecondary} py-8 text-xs sm:text-sm`}
+          >
             No users found
           </div>
         )}

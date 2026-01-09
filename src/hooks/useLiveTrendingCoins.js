@@ -1,8 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import { getTrend, getTrendingCoinMarketData } from "@/api/coinApis";
-import { useBinanceTicker } from './useBinanceTicker';
+import { useBinanceTicker } from "./useBinanceTicker";
 
-const FALLBACK_IDS = ["bitcoin", "ethereum", "binancecoin", "ripple", "solana", "cardano", "polkadot"];
+const FALLBACK_IDS = [
+  "bitcoin",
+  "ethereum",
+  "binancecoin",
+  "ripple",
+  "solana",
+  "cardano",
+  "polkadot",
+];
 
 export function useLiveTrendingCoins(limit = 10) {
   const [trendingCoins, setTrendingCoins] = useState(() => {
@@ -32,19 +40,26 @@ export function useLiveTrendingCoins(limit = 10) {
 
     try {
       setError(null);
-      
+
       // 1. Check Cache Validity
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
           const now = Date.now();
-          if (parsed.timestamp && (now - parsed.timestamp < CACHE_DURATION) && Array.isArray(parsed.data) && parsed.data.length > 0) {
-             setTrendingCoins(parsed.data);
-             setLoading(false);
-             return; // EXIT EARLY
+          if (
+            parsed.timestamp &&
+            now - parsed.timestamp < CACHE_DURATION &&
+            Array.isArray(parsed.data) &&
+            parsed.data.length > 0
+          ) {
+            setTrendingCoins(parsed.data);
+            setLoading(false);
+            return; // EXIT EARLY
           }
-        } catch(e) { /* ignore parse error */ }
+        } catch (e) {
+          /* ignore parse error */
+        }
       }
 
       setLoading(true);
@@ -58,36 +73,42 @@ export function useLiveTrendingCoins(limit = 10) {
       }
 
       // Slice to requested limit
-      const marketData = await getTrendingCoinMarketData(idsArray.slice(0, limit));
-      
+      const marketData = await getTrendingCoinMarketData(
+        idsArray.slice(0, limit),
+      );
+
       const toCache = {
-          timestamp: Date.now(),
-          data: marketData
+        timestamp: Date.now(),
+        data: marketData,
       };
-      
+
       setTrendingCoins(marketData);
       localStorage.setItem(CACHE_KEY, JSON.stringify(toCache));
-
     } catch (err) {
-      console.warn("Trending Coins API failed, checking fallback cache or static list:", err.message);
-      
+      console.warn(
+        "Trending Coins API failed, checking fallback cache or static list:",
+        err.message,
+      );
+
       // Fallback Strategy:
       // 1. If we have OLD cache, use it instead of crashing, even if expired.
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
-           try {
-               const parsed = JSON.parse(cached);
-               if(Array.isArray(parsed.data)) {
-                  setTrendingCoins(parsed.data);
-                  setLoading(false);
-                  return;
-               }
-           } catch(e) {}
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed.data)) {
+            setTrendingCoins(parsed.data);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {}
       }
 
       // 2. If no cache at all, try static fallback
       try {
-        const marketData = await getTrendingCoinMarketData(FALLBACK_IDS.slice(0, limit));
+        const marketData = await getTrendingCoinMarketData(
+          FALLBACK_IDS.slice(0, limit),
+        );
         setTrendingCoins(marketData);
       } catch (fallbackErr) {
         console.warn("Fallback Trending Error:", fallbackErr.message);
@@ -108,14 +129,16 @@ export function useLiveTrendingCoins(limit = 10) {
 
   // Merge Data
   const safeTrendingCoins = Array.isArray(trendingCoins) ? trendingCoins : [];
-  const coinsWithLive = safeTrendingCoins.map(c => {
+  const coinsWithLive = safeTrendingCoins.map((c) => {
     const live = livePrices[c.id];
     return {
       ...c,
       current_price: live?.current_price ?? c.current_price,
-      price_change_percentage_24h: live?.price_change_percentage_24h ?? c.price_change_percentage_24h,
+      price_change_percentage_24h:
+        live?.price_change_percentage_24h ?? c.price_change_percentage_24h,
       price_change_24h: live?.price_change_24h ?? c.price_change_24h,
-      price_change_percentage_24h_in_currency: live?.price_change_percentage_24h ?? c.price_change_percentage_24h
+      price_change_percentage_24h_in_currency:
+        live?.price_change_percentage_24h ?? c.price_change_percentage_24h,
     };
   });
 

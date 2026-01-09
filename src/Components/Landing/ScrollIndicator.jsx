@@ -1,11 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-
 const PremiumScrollIndicator = ({ onClick }) => {
   return (
     <motion.div
-
       initial={{ opacity: 0, y: 40, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -17,7 +15,7 @@ const PremiumScrollIndicator = ({ onClick }) => {
       onClick={onClick}
       aria-label="Scroll down"
     >
-      { }
+      {}
       <div
         className="flex flex-col items-center gap-3 animate-float"
         role="button"
@@ -30,7 +28,10 @@ const PremiumScrollIndicator = ({ onClick }) => {
             <div className="relative w-full h-full rounded-full bg-slate-950/80 backdrop-blur-md flex justify-center overflow-hidden">
               <div
                 className="absolute w-1.5 h-6 rounded-full bg-[#A5B4FC] animate-scroll"
-                style={{ boxShadow: "0 0 8px rgba(114,138,213,1), 0 0 18px rgba(114,138,213,0.8)" }}
+                style={{
+                  boxShadow:
+                    "0 0 8px rgba(114,138,213,1), 0 0 18px rgba(114,138,213,0.8)",
+                }}
               />
             </div>
           </div>

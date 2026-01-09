@@ -1,5 +1,10 @@
 import React from "react";
-import { FaServer, FaBolt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import {
+  FaServer,
+  FaBolt,
+  FaCheckCircle,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
 function PlatformHealth({ isLoading, TC }) {
   return (
@@ -13,9 +18,15 @@ function PlatformHealth({ isLoading, TC }) {
       <div className="space-y-2 sm:space-y-3">
         {isLoading ? (
           <>
-            <div className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`} />
-            <div className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`} />
-            <div className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`} />
+            <div
+              className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+            />
+            <div
+              className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+            />
+            <div
+              className={`h-10 sm:h-12 rounded-xl ${TC.bgItem} animate-pulse`}
+            />
           </>
         ) : (
           [
@@ -46,7 +57,9 @@ function PlatformHealth({ isLoading, TC }) {
               >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <ItemIcon className={`text-xs sm:text-sm ${item.color}`} />
-                  <span className={`text-[10px] sm:text-sm ${TC.textSecondary}`}>
+                  <span
+                    className={`text-[10px] sm:text-sm ${TC.textSecondary}`}
+                  >
                     {item.label}
                   </span>
                 </div>

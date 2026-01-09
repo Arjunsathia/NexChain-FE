@@ -37,7 +37,9 @@ function NotificationSettings({ notifications, setNotifications, TC }) {
                 >
                   {item.label}
                 </h4>
-                <p className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}>
+                <p
+                  className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}
+                >
                   {item.description}
                 </p>
               </div>

@@ -1,12 +1,9 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useEffect, Suspense } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "@/Components/UserProfile/Sidebar";
 import UserMobileNavbar from "@/Components/UserProfile/UserMobileNavbar";
 import { logout } from "@/api/axiosConfig";
-
-
-
 
 const UserLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -26,14 +23,14 @@ export default function User() {
     const checkScreenSize = () => {
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      
+
       if (desktop && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
     };
 
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, [isMobileMenuOpen]);
 
   const handleLogout = async () => {
@@ -51,28 +48,30 @@ export default function User() {
   };
 
   return (
-    <div className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}>
+    <div
+      className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}
+    >
       {}
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}
-      
+
       {}
       <div className="flex-1 flex flex-col min-h-screen relative w-full overflow-x-hidden">
         {}
         {!isDesktop && (
           <div className="sticky top-0 z-50">
             <UserMobileNavbar
-              isOpen={isMobileMenuOpen} 
+              isOpen={isMobileMenuOpen}
               onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               onLogout={handleLogout}
               isLogoutLoading={isLogoutLoading}
             />
           </div>
         )}
-        
+
         {}
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
           <Suspense fallback={<UserLoader />}>

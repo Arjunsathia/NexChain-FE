@@ -44,15 +44,21 @@ const AdminFeedback = () => {
       btnDanger:
         "bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all duration-300 active:scale-95 text-sm font-bold",
 
-      tableHead: isLight ? "bg-gray-100/80 text-gray-600" : "bg-white/5 text-gray-400",
-      tableRow: isLight ? "hover:bg-gray-50 transition-colors" : "hover:bg-white/5 transition-colors",
+      tableHead: isLight
+        ? "bg-gray-100/80 text-gray-600"
+        : "bg-white/5 text-gray-400",
+      tableRow: isLight
+        ? "hover:bg-gray-50 transition-colors"
+        : "hover:bg-white/5 transition-colors",
 
       modalOverlay: "bg-black/40 backdrop-blur-sm",
-      modalContent: isLight ? "bg-white" : "bg-[#0B0E11] border border-gray-800 glass-card",
+      modalContent: isLight
+        ? "bg-white"
+        : "bg-[#0B0E11] border border-gray-800 glass-card",
 
       headerGradient: "from-blue-600 to-cyan-500",
     }),
-    [isLight]
+    [isLight],
   );
 
   const [feedbacks, setFeedbacks] = useState([]);
@@ -60,7 +66,6 @@ const AdminFeedback = () => {
   // Granular Loading States
   const [isFeedbacksLoading, setIsFeedbacksLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
-
 
   const [stats, setStats] = useState({});
   const [filters, setFilters] = useState({
@@ -75,7 +80,6 @@ const AdminFeedback = () => {
   const [feedbackToDelete, setFeedbackToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editNotes, setEditNotes] = useState("");
-
 
   useEffect(() => {
     fetchFeedbacks();
@@ -133,7 +137,7 @@ const AdminFeedback = () => {
       const data = await updateById("/feedback", id, { status });
       if (data.success) {
         setFeedbacks((prev) =>
-          prev.map((fb) => (fb._id === id ? { ...fb, status } : fb))
+          prev.map((fb) => (fb._id === id ? { ...fb, status } : fb)),
         );
         fetchStats();
       }
@@ -148,7 +152,7 @@ const AdminFeedback = () => {
       const data = await updateById("/feedback", id, { adminNotes });
       if (data.success) {
         setFeedbacks((prev) =>
-          prev.map((fb) => (fb._id === id ? { ...fb, adminNotes } : fb))
+          prev.map((fb) => (fb._id === id ? { ...fb, adminNotes } : fb)),
         );
         setShowModal(false);
         alert("✅ Notes updated successfully!");
@@ -171,7 +175,7 @@ const AdminFeedback = () => {
       const data = await deleteById("/feedback", feedbackToDelete._id);
       if (data.success) {
         setFeedbacks((prev) =>
-          prev.filter((fb) => fb._id !== feedbackToDelete._id)
+          prev.filter((fb) => fb._id !== feedbackToDelete._id),
         );
         fetchStats();
         setShowDeleteModal(false);
@@ -190,7 +194,9 @@ const AdminFeedback = () => {
       !filters.search ||
       feedback.message.toLowerCase().includes(filters.search.toLowerCase()) ||
       (feedback.userEmail &&
-        feedback.userEmail.toLowerCase().includes(filters.search.toLowerCase()));
+        feedback.userEmail
+          .toLowerCase()
+          .includes(filters.search.toLowerCase()));
     const matchesStatus = !filters.status || feedback.status === filters.status;
     const matchesType = !filters.type || feedback.type === filters.type;
     const matchesPriority =
@@ -206,8 +212,13 @@ const AdminFeedback = () => {
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
           <div>
-            <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
-              Feedback <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">& Reports</span>
+            <h1
+              className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
+            >
+              Feedback{" "}
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                & Reports
+              </span>
             </h1>
             <p className={`text-sm font-medium ${TC.textSecondary}`}>
               Manage user feedback and reports
@@ -228,7 +239,8 @@ const AdminFeedback = () => {
               disabled={isFeedbacksLoading}
               className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} flex-1 sm:flex-initial justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <FaSync className={isFeedbacksLoading ? "animate-spin" : ""} /> Refresh
+              <FaSync className={isFeedbacksLoading ? "animate-spin" : ""} />{" "}
+              Refresh
             </button>
           </div>
         </div>

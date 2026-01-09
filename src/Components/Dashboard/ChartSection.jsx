@@ -27,17 +27,19 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
   });
   const [loading, setLoading] = useState(false);
 
-
   const validateData = (data) => {
     if (!data || typeof data !== "object") return false;
     if (!Array.isArray(data.prices)) return false;
     if (data.prices.length === 0) return true;
 
-
     const first = data.prices[0];
-    return Array.isArray(first) && first.length === 2 && typeof first[0] === "number" && !isNaN(first[1]);
+    return (
+      Array.isArray(first) &&
+      first.length === 2 &&
+      typeof first[0] === "number" &&
+      !isNaN(first[1])
+    );
   };
-
 
   useEffect(() => {
     let active = true;
@@ -78,7 +80,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
             }
             shouldFetch = false;
           }
-        } catch (e) { }
+        } catch (e) {}
       }
 
       if (!shouldFetch) {
@@ -93,10 +95,12 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         const data = await getMarketChart(coinId, days);
 
         if (active) {
-          localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, data }));
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({ timestamp: now, data }),
+          );
           setData(data);
         }
-
       } catch (error) {
         console.error("Failed to fetch chart data", error);
 
@@ -116,9 +120,10 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     };
 
     fetchChart();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [coinId, days]);
-
 
   const options = {
     chart: {
@@ -154,11 +159,11 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       labels: {
         style: { colors: isLight ? "#333" : "#888" },
         datetimeFormatter: {
-          year: 'yyyy',
+          year: "yyyy",
           month: "MMM 'yy",
-          day: 'dd MMM',
-          hour: 'HH:mm'
-        }
+          day: "dd MMM",
+          hour: "HH:mm",
+        },
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -187,12 +192,17 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
   ];
 
   return (
-    <div className={`p-4 rounded-2xl ${isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
-      }`}>
+    <div
+      className={`p-4 rounded-2xl ${
+        isLight
+          ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+          : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
+      }`}
+    >
       <div className="flex justify-between items-center mb-4">
-        <h3 className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}>
+        <h3
+          className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}
+        >
           Price Chart ({coinId?.toUpperCase()})
         </h3>
         <div className="flex gap-2">
@@ -200,12 +210,13 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
             <button
               key={tf.value}
               onClick={() => setDays(tf.value)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${days === tf.value
-                ? "bg-blue-600 text-white shadow-lg"
-                : isLight
-                  ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                days === tf.value
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : isLight
+                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
             >
               {tf.label}
             </button>
@@ -214,17 +225,22 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       </div>
 
       <div className="w-full h-[350px] sm:h-[450px] lg:h-[560px] relative">
-        { }
+        {}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-[1px] z-10 rounded-xl transition-all duration-300">
             <div className="flex flex-col items-center gap-2">
               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              { }
+              {}
             </div>
           </div>
         )}
 
-        <ReactApexChart options={options} series={series} type="area" height="100%" />
+        <ReactApexChart
+          options={options}
+          series={series}
+          type="area"
+          height="100%"
+        />
       </div>
     </div>
   );

@@ -1,14 +1,11 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import NewsPanel from "./NewsPanel";
 
-
-
 const DashboardSkeleton = () => {
   const isLight = useThemeCheck();
-
 
   const TC = useMemo(
     () => ({
@@ -18,21 +15,15 @@ const DashboardSkeleton = () => {
         ? "bg-white/90 shadow-[0_6px_25px_rgba(0,0,0,0.12)]"
         : "bg-gray-800/50 backdrop-blur-xl shadow-xl shadow-black/20",
     }),
-    [isLight]
+    [isLight],
   );
-
-
-
 
   const USERDATA_HEIGHT = "h-[150px]";
 
-
   const CHART_HEIGHT = "h-[620px]";
-
 
   const PORTFOLIO_HEIGHT = "h-[300px]";
   const TRADES_HEIGHT = "h-[266px]";
-
 
   const WATCHLIST_HEIGHT = "h-[280px]";
   const TRENDING_HEIGHT = "h-[250px]";
@@ -40,12 +31,13 @@ const DashboardSkeleton = () => {
 
   return (
     <div
-      className={`min-h-screen p-2 sm:p-4 lg:p-6 fade-in ${isLight ? "text-gray-900" : "text-white"
-        }`}
+      className={`min-h-screen p-2 sm:p-4 lg:p-6 fade-in ${
+        isLight ? "text-gray-900" : "text-white"
+      }`}
     >
-      { }
+      {}
       <div className="xl:hidden flex flex-col gap-4">
-        { }
+        {}
         <div className="sm:hidden fade-in" style={{ animationDelay: "0.2s" }}>
           <div className={`rounded-xl p-4 h-20 ${TC.bgSkeletonItem}`}>
             <div className="flex items-center justify-between">
@@ -92,7 +84,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        { }
+        {}
         <div className="fade-in" style={{ animationDelay: "0.5s" }}>
           <div className="space-y-1">
             <Skeleton
@@ -155,7 +147,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        { }
+        {}
         <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((_, i) => (
             <div
@@ -183,7 +175,7 @@ const DashboardSkeleton = () => {
           ))}
         </div>
 
-        { }
+        {}
         <div className="fade-in" style={{ animationDelay: "0.6s" }}>
           <div className={`rounded-xl p-6 h-96 ${TC.bgSkeletonItem}`}>
             <Skeleton
@@ -201,7 +193,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        { }
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((_, i) => (
             <div
@@ -228,7 +220,7 @@ const DashboardSkeleton = () => {
           ))}
         </div>
 
-        { }
+        {}
         <div className="fade-in" style={{ animationDelay: "1.0s" }}>
           <div className={`rounded-xl p-6 h-64 ${TC.bgSkeletonItem}`}>
             <Skeleton
@@ -248,10 +240,10 @@ const DashboardSkeleton = () => {
         </div>
       </div>
 
-      { }
+      {}
       <div className="hidden xl:flex flex-col gap-6">
         <div className="grid grid-cols-12 gap-6 items-stretch">
-          { }
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${USERDATA_HEIGHT}`}
@@ -315,9 +307,9 @@ const DashboardSkeleton = () => {
             </div>
           </div>
 
-          { }
+          {}
           <div className="col-span-6 flex flex-col gap-6">
-            { }
+            {}
             <div className="fade-in" style={{ animationDelay: "0.5s" }}>
               <div className="grid grid-cols-3 gap-4">
                 {[1, 2, 3].map((_, i) => (
@@ -348,7 +340,7 @@ const DashboardSkeleton = () => {
               </div>
             </div>
 
-            { }
+            {}
             <div
               className={`fade-in ${CHART_HEIGHT}`}
               style={{ animationDelay: "0.6s" }}
@@ -370,7 +362,7 @@ const DashboardSkeleton = () => {
             </div>
           </div>
 
-          { }
+          {}
           <div className="col-span-3 flex flex-col gap-6">
             <div
               className={`fade-in ${WATCHLIST_HEIGHT}`}
@@ -435,7 +427,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        { }
+        {}
         <div className="fade-in" style={{ animationDelay: "0.7s" }}>
           <NewsPanel />
         </div>

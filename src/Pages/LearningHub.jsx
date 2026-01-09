@@ -1,4 +1,4 @@
-import useThemeCheck from '@/hooks/useThemeCheck';
+import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useMemo, useEffect } from "react";
 import {
   FaGraduationCap,
@@ -11,7 +11,7 @@ import {
   FaSearch,
   FaBolt,
   FaClock,
-  FaSignal
+  FaSignal,
 } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
@@ -31,7 +31,7 @@ const MOCK_COURSES = [
     progress: 0,
     color: "text-emerald-400",
     bg: "bg-emerald-400/10",
-    border: "border-emerald-400/20"
+    border: "border-emerald-400/20",
   },
   {
     id: 2,
@@ -44,7 +44,7 @@ const MOCK_COURSES = [
     progress: 0,
     color: "text-violet-400",
     bg: "bg-violet-400/10",
-    border: "border-violet-400/20"
+    border: "border-violet-400/20",
   },
   {
     id: 3,
@@ -57,7 +57,7 @@ const MOCK_COURSES = [
     progress: 0,
     color: "text-blue-400",
     bg: "bg-blue-400/10",
-    border: "border-blue-400/20"
+    border: "border-blue-400/20",
   },
   {
     id: 4,
@@ -70,7 +70,7 @@ const MOCK_COURSES = [
     progress: 0,
     color: "text-orange-400",
     bg: "bg-orange-400/10",
-    border: "border-orange-400/20"
+    border: "border-orange-400/20",
   },
 ];
 
@@ -110,36 +110,45 @@ function LearningHub() {
   }, [hasVisited]);
 
   // Premium Styling Config
-  const TC = useMemo(() => ({
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    textMuted: isLight ? "text-gray-400" : "text-gray-600",
+  const TC = useMemo(
+    () => ({
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      textMuted: isLight ? "text-gray-400" : "text-gray-600",
 
-    // Glass Cards (No solid backgrounds)
-    cardBase: isLight
-      ? "bg-white/60 backdrop-blur-md border border-gray-200"
-      : "bg-white/5 backdrop-blur-md border border-white/10",
+      // Glass Cards (No solid backgrounds)
+      cardBase: isLight
+        ? "bg-white/60 backdrop-blur-md border border-gray-200"
+        : "bg-white/5 backdrop-blur-md border border-white/10",
 
-    cardHover: isLight
-      ? "hover:bg-white hover:border-gray-300 hover:shadow-xl hover:shadow-gray-200/50"
-      : "hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:shadow-black/20",
+      cardHover: isLight
+        ? "hover:bg-white hover:border-gray-300 hover:shadow-xl hover:shadow-gray-200/50"
+        : "hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:shadow-black/20",
 
-    accentGradient: "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500",
+      accentGradient:
+        "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500",
 
-    // Skeleton Colors (Matches Watchlist)
-    skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
-    skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-  }), [isLight]);
+      // Skeleton Colors (Matches Watchlist)
+      skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
+      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
+    }),
+    [isLight],
+  );
 
-  const filteredCourses = MOCK_COURSES.filter(c => selectedCategory === "all" || c.category === selectedCategory);
+  const filteredCourses = MOCK_COURSES.filter(
+    (c) => selectedCategory === "all" || c.category === selectedCategory,
+  );
 
   return (
     // No global background, fits into parent
-    <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans ${hasVisited ? '' : `transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}`}>
-
+    <div
+      className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans ${hasVisited ? "" : `transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}`}
+    >
       {/* --- Hero: "Start Here" (Premium Banner) --- */}
-      {!loading && selectedCategory === 'all' && (
-        <div className={`relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer ${hasVisited ? '' : 'animate-in fade-in slide-in-from-bottom-6 duration-700'}`}>
+      {!loading && selectedCategory === "all" && (
+        <div
+          className={`relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
+        >
           {/* Abstract Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
           <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
@@ -151,17 +160,21 @@ function LearningHub() {
                 <FaBolt size={10} /> RECOMMENDED STARTER
               </div>
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                Crypto 101: <br />The Foundation
+                Crypto 101: <br />
+                The Foundation
               </h2>
               <p className="text-slate-300 text-lg mb-8 leading-relaxed">
-                Everything you need to know to start trading. From blockchain basics to setting up your first wallet securely.
+                Everything you need to know to start trading. From blockchain
+                basics to setting up your first wallet securely.
               </p>
 
               <div className="flex items-center gap-4">
                 <button className="px-8 py-3.5 bg-white text-slate-900 rounded-full font-bold text-sm hover:bg-cyan-50 transition-colors flex items-center gap-2">
                   <FaPlay size={12} /> Start Lesson 1
                 </button>
-                <span className="text-slate-400 text-sm font-medium">12 Lessons • 2h 15m</span>
+                <span className="text-slate-400 text-sm font-medium">
+                  12 Lessons • 2h 15m
+                </span>
               </div>
             </div>
 
@@ -201,13 +214,17 @@ function LearningHub() {
             type="text"
             placeholder="Search topics..."
             className={`w-full py-2 px-4 pr-10 rounded-full text-sm outline-none transition-all duration-300
-                 ${isLight
-                ? 'bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500'
-                : 'bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500'
-              }
+                 ${
+                   isLight
+                     ? "bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500"
+                     : "bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500"
+                 }
                `}
           />
-          <FaSearch className={`absolute right-3.5 top-2.5 text-gray-400 group-focus-within:text-cyan-500 transition-colors`} size={14} />
+          <FaSearch
+            className={`absolute right-3.5 top-2.5 text-gray-400 group-focus-within:text-cyan-500 transition-colors`}
+            size={14}
+          />
         </div>
       </div>
 
@@ -215,34 +232,76 @@ function LearningHub() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`rounded-2xl p-6 h-[260px] flex flex-col justify-between ${TC.cardBase}`}>
+            <div
+              key={i}
+              className={`rounded-2xl p-6 h-[260px] flex flex-col justify-between ${TC.cardBase}`}
+            >
               <div className="flex justify-between items-start">
-                <Skeleton circle width={48} height={48} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                <Skeleton width={60} height={20} borderRadius={6} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton
+                  circle
+                  width={48}
+                  height={48}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
+                <Skeleton
+                  width={60}
+                  height={20}
+                  borderRadius={6}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
               </div>
               <div className="space-y-3">
-                <Skeleton width="90%" height={24} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                <Skeleton width="70%" height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton
+                  width="90%"
+                  height={24}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
+                <Skeleton
+                  width="70%"
+                  height={16}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-white/5">
-                <Skeleton width={80} height={16} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
-                <Skeleton circle width={32} height={32} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
+                <Skeleton
+                  width={80}
+                  height={16}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
+                <Skeleton
+                  circle
+                  width={32}
+                  height={32}
+                  baseColor={TC.skeletonBase}
+                  highlightColor={TC.skeletonHighlight}
+                />
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${hasVisited ? '' : 'animate-in fade-in slide-in-from-bottom-4 duration-500'}`}>
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
+        >
           {filteredCourses.map((course) => (
             <PremiumCard key={course.id} course={course} TC={TC} />
           ))}
 
           {/* "Coming Soon" Placeholder for visual balance */}
-          <div className={`rounded-2xl border border-dashed ${isLight ? 'border-gray-300' : 'border-gray-800'} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[260px]`}>
+          <div
+            className={`rounded-2xl border border-dashed ${isLight ? "border-gray-300" : "border-gray-800"} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[260px]`}
+          >
             <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
               <span className="text-xl">✨</span>
             </div>
-            <p className={`text-sm font-medium ${TC.textPrimary}`}>More coming soon</p>
+            <p className={`text-sm font-medium ${TC.textPrimary}`}>
+              More coming soon
+            </p>
           </div>
         </div>
       )}
@@ -254,34 +313,46 @@ function LearningHub() {
 
 const PremiumCard = ({ course, TC }) => {
   return (
-    <div className={`
+    <div
+      className={`
       group relative rounded-2xl p-6 transition-all duration-500 ease-out cursor-pointer
       ${TC.cardBase} ${TC.cardHover}
       flex flex-col h-full min-h-[260px]
-    `}>
+    `}
+    >
       {/* Icon Top Right */}
       <div className="flex justify-between items-start mb-12">
         <div className={`p-3 rounded-2xl ${course.bg} ${course.border} border`}>
-          {course.category === 'basics' && <FaGraduationCap className={course.color} size={20} />}
-          {course.category === 'trading' && <FaChartLine className={course.color} size={20} />}
-          {course.category === 'security' && <FaShieldAlt className={course.color} size={20} />}
-          {course.category === 'advanced' && <FaRocket className={course.color} size={20} />}
+          {course.category === "basics" && (
+            <FaGraduationCap className={course.color} size={20} />
+          )}
+          {course.category === "trading" && (
+            <FaChartLine className={course.color} size={20} />
+          )}
+          {course.category === "security" && (
+            <FaShieldAlt className={course.color} size={20} />
+          )}
+          {course.category === "advanced" && (
+            <FaRocket className={course.color} size={20} />
+          )}
         </div>
 
         {/* Level Badge */}
-        <span className={`text-[10px] font-bold tracking-widest uppercase py-1 px-2 rounded-md ${TC.textSecondary} bg-gray-100/50 dark:bg-gray-800/50`}>
+        <span
+          className={`text-[10px] font-bold tracking-widest uppercase py-1 px-2 rounded-md ${TC.textSecondary} bg-gray-100/50 dark:bg-gray-800/50`}
+        >
           {course.level}
         </span>
       </div>
 
       {/* Info */}
       <div className="mt-auto">
-        <h3 className={`text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
+        <h3
+          className={`text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
+        >
           {course.title}
         </h3>
-        <p className={`text-sm ${TC.textSecondary} mb-6`}>
-          {course.subtitle}
-        </p>
+        <p className={`text-sm ${TC.textSecondary} mb-6`}>{course.subtitle}</p>
 
         {/* Footer Meta */}
         <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
@@ -290,7 +361,10 @@ const PremiumCard = ({ course, TC }) => {
           </div>
 
           <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-            <FaArrowRight size={10} className="-rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+            <FaArrowRight
+              size={10}
+              className="-rotate-45 group-hover:rotate-0 transition-transform duration-300"
+            />
           </div>
         </div>
       </div>

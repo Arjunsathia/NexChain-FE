@@ -9,47 +9,44 @@ const getBaseUrl = () => {
 
 const API_BASE_URL = getBaseUrl();
 
-const COINGECKO_BASE_URL = import.meta.env.DEV 
-  ? "/api/coingecko" 
+const COINGECKO_BASE_URL = import.meta.env.DEV
+  ? "/api/coingecko"
   : "https://api.coingecko.com/api/v3";
-  
-export const SERVER_URL = API_BASE_URL.replace('/api', '');
+
+export const SERVER_URL = API_BASE_URL.replace("/api", "");
 
 export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,
 });
 
-
 coinGecko.interceptors.response.use(
   (response) => {
     const contentType = response.headers["content-type"];
     if (contentType && !contentType.includes("application/json")) {
-      console.warn("⚠️ API Warning: Received non-JSON response from CoinGecko proxy (likely HTML fallback). Blocking.");
-      return Promise.reject(new Error("Invalid API response format (expected JSON)"));
+      console.warn(
+        "⚠️ API Warning: Received non-JSON response from CoinGecko proxy (likely HTML fallback). Blocking.",
+      );
+      return Promise.reject(
+        new Error("Invalid API response format (expected JSON)"),
+      );
     }
     return response;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
-
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  
-  
 });
-
 
 let memoryToken = null;
 
 export const setMemoryToken = (token) => {
   memoryToken = token;
 };
-
-
 
 api.interceptors.request.use(
   (config) => {
@@ -63,9 +60,8 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
-
 
 api.interceptors.response.use(
   (response) => {
@@ -75,19 +71,25 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check for 2FA requirement
-    if (error.response?.status === 403 && error.response?.data?.require2FA && !originalRequest._isRetry) {
-        originalRequest._isRetry = true;
-        
-        try {
-            // Request code from user via Modal
-            const code = await TwoFactorEvent.request({});
-            
-            // Add code to headers and retry
-            originalRequest.headers['X-Admin-2FA-Code'] = code;
-            return api(originalRequest);
-        } catch {
-             return Promise.reject(new Error("2FA Authentication Cancelled or Failed"));
-        }
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.require2FA &&
+      !originalRequest._isRetry
+    ) {
+      originalRequest._isRetry = true;
+
+      try {
+        // Request code from user via Modal
+        const code = await TwoFactorEvent.request({});
+
+        // Add code to headers and retry
+        originalRequest.headers["X-Admin-2FA-Code"] = code;
+        return api(originalRequest);
+      } catch {
+        return Promise.reject(
+          new Error("2FA Authentication Cancelled or Failed"),
+        );
+      }
     }
 
     // If error is 401 and we haven't retried yet
@@ -96,7 +98,11 @@ api.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
         const { accessToken } = response.data;
 
         if (accessToken) {
@@ -112,13 +118,16 @@ api.interceptors.response.use(
 
     // Silence 401 and 429 errors from cluttering console
     if (error.response?.status !== 401 && error.response?.status !== 429) {
-      console.error("API Error:", error.response?.status, error.response?.data || error.message);
+      console.error(
+        "API Error:",
+        error.response?.status,
+        error.response?.data || error.message,
+      );
     }
-    
-    return Promise.reject(error);
-  }
-);
 
+    return Promise.reject(error);
+  },
+);
 
 export const getData = async (url, params) => {
   const response = await api.get(url, params && { params });

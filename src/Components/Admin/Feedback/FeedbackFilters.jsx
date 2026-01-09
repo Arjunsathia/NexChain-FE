@@ -6,7 +6,9 @@ function FeedbackFilters({ filters, setFilters, TC }) {
     <div className={`${TC.bgCard} rounded-2xl p-3 sm:p-4 lg:p-6`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <div className="lg:col-span-2 relative w-full group">
-          <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`} />
+          <FaSearch
+            className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors ${TC.textSecondary} group-focus-within:text-cyan-500`}
+          />
           <input
             type="text"
             placeholder="Search feedback..."

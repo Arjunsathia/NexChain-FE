@@ -6,27 +6,32 @@ let lastFetchTime = 0;
 const CACHE_DURATION = 60000; // 1 minute cache
 
 const ensureFrozenCache = async (force = false) => {
-  if (!force && Date.now() - lastFetchTime < CACHE_DURATION && frozenCoinsCache.length > 0) return;
+  if (
+    !force &&
+    Date.now() - lastFetchTime < CACHE_DURATION &&
+    frozenCoinsCache.length > 0
+  )
+    return;
   try {
-     const res = await api.get('/coins/frozen');
-     if (res.data.success) {
-       frozenCoinsCache = res.data.frozenIds || [];
-       lastFetchTime = Date.now();
-     }
+    const res = await api.get("/coins/frozen");
+    if (res.data.success) {
+      frozenCoinsCache = res.data.frozenIds || [];
+      lastFetchTime = Date.now();
+    }
   } catch (e) {
-     console.warn("Failed to fetch frozen coins blacklist", e);
+    console.warn("Failed to fetch frozen coins blacklist", e);
   }
 };
 
 // Exposed helper to force refresh (e.g., after Admin action)
 export const refreshFrozenCache = async () => {
-    await ensureFrozenCache(true);
+  await ensureFrozenCache(true);
 };
 
 export const getCoins = async (customParams = {}) => {
   try {
     const { includeFrozen, ...apiParams } = customParams;
-    
+
     // Ensure we have the blacklist
     await ensureFrozenCache();
 
@@ -47,14 +52,14 @@ export const getCoins = async (customParams = {}) => {
     if (!Array.isArray(coins)) return [];
 
     // Mark frozen status
-    coins = coins.map(c => ({
-        ...c,
-        isFrozen: frozenCoinsCache.includes(c.id)
+    coins = coins.map((c) => ({
+      ...c,
+      isFrozen: frozenCoinsCache.includes(c.id),
     }));
 
     // Filter if not requested to include
     if (!includeFrozen) {
-        coins = coins.filter(c => !c.isFrozen);
+      coins = coins.filter((c) => !c.isFrozen);
     }
 
     return coins;
@@ -64,16 +69,17 @@ export const getCoins = async (customParams = {}) => {
   }
 };
 
-
 export const getTrend = async () => {
   try {
     await ensureFrozenCache();
     const response = await coinGecko.get("/search/trending");
-    
+
     // Filter trending coins
     // Structure: response.data.coins is Array<{ item: { id: ... } }>
-    const filteredCoins = (response.data.coins || []).filter(c => !frozenCoinsCache.includes(c.item.id));
-    
+    const filteredCoins = (response.data.coins || []).filter(
+      (c) => !frozenCoinsCache.includes(c.item.id),
+    );
+
     return { ...response.data, coins: filteredCoins };
   } catch (error) {
     console.error("Error fetching trending coins:", error.message);
@@ -81,16 +87,15 @@ export const getTrend = async () => {
   }
 };
 
-
 export const getTrendingCoinMarketData = async (idsArray) => {
   try {
     await ensureFrozenCache();
-    
+
     // Filter IDs before requesting if possible, or after?
     // Let's filter after to ensure we don't break expected array length if that matters (it doesn't usually)
     // Actually, asking for a frozen ID might return data, but we shouldn't show it.
-    
-    const ids = idsArray.join(","); 
+
+    const ids = idsArray.join(",");
     const response = await coinGecko.get("/coins/markets", {
       params: {
         vs_currency: "usd",
@@ -99,20 +104,19 @@ export const getTrendingCoinMarketData = async (idsArray) => {
         price_change_percentage: "1h,24h,7d",
       },
     });
-    
+
     // Filter result
-    return response.data.filter(c => !frozenCoinsCache.includes(c.id));
+    return response.data.filter((c) => !frozenCoinsCache.includes(c.id));
   } catch (error) {
     console.error("Error fetching trending market data:", error.message);
     throw error;
   }
 };
 
-
 export const getTopGainers = async () => {
   try {
     await ensureFrozenCache();
-    
+
     const response = await coinGecko.get("/coins/markets", {
       params: {
         vs_currency: "usd",
@@ -125,18 +129,17 @@ export const getTopGainers = async () => {
     });
 
     let data = response.data;
-    if(Array.isArray(data)) {
-        // Filter frozen
-        data = data.filter(c => !frozenCoinsCache.includes(c.id));
-        
-        // Sort and slice
-        const sorted = data.sort(
-            (a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h
-        );
-        return sorted.slice(0, 5);
+    if (Array.isArray(data)) {
+      // Filter frozen
+      data = data.filter((c) => !frozenCoinsCache.includes(c.id));
+
+      // Sort and slice
+      const sorted = data.sort(
+        (a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h,
+      );
+      return sorted.slice(0, 5);
     }
     return [];
-
   } catch (error) {
     console.error("Error fetching top gainers:", error.message);
     throw error;
@@ -159,16 +162,16 @@ export const getTopLosers = async () => {
     });
 
     let data = response.data;
-    if(Array.isArray(data)) {
-        // Filter frozen
-        data = data.filter(c => !frozenCoinsCache.includes(c.id));
+    if (Array.isArray(data)) {
+      // Filter frozen
+      data = data.filter((c) => !frozenCoinsCache.includes(c.id));
 
-        // Sort ascending for losers
-        const sorted = data.sort(
-          (a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h
-        );
+      // Sort ascending for losers
+      const sorted = data.sort(
+        (a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h,
+      );
 
-        return sorted.slice(0, 5);
+      return sorted.slice(0, 5);
     }
     return [];
   } catch (error) {
@@ -177,13 +180,12 @@ export const getTopLosers = async () => {
   }
 };
 
-
 export const getCoinById = async (id) => {
   try {
     // We optionally block access here too
     await ensureFrozenCache();
     if (frozenCoinsCache.includes(id)) {
-        throw new Error("This asset is currently unavailable.");
+      throw new Error("This asset is currently unavailable.");
     }
 
     const response = await coinGecko.get(`/coins/${id}`);
@@ -194,7 +196,6 @@ export const getCoinById = async (id) => {
   }
 };
 
-
 export const getGlobalMarketStats = async () => {
   try {
     const response = await coinGecko.get("/global");
@@ -204,7 +205,6 @@ export const getGlobalMarketStats = async () => {
     throw error;
   }
 };
-
 
 export const getMarketChart = async (id, days = 7) => {
   try {
@@ -223,13 +223,13 @@ export const getMarketChart = async (id, days = 7) => {
 
 // Admin Helpers
 export const freezeCoin = async (coinData) => {
-    const response = await api.post('/coins/freeze', coinData);
-    await refreshFrozenCache(); // Immediate refresh
-    return response.data;
+  const response = await api.post("/coins/freeze", coinData);
+  await refreshFrozenCache(); // Immediate refresh
+  return response.data;
 };
 
 export const unfreezeCoin = async (coinId) => {
-    const response = await api.post('/coins/unfreeze', { coinId });
-    await refreshFrozenCache(); // Immediate refresh
-    return response.data;
+  const response = await api.post("/coins/unfreeze", { coinId });
+  await refreshFrozenCache(); // Immediate refresh
+  return response.data;
 };

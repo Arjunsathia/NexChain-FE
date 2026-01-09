@@ -12,8 +12,8 @@ import {
   FaUserShield,
   FaSignOutAlt,
   FaChevronRight,
-  FaGlobe,    // Icon for "Online"
-  FaExchangeAlt // Icon for "Trades"
+  FaGlobe, // Icon for "Online"
+  FaExchangeAlt, // Icon for "Trades"
 } from "react-icons/fa";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -23,8 +23,14 @@ import { createPortal } from "react-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 // Logout Modal (Identical to UserSidebar's)
-const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading }) => {
-  if (typeof document === 'undefined') return null;
+const LogoutConfirmationModal = ({
+  show,
+  onClose,
+  onConfirm,
+  isLight,
+  isLoading,
+}) => {
+  if (typeof document === "undefined") return null;
 
   return createPortal(
     <AnimatePresence>
@@ -40,32 +46,45 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
-              }`}
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${
+              isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
+            }`}
           >
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`} />
+            <div
+              className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
+            />
 
             <div className="text-center relative z-10">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
-                }`}>
-                <FaSignOutAlt className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`} />
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                  isLight ? "bg-red-50" : "bg-red-500/10"
+                }`}
+              >
+                <FaSignOutAlt
+                  className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
+                />
               </div>
 
-              <h3 className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}>
+              <h3
+                className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}
+              >
                 Sign Out?
               </h3>
 
-              <p className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+              <p
+                className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}
+              >
                 Are you sure you want to end your session?
               </p>
 
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
+                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
+                    isLight
+                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
                 >
                   Cancel
                 </button>
@@ -89,7 +108,7 @@ const LogoutConfirmationModal = ({ show, onClose, onConfirm, isLight, isLoading 
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 };
 
@@ -103,7 +122,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
   // Check if we have been to any admin page before to skip animation
   const hasVisitedAdmin = useMemo(() => {
-    return Array.from(visitedRoutes).some(path => path.startsWith('/admin'));
+    return Array.from(visitedRoutes).some((path) => path.startsWith("/admin"));
   }, [visitedRoutes]);
 
   // If visited, mount immediately. Else wait for 100ms.
@@ -119,16 +138,19 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   }, [hasVisitedAdmin]);
 
   // Admin Data Specifics
-  const [dashboardStats, setDashboardStats] = useState({ onlineUsers: 0, activeTrades: 0 });
+  const [dashboardStats, setDashboardStats] = useState({
+    onlineUsers: 0,
+    activeTrades: 0,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await api.get('/purchases/platform-stats');
+        const res = await api.get("/purchases/platform-stats");
         if (res.data.success) {
           setDashboardStats({
             onlineUsers: res.data.stats.totalUsers,
-            activeTrades: res.data.stats.tradesToday
+            activeTrades: res.data.stats.tradesToday,
           });
         }
       } catch {
@@ -140,32 +162,41 @@ function Sidebar({ onLogout, isLogoutLoading }) {
     return () => clearInterval(interval);
   }, []);
 
+  const TC = useMemo(
+    () => ({
+      textPrimary: isLight ? "text-gray-900" : "text-white",
+      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
+      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
 
+      bgSidebar: isLight
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
-  const TC = useMemo(() => ({
-    textPrimary: isLight ? "text-gray-900" : "text-white",
-    textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-    textTertiary: isLight ? "text-gray-400" : "text-gray-500",
+      bgStats: isLight
+        ? "bg-gray-50/80 border border-gray-100"
+        : "bg-gray-800/20", // Cleaner look for internal stats, no border
 
-    bgSidebar: isLight
-      ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-      : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
+      menuItemBase: isLight
+        ? "text-gray-600 hover:bg-gray-100/80"
+        : "text-gray-400 hover:bg-white/5",
 
-    bgStats: isLight
-      ? "bg-gray-50/80 border border-gray-100"
-      : "bg-gray-800/20", // Cleaner look for internal stats, no border
-
-    menuItemBase: isLight ? "text-gray-600 hover:bg-gray-100/80" : "text-gray-400 hover:bg-white/5",
-
-    // Gradients & Accents (Matching UserSidebar)
-    activeGradient: "bg-gradient-to-r from-cyan-500 to-blue-500",
-    activeGlow: isLight ? "shadow-[0_4px_14px_0_rgba(59,130,246,0.3)]" : "shadow-[0_4px_14px_0_rgba(6,182,212,0.3)]",
-  }), [isLight]);
+      // Gradients & Accents (Matching UserSidebar)
+      activeGradient: "bg-gradient-to-r from-cyan-500 to-blue-500",
+      activeGlow: isLight
+        ? "shadow-[0_4px_14px_0_rgba(59,130,246,0.3)]"
+        : "shadow-[0_4px_14px_0_rgba(6,182,212,0.3)]",
+    }),
+    [isLight],
+  );
 
   const menus = [
     { name: "Dashboard", path: "/admin", icon: FaChartLine },
     { name: "Users", path: "/admin/users", icon: FaUsers },
-    { name: "Cryptocurrencies", path: "/admin/cryptocurrencies", icon: FaCoins },
+    {
+      name: "Cryptocurrencies",
+      path: "/admin/cryptocurrencies",
+      icon: FaCoins,
+    },
     { name: "News Management", path: "/admin/news", icon: FaNewspaper },
     { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
     { name: "Settings", path: "/admin/settings", icon: FaCog },
@@ -208,17 +239,30 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         `}
       >
         {/* Profile Header */}
-        <Link to="/admin/settings" className={`block mb-6 group relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`} style={hasVisitedAdmin ? {} : { animationDelay: '0s' }}>
+        <Link
+          to="/admin/settings"
+          className={`block mb-6 group relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`}
+          style={hasVisitedAdmin ? {} : { animationDelay: "0s" }}
+        >
           <div className="flex items-center gap-4">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="relative"
-            >
-              <div className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg ${isLight ? 'shadow-blue-500/20' : 'shadow-black/40'} border-2 ${isLight ? 'border-white' : 'border-gray-700'}`}>
+            <motion.div whileHover={{ scale: 1.05 }} className="relative">
+              <div
+                className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg ${isLight ? "shadow-blue-500/20" : "shadow-black/40"} border-2 ${isLight ? "border-white" : "border-gray-700"}`}
+              >
                 {user?.image ? (
-                  <img src={user.image.startsWith('http') ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                  <img
+                    src={
+                      user.image.startsWith("http")
+                        ? user.image
+                        : `${SERVER_URL}/uploads/${user.image}`
+                    }
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className={`w-full h-full flex items-center justify-center font-bold text-lg ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-gray-800 text-white'}`}>
+                  <div
+                    className={`w-full h-full flex items-center justify-center font-bold text-lg ${isLight ? "bg-blue-50 text-blue-600" : "bg-gray-800 text-white"}`}
+                  >
                     <FaUserShield />
                   </div>
                 )}
@@ -230,10 +274,14 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             </motion.div>
 
             <div className="min-w-0">
-              <h2 className={`text-lg font-bold truncate ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}>
-                {user?.name || 'Admin'}
+              <h2
+                className={`text-lg font-bold truncate ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
+              >
+                {user?.name || "Admin"}
               </h2>
-              <div className={`flex items-center gap-1 text-xs font-medium ${TC.textSecondary}`}>
+              <div
+                className={`flex items-center gap-1 text-xs font-medium ${TC.textSecondary}`}
+              >
                 Administrator <FaChevronRight size={10} />
               </div>
             </div>
@@ -248,31 +296,46 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               <div
                 key={item.name}
                 className={hasVisitedAdmin ? "" : "slide-in"}
-                style={hasVisitedAdmin ? {} : { animationDelay: `${0.05 + index * 0.03}s` }}
+                style={
+                  hasVisitedAdmin
+                    ? {}
+                    : { animationDelay: `${0.05 + index * 0.03}s` }
+                }
               >
                 <Link
                   to={item.path}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 group overflow-hidden ${active ? '' : TC.menuItemBase
-                    }`}
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 group overflow-hidden ${
+                    active ? "" : TC.menuItemBase
+                  }`}
                 >
                   {active && (
                     <motion.div
                       layoutId="activeTab"
                       className={`absolute inset-0 rounded-xl ${TC.activeGradient} ${TC.activeGlow}`}
                       initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
                     />
                   )}
 
-                  <span className={`relative z-10 text-lg transition-colors duration-200 ${active ? 'text-white' : isLight ? 'text-gray-400 group-hover:text-blue-500' : 'text-gray-500 group-hover:text-cyan-400'}`}>
+                  <span
+                    className={`relative z-10 text-lg transition-colors duration-200 ${active ? "text-white" : isLight ? "text-gray-400 group-hover:text-blue-500" : "text-gray-500 group-hover:text-cyan-400"}`}
+                  >
                     <item.icon />
                   </span>
 
-                  <span className={`relative z-10 font-medium text-sm transition-colors duration-200 ${active ? 'text-white' : ''}`}>
+                  <span
+                    className={`relative z-10 font-medium text-sm transition-colors duration-200 ${active ? "text-white" : ""}`}
+                  >
                     {item.name}
                   </span>
 
-                  {active && <FaChevronRight className="relative z-10 ml-auto text-white/80 text-xs" />}
+                  {active && (
+                    <FaChevronRight className="relative z-10 ml-auto text-white/80 text-xs" />
+                  )}
                 </Link>
               </div>
             );
@@ -283,22 +346,34 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         <div
           className={`mt-auto pt-6 border-t border-dashed relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`}
           style={{
-            borderColor: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
-            ...(hasVisitedAdmin ? {} : { animationDelay: '0.2s' })
+            borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)",
+            ...(hasVisitedAdmin ? {} : { animationDelay: "0.2s" }),
           }}
         >
           {/* Quick Stats Grid - Admin Version */}
           <div className={`rounded-2xl p-4 mb-4 ${TC.bgStats}`}>
-            <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${TC.textTertiary}`}>Platform Stats</p>
+            <p
+              className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${TC.textTertiary}`}
+            >
+              Platform Stats
+            </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}>Total Users</p>
+                <p
+                  className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}
+                >
+                  Total Users
+                </p>
                 <p className={`text-sm font-bold ${TC.textPrimary}`}>
                   {dashboardStats.onlineUsers.toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}>Trades Today</p>
+                <p
+                  className={`text-[10px] font-medium mb-0.5 ${TC.textSecondary}`}
+                >
+                  Trades Today
+                </p>
                 <p className={`text-sm font-bold ${TC.textPrimary}`}>
                   {dashboardStats.activeTrades.toLocaleString()}
                 </p>
@@ -308,22 +383,28 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             <div className="mt-3 flex items-center gap-2">
               <div className="flex -space-x-2">
                 {[FaUsers, FaChartLine, FaGlobe].map((Icon, i) => (
-                  <div key={i} className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${isLight ? 'border-white bg-gray-100 text-gray-400' : 'border-gray-800 bg-gray-700 text-gray-400'}`}>
+                  <div
+                    key={i}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${isLight ? "border-white bg-gray-100 text-gray-400" : "border-gray-800 bg-gray-700 text-gray-400"}`}
+                  >
                     <Icon size={10} />
                   </div>
                 ))}
               </div>
-              <span className={`text-[10px] font-medium ${TC.textSecondary}`}>System Active</span>
+              <span className={`text-[10px] font-medium ${TC.textSecondary}`}>
+                System Active
+              </span>
             </div>
           </div>
 
           {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isLight
-              ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
-              : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
-              }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+              isLight
+                ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
+                : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
+            }`}
           >
             <FaSignOutAlt className="text-lg" />
             <span className="font-medium text-sm">Sign Out</span>
@@ -332,8 +413,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         </div>
 
         {/* Background Decor */}
-
-
       </aside>
 
       {/* Logout Modal Render */}

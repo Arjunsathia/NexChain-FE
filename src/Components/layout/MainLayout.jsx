@@ -40,7 +40,11 @@ export default function MainLayout() {
     markVisited(location.pathname);
   }, [location.pathname, markVisited]);
 
-  const pageKey = location.pathname.startsWith("/admin") ? "admin" : location.pathname.startsWith("/user") ? "user" : location.pathname;
+  const pageKey = location.pathname.startsWith("/admin")
+    ? "admin"
+    : location.pathname.startsWith("/user")
+      ? "user"
+      : location.pathname;
 
   // Animation variants for instant parallel transition (cross-fade)
   const pageVariants = {
@@ -53,17 +57,17 @@ export default function MainLayout() {
       scale: 1,
       transition: {
         duration: 0.1, // Ultra-fast
-        ease: "linear" // Linear is perceptually fastest for short durations
-      }
+        ease: "linear", // Linear is perceptually fastest for short durations
+      },
     },
     exit: {
       opacity: 0,
       scale: 1,
       transition: {
         duration: 0.1, // Ultra-fast
-        ease: "linear"
-      }
-    }
+        ease: "linear",
+      },
+    },
   };
 
   // Scroll to top instantly when the page key changes (navigation start)
@@ -75,14 +79,19 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
-      { }
+      {}
       <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
-        style={{ background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)" }}
+        style={{
+          background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)",
+        }}
       />
       <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-dark"
-        style={{ background: "linear-gradient(to bottom right, #000000, #0b182d, #000000)" }}
+        style={{
+          background:
+            "linear-gradient(to bottom right, #000000, #0b182d, #000000)",
+        }}
       />
 
       <Navbar />
@@ -99,16 +108,14 @@ export default function MainLayout() {
             className="w-full h-full col-start-1 row-start-1 bg-transparent"
             style={{ willChange: "opacity" }}
           >
-            <Suspense fallback={<LayoutLoader />}>
-              {element}
-            </Suspense>
+            <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
           </motion.div>
         </AnimatePresence>
       </main>
 
       <Footer />
 
-      { }
+      {}
       <ChatbotWidget />
     </div>
   );

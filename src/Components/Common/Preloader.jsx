@@ -14,17 +14,21 @@ const Preloader = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.02)_0%,_rgba(0,0,0,0)_100%)] opacity-50 will-change-transform" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center p-8" style={{ transform: 'translateZ(0)' }}>
-
+      <div
+        className="relative z-10 flex flex-col items-center justify-center p-8"
+        style={{ transform: "translateZ(0)" }}
+      >
         {/* The "Nexus" - Advanced Kinetic Structure */}
         <div className="relative w-32 h-32 mb-12 perspective-1000">
-
           {/* Ring 1 - The Stabilizer (Slow, Horizontal) */}
           <motion.div
             animate={{ rotateX: [60, 70, 60], rotateZ: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0 rounded-full border-[1px] border-white/20 will-change-transform"
-            style={{ borderTopColor: "rgba(255,255,255,0.8)", borderBottomColor: "transparent" }}
+            style={{
+              borderTopColor: "rgba(255,255,255,0.8)",
+              borderBottomColor: "transparent",
+            }}
           />
 
           {/* Ring 2 - The Accelerator (Medium, Vertical-ish) */}
@@ -32,15 +36,25 @@ const Preloader = () => {
             animate={{ rotateY: [60, 50, 60], rotateZ: -360 }}
             transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
             className="absolute inset-2 rounded-full border-[1px] border-cyan-400/20 will-change-transform"
-            style={{ borderLeftColor: "rgba(34,211,238, 0.8)", borderRightColor: "transparent" }}
+            style={{
+              borderLeftColor: "rgba(34,211,238, 0.8)",
+              borderRightColor: "transparent",
+            }}
           />
 
           {/* Ring 3 - The Core (Fast, Omni) */}
           <motion.div
-            animate={{ rotateX: [45, -45, 45], rotateY: [45, 45, 45], rotateZ: 360 }}
+            animate={{
+              rotateX: [45, -45, 45],
+              rotateY: [45, 45, 45],
+              rotateZ: 360,
+            }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
             className="absolute inset-6 rounded-full border-[1px] border-blue-500/20 will-change-transform"
-            style={{ borderTopColor: "rgba(59,130,246, 0.9)", borderLeftColor: "transparent" }}
+            style={{
+              borderTopColor: "rgba(59,130,246, 0.9)",
+              borderLeftColor: "transparent",
+            }}
           />
 
           {/* Central Singularity Point */}
@@ -49,7 +63,6 @@ const Preloader = () => {
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full shadow-[0_0_20px_white] will-change-transform"
           />
-
         </div>
 
         {/* Brand Name - Pure & Clean */}
@@ -66,11 +79,15 @@ const Preloader = () => {
           <motion.div
             initial={{ x: "-100%", opacity: 0 }}
             animate={{ x: "100%", opacity: [0, 1, 0] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 3,
+              ease: "easeInOut",
+            }}
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 will-change-transform"
           />
         </div>
-
       </div>
     </motion.div>
   );

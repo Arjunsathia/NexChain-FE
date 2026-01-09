@@ -1,13 +1,7 @@
 import React from "react";
 import { FaTrophy } from "react-icons/fa";
 
-function AdditionalStats({
-  coin,
-  formatNumber,
-  formatCurrency,
-  TC,
-  isLight,
-}) {
+function AdditionalStats({ coin, formatNumber, formatCurrency, TC, isLight }) {
   const stats = [
     {
       label: "Circulating Supply",

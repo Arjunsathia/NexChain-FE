@@ -44,7 +44,7 @@ const Settings = () => {
 
       headerGradient: "from-blue-600 to-cyan-500",
     }),
-    [isLight]
+    [isLight],
   );
 
   const tabs = [
@@ -58,13 +58,19 @@ const Settings = () => {
   return (
     <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6">
       <div
-        className={`transition-all duration-300 ease-out transform-gpu ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-          }`}
+        className={`transition-all duration-300 ease-out transform-gpu ${
+          isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+        }`}
       >
         {/* Header - Matches Dashboard */}
         <header className="mb-6 py-2 px-2">
-          <h1 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}>
-            Account <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Settings</span>
+          <h1
+            className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
+          >
+            Account{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+              Settings
+            </span>
           </h1>
           <p className={`text-sm font-medium ${TC.textSecondary}`}>
             Manage your personal information and profile preferences.
@@ -72,7 +78,9 @@ const Settings = () => {
         </header>
 
         {/* Tab Navigation - Smooth Sliding Pill */}
-        <div className={`p-1.5 rounded-full ${isLight ? 'bg-gray-100/80 border border-gray-200' : 'bg-gray-900/50 border border-white/5'} backdrop-blur-md inline-flex items-center gap-1 mb-6 relative overflow-visible flex-wrap sm:flex-nowrap`}>
+        <div
+          className={`p-1.5 rounded-full ${isLight ? "bg-gray-100/80 border border-gray-200" : "bg-gray-900/50 border border-white/5"} backdrop-blur-md inline-flex items-center gap-1 mb-6 relative overflow-visible flex-wrap sm:flex-nowrap`}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -92,7 +100,9 @@ const Settings = () => {
                 />
               )}
               <span className="relative z-10 flex items-center gap-2">
-                <tab.icon className={`text-base ${activeTab === tab.id ? "text-white" : ""}`} />
+                <tab.icon
+                  className={`text-base ${activeTab === tab.id ? "text-white" : ""}`}
+                />
                 {tab.label}
               </span>
             </button>
@@ -100,19 +110,32 @@ const Settings = () => {
         </div>
 
         {/* Main Content Card - Matches Dashboard Style */}
-        <div className={`${TC.bgCard} rounded-2xl p-6 sm:p-8 relative overflow-hidden min-h-[500px]`}>
+        <div
+          className={`${TC.bgCard} rounded-2xl p-6 sm:p-8 relative overflow-hidden min-h-[500px]`}
+        >
           {/* Decorative Background Gradient (Persistent) */}
-          <div className={`absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none transition-opacity duration-500 ${isLight ? 'opacity-100' : 'opacity-20'}`} />
+          <div
+            className={`absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none transition-opacity duration-500 ${isLight ? "opacity-100" : "opacity-20"}`}
+          />
 
           <div className="relative z-10">
-            {activeTab === "profile" && <ProfileSettings TC={TC} isLight={isLight} />}
-            {activeTab === "security" && <SecuritySettings TC={TC} isLight={isLight} />}
-            {activeTab === "kyc" && <KYCVerification TC={TC} isLight={isLight} />}
-            {activeTab === "preferences" && <PreferenceSettings TC={TC} isLight={isLight} />}
-            {activeTab === "notifications" && <NotificationSettings TC={TC} isLight={isLight} />}
+            {activeTab === "profile" && (
+              <ProfileSettings TC={TC} isLight={isLight} />
+            )}
+            {activeTab === "security" && (
+              <SecuritySettings TC={TC} isLight={isLight} />
+            )}
+            {activeTab === "kyc" && (
+              <KYCVerification TC={TC} isLight={isLight} />
+            )}
+            {activeTab === "preferences" && (
+              <PreferenceSettings TC={TC} isLight={isLight} />
+            )}
+            {activeTab === "notifications" && (
+              <NotificationSettings TC={TC} isLight={isLight} />
+            )}
           </div>
         </div>
-
       </div>
     </div>
   );

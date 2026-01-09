@@ -3,12 +3,60 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { BadgeCheck, TrendingUp, Quote } from "lucide-react";
 
 const testimonials = [
-  { name: "Asha S.", handle: "@asha_trades", message: "NexChain's latency is practically zero. My execution speed has doubled since I switched.", pnl: "+124%", avatar: "A", timestamp: "2d ago" },
-  { name: "Vikram P.", handle: "@vik_crypto", message: "The simulation mode saved me getting wrecked. Best practice ground for new strats.", pnl: "+45%", avatar: "V", timestamp: "1w ago" },
-  { name: "Neha K.", handle: "@neha_charts", message: "Finally, charts that don't lag during high volatility. The analytics are institutional grade.", pnl: "+89%", avatar: "N", timestamp: "3d ago" },
-  { name: "Marcus L.", handle: "@marcus_defi", message: "From beginner to funded trader in 3 months thanks to the Mastery Hub. Unbelievable value.", pnl: "+210%", avatar: "M", timestamp: "1d ago" },
-  { name: "Sophia M.", handle: "@sophia_yield", message: "Tracking my cross-chain portfolio used to be a nightmare. Now it's one click.", pnl: "+67%", avatar: "S", timestamp: "2w ago" },
-  { name: "David T.", handle: "@dave_eth", message: "This feels like a terminal built for pros but accessible enough for retail. Solid work.", pnl: "+15%", avatar: "D", timestamp: "5d ago" },
+  {
+    name: "Asha S.",
+    handle: "@asha_trades",
+    message:
+      "NexChain's latency is practically zero. My execution speed has doubled since I switched.",
+    pnl: "+124%",
+    avatar: "A",
+    timestamp: "2d ago",
+  },
+  {
+    name: "Vikram P.",
+    handle: "@vik_crypto",
+    message:
+      "The simulation mode saved me getting wrecked. Best practice ground for new strats.",
+    pnl: "+45%",
+    avatar: "V",
+    timestamp: "1w ago",
+  },
+  {
+    name: "Neha K.",
+    handle: "@neha_charts",
+    message:
+      "Finally, charts that don't lag during high volatility. The analytics are institutional grade.",
+    pnl: "+89%",
+    avatar: "N",
+    timestamp: "3d ago",
+  },
+  {
+    name: "Marcus L.",
+    handle: "@marcus_defi",
+    message:
+      "From beginner to funded trader in 3 months thanks to the Mastery Hub. Unbelievable value.",
+    pnl: "+210%",
+    avatar: "M",
+    timestamp: "1d ago",
+  },
+  {
+    name: "Sophia M.",
+    handle: "@sophia_yield",
+    message:
+      "Tracking my cross-chain portfolio used to be a nightmare. Now it's one click.",
+    pnl: "+67%",
+    avatar: "S",
+    timestamp: "2w ago",
+  },
+  {
+    name: "David T.",
+    handle: "@dave_eth",
+    message:
+      "This feels like a terminal built for pros but accessible enough for retail. Solid work.",
+    pnl: "+15%",
+    avatar: "D",
+    timestamp: "5d ago",
+  },
 ];
 
 const TraderReviewCard = ({ testimonial }) => {
@@ -48,7 +96,6 @@ const TraderReviewCard = ({ testimonial }) => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
-
         {/* User Header */}
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
@@ -69,11 +116,15 @@ const TraderReviewCard = ({ testimonial }) => {
               {testimonial.name}
             </h4>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-slate-500 font-medium font-mono uppercase tracking-wider">{testimonial.handle}</p>
+              <p className="text-xs text-slate-500 font-medium font-mono uppercase tracking-wider">
+                {testimonial.handle}
+              </p>
               {/* PnL Tag */}
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <TrendingUp className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] font-bold text-emerald-400 font-mono tracking-tight">{testimonial.pnl}</span>
+                <span className="text-[10px] font-bold text-emerald-400 font-mono tracking-tight">
+                  {testimonial.pnl}
+                </span>
               </div>
             </div>
           </div>
@@ -88,7 +139,9 @@ const TraderReviewCard = ({ testimonial }) => {
         <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between group-hover:border-[#4fcdda]/20 transition-colors">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#4fcdda] shadow-[0_0_8px_#4fcdda] animate-pulse" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[#4fcdda] font-bold">Verified Trade</span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[#4fcdda] font-bold">
+              Verified Trade
+            </span>
           </div>
           <span className="text-xs text-slate-600 font-mono group-hover:text-slate-500 transition-colors">
             {testimonial.timestamp}
@@ -102,7 +155,6 @@ const TraderReviewCard = ({ testimonial }) => {
 const TestimonialGrid = () => {
   return (
     <section className="py-0 relative overflow-visible font-manrope bg-transparent">
-
       {/* REMOVED: Background Ambience div */}
 
       <div className="w-full max-w-7xl mx-auto px-6 relative z-10">
