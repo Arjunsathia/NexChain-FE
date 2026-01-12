@@ -4,15 +4,17 @@ import Lenis from "lenis";
 const LenisScroll = () => {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 0.8,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       direction: "vertical",
       gestureDirection: "vertical",
       smooth: true,
-      mouseMultiplier: 1.5,
-      smoothTouch: true,
-      touchMultiplier: 3,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
     });
+
+    window.lenis = lenis;
 
     function raf(time) {
       lenis.raf(time);
@@ -23,6 +25,7 @@ const LenisScroll = () => {
 
     return () => {
       lenis.destroy();
+      window.lenis = null;
     };
   }, []);
 

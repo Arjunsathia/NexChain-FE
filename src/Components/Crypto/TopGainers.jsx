@@ -47,7 +47,8 @@ function TopGainers({ disableAnimations = false }) {
     const fetchData = async () => {
       setLoading(true);
 
-      // Check Cache
+      setLoading(true);
+
       try {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
@@ -66,7 +67,6 @@ function TopGainers({ disableAnimations = false }) {
         console.error("Cache parse error", e);
       }
 
-      // Fetch Fresh
       try {
         const data = await getTopGainers();
         if (Array.isArray(data)) {
@@ -108,11 +108,11 @@ function TopGainers({ disableAnimations = false }) {
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide">
         {loading ? (
-          <div className="space-y-2">
+          <div>
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2.5"
+                className="flex justify-between items-center p-2.5 border-b border-transparent"
               >
                 <Skeleton
                   circle

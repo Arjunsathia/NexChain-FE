@@ -13,7 +13,7 @@ import {
   FaHeart,
 } from "react-icons/fa";
 import { X } from "lucide-react";
-import SiteLogo from "../../assets/Img/hero_globe_premium-removebg-preview.png";
+import SiteLogo from "../../assets/Img/logo.png";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
@@ -126,19 +126,12 @@ export default function Footer() {
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 mb-6 sm:mb-8">
             {/* Brand & Disclaimer Section */}
             <div className="flex-1 space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 flex items-center justify-center">
-                  <img
-                    src={SiteLogo}
-                    alt="NexChain"
-                    className="w-full h-full object-contain drop-shadow-sm"
-                  />
-                </div>
-                <h3
-                  className={`text-lg sm:text-xl font-bold ${TC.textPrimary} tracking-tight`}
-                >
-                  NexChain
-                </h3>
+              <div className="flex items-center justify-start mb-4">
+                <img
+                  src={SiteLogo}
+                  alt="NexChain"
+                  className="h-12 w-auto object-contain"
+                />
               </div>
 
               <p
@@ -333,11 +326,10 @@ export default function Footer() {
                                 onClick={() => setFeedbackType(item.id)}
                                 className={`
                                          flex flex-col items-center gap-1.5 py-2.5 rounded-xl border transition-all duration-200
-                                         ${
-                                           feedbackType === item.id
-                                             ? `${TC.bgBtnFeedbackActive} border-blue-500/30`
-                                             : `${TC.bgBtnFeedbackDefault} border-transparent`
-                                         }
+                                         ${feedbackType === item.id
+                                    ? `${TC.bgBtnFeedbackActive} border-blue-500/30`
+                                    : `${TC.bgBtnFeedbackDefault} border-transparent`
+                                  }
                                       `}
                               >
                                 <item.icon

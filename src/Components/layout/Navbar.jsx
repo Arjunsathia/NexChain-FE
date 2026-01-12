@@ -8,7 +8,7 @@ import NotificationModal from "@/Components/Common/NotificationModal";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import SiteLogo from "../../assets/Img/hero_globe_premium-removebg-preview.png";
+import SiteLogo from "../../assets/Img/logo.png";
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
@@ -143,64 +143,13 @@ export default function Navbar() {
 
             <div
               onClick={() => navigate("/")}
-              className="flex items-center gap-3 group cursor-pointer justify-center"
+              className="flex items-center justify-center h-full group cursor-pointer"
             >
-              <div className="w-8 h-8 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <img
-                  src={SiteLogo}
-                  alt="NexChain"
-                  className="w-full h-full object-contain drop-shadow-md"
-                />
-              </div>
-              <span
-                className={`relative flex items-center text-lg md:text-xl font-bold tracking-tighter leading-none ${TC.textPrimary}`}
-              >
-                {/* "ne" part */}
-                <span>ne</span>
-
-                {/* X with enhanced button effects */}
-                <span className="relative mx-[2px] inline-flex justify-center items-center">
-                  {/* Background bloom/glow */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-r from-[#4fcdda]/90 via-[#364abe] to-[#233784] bg-clip-text text-transparent blur-sm opacity-60 select-none"
-                  >
-                    X
-                  </span>
-
-                  {/* Main X with exact button gradient */}
-                  <span className="relative bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent transform translate-y-[1px]">
-                    X
-                  </span>
-
-                  {/* Surface sheen (top gloss) */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-transparent bg-clip-text text-transparent opacity-60 select-none"
-                  >
-                    X
-                  </span>
-
-                  {/* Bottom cyan refraction line */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-[#4fcdda] to-transparent bg-clip-text text-transparent opacity-80 translate-y-[0.5px] select-none"
-                  >
-                    X
-                  </span>
-
-                  {/* Outer glow */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] bg-clip-text text-transparent opacity-40 blur-[3px] -translate-y-[0.5px] select-none"
-                  >
-                    X
-                  </span>
-                </span>
-
-                {/* "chain" part */}
-                <span>chain</span>
-              </span>
+              <img
+                src={SiteLogo}
+                alt="NexChain"
+                className="h-12 w-auto object-contain"
+              />
             </div>
           </div>
 
@@ -326,15 +275,12 @@ export default function Navbar() {
             >
               {/* Drawer Content */}
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-start">
                   <img
                     src={SiteLogo}
                     alt="NexChain"
-                    className="w-8 h-8 object-contain"
+                    className="h-12 w-auto object-contain"
                   />
-                  <span className={`text-xl font-bold ${TC.textPrimary}`}>
-                    NexChain
-                  </span>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}

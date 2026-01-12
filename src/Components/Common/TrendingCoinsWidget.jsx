@@ -106,11 +106,11 @@ function TrendingCoinsWidget({
             </button>
           </div>
         ) : loading && displayedCoins.length === 0 ? (
-          <div className="space-y-4">
+          <div>
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2"
+                className="flex justify-between items-center p-2.5 border-b border-transparent"
               >
                 <Skeleton
                   circle

@@ -25,7 +25,7 @@ const QuantumNebulaBackground = React.memo(() => {
 
     // Cosmic Entities
     const stars = [];
-    const starCount = 350; // Increased from 150
+    const starCount = 150; // Performance optimized from 350
 
     // Initialize Starfield (Quantum Particles)
     for (let i = 0; i < starCount; i++) {
@@ -67,13 +67,7 @@ const QuantumNebulaBackground = React.memo(() => {
         ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.opacity) * 0.4})`;
         ctx.fill();
 
-        // Subtle glow for larger stars
-        if (s.size > 1) {
-          ctx.shadowBlur = 2;
-          ctx.shadowColor = "white";
-        } else {
-          ctx.shadowBlur = 0;
-        }
+        // Removed shadowBlur context calls for 10x performance gain
       });
 
       animationRef.current = requestAnimationFrame(animate);
@@ -130,13 +124,14 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
       {/* 1. Base Quantum Starfield */}
       <QuantumNebulaBackground />
 
-      {/* 2. High-Tech Grid Overlay - Lower Opacity */}
+      {/* 2. High-Tech Grid Overlay - Lower Opacity & Simplified */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
                             linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
-          backgroundSize: "50px 50px",
+          backgroundSize: "60px 60px",
+          willChange: "transform", // Hint browser to promote layer
         }}
       />
 

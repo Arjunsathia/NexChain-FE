@@ -198,7 +198,7 @@ function TradeModal({
       setIsVisible(false);
     }
     prevShowRef.current = show;
-  }, [show, coin, initialAlertMode, shouldShowHoldingsInfo, type]); // Added coin back with guards to prevent flicker on updates
+  }, [show, coin, initialAlertMode, shouldShowHoldingsInfo, type]);
 
   // Dedicated effect for live price updates to avoid form resets
   useEffect(() => {
@@ -576,15 +576,15 @@ function TradeModal({
     <>
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
           } ${isLight ? "bg-black/30" : "bg-black/70"}`}
         onClick={handleBackdropClick}
       >
         <div
           className={`rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-[95%] sm:w-full max-w-[360px] sm:max-w-[440px] mx-auto overflow-hidden transition-all duration-300 ease-out origin-center backdrop-blur-3xl transform ${isLight
-              ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
-              : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
+            ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
+            : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
             } ${isVisible
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-4 scale-95"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // Added framer-motion
+import { motion } from "framer-motion"; // Added framer-motion
 import {
   FaChartLine,
   FaUsers,
@@ -9,7 +9,6 @@ import {
   FaCommentAlt,
   FaCog,
   FaUserShield,
-  FaSignOutAlt,
   FaChevronRight,
   FaGlobe, // Icon for "Online"
 } from "react-icons/fa";
@@ -17,103 +16,14 @@ import {
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import api, { SERVER_URL } from "@/api/axiosConfig";
-import { createPortal } from "react-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-// Logout Modal (Identical to UserSidebar's)
-const LogoutConfirmationModal = ({
-  show,
-  onClose,
-  onConfirm,
-  isLight,
-  isLoading,
-}) => {
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
-              }`}
-          >
-            <div
-              className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
-            />
-
-            <div className="text-center relative z-10">
-              <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
-                  }`}
-              >
-                <FaSignOutAlt
-                  className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
-                />
-              </div>
-
-              <h3
-                className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}
-              >
-                Sign Out?
-              </h3>
-
-              <p
-                className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}
-              >
-                Are you sure you want to end your session?
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={onConfirm}
-                  disabled={isLoading}
-                  className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-lg shadow-red-500/20 transition-all flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Signing Out...</span>
-                    </>
-                  ) : (
-                    "Sign Out"
-                  )}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body,
-  );
-};
-
-function Sidebar({ onLogout, isLogoutLoading }) {
+function Sidebar() {
   const isLight = useThemeCheck();
   const location = useLocation();
   const { user } = useUserContext();
   const { visitedRoutes } = useVisitedRoutes();
   const [isMounted, setIsMounted] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Check if we have been to any admin page before to skip animation
   const hasVisitedAdmin = useMemo(() => {
@@ -336,7 +246,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           })}
         </nav>
 
-        {/* Bottom Stats & Logout */}
+        {/* Bottom Stats Only */}
         <div
           className={`mt-auto pt-6 border-t border-dashed relative z-10 shrink-0 ${hasVisitedAdmin ? "" : "slide-in"}`}
           style={{
@@ -345,7 +255,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           }}
         >
           {/* Quick Stats Grid - Admin Version */}
-          <div className={`rounded-2xl p-4 mb-4 ${TC.bgStats}`}>
+          <div className={`rounded-2xl p-4 ${TC.bgStats}`}>
             <p
               className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${TC.textTertiary}`}
             >
@@ -390,32 +300,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               </span>
             </div>
           </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isLight
-              ? "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30"
-              : "bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white"
-              }`}
-          >
-            <FaSignOutAlt className="text-lg" />
-            <span className="font-medium text-sm">Sign Out</span>
-            <FaChevronRight className="ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
         </div>
 
         {/* Background Decor */}
       </aside>
-
-      {/* Logout Modal Render */}
-      <LogoutConfirmationModal
-        show={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={onLogout}
-        isLight={isLight}
-        isLoading={isLogoutLoading}
-      />
     </>
   );
 }

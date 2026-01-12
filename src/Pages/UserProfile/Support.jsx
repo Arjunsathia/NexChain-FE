@@ -14,6 +14,7 @@ import {
   FaCode,
   FaPaperPlane,
   FaPaperclip,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 const SupportCategory = ({
@@ -173,13 +174,12 @@ const LiveChatWindow = ({ TC, isLight }) => {
             className={`flex flex-col ${msg.isBot ? "items-start" : "items-end"}`}
           >
             <div
-              className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                msg.isBot
-                  ? isLight
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-gray-700/50 text-white border border-white/5"
-                  : "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/20"
-              }`}
+              className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.isBot
+                ? isLight
+                  ? "bg-gray-100 text-gray-800"
+                  : "bg-gray-700/50 text-white border border-white/5"
+                : "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/20"
+                }`}
             >
               {msg.text}
             </div>
@@ -213,14 +213,108 @@ const LiveChatWindow = ({ TC, isLight }) => {
   );
 };
 
+import { postForm } from "../../api/axiosConfig";
+import { toast } from "react-hot-toast";
+
 const TicketForm = ({ TC, isLight }) => {
-  const [fileName, setFileName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle, success, error
+  const [file, setFile] = useState(null); // Attachments
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!subject.trim() || !message.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    setStatus("idle");
+
+    try {
+      // Use FormData to send file + JSON data
+      const formData = new FormData();
+      formData.append("subject", subject);
+      formData.append("message", message);
+      if (file) {
+        formData.append("attachment", file);
+      }
+
+      await postForm("/users/contact-support", formData);
+      setStatus("success");
+      setSubject("");
+      setMessage("");
+      setFile(null);
+      toast.success("Support mail sent successfully!");
+    } catch (error) {
+      setStatus("error");
+      toast.error(error.response?.data?.error || "Failed to send mail");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setFileName(e.target.files[0].name);
+      setFile(e.target.files[0]);
     }
   };
+
+  const removeFile = () => {
+    setFile(null);
+  };
+
+  if (status === "success") {
+    return (
+      <div className={`${TC.bgCard} p-8 rounded-2xl h-[600px] flex flex-col items-center justify-center text-center relative overflow-hidden`}>
+        {/* Confetti Background Effect (Simplified with CSS/divs) */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-10">
+          <div className={`absolute top-10 left-10 w-4 h-4 rounded-full ${isLight ? "bg-blue-500" : "bg-cyan-400"} animate-bounce`} style={{ animationDuration: '2s' }}></div>
+          <div className={`absolute bottom-20 right-20 w-3 h-3 rounded-full ${isLight ? "bg-green-500" : "bg-emerald-400"} animate-bounce`} style={{ animationDuration: '3s' }}></div>
+          <div className={`absolute top-1/2 left-1/2 w-2 h-2 rounded-full ${isLight ? "bg-purple-500" : "bg-pink-400"} animate-ping`} style={{ animationDuration: '1.5s' }}></div>
+        </div>
+
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl ${isLight ? "bg-green-100/50" : "bg-green-500/10"}`}
+        >
+          <FaCheckCircle className="text-5xl text-green-500" />
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className={`text-3xl font-bold ${TC.textPrimary} mb-3`}
+        >
+          Mail Sent!
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={`text-base ${TC.textSecondary} max-w-sm mb-10 leading-relaxed`}
+        >
+          Our support team has received your request. We've sent a confirmation email to <b>nexchainsystem@gmail.com</b>. We'll get back to you shortly!
+        </motion.p>
+
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          onClick={() => setStatus("idle")}
+          className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white text-sm shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          Send Another Message
+        </motion.button>
+      </div>
+    );
+  }
 
   return (
     <div className={`${TC.bgCard} p-6 rounded-2xl h-[600px] flex flex-col`}>
@@ -233,26 +327,56 @@ const TicketForm = ({ TC, isLight }) => {
         </div>
         <div>
           <h2 className={`text-lg font-bold ${TC.textPrimary}`}>
-            Open a Ticket
+            Send an Email
           </h2>
           <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-            Complex issue? We usually respond within 2 hrs.
+            Complex issue? Attachment size limit: 5MB
           </p>
         </div>
       </div>
 
-      <form className="space-y-4 flex-1 flex flex-col">
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
         <div>
           <label
             className={`block text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} mb-1.5`}
           >
-            Subject
+            Subject & Attachment
           </label>
-          <input
-            type="text"
-            className={`w-full ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl px-4 py-3 text-sm ${TC.textPrimary} outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-400`}
-            placeholder="Brief description of issue"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className={`w-full ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl px-4 py-3 text-sm ${TC.textPrimary} outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-400`}
+              placeholder="Brief description of issue"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              disabled={loading}
+            />
+
+            {/* Simple/Compact Attachment Button */}
+            <div className="relative shrink-0">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*,.pdf"
+                disabled={loading}
+              />
+              <label
+                htmlFor="file-upload"
+                className={`h-full w-12 flex items-center justify-center cursor-pointer ${isLight ? "bg-gray-50 border-gray-200 hover:bg-gray-100" : "bg-black/20 border-white/10 hover:bg-white/5"} border rounded-xl transition-all ${file ? "border-green-500/50 text-green-500 bg-green-500/10" : TC.textSecondary}`}
+                title={file ? file.name : "Attach File"}
+              >
+                <FaPaperclip className={file ? "text-green-500" : ""} />
+              </label>
+            </div>
+          </div>
+          {file && (
+            <div className="mt-2 text-xs flex items-center justify-between text-green-500 bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20">
+              <span className="truncate max-w-[200px]">{file.name}</span>
+              <button type="button" onClick={removeFile} className="hover:text-green-400 font-bold ml-2">✕</button>
+            </div>
+          )}
         </div>
         <div className="flex-1">
           <label
@@ -263,40 +387,25 @@ const TicketForm = ({ TC, isLight }) => {
           <textarea
             className={`w-full h-[calc(100%-25px)] ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl px-4 py-3 text-sm ${TC.textPrimary} outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all resize-none placeholder:text-gray-400`}
             placeholder="Tell us what happened..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            disabled={loading}
           ></textarea>
         </div>
 
-        <div>
-          <label
-            className={`block text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} mb-1.5`}
-          >
-            Screenshot (Optional)
-          </label>
-          <div className="relative">
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              onChange={handleFileChange}
-              accept="image/*"
-            />
-            <label
-              htmlFor="file-upload"
-              className={`w-full flex items-center gap-2 cursor-pointer ${isLight ? "bg-gray-50 border-gray-200 hover:bg-gray-100" : "bg-black/20 border-white/10 hover:bg-white/5"} border border-dashed rounded-xl px-4 py-3 text-sm ${TC.textSecondary} transition-all`}
-            >
-              <FaPaperclip className="text-cyan-500" />
-              <span className="truncate">
-                {fileName || "Click to attach an image"}
-              </span>
-            </label>
-          </div>
-        </div>
-
         <button
-          type="button"
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white text-sm shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all shrink-0"
+          type="submit"
+          disabled={loading || !subject || !message}
+          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white text-sm shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all shrink-0 disabled:opacity-70 disabled:grayscale disabled:scale-100 flex items-center justify-center gap-2"
         >
-          Submit Ticket
+          {loading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Sending Mail...
+            </>
+          ) : (
+            "Send Mail"
+          )}
         </button>
       </form>
     </div>
@@ -383,9 +492,8 @@ export default function Support() {
   return (
     <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-6">
       <div
-        className={`transition-all duration-300 ease-out ${
-          isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        }`}
+        className={`transition-all duration-300 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          }`}
       >
         {/* Header Section Matches Dashboard */}
         <header className="mb-6 py-2 px-2">

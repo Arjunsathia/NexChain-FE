@@ -51,10 +51,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       const now = Date.now();
       const cached = localStorage.getItem(cacheKey);
 
-      // If we already have data from useState init (or simple re-render), check if it matches cache
-      // Optimization: If series is populated, we might still want to stale-validate or just trust it.
-      // For "perfect caching" request, let's trust the cache if it's recent.
-
+      // If we already have data, check if it matches cache
       let shouldFetch = true;
 
       // Helper to set data
@@ -67,14 +64,13 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         }
       };
 
-      // 1. Check Cache Validity (similar to logic used in init)
+      // Check Cache Validity
       if (cached) {
         try {
           const { timestamp, data } = JSON.parse(cached);
           // 5 minutes TTL
           if (now - timestamp < 5 * 60 * 1000) {
             // Cache is valid.
-            // If series is already set (from init), we don't need to do anything, just ensure loading is false.
             if (series.length === 0) {
               setData(data);
             }
@@ -92,7 +88,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
 
       setLoading(true);
 
-      // 2. Fetch from API
+      // Fetch from API
       try {
         const data = await getMarketChart(coinId, days);
 
@@ -106,10 +102,9 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       } catch (error) {
         console.error("Failed to fetch chart data", error);
 
-        // 3. If API fails (e.g. 429), fallback to stale cache if it exists
+        // If API fails, fallback to stale cache if available
         if (active) {
           if (cached) {
-            console.warn("Using stale cached data due to API failure");
             const { data } = JSON.parse(cached);
             setData(data);
           } else {
@@ -135,7 +130,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       zoom: { enabled: false },
       toolbar: { show: false },
       background: "transparent",
-      animations: { enabled: !disableAnimations }, // Disable animations to prevent repaint thrashing
+      animations: { enabled: !disableAnimations },
     },
     colors: ["#00E396"],
     stroke: {
@@ -165,8 +160,12 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
           year: "yyyy",
           month: "MMM 'yy",
           day: "dd MMM",
-          hour: "HH:mm",
+          hour: "hh:mm tt", // Updated to 12h format for better readability
         },
+        datetimeUTC: false, // Critical Fix: Force local time
+      },
+      tooltip: {
+        enabled: false, // Disable x-axis tooltip to reduce clutter
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -182,7 +181,9 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     },
     tooltip: {
       theme: isLight ? "light" : "dark",
-      x: { format: "dd MMM HH:mm" },
+      x: {
+        format: "dd MMM yyyy hh:mm tt", // Full date with 12h time
+      },
     },
   };
 
@@ -197,8 +198,8 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
   return (
     <div
       className={`p-4 rounded-2xl ${isLight
-          ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-          : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
+        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
+        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
         }`}
     >
       <div className="flex justify-between items-center mb-4">
@@ -213,10 +214,10 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
               key={tf.value}
               onClick={() => setDays(tf.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${days === tf.value
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : isLight
-                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                ? "bg-blue-600 text-white shadow-lg"
+                : isLight
+                  ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
             >
               {tf.label}

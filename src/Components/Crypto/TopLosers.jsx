@@ -107,11 +107,11 @@ function TopLosers({ disableAnimations = false }) {
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide">
         {loading ? (
-          <div className="space-y-2">
+          <div>
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2.5"
+                className="flex justify-between items-center p-2.5 border-b border-transparent"
               >
                 <Skeleton
                   circle

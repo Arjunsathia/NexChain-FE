@@ -27,6 +27,20 @@ const PortfolioPage = () => {
   const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
   const { purchasedCoins } = usePurchasedCoins();
 
+  // Get User ID for Caching
+  const userStr = localStorage.getItem("NEXCHAIN_USER");
+  const userId = userStr ? JSON.parse(userStr).id : "guest";
+
+  // Cache State
+  const [cachedHoldings, setCachedHoldings] = useState(() => {
+    try {
+      const cached = localStorage.getItem(`portfolio_holdings_v1_${userId}`);
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const [livePrices, setLivePrices] = useState({});
   const ws = useRef(null);
 
@@ -218,12 +232,29 @@ const PortfolioPage = () => {
     });
   }, [groupedHoldings, livePrices]);
 
+  // Update Cache when mergedHoldings has data
+  useEffect(() => {
+    if (mergedHoldings.length > 0) {
+      setCachedHoldings(mergedHoldings);
+      localStorage.setItem(
+        `portfolio_holdings_v1_${userId}`,
+        JSON.stringify(mergedHoldings)
+      );
+    }
+  }, [mergedHoldings, userId]);
+
+  // Use cached data if fresh data is loading or empty (flicker prevention)
+  const finalHoldings = useMemo(() => {
+    return mergedHoldings.length > 0 ? mergedHoldings : cachedHoldings;
+  }, [mergedHoldings, cachedHoldings]);
+
   const liveSummary = useMemo(() => {
-    const totalCurrentValue = mergedHoldings.reduce(
+    // Recalculate based on finalHoldings to ensure header updates instantly
+    const totalCurrentValue = finalHoldings.reduce(
       (sum, coin) => sum + (coin.totalCurrentValue || 0),
       0,
     );
-    const totalInvested = mergedHoldings.reduce(
+    const totalInvested = finalHoldings.reduce(
       (sum, coin) => sum + (coin.remainingInvestment || 0),
       0,
     );
@@ -237,21 +268,21 @@ const PortfolioPage = () => {
       totalProfitLoss,
       totalProfitLossPercentage,
     };
-  }, [mergedHoldings]);
+  }, [finalHoldings]); // Depend on finalHoldings
 
   const topPerformer = useMemo(() => {
-    if (!mergedHoldings || mergedHoldings.length === 0) return null;
-    return [...mergedHoldings].sort(
+    if (!finalHoldings || finalHoldings.length === 0) return null;
+    return [...finalHoldings].sort(
       (a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0),
     )[0];
-  }, [mergedHoldings]);
+  }, [finalHoldings]);
 
   const topLoser = useMemo(() => {
-    if (!mergedHoldings || mergedHoldings.length === 0) return null;
-    return [...mergedHoldings].sort(
+    if (!finalHoldings || finalHoldings.length === 0) return null;
+    return [...finalHoldings].sort(
       (a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0),
     )[0];
-  }, [mergedHoldings]);
+  }, [finalHoldings]);
 
   const handleTrade = useCallback((coin) => {
     setTradeModal({
@@ -281,8 +312,8 @@ const PortfolioPage = () => {
           <div className="space-y-4">
             <HoldingsTable
               isLight={isLight}
-              holdings={mergedHoldings}
-              loading={portfolioLoading}
+              holdings={finalHoldings}
+              loading={portfolioLoading && finalHoldings.length === 0} // Only show loader if we truly have no data
               onTrade={handleTrade}
               TC={TC}
             />
@@ -292,18 +323,18 @@ const PortfolioPage = () => {
             <div className="lg:col-span-2">
               <PerformanceChart
                 isLight={isLight}
-                groupedHoldings={mergedHoldings}
+                groupedHoldings={finalHoldings}
                 balance={balance}
-                loading={portfolioLoading}
+                loading={portfolioLoading && finalHoldings.length === 0}
                 TC={TC}
               />
             </div>
             <div className="lg:col-span-1">
               <PortfolioDistribution
                 isLight={isLight}
-                groupedHoldings={mergedHoldings}
+                groupedHoldings={finalHoldings}
                 balance={balance}
-                loading={portfolioLoading}
+                loading={portfolioLoading && finalHoldings.length === 0}
                 TC={TC}
               />
             </div>

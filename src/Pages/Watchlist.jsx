@@ -47,9 +47,26 @@ const Watchlist = () => {
   );
   const userId = user?.id || userFromLocalStorage?.id;
 
-  const [watchlistData, setWatchlistData] = useState([]);
+  const [watchlistData, setWatchlistData] = useState(() => {
+    try {
+      if (userId) {
+        const cached = localStorage.getItem(`user_watchlist_cache_${userId}`);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          // Optional: Check if cache is fresh (e.g., < 5 mins) if strictly needed,
+          // but for "instant" feel we usually just show it and update in background.
+          return data || [];
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  });
+
   const [livePrices, setLivePrices] = useState({});
-  const [loading, setLoading] = useState(false);
+  // If we have watchlist data, don't show initial full-screen loading
+  const [loading, setLoading] = useState(() => watchlistData.length === 0);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMounted, setIsMounted] = useState(false);
@@ -216,31 +233,46 @@ const Watchlist = () => {
   const fetchData = useCallback(
     async (shouldLoad = true) => {
       if (!userId) return;
-      if (shouldLoad) setLoading(true);
+      // If we already have data, don't show loading (background refresh)
+      // Only show loading if we have NO data AND we are explicitly asked to load
+      if (watchlistData.length === 0 && shouldLoad) setLoading(true);
+
       try {
         const res = await getData("/watchlist", { user_id: userId });
-        setWatchlistData(res || []);
+        const newData = res || [];
+        setWatchlistData(newData);
+
+        // Update Cache
+        localStorage.setItem(
+          `user_watchlist_cache_${userId}`,
+          JSON.stringify({
+            data: newData,
+            timestamp: Date.now(),
+          })
+        );
       } catch (err) {
         console.error("Failed to fetch watchlist data", err);
-        toast.error("Failed to fetch watchlist data", {
-          style: {
-            background: "#FEE2E2",
-            color: "#991B1B",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "14px",
-            padding: "12px 16px",
-            border: "none",
-          },
-          iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-        });
-        setWatchlistData([]);
+        // Only error toast if we don't have cached data looking good
+        if (watchlistData.length === 0) {
+          toast.error("Failed to fetch watchlist data", {
+            style: {
+              background: "#FEE2E2",
+              color: "#991B1B",
+              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+              borderRadius: "8px",
+              fontWeight: "600",
+              fontSize: "14px",
+              padding: "12px 16px",
+              border: "none",
+            },
+            iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
+          });
+        }
       } finally {
         if (shouldLoad) setLoading(false);
       }
     },
-    [userId],
+    [userId, watchlistData.length], // dependence on watchlistData.length to know if we should show loading
   );
 
   useEffect(() => {
@@ -409,7 +441,6 @@ const Watchlist = () => {
               </div>
             ) : (
               <>
-                {}
                 <WatchlistTable
                   coins={paginatedCoins}
                   TC={TC}
@@ -421,7 +452,6 @@ const Watchlist = () => {
                   disableAnimations={hasVisited}
                 />
 
-                {}
                 <WatchlistMobileCards
                   coins={paginatedCoins}
                   TC={TC}

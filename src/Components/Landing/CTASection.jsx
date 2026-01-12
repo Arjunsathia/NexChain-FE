@@ -8,7 +8,7 @@ import {
   FaTelegramPlane,
   FaArrowRight,
 } from "react-icons/fa";
-import SiteLogo from "../../assets/Img/hero_globe_premium-removebg-preview.png";
+import SiteLogo from "../../assets/Img/logo.png";
 
 const CTASection = React.memo(({ sectionVariants, navigate }) => {
   const footerLinks = useMemo(
@@ -128,17 +128,12 @@ const CTASection = React.memo(({ sectionVariants, navigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 gap-8 md:gap-12 lg:gap-8 mb-12 md:mb-16">
           {/* Brand Column */}
           <div className="md:col-span-2 lg:col-span-2 space-y-4 md:space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <img
-                  src={SiteLogo}
-                  alt="NextChain"
-                  className="w-full h-full object-contain drop-shadow-sm"
-                />
-              </div>
-              <span className="text-2xl font-bold text-white tracking-tight">
-                NexChain
-              </span>
+            <div className="flex items-center justify-start mb-2">
+              <img
+                src={SiteLogo}
+                alt="NexChain"
+                className="h-12 w-auto object-contain"
+              />
             </div>
             <p className="text-sm leading-relaxed text-slate-400 max-w-xs mx-auto md:mx-0">
               The next generation of crypto trading. Fast, secure, and built for

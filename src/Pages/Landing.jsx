@@ -100,15 +100,17 @@ export default function Landing() {
   const scrollToFeatures = useCallback(() => {
     const element = document.getElementById("features-section");
     if (element) {
-      // Robust calculation based scroll to prevent browser/library conflict
-      const top = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top, behavior: "smooth" });
+      if (window.lenis) {
+        window.lenis.scrollTo(element, { duration: 1.5 });
+      } else {
+        const top = element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-transparent text-white font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
-      {}
       <div className="relative z-10">
         <MemoizedHeroSection
           navigate={navigate}
@@ -118,7 +120,6 @@ export default function Landing() {
         />
       </div>
 
-      {}
       <SectionWrapper id="features-section" className="z-10 py-16 md:py-20">
         <React.Suspense
           fallback={
@@ -131,7 +132,6 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {}
       <SectionWrapper id="market-section" className="z-20 py-12 md:py-16">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedMarketOverviewSection
@@ -142,7 +142,6 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {/* Testimonials */}
       <SectionWrapper id="testimonials-section" className="z-30 py-12 md:py-16">
         <React.Suspense fallback={<div className="h-96 w-full" />}>
           <MemoizedTestimonialsSection
@@ -153,7 +152,6 @@ export default function Landing() {
         </React.Suspense>
       </SectionWrapper>
 
-      {}
       <SectionWrapper id="contact-section" className="z-30 pb-20">
         <React.Suspense fallback={<div className="h-64 w-full" />}>
           <MemoizedCTASection
