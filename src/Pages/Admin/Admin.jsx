@@ -2,7 +2,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/Components/Admin/Sidebar";
 import MobileNavbar from "@/Components/Admin/MobileNavbar";
-import { logout } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -15,7 +14,7 @@ const AdminLoader = () => (
 
 function Admin() {
   const navigate = useNavigate();
-  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const isLight = useThemeCheck();
@@ -34,46 +33,32 @@ function Admin() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [isMobileMenuOpen]);
 
-  const handleLogout = async () => {
-    try {
-      setIsLogoutLoading(true);
-      await logout();
-    } catch (error) {
-      console.error("Error While Logout", error);
-    } finally {
-      localStorage.removeItem("NEXCHAIN_USER_TOKEN");
-      localStorage.removeItem("NEXCHAIN_USER");
-      setIsLogoutLoading(false);
-      navigate("/auth");
-    }
-  };
+
 
   return (
     <div
       className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"} transition-colors duration-150`}
     >
-      {}
+      { }
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
-          <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
+          <Sidebar />
         </div>
       )}
 
-      {}
+      { }
       <div className="flex-1 flex flex-col min-h-screen relative min-w-0">
-        {}
+        { }
         {!isDesktop && (
           <div className="sticky top-0 z-50">
             <MobileNavbar
               isOpen={isMobileMenuOpen}
               onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              onLogout={handleLogout}
-              isLogoutLoading={isLogoutLoading}
             />
           </div>
         )}
 
-        {}
+        { }
         <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4">
           <Suspense fallback={<AdminLoader />}>
             <Outlet />

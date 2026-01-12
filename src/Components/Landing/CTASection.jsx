@@ -66,7 +66,7 @@ const CTASection = React.memo(({ sectionVariants, navigate }) => {
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-16 md:mb-24">
         <div
           className="
-           relative rounded-[2.5rem] p-8 md:p-16 overflow-hidden
+           relative rounded-3xl md:rounded-[2.5rem] p-8 md:p-16 overflow-hidden
            bg-slate-900/20 backdrop-blur-xl
            border border-white/10
            shadow-[0_0_50px_-10px_rgba(79,205,218,0.1)]

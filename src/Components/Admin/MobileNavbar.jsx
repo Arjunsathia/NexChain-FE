@@ -13,7 +13,6 @@ import {
   FaChevronRight,
   FaUser,
   FaExchangeAlt,
-  FaSignOutAlt,
 } from "react-icons/fa";
 import { HiMenuAlt3 } from "react-icons/hi"; // Modern menu icon
 
@@ -21,7 +20,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 
-function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
+function MobileNavbar({ isOpen, onToggle }) {
   const isLight = useThemeCheck();
   const location = useLocation();
   const { user } = useUserContext();
@@ -112,7 +111,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   ];
 
   return (
-    <div className="lg:hidden sticky top-4 z-[999] px-4 mb-6">
+    <div className="lg:hidden px-4 mb-6">
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -162,13 +161,12 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onToggle}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${
-              isOpen
-                ? "bg-red-500/10 text-red-500" // Active Close State
-                : isLight
-                  ? "bg-gray-100 text-gray-700"
-                  : "bg-white/5 text-gray-300"
-            }`}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${isOpen
+              ? "bg-red-500/10 text-red-500" // Active Close State
+              : isLight
+                ? "bg-gray-100 text-gray-700"
+                : "bg-white/5 text-gray-300"
+              }`}
           >
             {isOpen ? <FaTimes size={18} /> : <HiMenuAlt3 size={22} />}
           </motion.button>
@@ -197,9 +195,8 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                         <Link
                           to={item.path}
                           onClick={onToggle}
-                          className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                            active ? TC.activeItem : TC.itemHover
-                          } group`}
+                          className={`flex items-center justify-between p-3 rounded-xl transition-all ${active ? TC.activeItem : TC.itemHover
+                            } group`}
                         >
                           <div className="flex items-center gap-3">
                             <span
@@ -254,28 +251,7 @@ function MobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <button
-                    onClick={() => {
-                      onToggle();
-                      onLogout();
-                    }}
-                    disabled={isLogoutLoading}
-                    className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/20 active:scale-95 transition-all"
-                  >
-                    {isLogoutLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Signing Out...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaSignOutAlt />
-                        <span>Sign Out</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+
               </div>
             </motion.div>
           )}

@@ -278,8 +278,8 @@ const UserMarketInsights = () => {
         style={hasVisited ? {} : { animationDelay: "0.1s" }}
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+          <div className="w-full sm:w-auto text-center sm:text-left">
             <h1
               className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
             >

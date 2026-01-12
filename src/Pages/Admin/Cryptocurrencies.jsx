@@ -137,8 +137,8 @@ const AdminCryptocurrencies = () => {
       <div
         className={`flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? "fade-in" : ""}`}
       >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+          <div className="w-full sm:w-auto text-center sm:text-left">
             <h1
               className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
             >

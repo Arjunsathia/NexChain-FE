@@ -147,19 +147,19 @@ function LearningHub() {
       {/* --- Hero: "Start Here" (Premium Banner) --- */}
       {!loading && selectedCategory === "all" && (
         <div
-          className={`relative w-full rounded-3xl overflow-hidden mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
+          className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
         >
           {/* Abstract Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
           <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2"></div>
 
-          <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-300 text-xs font-bold mb-4 backdrop-blur-sm">
                 <FaBolt size={10} /> RECOMMENDED STARTER
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
                 Crypto 101: <br />
                 The Foundation
               </h2>
@@ -188,14 +188,14 @@ function LearningHub() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 border-b border-gray-200 dark:border-gray-800 pb-1">
-        <div className="flex items-center gap-8 overflow-x-auto no-scrollbar w-full sm:w-auto">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-6 mb-8 border-b border-gray-200 dark:border-gray-800 pb-4 md:pb-1">
+        <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar w-full md:w-auto pb-2 md:pb-0 px-1">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`
-              pb-3 text-sm font-medium transition-all relative whitespace-nowrap
+              pb-2 md:pb-3 text-sm font-medium transition-all relative whitespace-nowrap
               ${selectedCategory === cat.id ? TC.textPrimary : TC.textSecondary}
               hover:${TC.textPrimary}
             `}
@@ -209,20 +209,19 @@ function LearningHub() {
         </div>
 
         {/* Search Bar (Moved Here) */}
-        <div className={`relative group w-full sm:w-64 mb-2 sm:mb-0`}>
+        <div className={`relative group w-full md:w-64`}>
           <input
             type="text"
             placeholder="Search topics..."
-            className={`w-full py-2 px-4 pr-10 rounded-full text-sm outline-none transition-all duration-300
-                 ${
-                   isLight
-                     ? "bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500"
-                     : "bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500"
-                 }
+            className={`w-full py-2.5 px-4 pr-10 rounded-full text-sm outline-none transition-all duration-300
+                 ${isLight
+                ? "bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500"
+                : "bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500"
+              }
                `}
           />
           <FaSearch
-            className={`absolute right-3.5 top-2.5 text-gray-400 group-focus-within:text-cyan-500 transition-colors`}
+            className={`absolute right-3.5 top-3 text-gray-400 group-focus-within:text-cyan-500 transition-colors`}
             size={14}
           />
         </div>

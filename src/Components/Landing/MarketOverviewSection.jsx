@@ -23,7 +23,7 @@ const MarketOverviewSection = forwardRef(
               </span>
               Live Market Data
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white font-manrope">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 text-white font-manrope">
               Global Market{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 filter drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]">
                 Overview

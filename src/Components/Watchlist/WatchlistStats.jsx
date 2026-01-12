@@ -4,7 +4,7 @@ import { FaStar, FaChartLine, FaTrophy, FaFire } from "react-icons/fa";
 const WatchlistStats = ({ stats, TC, disableAnimations = false }) => {
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 ${disableAnimations ? "" : "fade-in"}`}
+      className={`hidden sm:grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 ${disableAnimations ? "" : "fade-in"}`}
       style={disableAnimations ? {} : { animationDelay: "0.1s" }}
     >
       {[

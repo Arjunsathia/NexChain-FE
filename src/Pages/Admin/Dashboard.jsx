@@ -256,9 +256,9 @@ const AdminDashboard = () => {
         className={`min-h-screen p-2 sm:p-4 lg:p-6 ${TC.textPrimary} overflow-x-hidden`}
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
           <div
-            className={isFirstVisit ? "fade-in" : ""}
+            className={`w-full md:w-auto text-center md:text-left ${isFirstVisit ? "fade-in" : ""}`}
             style={{ animationDelay: "0.1s" }}
           >
             <h1
@@ -275,7 +275,7 @@ const AdminDashboard = () => {
           </div>
 
           <div
-            className="flex items-center gap-3 fade-in"
+            className="flex items-center justify-center gap-3 fade-in w-full md:w-auto"
             style={{ animationDelay: "0.2s" }}
           >
             {(!isReady ||

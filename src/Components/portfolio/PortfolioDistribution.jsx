@@ -32,6 +32,15 @@ const PortfolioDistribution = ({
   balance,
   loading,
 }) => {
+  const [shouldAnimate, setShouldAnimate] = React.useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldAnimate(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const TC = useMemo(
     () => ({
       bgContainer: isLight
@@ -60,19 +69,25 @@ const PortfolioDistribution = ({
     [isLight],
   );
 
-  const distributionData = useMemo(() => {
+  // Stabilized Distribution Data: Only update when coin list changes, not on every price tick
+  const [distributionData, setDistributionData] = React.useState([]);
+
+  React.useEffect(() => {
     if (!groupedHoldings || groupedHoldings.length === 0) {
-      return balance > 0
-        ? [
-            {
-              name: "CASH",
-              value: balance,
-              fullName: "Virtual Cash",
-              color: "#10B981",
-              type: "cash",
-            },
-          ]
-        : [];
+      if (balance > 0) {
+        setDistributionData([
+          {
+            name: "CASH",
+            value: balance,
+            fullName: "Virtual Cash",
+            color: "#10B981",
+            type: "cash",
+          },
+        ]);
+      } else {
+        setDistributionData([]);
+      }
+      return;
     }
 
     const coinData = groupedHoldings
@@ -116,8 +131,15 @@ const PortfolioDistribution = ({
       });
     }
 
-    return coinData;
-  }, [groupedHoldings, balance]);
+    setDistributionData(coinData);
+  }, [
+    // Only update if the LIST of coins changes (user buys/sells a new coin)
+    // Or if balance changes significantly (deposit)
+    // We intentionally OMIT live prices to stop Chart flickering
+    groupedHoldings.length,
+    groupedHoldings.map(c => c.coinId).join(','),
+    balance
+  ]);
 
   const totalPortfolioValue = useMemo(() => {
     return distributionData.reduce(
@@ -170,13 +192,14 @@ const PortfolioDistribution = ({
     >
       <Header isLight={isLight} TC={TC} />
 
-      {}
+      {/* Profit/Loss Summary */}
       {totalInvestment > 0 && (
         <ProfitLossSummary
           isLight={isLight}
           totalProfitLoss={totalProfitLoss}
           totalProfitLossPercentage={totalProfitLossPercentage}
           TC={TC}
+          shouldAnimate={shouldAnimate}
         />
       )}
 
@@ -185,6 +208,7 @@ const PortfolioDistribution = ({
         distributionData={distributionData}
         totalPortfolioValue={totalPortfolioValue}
         TC={TC}
+        shouldAnimate={shouldAnimate}
       />
 
       <PortfolioSummary
@@ -193,6 +217,7 @@ const PortfolioDistribution = ({
         totalPortfolioValue={totalPortfolioValue}
         groupedHoldings={groupedHoldings}
         TC={TC}
+        shouldAnimate={shouldAnimate}
       />
     </div>
   );
@@ -215,6 +240,7 @@ const ProfitLossSummary = ({
   totalProfitLoss,
   totalProfitLossPercentage,
   TC,
+  shouldAnimate,
 }) => {
   const isPositive = totalProfitLoss >= 0;
 
@@ -223,7 +249,7 @@ const ProfitLossSummary = ({
 
   return (
     <div
-      className={`mb-4 mx-2 p-2.5 md:p-3 rounded-xl fade-in ${bgPill}`}
+      className={`mb-4 mx-2 p-2.5 md:p-3 rounded-xl ${shouldAnimate ? "fade-in" : ""} ${bgPill}`}
       style={{ animationDelay: "0.1s" }}
     >
       <div className="flex items-center justify-between">
@@ -257,7 +283,7 @@ const ProfitLossSummary = ({
   );
 };
 
-const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
+const Chart = ({ isLight, distributionData, totalPortfolioValue, TC, shouldAnimate }) => {
   const strokeColor = isLight ? "#1F2937" : "#1F2937";
 
   const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, percent }) => {
@@ -285,7 +311,7 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
     <div className="w-full min-h-[220px] mb-4 flex-1 rounded-xl">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          {}
+          {/* Pie Chart with Controlled Animation */}
           <Pie
             data={distributionData}
             dataKey="value"
@@ -296,7 +322,9 @@ const Chart = ({ isLight, distributionData, totalPortfolioValue, TC }) => {
             paddingAngle={2}
             label={renderCustomLabel}
             labelLine={false}
-            isAnimationActive={false}
+            isAnimationActive={shouldAnimate}
+            animationDuration={800}
+            animationBegin={0}
           >
             {distributionData.map((entry, index) => (
               <Cell
@@ -338,7 +366,7 @@ const CustomTooltip = ({
 
     return (
       <div
-        className={`rounded-lg p-3 shadow-lg fade-in border ${isLight ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"}`}
+        className={`rounded-lg p-3 shadow-lg border ${isLight ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"}`}
       >
         <p className={`font-semibold text-sm mb-1 ${TC.textPrimary}`}>
           {data.fullName || data.name}
@@ -369,10 +397,11 @@ const PortfolioSummary = ({
   totalPortfolioValue,
   groupedHoldings,
   TC,
+  shouldAnimate,
 }) => {
   return (
     <div
-      className={`mx-2 mb-2 space-y-2 p-3 rounded-xl fade-in ${TC.bgSummaryCard}`}
+      className={`mx-2 mb-2 space-y-2 p-3 rounded-xl ${shouldAnimate ? "fade-in" : ""} ${TC.bgSummaryCard}`}
       style={{ animationDelay: "0.2s" }}
     >
       <div className="flex items-center justify-between text-xs">

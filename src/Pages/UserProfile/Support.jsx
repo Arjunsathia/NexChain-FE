@@ -29,7 +29,7 @@ const SupportCategory = ({
     whileHover={{ scale: 1.01 }}
     whileTap={{ scale: 0.99 }}
     onClick={onClick}
-    className={`${TC.bgCard} p-5 rounded-2xl transition-all text-left w-full h-full group relative overflow-hidden`}
+    className={`${TC.bgCard} p-4 sm:p-5 rounded-2xl transition-all text-left w-full h-full group relative overflow-hidden`}
   >
     {/* Decorative Background Gradient */}
     <div
@@ -138,7 +138,7 @@ const LiveChatWindow = ({ TC, isLight }) => {
   };
 
   return (
-    <div className={`${TC.bgCard} p-6 rounded-2xl h-[600px] flex flex-col`}>
+    <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl h-[600px] flex flex-col`}>
       {/* Header */}
       <div
         className="mb-4 shrink-0 flex items-center gap-4 border-b pb-4 border-dashed"
@@ -317,7 +317,7 @@ const TicketForm = ({ TC, isLight }) => {
   }
 
   return (
-    <div className={`${TC.bgCard} p-6 rounded-2xl h-[600px] flex flex-col`}>
+    <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl h-[600px] flex flex-col`}>
       <div
         className="mb-6 shrink-0 flex items-center gap-4 border-b pb-4 border-dashed"
         style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
@@ -496,7 +496,7 @@ export default function Support() {
           }`}
       >
         {/* Header Section Matches Dashboard */}
-        <header className="mb-6 py-2 px-2">
+        <header className="mb-6 py-2 px-2 text-center sm:text-left">
           <h1
             className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
           >
@@ -541,7 +541,7 @@ export default function Support() {
           {/* Left Column: FAQ & Contact */}
           <div className="lg:col-span-2 space-y-6">
             {/* FAQ Section */}
-            <div className={`${TC.bgCard} p-6 rounded-2xl`}>
+            <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl`}>
               <h2
                 className={`text-xl font-bold mb-4 flex items-center gap-2 ${TC.textPrimary}`}
               >
@@ -568,7 +568,7 @@ export default function Support() {
             <div className="grid sm:grid-cols-2 gap-4">
               <button
                 onClick={() => setActiveSection("ticket")}
-                className={`w-full ${TC.bgCard} text-left p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-blue-500/20 transition-all ${activeSection === "ticket" ? "ring-2 ring-blue-500/50" : ""}`}
+                className={`w-full ${TC.bgCard} text-left p-4 sm:p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-blue-500/20 transition-all ${activeSection === "ticket" ? "ring-2 ring-blue-500/50" : ""}`}
               >
                 <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform shadow-sm">
                   <FaEnvelope />
@@ -587,7 +587,7 @@ export default function Support() {
 
               <button
                 onClick={() => setActiveSection("chat")}
-                className={`w-full ${TC.bgCard} text-left p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-green-500/20 transition-all ${activeSection === "chat" ? "ring-2 ring-green-500/50" : ""}`}
+                className={`w-full ${TC.bgCard} text-left p-4 sm:p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-green-500/20 transition-all ${activeSection === "chat" ? "ring-2 ring-green-500/50" : ""}`}
               >
                 <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform shadow-sm">
                   <FaHeadset />

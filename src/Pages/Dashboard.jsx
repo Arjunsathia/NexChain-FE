@@ -65,12 +65,12 @@ export default function Dashboard() {
     <div
       className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
-      <div className="xl:hidden flex flex-col gap-4">
-        <div>
+      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
           <UserProfileCard />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <div className="space-y-1">
             <h2
               className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}
@@ -90,7 +90,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <ChartSection coinId={selectedCoinId} />
         </div>
 
@@ -105,15 +105,15 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <NewsPanel />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <RecentTradesCard />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <LearningHub />
         </div>
       </div>

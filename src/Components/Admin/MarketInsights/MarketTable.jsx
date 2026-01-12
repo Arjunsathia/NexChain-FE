@@ -70,8 +70,8 @@ function MarketTable({
                   disableAnimations
                     ? {}
                     : {
-                        animationDelay: `${(currentItems.indexOf(coin) % 20) * 0.05}s`,
-                      }
+                      animationDelay: `${(currentItems.indexOf(coin) % 20) * 0.05}s`,
+                    }
                 }
               >
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
@@ -107,11 +107,10 @@ function MarketTable({
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">
                   <span
-                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${
-                      coin.price_change_percentage_24h >= 0
+                    className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${coin.price_change_percentage_24h >= 0
                         ? "text-green-400"
                         : "text-red-400"
-                    }`}
+                      }`}
                   >
                     {coin.price_change_percentage_24h >= 0 ? (
                       <FaArrowUp size={10} />
@@ -152,19 +151,17 @@ function MarketTable({
         </table>
       </div>
 
-      {}
+      { }
       {filteredData.length > itemsPerPage && (
-        <div className="flex justify-center items-center gap-2 mt-6">
+        <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
           <button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${
-              currentPage === 1
+            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${currentPage === 1
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-gray-800/50 hover:scale-105 active:scale-95"
-            } ${
-              isLight ? "text-gray-600 bg-gray-100" : "text-gray-300 bg-white/5"
-            }`}
+              } ${isLight ? "text-gray-600 bg-gray-100" : "text-gray-300 bg-white/5"
+              }`}
           >
             Previous
           </button>
@@ -182,11 +179,10 @@ function MarketTable({
                   <button
                     key={i}
                     onClick={() => paginate(i + 1)}
-                    className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-300 ${
-                      currentPage === i + 1
+                    className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-300 ${currentPage === i + 1
                         ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
                         : TC.btnSecondary
-                    }`}
+                      }`}
                   >
                     {i + 1}
                   </button>
@@ -195,7 +191,7 @@ function MarketTable({
                 (i + 1 === currentPage - 2 && currentPage > 3) ||
                 (i + 1 === currentPage + 2 &&
                   currentPage <
-                    Math.ceil(filteredData.length / itemsPerPage) - 2)
+                  Math.ceil(filteredData.length / itemsPerPage) - 2)
               ) {
                 return (
                   <span key={i} className={`px-1 ${TC.textSecondary}`}>
@@ -212,13 +208,11 @@ function MarketTable({
             disabled={
               currentPage === Math.ceil(filteredData.length / itemsPerPage)
             }
-            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${
-              currentPage === Math.ceil(filteredData.length / itemsPerPage)
+            className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${currentPage === Math.ceil(filteredData.length / itemsPerPage)
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-gray-800/50 hover:scale-105 active:scale-95"
-            } ${
-              isLight ? "text-gray-600 bg-gray-100" : "text-gray-300 bg-white/5"
-            }`}
+              } ${isLight ? "text-gray-600 bg-gray-100" : "text-gray-300 bg-white/5"
+              }`}
           >
             Next
           </button>

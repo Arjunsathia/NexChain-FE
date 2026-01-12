@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -91,91 +91,136 @@ const PerformanceChart = ({
     };
   }, [groupedHoldings, balance]);
 
-  const performanceData = useMemo(() => {
-    const { totalInvestment, profitLoss, profitLossPercentage } =
-      currentMetrics;
-    if (totalInvestment === 0) return [];
+  // Stabilized Chart Data: Only updates when Time Range changes or initial data loads
+  const [chartData, setChartData] = useState([]);
 
-    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
-    const data = [];
+  // Use a Ref to pass live data to tooltip without re-rendering the Chart component
+  const tooltipDataRef = React.useRef(currentMetrics);
+  useEffect(() => {
+    tooltipDataRef.current = currentMetrics;
+  }, [currentMetrics]);
 
+  // Generate chart data only on TimeRange change to prevent "wiggling" on every price tick
+  useEffect(() => {
+    const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
+
+    // If no investment, we can't generate a meaningful chart yet
+    if (totalInvestment <= 0) {
+      if (chartData.length > 0) setChartData([]); // Clear if reset
+      return;
+    }
+
+    const isIntraday = timeRange === "1d";
+    const points = isIntraday ? 24 : (timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90);
+
+    // Use a stable snapshot for the "Current" end of the graph 
     const startingValue = totalInvestment;
     const currentValue = startingValue + profitLoss;
 
-    const seededRandom = (seed) => {
-      const x = Math.sin(seed) * 10000;
-      return x - Math.floor(x);
-    };
+    const newData = [];
 
-    for (let i = days - 1; i >= 0; i--) {
+    // We want to simulate a path from (Start = Current - TotalP_L) to (End = Current)
+    // The "change per point" average needed is TotalP_L / points.
+    const averageChangePerPoint = profitLoss / points;
+
+    let runningValue = currentValue;
+
+    for (let i = 0; i < points; i++) {
       const date = new Date();
-      date.setDate(date.getDate() - i);
-
-      let value, dailyProfitLoss, dailyProfitLossPercentage;
-
-      if (i === 0) {
-        value = currentValue;
-        dailyProfitLoss = profitLoss;
-        dailyProfitLossPercentage =
-          startingValue > 0 ? (dailyProfitLoss / startingValue) * 100 : 0;
+      if (isIntraday) {
+        date.setHours(date.getHours() - i);
       } else {
-        const progress = (days - i) / days;
-        const targetChange = (profitLossPercentage / 100) * progress;
-
-        const volatility = 0.02;
-        const seed = i * 12345 + days * 67890;
-        const randomChange = (seededRandom(seed) - 0.5) * volatility;
-        const totalChange = targetChange + randomChange;
-
-        value = startingValue * (1 + totalChange);
-        dailyProfitLoss = value - startingValue;
-        dailyProfitLossPercentage =
-          startingValue > 0 ? (dailyProfitLoss / startingValue) * 100 : 0;
-
-        value = Math.max(value, startingValue * 0.1);
+        date.setDate(date.getDate() - i);
       }
 
-      data.push({
-        date: date.toLocaleDateString("en-IN", {
-          month: "short",
-          day: "numeric",
-        }),
-        value: Math.round(value * 100) / 100,
-        profitLoss: dailyProfitLoss,
-        profitLossPercentage: dailyProfitLossPercentage,
+      // Point 0 (Today/Now) is exactly the current value
+      let pointValue = runningValue;
+
+      // For previous points, subtract the average change + some noise
+      if (i > 0) {
+        // Noise factor: Random deviation, slightly higher for Intraday to show volatility
+        const volatilityBase = isIntraday ? 0.05 : 0.01;
+        const noiseFactor = (Math.random() - 0.5) * (Math.abs(averageChangePerPoint) * 2 || startingValue * volatilityBase);
+        const stepChange = averageChangePerPoint + noiseFactor;
+        runningValue -= stepChange;
+        pointValue = runningValue;
+      }
+
+      // Ensure value doesn't drop below 0 realistically
+      pointValue = Math.max(pointValue, 0);
+
+      const pointProfitLoss = pointValue - startingValue;
+      const pointProfitLossPercentage = startingValue > 0 ? (pointProfitLoss / startingValue) * 100 : 0;
+
+      let dateLabel = "";
+      if (isIntraday) {
+        // For 1d, show Time (e.g. 14:00)
+        dateLabel = date.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+      } else {
+        // For others, show Date (e.g. 12 Jan)
+        dateLabel = date.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+      }
+
+      // "Today" logic needs adjustment for Intraday ("Now" vs "1h ago")
+      let dayLabel = null;
+      if (i === 0) dayLabel = isIntraday ? "Now" : "Today";
+      else if (i === 1 && !isIntraday) dayLabel = "Yesterday";
+
+      newData.unshift({
+        date: dateLabel,
+        value: Math.round(pointValue * 100) / 100,
+        profitLoss: pointProfitLoss,
+        profitLossPercentage: pointProfitLossPercentage,
         investment: startingValue,
-        day: i === 0 ? "Today" : i === 1 ? "Yesterday" : null,
+        day: dayLabel,
+        // Store full date obj for uniqueness if needed, but string dateLabel is usually enough for XAxis
+        fullDate: date
       });
     }
 
-    return data;
-  }, [currentMetrics, timeRange]);
+    setChartData(newData);
+  }, [timeRange, currentMetrics.totalInvestment > 0]); // Only regenerate on TimeRange or if Investment State changes (0 -> >0) since chart shape is simulated.
 
   const periodReturns = useMemo(() => {
-    if (performanceData.length < 2)
-      return { "7d": 0, "30d": 0, "90d": 0, current: 0 };
+    if (chartData.length < 2)
+      return { "1d": 0, "7d": 0, "30d": 0, "90d": 0, current: 0 };
 
-    const firstValue = performanceData[0].investment;
-    const lastValue = performanceData[performanceData.length - 1].value;
+    const firstValue = chartData[0].investment;
+    const lastValue = chartData[chartData.length - 1].value;
     const totalReturn =
       firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
 
-    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
-    const periodStartIndex = Math.max(0, performanceData.length - days - 1);
-    const periodStartValue =
-      performanceData[periodStartIndex]?.investment || firstValue;
-    const periodReturn =
-      periodStartValue > 0
-        ? ((lastValue - periodStartValue) / periodStartValue) * 100
-        : 0;
+    // Logic for Return Calculation based on the VIEW
+    const calculateReturn = (slicePoints) => {
+      const startIndex = Math.max(0, chartData.length - slicePoints - 1);
+      const startVal = chartData[startIndex]?.investment || firstValue; // Baseline is always investment in this simulation
+      // Wait, 'periodReturn' usually means 'Change since Start of Period'.
+      // In our simulation, data[0] is Start of Period (e.g. 7 days ago).
+      // So period return is just (LastValue - FirstValue) / FirstValue effectively.
+      // BUT FirstValue = Investment (approx).
+      // So it matches TotalReturn.
+      return totalReturn;
+    };
+
+    // Since our chart construction always spans the full period (Start->End), 
+    // the "Period Return" is essentially the Total Return for that specific view.
+    // e.g. If viewing 7d, the chart goes from CostBasis -> Current. Return = Total P&L %.
+    // This is a "Lifetime" view compressed into time ranges.
+
+    // However, to make the stats card look dynamic when switching, we can enable the simulation logic:
+    // If I switch to 7d, I see 7d return (which is Total Return).
+    // If I switch to 1d, I see 1d return (Total Return).
+    // This is consistent with the "Simulate Cost Basis -> Current" logic.
+    const periodReturn = totalReturn;
 
     return {
-      "7d": timeRange === "7d" ? periodReturn : totalReturn * 0.3,
-      "30d": timeRange === "30d" ? periodReturn : totalReturn * 0.6,
-      "90d": timeRange === "90d" ? periodReturn : totalReturn,
+      "1d": periodReturn,
+      "7d": periodReturn,
+      "30d": periodReturn,
+      "90d": periodReturn,
       current: totalReturn,
     };
-  }, [performanceData, timeRange]);
+  }, [chartData, timeRange]);
 
   if (loading) {
     return (
@@ -215,8 +260,9 @@ const PerformanceChart = ({
       />
       <Chart
         isLight={isLight}
-        performanceData={performanceData}
-        currentMetrics={currentMetrics}
+        chartData={chartData}
+        tooltipDataRef={tooltipDataRef}
+        isPositive={currentMetrics.profitLoss >= 0}
         TC={TC}
         disableAnimations={disableAnimations}
       />
@@ -266,21 +312,20 @@ const Header = ({ timeRange, setTimeRange, TC }) => {
       <div
         className={`flex rounded-lg p-0.5 border shadow-sm ${TC.bgRangeContainer}`}
       >
-        {["7d", "30d", "90d"].map((range) => (
+        {["1d", "7d", "30d", "90d"].map((range) => (
           <button
             key={range}
             onClick={() => setTimeRange(range)}
-            className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${
-              timeRange === range
-                ? TC.bgRangeButtonActive
-                : TC.bgRangeButtonDefault
-            }`}
+            className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${timeRange === range
+              ? TC.bgRangeButtonActive
+              : TC.bgRangeButtonDefault
+              }`}
           >
             {range}
           </button>
         ))}
       </div>
-    </div>
+    </div >
   );
 };
 
@@ -298,8 +343,8 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
         <p className={`text-sm md:text-base font-bold ${TC.textPrimary}`}>
           $
           {totalInvestment.toLocaleString("en-IN", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           })}
         </p>
       </div>
@@ -319,8 +364,8 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
           <span>
             $
             {Math.abs(profitLoss).toLocaleString("en-IN", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             })}
           </span>
         </div>
@@ -349,11 +394,80 @@ const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
   );
 };
 
-const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
-  const isPositive = currentMetrics.profitLoss >= 0;
+// 1. Move Tooltip OUTSIDE and use Ref for live data
+const ChartTooltip = ({ active, payload, TC, tooltipDataRef }) => {
+  if (active && payload && payload.length) {
+    let data = payload[0].payload;
+
+    // Retrieve live metrics seamlessly from Ref without triggering Chart re-render
+    const currentMetrics = tooltipDataRef?.current;
+
+    // Override 'Today' data point with live metrics
+    if (data.day === "Today" && currentMetrics) {
+      data = {
+        ...data,
+        value: currentMetrics.currentValue,
+        profitLoss: currentMetrics.profitLoss,
+        profitLossPercentage: currentMetrics.profitLossPercentage
+      };
+    }
+
+    const rowPositive = data.profitLoss >= 0;
+
+    return (
+      <div
+        className={`rounded-lg p-3 shadow-lg min-w-[150px] ${TC.tooltipBg}`}
+      >
+        <p className={`font-semibold text-xs mb-2 ${TC.tooltipTextPrimary} opacity-70`}>
+          {data.day || data.date}
+        </p>
+
+        {/* P&L Amount */}
+        <div className="flex items-center justify-between gap-4 mb-1">
+          <span className={`text-xs ${TC.textSecondary}`}>P&L:</span>
+          <span className={`text-sm font-bold ${rowPositive ? TC.textPositive : TC.textNegative}`}>
+            {rowPositive ? "+" : "-"}$
+            {Math.abs(data.profitLoss).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        </div>
+
+        {/* Percentage */}
+        <div className="flex items-center justify-between gap-4">
+          <span className={`text-xs ${TC.textSecondary}`}>Return:</span>
+          <span
+            className={`text-xs font-medium ${rowPositive ? TC.textPositive : TC.textNegative}`}
+          >
+            {rowPositive ? "+" : ""}
+            {data.profitLossPercentage.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// 2. Wrap Chart in React.memo to prevent re-renders (fixing Axis flicker)
+const Chart = React.memo(({ chartData, isPositive, tooltipDataRef, TC, disableAnimations }) => {
   const gradientId = `performanceGradient`;
 
-  if (!performanceData || performanceData.length === 0) {
+  const [shouldAnimate, setShouldAnimate] = useState(!disableAnimations);
+
+  useEffect(() => {
+    if (disableAnimations) return;
+
+    setShouldAnimate(true);
+    const timer = setTimeout(() => {
+      setShouldAnimate(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [chartData?.length, disableAnimations]);
+
+  if (!chartData || chartData.length === 0) {
     return (
       <div className="flex-1 min-h-[250px] flex items-center justify-center text-gray-400">
         <p className="text-sm">No performance data available</p>
@@ -361,42 +475,11 @@ const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
     );
   }
 
-  const ChartTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      const rowPositive = data.profitLoss >= 0;
-
-      return (
-        <div
-          className={`rounded-lg p-3 shadow-lg min-w-[150px] ${TC.tooltipBg}`}
-        >
-          <p className={`font-semibold text-sm mb-1 ${TC.tooltipTextPrimary}`}>
-            {data.day || data.date}
-          </p>
-          <div className={`text-sm font-bold ${TC.tooltipTextPrimary}`}>
-            $
-            {data.value.toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </div>
-          <div
-            className={`text-xs mt-1 ${rowPositive ? TC.textPositive : TC.textNegative}`}
-          >
-            {rowPositive ? "+" : ""}
-            {data.profitLossPercentage.toFixed(2)}%
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="flex-1 min-h-[250px] w-full px-2 pb-2">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={performanceData}
+          data={chartData}
           margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
         >
           <defs>
@@ -434,14 +517,16 @@ const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            domain={['auto', 'auto']}
           />
           <Tooltip
-            content={<ChartTooltip TC={TC} />}
+            content={<ChartTooltip TC={TC} tooltipDataRef={tooltipDataRef} />}
             cursor={{
               stroke: TC.chartGrid,
               strokeWidth: 1,
               strokeDasharray: "3 3",
             }}
+            isAnimationActive={false}
           />
           <Area
             type="monotone"
@@ -449,7 +534,8 @@ const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
             stroke="none"
             fill={`url(#${gradientId})`}
             fillOpacity={1}
-            isAnimationActive={!disableAnimations}
+            isAnimationActive={shouldAnimate}
+            animationDuration={1500}
           />
           <Line
             type="monotone"
@@ -458,12 +544,13 @@ const Chart = ({ performanceData, currentMetrics, TC, disableAnimations }) => {
             strokeWidth={3}
             dot={false}
             activeDot={{ r: 6, strokeWidth: 0 }}
-            isAnimationActive={!disableAnimations}
+            isAnimationActive={shouldAnimate}
+            animationDuration={1500}
           />
         </LineChart>
       </ResponsiveContainer>
     </div>
   );
-};
+});
 
 export default PerformanceChart;

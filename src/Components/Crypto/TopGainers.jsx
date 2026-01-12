@@ -109,44 +109,30 @@ function TopGainers({ disableAnimations = false }) {
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide">
         {loading ? (
           <div>
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
                 className="flex justify-between items-center p-2.5 border-b border-transparent"
               >
                 <Skeleton
                   circle
-                  width={32}
-                  height={32}
+                  width={24}
+                  height={24}
                   baseColor={TC.skeletonBase}
                   highlightColor={TC.skeletonHighlight}
                 />
-                <div className="flex-1 ml-3">
+                <div className="flex-1 ml-2">
                   <Skeleton
-                    width={35}
-                    height={12}
-                    baseColor={TC.skeletonBase}
-                    highlightColor={TC.skeletonHighlight}
-                    className="mb-0.5"
-                  />
-                  <Skeleton
-                    width={55}
-                    height={8}
+                    width={60}
+                    height={10}
                     baseColor={TC.skeletonBase}
                     highlightColor={TC.skeletonHighlight}
                   />
                 </div>
                 <div className="flex flex-col items-end">
                   <Skeleton
-                    width={45}
-                    height={12}
-                    baseColor={TC.skeletonBase}
-                    highlightColor={TC.skeletonHighlight}
-                    className="mb-0.5"
-                  />
-                  <Skeleton
-                    width={30}
-                    height={8}
+                    width={50}
+                    height={10}
                     baseColor={TC.skeletonBase}
                     highlightColor={TC.skeletonHighlight}
                   />

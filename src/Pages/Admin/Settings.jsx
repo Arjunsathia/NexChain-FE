@@ -84,8 +84,8 @@ const AdminSettings = () => {
       className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
     >
       {/* 1. Page Header (Admin Styled) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-        <div>
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4 mb-2">
+        <div className="w-full sm:w-auto text-center sm:text-left">
           <h1
             className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
           >
@@ -116,7 +116,7 @@ const AdminSettings = () => {
         </button>
       </div>
 
-      {}
+      { }
       <div
         className={`flex items-center gap-2 p-1.5 rounded-2xl ${TC.bgCard} shadow-sm border ${isLight ? "border-gray-200" : "border-white/5"} overflow-x-auto no-scrollbar max-w-fit mb-2`}
       >
@@ -129,11 +129,10 @@ const AdminSettings = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform-gpu active:scale-95 whitespace-nowrap ${
-              activeTab === tab.id
+            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform-gpu active:scale-95 whitespace-nowrap ${activeTab === tab.id
                 ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
                 : `${TC.textSecondary} hover:bg-gray-100/50 dark:hover:bg-white/5`
-            }`}
+              }`}
           >
             <tab.icon
               className={`text-base ${activeTab === tab.id ? "animate-pulse" : ""}`}
@@ -143,7 +142,7 @@ const AdminSettings = () => {
         ))}
       </div>
 
-      {}
+      { }
       {loading ? (
         <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
           <div className="space-y-6">
@@ -161,7 +160,7 @@ const AdminSettings = () => {
       ) : (
         <div className="fade-in" style={{ animationDelay: "0.2s" }}>
           <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-            {}
+            { }
             {activeTab === "general" && (
               <GeneralSettings
                 settings={settings}
@@ -170,7 +169,7 @@ const AdminSettings = () => {
               />
             )}
 
-            {}
+            { }
             {activeTab === "security" && (
               <SecuritySettings
                 security={security}
@@ -179,7 +178,7 @@ const AdminSettings = () => {
               />
             )}
 
-            {}
+            { }
             {activeTab === "notifications" && (
               <NotificationSettings
                 notifications={notifications}
@@ -188,7 +187,7 @@ const AdminSettings = () => {
               />
             )}
 
-            {}
+            { }
             {activeTab === "api" && (
               <ApiSettings
                 apiSettings={apiSettings}

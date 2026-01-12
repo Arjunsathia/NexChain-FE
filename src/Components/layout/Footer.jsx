@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import { X } from "lucide-react";
 import SiteLogo from "../../assets/Img/logo.png";
+import SiteLogoLight from "../../assets/Img/logo-2.png";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { postForm } from "@/api/axiosConfig";
@@ -125,17 +126,17 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 mb-6 sm:mb-8">
             {/* Brand & Disclaimer Section */}
-            <div className="flex-1 space-y-3 sm:space-y-4">
-              <div className="flex items-center justify-start mb-4">
+            <div className="flex-1 space-y-3 sm:space-y-4 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start mb-4">
                 <img
-                  src={SiteLogo}
+                  src={isLight ? SiteLogoLight : SiteLogo}
                   alt="NexChain"
-                  className="h-12 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
               </div>
 
               <p
-                className={`text-sm leading-relaxed max-w-lg ${TC.textSecondary}`}
+                className={`text-sm leading-relaxed max-w-lg ${TC.textSecondary} mx-auto sm:mx-0`}
               >
                 Empowering your financial future with advanced crypto tools.
                 <span className="opacity-70 mx-1 block sm:inline mt-1 sm:mt-0">
@@ -162,15 +163,15 @@ export default function Footer() {
             </div>
 
             {/* Links & Actions */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-8 lg:gap-16 pt-2 sm:pt-0">
+            <div className="grid grid-cols-1 sm:flex sm:flex-row gap-8 lg:gap-16 pt-2 sm:pt-0">
               {/* Quick Links */}
-              <div className="space-y-3 min-w-[120px]">
+              <div className="hidden sm:flex space-y-3 min-w-[120px] flex-col items-center sm:items-start text-center sm:text-left">
                 <h4
                   className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}
                 >
                   Platform
                 </h4>
-                <div className="flex flex-col space-y-2">
+                <div className="flex flex-col space-y-2 items-center sm:items-start">
                   {["Dashboard", "Market", "Portfolio", "Learn"].map((item) => (
                     <a
                       key={item}
@@ -183,30 +184,10 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Legal */}
-              <div className="space-y-3 min-w-[120px]">
-                <h4
-                  className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}
-                >
-                  Legal
-                </h4>
-                <div className="flex flex-col space-y-2">
-                  {["Privacy Policy", "Terms of Service", "Cookie Policy"].map(
-                    (item) => (
-                      <a
-                        key={item}
-                        href="#"
-                        className={`text-sm font-medium ${TC.textSecondary} hover:text-cyan-500 transition-colors`}
-                      >
-                        {item}
-                      </a>
-                    ),
-                  )}
-                </div>
-              </div>
 
-              {/* Feedback CTA - Full width on mobile col-span-2 */}
-              <div className="space-y-3 col-span-2 sm:col-span-1 sm:w-auto">
+
+              {/* Feedback CTA */}
+              <div className="space-y-3 sm:w-auto flex flex-col items-center sm:items-start text-center sm:text-left">
                 <h4
                   className={`text-xs font-bold uppercase tracking-wider ${TC.textTertiary}`}
                 >
@@ -235,17 +216,10 @@ export default function Footer() {
           <div
             className={`pt-6 border-t ${isLight ? "border-gray-100" : "border-gray-800"}`}
           >
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex items-center justify-center text-center">
               <p className={`text-xs font-medium ${TC.textTertiary}`}>
                 &copy; {currentYear} NexChain Inc. All rights reserved.
               </p>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Systems Operational
-              </div>
             </div>
           </div>
         </div>

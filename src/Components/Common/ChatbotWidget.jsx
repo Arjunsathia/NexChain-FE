@@ -29,17 +29,17 @@ const RobotIcon = ({ className }) => (
     className={className}
     xmlns="http://www.w3.org/2000/svg"
   >
-    {}
+    { }
     <circle cx="50" cy="15" r="6" />
     <rect x="48" y="15" width="4" height="15" rx="1" />
-    {}
+    { }
     <path d="M12 45 H18 V65 H12 C10 65 8 63 8 61 V49 C8 47 10 45 12 45 Z" />
     <path d="M82 45 H88 C90 45 92 47 92 49 V61 C92 63 90 65 88 65 H82 V45 Z" />
-    {}
+    { }
     <rect x="18" y="28" width="64" height="50" rx="12" />
-    {}
+    { }
     <circle cx="38" cy="48" r="6" fill="white" />
-    {}
+    { }
     <circle
       cx="38"
       cy="48"
@@ -48,8 +48,8 @@ const RobotIcon = ({ className }) => (
       fillOpacity="0"
       className="text-current opacity-0"
     />{" "}
-    {}
-    {}
+    { }
+    { }
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -70,15 +70,15 @@ const RobotIcon = ({ className }) => (
 
 const SmartBotIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    {}
+    { }
     <path
       fillRule="evenodd"
       clipRule="evenodd"
       d="M12 4C12.55 4 13 4.45 13 5V6H18C20.21 6 22 7.79 22 10V17C22 19.21 20.21 21 18 21H14L10 24V21H6C3.79 21 2 19.21 2 17V10C2 7.79 3.79 6 6 6H11V5C11 4.45 11.45 4 12 4ZM8.5 13C9.33 13 10 12.33 10 11.5C10 10.67 9.33 10 8.5 10C7.67 10 7 10.67 7 11.5C7 12.33 7.67 13 8.5 13ZM15.5 13C16.33 13 17 12.33 17 11.5C17 10.67 16.33 10 15.5 10C14.67 10 14 10.67 14 11.5C14 12.33 14.67 13 15.5 13ZM8 15.5C8 15.5 10 18.5 12 18.5C14 18.5 16 15.5 16 15.5H8Z"
     />
-    {}
+    { }
     <circle cx="12" cy="2.5" r="1.5" />
-    {}
+    { }
     <path d="M22 11H23C23.55 11 24 11.45 24 12V15C24 15.55 23.55 16 23 16H22V11Z" />
     <path d="M2 11H1C0.45 11 0 11.45 0 12V15C0 15.55 0.45 16 1 16H2V11Z" />
   </svg>
@@ -134,8 +134,8 @@ const ChatbotWidget = () => {
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          fixed bottom-6 right-6 z-50
-          w-14 h-14 rounded-full
+          fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50
+          w-12 h-12 sm:w-14 sm:h-14 rounded-full
           bg-gradient-to-tr from-blue-600 to-cyan-400
           text-white
           flex items-center justify-center
@@ -163,7 +163,7 @@ const ChatbotWidget = () => {
         </motion.div>
       </motion.button>
 
-      {}
+      { }
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -172,18 +172,18 @@ const ChatbotWidget = () => {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className={`
-              fixed bottom-6 right-6 z-50
-              w-[90vw] max-w-[400px] h-[600px] max-h-[80vh]
+              fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50
+              w-[calc(100vw-32px)] sm:w-[400px] max-w-[400px]
+              h-[calc(100%-100px)] sm:h-[600px] max-h-[80vh]
               rounded-2xl shadow-2xl
-              ${
-                isLight
-                  ? "bg-white border border-gray-200"
-                  : "bg-gray-900 border border-gray-700"
+              ${isLight
+                ? "bg-white border border-gray-200"
+                : "bg-gray-900 border border-gray-700"
               }
               flex flex-col overflow-hidden
             `}
           >
-            {}
+            { }
             <div className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -204,7 +204,7 @@ const ChatbotWidget = () => {
               </button>
             </div>
 
-            {}
+            { }
             <div
               className={`
               flex-1 overflow-y-auto p-4 space-y-4
@@ -221,12 +221,11 @@ const ChatbotWidget = () => {
                   <div
                     className={`
                       max-w-[80%] rounded-2xl px-4 py-2.5
-                      ${
-                        message.sender === "user"
-                          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                          : isLight
-                            ? "bg-white border border-gray-200 text-gray-900"
-                            : "bg-gray-700 border border-gray-600 text-white"
+                      ${message.sender === "user"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                        : isLight
+                          ? "bg-white border border-gray-200 text-gray-900"
+                          : "bg-gray-700 border border-gray-600 text-white"
                       }
                     `}
                   >
@@ -244,7 +243,7 @@ const ChatbotWidget = () => {
               ))}
             </div>
 
-            {}
+            { }
             <div
               className={`
               p-4 border-t
@@ -262,10 +261,9 @@ const ChatbotWidget = () => {
                     flex-1 px-4 py-2.5 rounded-xl
                     outline-none focus:ring-2 focus:ring-cyan-500/50
                     transition-all
-                    ${
-                      isLight
-                        ? "bg-gray-100 text-gray-900 placeholder-gray-500"
-                        : "bg-gray-800 text-white placeholder-gray-400 border border-gray-700"
+                    ${isLight
+                      ? "bg-gray-100 text-gray-900 placeholder-gray-500"
+                      : "bg-gray-800 text-white placeholder-gray-400 border border-gray-700"
                     }
                   `}
                 />
@@ -277,10 +275,9 @@ const ChatbotWidget = () => {
                     bg-gradient-to-r from-cyan-500 to-blue-600
                     flex items-center justify-center
                     transition-all
-                    ${
-                      inputValue.trim()
-                        ? "opacity-100 hover:shadow-lg hover:shadow-cyan-500/50"
-                        : "opacity-50 cursor-not-allowed"
+                    ${inputValue.trim()
+                      ? "opacity-100 hover:shadow-lg hover:shadow-cyan-500/50"
+                      : "opacity-50 cursor-not-allowed"
                     }
                   `}
                 >

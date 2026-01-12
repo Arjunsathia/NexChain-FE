@@ -156,7 +156,7 @@ const MarketInsights = () => {
       btcDominance: btcDominance || 0,
       ethDominance:
         (data.find((c) => c.symbol === "eth")?.market_cap / totalMarketCap) *
-          100 || 0,
+        100 || 0,
     });
   };
 
@@ -201,7 +201,7 @@ const MarketInsights = () => {
 
   const MarketSkeleton = () => (
     <div className="space-y-6">
-      {}
+      { }
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[...Array(4)].map((_, i) => (
           <div
@@ -211,7 +211,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {}
+      { }
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {[...Array(2)].map((_, i) => (
           <div
@@ -221,7 +221,7 @@ const MarketInsights = () => {
         ))}
       </div>
 
-      {}
+      { }
       <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
         <div className="space-y-4">
           <div
@@ -244,9 +244,9 @@ const MarketInsights = () => {
         className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
         style={{ animationDelay: "0.1s" }}
       >
-        {}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
+        { }
+        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+          <div className="w-full sm:w-auto text-center sm:text-left">
             <h1
               className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
             >
@@ -283,14 +283,14 @@ const MarketInsights = () => {
             className="space-y-4 lg:space-y-6 fade-in"
             style={{ animationDelay: "0.2s" }}
           >
-            {}
+            { }
             <GlobalStats
               globalStats={globalStats}
               TC={TC}
               formatCompactNumber={formatCompactNumber}
             />
 
-            {}
+            { }
             <MarketMovers
               topGainers={topGainers}
               topLosers={topLosers}
@@ -300,7 +300,7 @@ const MarketInsights = () => {
               formatCurrency={formatCurrency}
             />
 
-            {}
+            { }
             <MarketTable
               currentItems={currentItems}
               filteredData={filteredData}
@@ -319,7 +319,7 @@ const MarketInsights = () => {
         )}
       </div>
 
-      {}
+      { }
       <MarketCoinDetailsModal
         selectedCoin={selectedCoin}
         setSelectedCoin={setSelectedCoin}
@@ -329,7 +329,7 @@ const MarketInsights = () => {
         formatCompactNumber={formatCompactNumber}
       />
 
-      {}
+      { }
       {showTopGainers && (
         <CoinListModal
           title="Top Gainers (24h)"
@@ -346,7 +346,7 @@ const MarketInsights = () => {
         />
       )}
 
-      {}
+      { }
       {showTopLosers && (
         <CoinListModal
           title="Top Losers (24h)"

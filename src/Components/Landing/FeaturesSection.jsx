@@ -141,7 +141,7 @@ const FeaturesSection = forwardRef((props, ref) => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Header Section */}
         <div className="text-center mb-10">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white font-manrope">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 text-white font-manrope">
             Why Choose{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fcdda] via-[#364abe] to-[#233784] filter drop-shadow-[0_0_20px_rgba(79,205,218,0.4)]">
               NexChain
@@ -165,14 +165,13 @@ const FeaturesSection = forwardRef((props, ref) => {
                   key={feature.id}
                   onClick={() => setActiveFeature(index)}
                   className={`
-                       group relative p-6 h-[120px] rounded-3xl cursor-pointer transition-all duration-300
+                       group relative p-6 min-h-[100px] h-auto rounded-3xl cursor-pointer transition-all duration-300
                        overflow-hidden flex items-center
-                       ${
-                         isActive
-                           ? /* TRANSPARENT LOOK: Low Opacity Background + High Blur + Borders */
-                             "bg-gradient-to-r from-[#4fcdda]/10 via-[#364abe]/10 to-[#233784]/10 backdrop-blur-xl border border-cyan-400/50 shadow-[0_0_30px_-10px_rgba(79,205,218,0.3)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]"
-                           : "bg-transparent border border-transparent hover:bg-white/5"
-                       }
+                       ${isActive
+                      ? /* TRANSPARENT LOOK: Low Opacity Background + High Blur + Borders */
+                      "bg-gradient-to-r from-[#4fcdda]/10 via-[#364abe]/10 to-[#233784]/10 backdrop-blur-xl border border-cyan-400/50 shadow-[0_0_30px_-10px_rgba(79,205,218,0.3)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]"
+                      : "bg-transparent border border-transparent hover:bg-white/5"
+                    }
                     `}
                 >
                   {/* Content */}
@@ -181,11 +180,10 @@ const FeaturesSection = forwardRef((props, ref) => {
                     <div
                       className={`
                          w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300
-                         ${
-                           isActive
-                             ? "bg-cyan-400/20 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                             : "bg-slate-800/50 text-slate-400 group-hover:bg-slate-700 group-hover:text-white"
-                         }
+                         ${isActive
+                          ? "bg-cyan-400/20 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                          : "bg-slate-800/50 text-slate-400 group-hover:bg-slate-700 group-hover:text-white"
+                        }
                       `}
                     >
                       <feature.icon className="w-6 h-6" />
@@ -216,7 +214,7 @@ const FeaturesSection = forwardRef((props, ref) => {
           </div>
 
           {/* RIGHT: Dynamic Display */}
-          <div className="w-full lg:w-[45%] relative z-20 flex justify-center items-center h-[520px]">
+          <div className="w-full lg:w-[45%] relative z-20 flex justify-center items-center h-auto min-h-[400px] lg:h-[520px]">
             {/* Connection Dot */}
             <div className="hidden lg:block absolute left-[-6px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0B0E14] border-2 border-[#4fcdda] shadow-[0_0_15px_#4fcdda] z-30" />
 

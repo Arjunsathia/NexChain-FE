@@ -61,7 +61,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </div>
 
             {/* HEADLINE: Bold & Refined Gradient */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight font-manrope text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.15] tracking-tight font-manrope text-white">
               The Future of <br className="hidden md:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-700 filter drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">
                 Digital Assets
@@ -75,13 +75,14 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </p>
 
             {/* BUTTONS: CTA Row - Fixed Sizing & Styling */}
-            <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto pt-6">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto pt-4 sm:pt-6">
               {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
               {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
               <button
                 onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
                 className="
     group relative 
+    w-full sm:w-auto
     px-10 py-3.5 
     rounded-full 
     font-bold text-sm md:text-base tracking-wide text-white 
@@ -117,7 +118,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
                 onClick={() =>
                   navigate(isLoggedIn ? "/learning" : "/public-learning")
                 }
-                className="group px-10 py-3.5 rounded-full font-bold text-sm md:text-base tracking-wide text-gray-300 transition-all duration-300 hover:text-white border border-white/10 hover:border-cyan-500/30 hover:bg-white/5 flex items-center justify-center gap-2 backdrop-blur-sm"
+                className="w-full sm:w-auto group px-10 py-3.5 rounded-full font-bold text-sm md:text-base tracking-wide text-gray-300 transition-all duration-300 hover:text-white border border-white/10 hover:border-cyan-500/30 hover:bg-white/5 flex items-center justify-center gap-2 backdrop-blur-sm"
               >
                 <span>Learning Hub</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform opacity-50 group-hover:opacity-100" />
@@ -131,7 +132,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative order-2 lg:order-2 h-[320px] md:h-[600px] flex flex-col items-center justify-center mb-0 md:mb-0 pointer-events-none lg:translate-x-12"
+            className="relative order-2 lg:order-2 h-[280px] xs:h-[320px] md:h-[600px] flex flex-col items-center justify-center mb-0 md:mb-0 pointer-events-none lg:translate-x-12"
             style={{ y: fgParallaxY }}
           >
             <HeroGlobe />
@@ -139,7 +140,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
         </motion.div>
       </div>
 
-      {}
+      { }
       <PremiumScrollIndicator onClick={scrollToFeatures} TC={TC} />
     </section>
   );

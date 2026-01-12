@@ -133,7 +133,7 @@ const OpenOrders = ({ livePrices }) => {
       </div>
 
       <div
-        className={`overflow-hidden rounded-xl border ${isLight ? "border-gray-100" : "border-gray-700/50"} shadow-md mx-2 mb-2`}
+        className={`hidden md:block overflow-hidden rounded-xl border ${isLight ? "border-gray-100" : "border-gray-700/50"} shadow-md mx-2 mb-2`}
       >
         <table className="w-full text-left border-collapse">
           <thead>
@@ -202,6 +202,63 @@ const OpenOrders = ({ livePrices }) => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3 px-2 pb-2">
+        {orders.map((order) => (
+          <div
+            key={order._id}
+            className={`p-4 rounded-xl border ${isLight ? "bg-gray-50/50 border-gray-200" : "bg-white/5 border-gray-700/50"} relative`}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex items-center gap-2">
+                <img
+                  src={order.coin_image}
+                  alt=""
+                  className="w-8 h-8 rounded-full"
+                />
+                <div>
+                  <div className={`font-bold text-sm ${TC.textPrimary}`}>
+                    {order.coin_symbol.toUpperCase()}
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase ${order.type === "buy" ? "text-emerald-500" : "text-rose-500"}`}
+                  >
+                    {order.category.replace("_", " ")} ({order.type})
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => handleCancel(order._id)}
+                className="text-rose-500 bg-rose-500/10 p-2 rounded-lg"
+              >
+                <FaTimes size={12} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <div className={`text-[10px] font-bold uppercase opacity-60 ${TC.textSecondary}`}>Stop</div>
+                <div className={`font-bold ${TC.textPrimary}`}>
+                  {order.stop_price ? `$${order.stop_price.toLocaleString()}` : "-"}
+                </div>
+              </div>
+              <div>
+                <div className={`text-[10px] font-bold uppercase opacity-60 ${TC.textSecondary}`}>Limit</div>
+                <div className={`font-bold ${TC.textPrimary}`}>
+                  {order.limit_price ? `$${order.limit_price.toLocaleString()}` : "MKT"}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`text-[10px] font-bold uppercase opacity-60 ${TC.textSecondary}`}>Qty</div>
+                <div className={`font-bold ${TC.textPrimary}`}>
+                  {order.quantity}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

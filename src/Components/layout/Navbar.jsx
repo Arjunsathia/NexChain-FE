@@ -9,6 +9,7 @@ import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import SiteLogo from "../../assets/Img/logo.png";
+import SiteLogoLight from "../../assets/Img/logo-2.png";
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
@@ -146,9 +147,9 @@ export default function Navbar() {
               className="flex items-center justify-center h-full group cursor-pointer"
             >
               <img
-                src={SiteLogo}
+                src={isLight ? SiteLogoLight : SiteLogo}
                 alt="NexChain"
-                className="h-12 w-auto object-contain"
+                className="h-10 w-auto object-contain"
               />
             </div>
           </div>
@@ -166,7 +167,7 @@ export default function Navbar() {
                   className={`
                                         relative px-6 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 
                                         outline-none select-none
-                                        ${active ? "text-white" : TC.textSecondary + " hover:text-slate-900 dark:hover:text-white"}
+                                        ${active ? "text-white" : TC.textSecondary + (isLight ? " hover:text-slate-900" : " hover:text-white")}
                                     `}
                 >
                   {active && (
@@ -277,9 +278,9 @@ export default function Navbar() {
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center justify-start">
                   <img
-                    src={SiteLogo}
+                    src={isLight ? SiteLogoLight : SiteLogo}
                     alt="NexChain"
-                    className="h-12 w-auto object-contain"
+                    className="h-10 w-auto object-contain"
                   />
                 </div>
                 <button

@@ -77,16 +77,15 @@ export default function Dashboard() {
       `}</style>
 
       <div
-        className={`transition-all duration-500 ease-in-out ${
-          contentLoaded && !isLoading
+        className={`transition-all duration-500 ease-in-out ${contentLoaded && !isLoading
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4"
-        }`}
+          }`}
       >
         {/* Header Section */}
         <header className="mb-8 py-2 px-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+            <div className="w-full sm:w-auto text-center sm:text-left">
               <h1
                 className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${textPrimary}`}
               >

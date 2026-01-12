@@ -513,8 +513,8 @@ const Users = () => {
       className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
     >
       {/* 1. Page Header (Admin Styled) */}
-      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="w-full sm:w-auto text-center sm:text-left">
           <h1
             className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
           >
@@ -1147,9 +1147,9 @@ const UserDetailPane = ({
                           key={tx._id}
                           className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgCard} ${TC.border}`}
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div
-                              className={`p-2 rounded-full ${tx.type === "buy" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                              className={`p-2 rounded-full flex-shrink-0 ${tx.type === "buy" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
                             >
                               {tx.type === "buy" ? (
                                 <ArrowDownLeft className="w-5 h-5" />
@@ -1157,16 +1157,16 @@ const UserDetailPane = ({
                                 <ArrowUpRight className="w-5 h-5" />
                               )}
                             </div>
-                            <div>
-                              <p className={`font-bold ${TC.textPrimary}`}>
+                            <div className="min-w-0 truncate">
+                              <p className={`font-bold ${TC.textPrimary} truncate`}>
                                 {tx.coinName} ({tx.coinSymbol?.toUpperCase()})
                               </p>
-                              <p className={`text-xs ${TC.textSecondary}`}>
+                              <p className={`text-xs ${TC.textSecondary} truncate`}>
                                 {new Date(tx.transactionDate).toLocaleString()}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0 ml-2">
                             <p
                               className={`font-bold ${tx.type === "buy" ? "text-green-500" : "text-red-500"}`}
                             >

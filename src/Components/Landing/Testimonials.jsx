@@ -161,7 +161,7 @@ const TestimonialGrid = () => {
         {/* Mobile: Horizontal Swipe */}
         <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6 [&::-webkit-scrollbar]:hidden">
           {testimonials.map((t, i) => (
-            <div key={i} className="min-w-[320px] snap-center">
+            <div key={i} className="min-w-[280px] w-[85vw] snap-center">
               <TraderReviewCard testimonial={t} />
             </div>
           ))}

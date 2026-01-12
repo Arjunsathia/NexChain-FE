@@ -58,12 +58,11 @@ const Settings = () => {
   return (
     <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-4 lg:space-y-6">
       <div
-        className={`transition-all duration-300 ease-out transform-gpu ${
-          isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        }`}
+        className={`transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          }`}
       >
         {/* Header - Matches Dashboard */}
-        <header className="mb-6 py-2 px-2">
+        <header className="mb-6 py-2 px-2 text-center sm:text-left">
           <h1
             className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
           >
@@ -111,7 +110,7 @@ const Settings = () => {
 
         {/* Main Content Card - Matches Dashboard Style */}
         <div
-          className={`${TC.bgCard} rounded-2xl p-6 sm:p-8 relative overflow-hidden min-h-[500px]`}
+          className={`${TC.bgCard} rounded-2xl p-4 sm:p-8 relative overflow-hidden min-h-[500px]`}
         >
           {/* Decorative Background Gradient (Persistent) */}
           <div
