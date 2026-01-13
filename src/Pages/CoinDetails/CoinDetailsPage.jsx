@@ -4,18 +4,18 @@ import React, {
   useState,
   useCallback,
   useMemo,
-  useRef,
 } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { getCoinById } from "@/api/coinApis";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
-import TradeModal from "@/Components/Common/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import TradeModal from "@/Components/Common/TradeModal";
 import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
 import OrderBook from "@/Components/CoinDetails/OrderBook";
@@ -51,10 +51,24 @@ function CoinDetailsPage() {
 
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
-  const [livePrice, setLivePrice] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const [widgetsReady, setWidgetsReady] = useState(false);
-  const ws = useRef(null);
+
+  // Use centralized live ticker feed
+  const livePrices = useBinanceTicker();
+  const livePriceData = livePrices[coinId];
+
+  const livePrice = useMemo(() => {
+    if (!livePriceData) return null;
+    return {
+      price: livePriceData.price,
+      change24h: livePriceData.change,
+      high24h: livePriceData.high_24h,
+      low24h: livePriceData.low_24h,
+      volume24h: livePriceData.quoteVolume || (livePriceData.volume * livePriceData.price),
+      isPositive: livePriceData.isPositive,
+    };
+  }, [livePriceData]);
 
   const TC = useMemo(
     () => ({
@@ -105,10 +119,10 @@ function CoinDetailsPage() {
         image:
           typeof passedCoin.image === "string"
             ? {
-                large: passedCoin.image,
-                small: passedCoin.image,
-                thumb: passedCoin.image,
-              }
+              large: passedCoin.image,
+              small: passedCoin.image,
+              thumb: passedCoin.image,
+            }
             : passedCoin.image || {},
         market_data: {
           current_price: {
@@ -161,10 +175,10 @@ function CoinDetailsPage() {
         image:
           typeof liveCoin.image === "string"
             ? {
-                large: liveCoin.image,
-                small: liveCoin.image,
-                thumb: liveCoin.image,
-              }
+              large: liveCoin.image,
+              small: liveCoin.image,
+              thumb: liveCoin.image,
+            }
             : liveCoin.image || {},
         market_data: {
           current_price: { usd: liveCoin.current_price || 0 },
@@ -208,31 +222,7 @@ function CoinDetailsPage() {
     );
   }, [coinId, displayCoin]);
 
-  useEffect(() => {
-    if (!coinSymbol) return;
-
-    try {
-      const wsUrl = `wss://stream.binance.com:9443/ws/${coinSymbol}@ticker`;
-      ws.current = new WebSocket(wsUrl);
-
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setLivePrice({
-          price: parseFloat(data.c),
-          change24h: parseFloat(data.P),
-          high24h: parseFloat(data.h),
-          low24h: parseFloat(data.l),
-          volume24h: parseFloat(data.v) * parseFloat(data.c),
-        });
-      };
-    } catch (e) {
-      console.warn("WS Connection failed", e);
-    }
-
-    return () => {
-      if (ws.current) ws.current.close();
-    };
-  }, [coinSymbol]);
+  // Ticker Logic Removed - Now handled by useBinanceTicker hook
 
   const checkWatchlistStatus = useCallback(async () => {
     if (!user?.id || !coinId) return;
@@ -382,12 +372,11 @@ function CoinDetailsPage() {
   if (loading && !displayCoin) {
     return (
       <div
-        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${
-          isMounted ? "opacity-100" : "opacity-0"
-        }`}
+        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${isMounted ? "opacity-100" : "opacity-0"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
-          {}
+          { }
           <div className={`rounded-2xl ${TC.bgCard} p-6 h-[200px]`}>
             <Skeleton
               height="100%"
@@ -433,11 +422,10 @@ function CoinDetailsPage() {
   return (
     <>
       <div
-        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${
-          isMounted ? "opacity-100" : "opacity-0"
-        }`}
+        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? "opacity-100" : "opacity-0"
+          }`}
       >
-        {}
+        { }
         <CoinHeader
           coin={displayCoin}
           currentPrice={currentPrice}
@@ -453,7 +441,7 @@ function CoinDetailsPage() {
         />
 
         <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          {}
+          { }
           <CoinStats
             coin={displayCoin}
             livePrice={livePrice}
@@ -462,11 +450,11 @@ function CoinDetailsPage() {
             isLight={isLight}
           />
 
-          {}
+          { }
           <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
-            {}
+            { }
             <div className="contents lg:block lg:col-span-8 lg:space-y-6">
-              {}
+              { }
               <div
                 className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
                 style={{ animationDelay: "0.1s" }}
@@ -488,7 +476,7 @@ function CoinDetailsPage() {
                 )}
               </div>
 
-              {}
+              { }
               <AdditionalStats
                 coin={displayCoin}
                 formatNumber={formatNumber}
@@ -497,11 +485,11 @@ function CoinDetailsPage() {
                 isLight={isLight}
               />
 
-              {}
+              { }
               <QuickLinks coin={displayCoin} TC={TC} isLight={isLight} />
             </div>
 
-            {}
+            { }
             <div className="contents lg:block lg:col-span-4 lg:space-y-6">
               <div
                 className="fade-in order-2 h-[350px] md:h-[450px]"
@@ -540,8 +528,8 @@ function CoinDetailsPage() {
         </div>
       </div>
 
-      {}
-      {}
+      { }
+      { }
       <TradeModal
         show={tradeModal.show}
         onClose={() => setTradeModal((prev) => ({ ...prev, show: false }))}

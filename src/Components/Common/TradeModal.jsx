@@ -7,6 +7,7 @@ import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 import TradeModalHeader from "../TradeModal/TradeModalHeader";
 import TradeModalTabs from "../TradeModal/TradeModalTabs";
@@ -33,6 +34,7 @@ function TradeModal({
   const [coinAmount, setCoinAmount] = useState("");
   const [slippage, setSlippage] = useState(1.0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const livePrices = useBinanceTicker();
   const [currentPrice, setCurrentPrice] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -185,8 +187,8 @@ function TradeModal({
           coin.market_data?.current_price?.usd ||
           0;
         setCurrentPrice(price);
-        setLimitPrice(price);
-        setStopPrice(price);
+        setLimitPrice(""); // Start empty to force intentional input
+        setStopPrice("");  // Start empty to force intentional input
         setOrderType("market");
         setAlertTargetPrice(price);
 
@@ -204,7 +206,10 @@ function TradeModal({
   // Dedicated effect for live price updates to avoid form resets
   useEffect(() => {
     if (show && coin) {
-      const price =
+      const coinId = coin.id || coin.coinId;
+      const liveData = livePrices[coinId];
+
+      const price = liveData?.current_price ||
         coin.current_price ||
         coin.currentPrice ||
         coin.coinPriceUSD ||
@@ -221,7 +226,7 @@ function TradeModal({
         }
       }
     }
-  }, [coin, show, currentPrice, orderType]);
+  }, [coin, show, currentPrice, orderType, livePrices]);
 
   const handleUsdAmountChange = (e) => {
     const value = e.target.value;
@@ -429,9 +434,9 @@ function TradeModal({
 
           const result = await addPurchase(purchaseData);
           if (result.success) {
-            toast.success(
-              `Successfully bought ${parseFloat(coinAmount).toFixed(6)} ${symbol.toUpperCase()}`,
-            );
+            toast.success(`${symbol.toUpperCase()} Purchase Successful`, {
+              duration: 3000,
+            });
 
             // Non-blocking
             runBackgroundUpdates();
@@ -448,17 +453,15 @@ function TradeModal({
           const sellData = {
             user_id: user.id,
             coin_id: cryptocurrencyId,
+            coin_symbol: symbol || coinData.symbol || coinData.coinSymbol,
             quantity: parseFloat(coinAmount),
-            current_price: parseFloat(currentPrice),
           };
 
           const result = await sellCoins(sellData);
           if (result.success) {
-            toast.success(
-              `Successfully sold ${parseFloat(coinAmount).toFixed(
-                6,
-              )} ${symbol.toUpperCase()}`,
-            );
+            toast.success(`${symbol.toUpperCase()} Sale Successful`, {
+              duration: 3000,
+            });
 
             // Non-blocking
             runBackgroundUpdates();
@@ -527,6 +530,30 @@ function TradeModal({
     const isBuyMode = shouldShowHoldingsInfo
       ? activeTab === "deposit"
       : type === "buy";
+
+    // Stop-Limit Validations
+    if (orderType === "stop_limit") {
+      const stop = parseFloat(stopPrice);
+      const limit = parseFloat(limitPrice);
+
+      if (isNaN(stop) || isNaN(limit)) {
+        toast.error("Please enter both Stop and Limit prices");
+        return;
+      }
+
+      if (isBuyMode) {
+        if (stop <= currentPrice) {
+          toast.error(`Buy Stop must be ABOVE current price ($${currentPrice.toLocaleString()}). Use a Limit order to buy lower.`);
+          return;
+        }
+      } else {
+        if (stop >= currentPrice) {
+          toast.error(`Sell Stop must be BELOW current price ($${currentPrice.toLocaleString()}). Use a Limit order to sell higher.`);
+          return;
+        }
+      }
+    }
+
     if (isBuyMode) {
       const quantity = parseFloat(coinAmount);
       if (quantity > maxAvailable) {
@@ -571,20 +598,19 @@ function TradeModal({
   if (!coin) return null;
 
   const symbol = coin.symbol?.toUpperCase() || coin.coinSymbol?.toUpperCase();
-  const coinName = coin.name || coin.coinName;
 
   return createPortal(
     <div
       className={`fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md transition-all duration-200 ${isVisible
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
+        ? "opacity-100 pointer-events-auto"
+        : "opacity-0 pointer-events-none"
         } ${isLight ? "bg-black/30" : "bg-black/70"}`}
       onClick={handleBackdropClick}
     >
       <div
         className={`rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-[95%] sm:w-full max-w-[360px] sm:max-w-[440px] mx-auto overflow-hidden transition-all duration-300 ease-out origin-center backdrop-blur-3xl transform ${isLight
-            ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
-            : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
+          ? "bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
+          : "bg-gray-900 border border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
           } ${isVisible
             ? "opacity-100 translate-y-0 scale-100"
             : "opacity-0 translate-y-4 scale-95"
@@ -592,9 +618,10 @@ function TradeModal({
       >
         <TradeModalHeader
           coin={coin}
-          coinName={coinName}
+          coinName={coin.coinName || coin.name}
           symbol={symbol}
           currentPrice={currentPrice}
+          priceChange={livePrices[coin.id || coin.coinId]?.price_change_percentage_24h || coin.price_change_percentage_24h || 0}
           shouldShowHoldingsInfo={shouldShowHoldingsInfo}
           activeTab={activeTab}
           isBuyOperation={isBuyOperation}

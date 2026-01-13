@@ -102,7 +102,7 @@ const PerformanceChart = ({
 
   // Generate chart data only on TimeRange change to prevent "wiggling" on every price tick
   useEffect(() => {
-    const { totalInvestment, profitLoss, profitLossPercentage } = currentMetrics;
+    const { totalInvestment, profitLoss } = currentMetrics;
 
     // If no investment, we can't generate a meaningful chart yet
     if (totalInvestment <= 0) {
@@ -179,7 +179,8 @@ const PerformanceChart = ({
     }
 
     setChartData(newData);
-  }, [timeRange, currentMetrics.totalInvestment > 0]); // Only regenerate on TimeRange or if Investment State changes (0 -> >0) since chart shape is simulated.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, currentMetrics.totalInvestment]); // Only regenerate on TimeRange or if Investment State changes (0 -> >0) since chart shape is simulated.
 
   const periodReturns = useMemo(() => {
     if (chartData.length < 2)
@@ -190,27 +191,6 @@ const PerformanceChart = ({
     const totalReturn =
       firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
 
-    // Logic for Return Calculation based on the VIEW
-    const calculateReturn = (slicePoints) => {
-      const startIndex = Math.max(0, chartData.length - slicePoints - 1);
-      const startVal = chartData[startIndex]?.investment || firstValue; // Baseline is always investment in this simulation
-      // Wait, 'periodReturn' usually means 'Change since Start of Period'.
-      // In our simulation, data[0] is Start of Period (e.g. 7 days ago).
-      // So period return is just (LastValue - FirstValue) / FirstValue effectively.
-      // BUT FirstValue = Investment (approx).
-      // So it matches TotalReturn.
-      return totalReturn;
-    };
-
-    // Since our chart construction always spans the full period (Start->End), 
-    // the "Period Return" is essentially the Total Return for that specific view.
-    // e.g. If viewing 7d, the chart goes from CostBasis -> Current. Return = Total P&L %.
-    // This is a "Lifetime" view compressed into time ranges.
-
-    // However, to make the stats card look dynamic when switching, we can enable the simulation logic:
-    // If I switch to 7d, I see 7d return (which is Total Return).
-    // If I switch to 1d, I see 1d return (Total Return).
-    // This is consistent with the "Simulate Cost Basis -> Current" logic.
     const periodReturn = totalReturn;
 
     return {
@@ -220,7 +200,7 @@ const PerformanceChart = ({
       "90d": periodReturn,
       current: totalReturn,
     };
-  }, [chartData, timeRange]);
+  }, [chartData]);
 
   if (loading) {
     return (
@@ -552,5 +532,7 @@ const Chart = React.memo(({ chartData, isPositive, tooltipDataRef, TC, disableAn
     </div>
   );
 });
+
+Chart.displayName = "Chart";
 
 export default PerformanceChart;

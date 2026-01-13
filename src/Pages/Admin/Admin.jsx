@@ -2,7 +2,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/Components/Admin/Sidebar";
 import MobileNavbar from "@/Components/Admin/MobileNavbar";
-import { useNavigate } from "react-router-dom";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
@@ -13,8 +12,6 @@ const AdminLoader = () => (
 );
 
 function Admin() {
-  const navigate = useNavigate();
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const isLight = useThemeCheck();
@@ -50,16 +47,14 @@ function Admin() {
       <div className="flex-1 flex flex-col min-h-screen relative min-w-0">
         { }
         {!isDesktop && (
-          <div className="sticky top-0 z-50">
-            <MobileNavbar
-              isOpen={isMobileMenuOpen}
-              onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            />
-          </div>
+          <MobileNavbar
+            isOpen={isMobileMenuOpen}
+            onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          />
         )}
 
-        { }
-        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4">
+        {/* Main Content */}
+        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4 pb-20 lg:pb-4">
           <Suspense fallback={<AdminLoader />}>
             <Outlet />
           </Suspense>

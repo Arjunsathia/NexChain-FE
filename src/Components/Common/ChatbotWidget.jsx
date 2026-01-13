@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 const CustomBotIcon = ({ className }) => (
@@ -96,6 +97,8 @@ const ChatbotWidget = () => {
   ]);
   const [inputValue, setInputValue] = useState("");
   const isLight = useThemeCheck();
+  const location = useLocation();
+  const hasBottomNav = location.pathname.startsWith("/admin") || location.pathname.startsWith("/user");
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -134,7 +137,7 @@ const ChatbotWidget = () => {
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50
+          fixed ${hasBottomNav ? "bottom-20" : "bottom-4"} sm:bottom-6 right-4 sm:right-6 z-[1001]
           w-12 h-12 sm:w-14 sm:h-14 rounded-full
           bg-gradient-to-tr from-blue-600 to-cyan-400
           text-white
@@ -172,7 +175,7 @@ const ChatbotWidget = () => {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className={`
-              fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50
+              fixed ${hasBottomNav ? "bottom-20" : "bottom-4"} sm:bottom-6 right-4 sm:right-6 z-[1001]
               w-[calc(100vw-32px)] sm:w-[400px] max-w-[400px]
               h-[calc(100%-100px)] sm:h-[600px] max-h-[80vh]
               rounded-2xl shadow-2xl

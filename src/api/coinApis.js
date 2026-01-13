@@ -23,11 +23,6 @@ const ensureFrozenCache = async (force = false) => {
   }
 };
 
-// Forcefully refresh the frozen coins cache (e.g., after an admin update)
-export const refreshFrozenCache = async () => {
-  await ensureFrozenCache(true);
-};
-
 export const getCoins = async (customParams = {}) => {
   try {
     const { includeFrozen, ...apiParams } = customParams;
@@ -65,24 +60,6 @@ export const getCoins = async (customParams = {}) => {
     return coins;
   } catch (error) {
     console.error("Error fetching coins:", error.message);
-    throw error;
-  }
-};
-
-export const getTrend = async () => {
-  try {
-    await ensureFrozenCache();
-    const response = await coinGecko.get("/search/trending");
-
-    // Filter trending coins
-    // Structure: response.data.coins is Array<{ item: { id: ... } }>
-    const filteredCoins = (response.data.coins || []).filter(
-      (c) => !frozenCoinsCache.includes(c.item.id),
-    );
-
-    return { ...response.data, coins: filteredCoins };
-  } catch (error) {
-    console.error("Error fetching trending coins:", error.message);
     throw error;
   }
 };
@@ -219,15 +196,89 @@ export const getMarketChart = async (id, days = 7) => {
   }
 };
 
+// --- Binance Data Extensions (Real-time Precision) ---
+
+const idToSymbol = {
+  bitcoin: "BTCUSDT",
+  ethereum: "ETHUSDT",
+  binancecoin: "BNBUSDT",
+  ripple: "XRPUSDT",
+  cardano: "ADAUSDT",
+  solana: "SOLUSDT",
+  dogecoin: "DOGEUSDT",
+  polkadot: "DOTUSDT",
+  "matic-network": "MATICUSDT",
+  litecoin: "LTCUSDT",
+  chainlink: "LINKUSDT",
+  stellar: "XLMUSDT",
+  cosmos: "ATOMUSDT",
+  monero: "XMRUSDT",
+  "ethereum-classic": "ETCUSDT",
+  "bitcoin-cash": "BCHUSDT",
+  filecoin: "FILUSDT",
+  theta: "THETAUSDT",
+  vechain: "VETUSDT",
+  tron: "TRXUSDT",
+  avalanche: "AVAXUSDT",
+  shiba: "SHIBUSDT",
+  toncoin: "TONUSDT",
+  "usd-coin": "USDCUSDT",
+  tether: "USDTUSDT",
+  arbitrum: "ARBUSDT",
+  optimism: "OPUSDT",
+  near: "NEARUSDT",
+  aptos: "APTUSDT",
+  fantom: "FTMUSDT",
+};
+
+export const getBinanceKlines = async (coinId, days = 1) => {
+  const symbol = idToSymbol[coinId];
+  if (!symbol) return null;
+
+  let interval = "1h";
+  let limit = 500;
+
+  if (days <= 1) {
+    interval = "5m";
+    limit = 288;
+  } else if (days <= 7) {
+    interval = "1h";
+    limit = 168;
+  } else if (days <= 30) {
+    interval = "4h";
+    limit = 180;
+  } else if (days <= 90) {
+    interval = "12h";
+    limit = 180;
+  } else {
+    interval = "1d";
+    limit = 365;
+  }
+
+  try {
+    const response = await api.get(`https://api.binance.com/api/v3/klines`, {
+      params: { symbol, interval, limit },
+    });
+
+    // Format for ApexCharts: [timestamp, price]
+    // Binance kline index 0 is open time, index 4 is close price
+    const prices = response.data.map((k) => [k[0], parseFloat(k[4])]);
+    return { prices };
+  } catch (error) {
+    console.error(`Binance Klines failed for ${symbol}:`, error.message);
+    return null;
+  }
+};
+
 // Admin Helpers
 export const freezeCoin = async (coinData) => {
   const response = await api.post("/coins/freeze", coinData);
-  await refreshFrozenCache(); // Immediate refresh
+  await ensureFrozenCache(true); // Immediate refresh
   return response.data;
 };
 
 export const unfreezeCoin = async (coinId) => {
   const response = await api.post("/coins/unfreeze", { coinId });
-  await refreshFrozenCache(); // Immediate refresh
+  await ensureFrozenCache(true); // Immediate refresh
   return response.data;
 };

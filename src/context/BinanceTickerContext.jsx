@@ -89,6 +89,8 @@ export const BinanceTickerProvider = ({ children }) => {
                 current_price: parseFloat(message.data.c),
                 price_change_percentage_24h: parseFloat(message.data.P),
                 price_change_24h: parseFloat(message.data.p),
+                high_24h: parseFloat(message.data.h),
+                low_24h: parseFloat(message.data.l),
                 isPositive: parseFloat(message.data.P) >= 0,
                 price: parseFloat(message.data.c),
                 change: parseFloat(message.data.P),
@@ -105,13 +107,11 @@ export const BinanceTickerProvider = ({ children }) => {
 
       ws.current.onclose = () => {
         if (isMounted) {
-          // console.log("Ticker WS Closed, reconnecting...");
           reconnectTimeout = setTimeout(connect, 3000);
         }
       };
 
-      ws.current.onerror = (error) => {
-        console.warn("WebSocket Error:", error);
+      ws.current.onerror = () => {
         if (ws.current) ws.current.close();
       };
     };

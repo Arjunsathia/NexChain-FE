@@ -124,19 +124,17 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${
-        isVisible
+      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${isVisible
           ? "bg-black/50 backdrop-blur-sm"
           : "bg-black/0 backdrop-blur-none pointer-events-none"
-      }`}
+        }`}
       onClick={onClose}
     >
       <div
-        className={`w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 relative transition-all duration-500 transform ${
-          isVisible
+        className={`w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 relative transition-all duration-500 transform ${isVisible
             ? "translate-y-0 opacity-100 scale-100"
             : "translate-y-full sm:translate-y-8 opacity-0 sm:scale-95"
-        } ${TC.bgModal}`}
+          } ${TC.bgModal}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -211,11 +209,10 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
                 className={`absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none`}
               >
                 <div
-                  className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${
-                    isAbove
+                  className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${isAbove
                       ? "text-green-600 bg-green-100 dark:bg-green-500/10 dark:text-green-400"
                       : "text-red-600 bg-red-100 dark:bg-red-500/10 dark:text-red-400"
-                  }`}
+                    }`}
                 >
                   {isAbove ? <FaArrowUp /> : <FaArrowDown />}
                   {Math.abs(percentDiff).toFixed(2)}%
@@ -226,7 +223,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
         </div>
 
         {/* Quick Presets */}
-        <div className="grid grid-cols-4 gap-2 mb-8">
+        <div className="grid grid-cols-5 gap-2 mb-8">
           {[5, 10, -5, -10].map((percent) => (
             <button
               key={percent}
@@ -237,6 +234,21 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
               {percent}%
             </button>
           ))}
+          <div
+            className={`flex items-center gap-1 px-1 rounded-lg border transition-all ${TC.chipBg} ${TC.inputBorder.split(" focus:")[0]}`}
+          >
+            <input
+              type="number"
+              placeholder="Cust."
+              className={`w-full bg-transparent text-[10px] font-bold outline-none text-center ${TC.chipText} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+              onChange={(e) => {
+                const pct = parseFloat(e.target.value);
+                if (!isNaN(pct)) {
+                  applyPreset(pct);
+                }
+              }}
+            />
+          </div>
         </div>
 
         {/* Action Button */}

@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useMemo,
-  useRef,
   useCallback,
 } from "react";
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -15,7 +14,9 @@ import PortfolioDistribution from "@/Components/portfolio/PortfolioDistribution"
 import HoldingsTable from "@/Components/portfolio/HoldingsTable";
 import TradeModal from "@/Components/Common/TradeModal";
 import TransactionHistory from "@/Components/portfolio/TransactionHistory";
-import OpenOrders from "@/Components/portfolio/OpenOrders";
+import OpenOrdersModal from "@/Components/portfolio/OpenOrdersModal";
+import { useOpenOrders } from "@/hooks/useOpenOrders";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
@@ -36,29 +37,27 @@ const PortfolioPage = () => {
     try {
       const cached = localStorage.getItem(`portfolio_holdings_v1_${userId}`);
       return cached ? JSON.parse(cached) : [];
-    } catch (e) {
+    } catch {
       return [];
     }
   });
 
-  const [livePrices, setLivePrices] = useState({});
-  const ws = useRef(null);
+  // Live Prices sourced from centralized feed
+  const livePrices = useBinanceTicker();
 
   // Defer heavy connections until after page transition (approx 350ms)
-  const [transitionComplete, setTransitionComplete] = useState(false);
-
   useEffect(() => {
     const timer = setTimeout(() => {
-      setTransitionComplete(true);
     }, 350);
     return () => clearTimeout(timer);
   }, []);
 
   const [tradeModal, setTradeModal] = useState({
-    show: false,
-    coin: null,
     type: "buy",
   });
+
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const { orders: openOrders, refetch: refetchOrders } = useOpenOrders();
 
   const TC = useMemo(
     () => ({
@@ -92,117 +91,7 @@ const PortfolioPage = () => {
     [isLight],
   );
 
-  const bufferRef = useRef({});
-
-  useEffect(() => {
-    if (!transitionComplete) return; // Wait for transition
-    if (!groupedHoldings || groupedHoldings.length === 0) return;
-
-    const symbols = groupedHoldings
-      .map((coin) => {
-        const symbolMap = {
-          bitcoin: "btcusdt",
-          ethereum: "ethusdt",
-          binancecoin: "bnbusdt",
-          ripple: "xrpusdt",
-          cardano: "adausdt",
-          solana: "solusdt",
-          dogecoin: "dogeusdt",
-          polkadot: "dotusdt",
-          "matic-network": "maticusdt",
-          litecoin: "ltcusdt",
-          chainlink: "linkusdt",
-          stellar: "xlmusdt",
-          cosmos: "atomusdt",
-          monero: "xmusdt",
-          "ethereum-classic": "etcusdt",
-          "bitcoin-cash": "bchusdt",
-          filecoin: "filusdt",
-          theta: "thetausdt",
-          vechain: "vetusdt",
-          tron: "trxusdt",
-        };
-        return symbolMap[coin.coinId]
-          ? `${symbolMap[coin.coinId]}@ticker`
-          : null;
-      })
-      .filter(Boolean);
-
-    if (symbols.length === 0) return;
-
-    const streams = symbols.join("/");
-
-    const intervalId = setInterval(() => {
-      if (Object.keys(bufferRef.current).length > 0) {
-        setLivePrices((prev) => ({
-          ...prev,
-          ...bufferRef.current,
-        }));
-        bufferRef.current = {};
-      }
-    }, 1000); // Update UI every 1s
-
-    try {
-      if (ws.current) ws.current.close();
-
-      ws.current = new WebSocket(
-        `wss://stream.binance.com:9443/stream?streams=${streams}`,
-      );
-
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.stream && message.data) {
-          const symbol = message.stream.replace("@ticker", "");
-          const coinData = message.data;
-
-          const symbolToCoinId = {
-            btcusdt: "bitcoin",
-            ethusdt: "ethereum",
-            bnbusdt: "binancecoin",
-            xrpusdt: "ripple",
-            adausdt: "cardano",
-            solusdt: "solana",
-            dogeusdt: "dogecoin",
-            dotusdt: "polkadot",
-            maticusdt: "matic-network",
-            ltcusdt: "litecoin",
-            linkusdt: "chainlink",
-            xlmusdt: "stellar",
-            atomusdt: "cosmos",
-            xmusdt: "monero",
-            etcusdt: "ethereum-classic",
-            bchusdt: "bitcoin-cash",
-            filusdt: "filecoin",
-            thetausdt: "theta",
-            vechain: "vetusdt",
-            tron: "trxusdt",
-          };
-
-          const coinId = symbolToCoinId[symbol];
-          if (coinId) {
-            bufferRef.current[coinId] = {
-              current_price: parseFloat(coinData.c),
-              price_change_percentage_24h: parseFloat(coinData.P),
-              price_change_24h: parseFloat(coinData.p),
-            };
-          }
-        }
-      };
-
-      ws.current.onerror = (error) => {
-        console.error("Portfolio WebSocket error:", error);
-      };
-    } catch (error) {
-      console.error("Portfolio WebSocket setup failed:", error);
-    }
-
-    return () => {
-      clearInterval(intervalId);
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, [groupedHoldings, transitionComplete]); // Re-run if holdings change
+  // Ticker logic removed - Now centralized in useBinanceTicker hook
 
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];
@@ -222,7 +111,7 @@ const PortfolioPage = () => {
         return {
           ...coin,
           currentPrice,
-          priceChange24h: liveData.price_change_percentage_24h,
+          priceChange24h: liveData.change,
           totalCurrentValue,
           profitLoss,
           profitLossPercentage,
@@ -277,13 +166,6 @@ const PortfolioPage = () => {
     )[0];
   }, [finalHoldings]);
 
-  const topLoser = useMemo(() => {
-    if (!finalHoldings || finalHoldings.length === 0) return null;
-    return [...finalHoldings].sort(
-      (a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0),
-    )[0];
-  }, [finalHoldings]);
-
   const handleTrade = useCallback((coin) => {
     setTradeModal({
       show: true,
@@ -304,7 +186,8 @@ const PortfolioPage = () => {
               balance={balance}
               loading={portfolioLoading}
               topPerformer={topPerformer}
-              topLoser={topLoser}
+              onOpenOrdersClick={() => setIsOrdersModalOpen(true)}
+              openOrdersCount={openOrders.length}
               TC={TC}
             />
           </div>
@@ -340,9 +223,6 @@ const PortfolioPage = () => {
             </div>
           </div>
 
-          <div className="">
-            <OpenOrders isLight={isLight} livePrices={livePrices} TC={TC} />
-          </div>
 
           <div
             className={`pt-8 border-t ${isLight ? "border-gray-200" : "border-white/5"}`}
@@ -359,6 +239,16 @@ const PortfolioPage = () => {
         coin={tradeModal.coin}
         type={tradeModal.type}
         purchasedCoins={purchasedCoins}
+      />
+
+      <OpenOrdersModal
+        isOpen={isOrdersModalOpen}
+        onClose={() => setIsOrdersModalOpen(false)}
+        orders={openOrders}
+        livePrices={livePrices}
+        onRefresh={refetchOrders}
+        TC={TC}
+        isLight={isLight}
       />
     </>
   );

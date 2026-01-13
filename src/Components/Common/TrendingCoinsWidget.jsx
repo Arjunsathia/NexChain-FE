@@ -4,8 +4,9 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaFire, FaArrowRight, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useLiveTrendingCoins } from "@/hooks/useLiveTrendingCoins";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import useCoinContext from "@/hooks/useCoinContext";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 function TrendingCoinsWidget({
   limit = 10,
@@ -19,19 +20,21 @@ function TrendingCoinsWidget({
   const navigate = useNavigate();
   const location = useLocation();
   const { isVisited } = useVisitedRoutes();
+  const { coins, coinsLoading: loading, error } = useCoinContext();
+  const livePrices = useBinanceTicker();
 
   // Animate only if it's the first visit to this page
   const [shouldAnimate] = useState(
     !disableAnimations && !isVisited(location.pathname),
   );
 
-  const {
-    coins,
-    loading,
-    error,
-    refetch: fetchTrending,
-  } = useLiveTrendingCoins(limit);
-  const displayedCoins = Array.isArray(coins) ? coins : [];
+  // Derive "Trending" coins by sorting by 24h volume or change
+  const displayedCoins = useMemo(() => {
+    if (!Array.isArray(coins)) return [];
+    return [...coins]
+      .sort((a, b) => Math.abs(b.price_change_percentage_24h || 0) - Math.abs(a.price_change_percentage_24h || 0))
+      .slice(0, limit);
+  }, [coins, limit]);
 
   const TC = useMemo(
     () => ({
@@ -98,12 +101,6 @@ function TrendingCoinsWidget({
               <FaExclamationTriangle />
             </div>
             <p className={`text-xs ${TC.textSecondary}`}>Error loading</p>
-            <button
-              onClick={() => fetchTrending()}
-              className="text-[10px] text-blue-500 mt-1 hover:underline"
-            >
-              Retry
-            </button>
           </div>
         ) : loading && displayedCoins.length === 0 ? (
           <div>
@@ -154,62 +151,68 @@ function TrendingCoinsWidget({
             <p className={`text-xs ${TC.textSecondary}`}>No trending data</p>
           </div>
         ) : (
-          displayedCoins.slice(0, limit).map((coin, index) => (
-            <div
-              key={coin.id}
-              onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
-              style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
-              className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <img
-                    src={coin.image}
-                    alt={coin.name}
-                    className="w-8 h-8 rounded-full object-cover shadow-sm"
-                  />
-                  <div
-                    className={`
-                                        absolute -top-1.5 -left-1.5 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center border shadow-sm
-                                        ${getRankStyle(index)}
-                                    `}
-                  >
-                    {index + 1}
+          displayedCoins.map((coin, index) => {
+            const liveData = livePrices[coin.id];
+            const displayPrice = liveData?.price !== undefined ? liveData.price : coin.current_price;
+            const displayChange = liveData?.change !== undefined ? liveData.change : coin.price_change_percentage_24h;
+
+            return (
+              <div
+                key={coin.id}
+                onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+                style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+                className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <img
+                      src={coin.image}
+                      alt={coin.name}
+                      className="w-8 h-8 rounded-full object-cover shadow-sm"
+                    />
+                    <div
+                      className={`
+                                            absolute -top-1.5 -left-1.5 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center border shadow-sm
+                                            ${getRankStyle(index)}
+                                        `}
+                    >
+                      {index + 1}
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-xs font-bold leading-none ${TC.textPrimary}`}
+                    >
+                      {coin.symbol?.toUpperCase()}
+                    </span>
+                    <span
+                      className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}
+                    >
+                      {coin.name}
+                    </span>
                   </div>
                 </div>
-                <div className="flex flex-col">
-                  <span
-                    className={`text-xs font-bold leading-none ${TC.textPrimary}`}
+
+                <div className="text-right flex flex-col items-end">
+                  <p
+                    className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}
                   >
-                    {coin.symbol?.toUpperCase()}
-                  </span>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}
+                    $
+                    {displayPrice?.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 6,
+                    })}
+                  </p>
+                  <p
+                    className={`text-[10px] font-semibold flex items-center ${displayChange >= 0 ? TC.textPricePositive : TC.textPriceNegative}`}
                   >
-                    {coin.name}
-                  </span>
+                    {displayChange >= 0 ? "+" : ""}
+                    {displayChange?.toFixed(2)}%
+                  </p>
                 </div>
               </div>
-
-              <div className="text-right flex flex-col items-end">
-                <p
-                  className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}
-                >
-                  $
-                  {coin.current_price?.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 6,
-                  })}
-                </p>
-                <p
-                  className={`text-[10px] font-semibold flex items-center ${coin.price_change_percentage_24h >= 0 ? TC.textPricePositive : TC.textPriceNegative}`}
-                >
-                  {coin.price_change_percentage_24h >= 0 ? "+" : ""}
-                  {coin.price_change_percentage_24h?.toFixed(2)}%
-                </p>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

@@ -2,7 +2,16 @@ import React from "react";
 import { FaTimes, FaMoneyBillWave } from "react-icons/fa";
 
 const TradeModalHeader = React.memo(
-  ({ coin, coinName, symbol, currentPrice, isLight, handleClose }) => {
+  ({
+    coin,
+    coinName,
+    symbol,
+    currentPrice,
+    priceChange,
+    isLight,
+    handleClose,
+  }) => {
+    const isPositive = priceChange >= 0;
     return (
       <div
         className={`relative flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 transition-colors duration-300 ${isLight ? "bg-white border-b border-gray-100" : "bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-b border-white/5"}`}
@@ -26,18 +35,29 @@ const TradeModalHeader = React.memo(
                 {coinName}
               </h2>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isLight ? "bg-gray-200 text-gray-500" : "bg-white/10 text-gray-400"}`}
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isLight ? "bg-gray-200 text-gray-400" : "bg-white/10 text-gray-500"}`}
               >
                 {symbol}
               </span>
             </div>
-            <div
-              className={`text-xs font-mono font-bold leading-none mt-1 ${isLight ? "text-gray-900" : "text-white"}`}
-            >
-              $
-              {currentPrice.toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-              })}
+            <div className="flex items-center gap-2 mt-1.5">
+              <div
+                className={`text-sm font-mono font-bold leading-none ${isLight ? "text-gray-900" : "text-white"}`}
+              >
+                $
+                {currentPrice.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                })}
+              </div>
+              <span
+                className={`text-[10px] font-bold px-1 rounded-sm ${isPositive
+                  ? "bg-green-500/10 text-green-500"
+                  : "bg-red-500/10 text-red-500"
+                  }`}
+              >
+                {isPositive ? "+" : ""}
+                {priceChange.toFixed(2)}%
+              </span>
             </div>
           </div>
         </div>

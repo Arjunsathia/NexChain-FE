@@ -102,7 +102,6 @@ function Sidebar() {
       path: "/admin/cryptocurrencies",
       icon: FaCoins,
     },
-    { name: "News Management", path: "/admin/news", icon: FaNewspaper },
     { name: "Feedback & Reports", path: "/admin/feedback", icon: FaCommentAlt },
     { name: "Settings", path: "/admin/settings", icon: FaCog },
   ];

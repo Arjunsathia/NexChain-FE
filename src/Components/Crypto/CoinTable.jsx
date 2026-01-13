@@ -563,132 +563,143 @@ function CoinTable({ onTrade, disableAnimations = false }) {
         <div className="lg:hidden">
           {paginatedCoins.length > 0 ? (
             <div className="space-y-3">
-              {paginatedCoins.map((coin, index) => (
-                <div
-                  key={coin.id}
-                  onClick={() =>
-                    navigate(`/coin/coin-details/${coin.id}`, {
-                      state: { coin },
-                    })
-                  }
-                  className={`p-4 rounded-xl border ${isLight
-                    ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
-                    : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
-                    } cursor-pointer transition-all duration-300 group ${shouldAnimate ? "fade-in" : ""}`}
-                  style={
-                    shouldAnimate
-                      ? { animationDelay: `${0.5 + index * 0.1}s` }
-                      : {}
-                  }
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+              {paginatedCoins.map((coin, index) => {
+                const liveCoinData = liveData[coin.id];
+                const displayPrice = liveCoinData?.price || coin.current_price;
+                const displayChange =
+                  liveCoinData?.change || coin.price_change_percentage_24h;
+                const isPositive =
+                  liveCoinData?.isPositive !== undefined
+                    ? liveCoinData.isPositive
+                    : coin.price_change_percentage_24h >= 0;
+
+                return (
+                  <div
+                    key={coin.id}
+                    onClick={() =>
+                      navigate(`/coin/coin-details/${coin.id}`, {
+                        state: { coin },
+                      })
+                    }
+                    className={`p-4 rounded-xl border ${isLight
+                        ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
+                        : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
+                      } cursor-pointer transition-all duration-300 group ${shouldAnimate ? "fade-in" : ""}`}
+                    style={
+                      shouldAnimate
+                        ? { animationDelay: `${0.5 + index * 0.1}s` }
+                        : {}
+                    }
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleWishlist(coin.id, coin);
+                          }}
+                          className="flex-shrink-0"
+                        >
+                          {coin.isInWatchlist ? (
+                            <FaStar
+                              className={`${TC.starFilled} text-xl hover:scale-110 transition-transform`}
+                            />
+                          ) : (
+                            <FaRegStar
+                              className={`${TC.starDefault} transition-colors text-xl`}
+                            />
+                          )}
+                        </button>
+                        <img
+                          src={coin.image}
+                          alt={coin.name}
+                          className="w-10 h-10 flex-shrink-0 rounded-full group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className={`font-semibold text-base truncate transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}
+                          >
+                            {coin.name}
+                          </div>
+                          <div
+                            className={`text-sm uppercase ${TC.textTertiary}`}
+                          >
+                            {coin.symbol.toUpperCase()}
+                          </div>
+                          {coin.userHolding && (
+                            <div
+                              className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}
+                            >
+                              Holding:{" "}
+                              {coin.userHolding.totalQuantity?.toFixed(6) ||
+                                coin.userHolding.quantity?.toFixed(6)}{" "}
+                              {coin.symbol.toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div
+                        className={`font-semibold text-sm px-2 py-1 rounded-lg ${!isPositive ? TC.bgPillNegative : TC.bgPillPositive
+                          }`}
+                      >
+                        {displayChange?.toFixed(2) || "0.00"}%
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`font-bold text-xl ${TC.textPrimary}`}>
+                        $
+                        {displayPrice?.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        }) || "0"}
+                      </div>
+                      <div className="w-20 h-10">
+                        <Sparkline
+                          data={coin.sparkline_in_7d?.price || []}
+                          width={80}
+                          height={40}
+                          positive={isPositive}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                      <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
+                        <div className={`text-xs mb-1 ${TC.textTertiary}`}>
+                          Market Cap
+                        </div>
+                        <div className={`font-medium ${TC.textSecondary}`}>
+                          {formatCurrency(coin.market_cap)}
+                        </div>
+                      </div>
+                      <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
+                        <div className={`text-xs mb-1 ${TC.textTertiary}`}>
+                          Volume
+                        </div>
+                        <div className={`font-medium ${TC.textSecondary}`}>
+                          {formatCurrency(coin.total_volume)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleWishlist(coin.id, coin);
+                          handleTrade(coin);
                         }}
-                        className="flex-shrink-0"
+                        className={`${TC.btnPrimary} flex-1 px-4 py-2.5 transition-all duration-200 inline-flex items-center justify-center gap-2`}
+                        style={
+                          disableAnimations
+                            ? {}
+                            : { animationDelay: `${0.5 + index * 0.1 + 0.05}s` }
+                        }
                       >
-                        {coin.isInWatchlist ? (
-                          <FaStar
-                            className={`${TC.starFilled} text-xl hover:scale-110 transition-transform`}
-                          />
-                        ) : (
-                          <FaRegStar
-                            className={`${TC.starDefault} transition-colors text-xl`}
-                          />
-                        )}
+                        <FaExchangeAlt className="text-sm" />
+                        Trade
                       </button>
-                      <img
-                        src={coin.image}
-                        alt={coin.name}
-                        className="w-10 h-10 flex-shrink-0 rounded-full group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div
-                          className={`font-semibold text-base truncate transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}
-                        >
-                          {coin.name}
-                        </div>
-                        <div className={`text-sm uppercase ${TC.textTertiary}`}>
-                          {coin.symbol.toUpperCase()}
-                        </div>
-                        {coin.userHolding && (
-                          <div
-                            className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${isLight ? "text-green-700 bg-green-100" : "text-green-400 bg-green-400/20"}`}
-                          >
-                            Holding:{" "}
-                            {coin.userHolding.totalQuantity?.toFixed(6) ||
-                              coin.userHolding.quantity?.toFixed(6)}{" "}
-                            {coin.symbol.toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div
-                      className={`font-semibold text-sm px-2 py-1 rounded-lg ${coin.price_change_percentage_24h < 0
-                        ? TC.bgPillNegative
-                        : TC.bgPillPositive
-                        }`}
-                    >
-                      {coin.price_change_percentage_24h?.toFixed(2) || "0.00"}%
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`font-bold text-xl ${TC.textPrimary}`}>
-                      $
-                      {coin.current_price?.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 4,
-                      }) || "0"}
-                    </div>
-                    <div className="w-20 h-10">
-                      <Sparkline
-                        data={coin.sparkline_in_7d?.price || []}
-                        width={80}
-                        height={40}
-                        positive={coin.price_change_percentage_24h >= 0}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                    <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
-                      <div className={`text-xs mb-1 ${TC.textTertiary}`}>
-                        Market Cap
-                      </div>
-                      <div className={`font-medium ${TC.textSecondary}`}>
-                        {formatCurrency(coin.market_cap)}
-                      </div>
-                    </div>
-                    <div className={`p-2 rounded-lg ${TC.bgSubCard}`}>
-                      <div className={`text-xs mb-1 ${TC.textTertiary}`}>
-                        Volume
-                      </div>
-                      <div className={`font-medium ${TC.textSecondary}`}>
-                        {formatCurrency(coin.total_volume)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTrade(coin);
-                      }}
-                      className={`${TC.btnPrimary} flex-1 px-4 py-2.5 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-                      style={
-                        disableAnimations
-                          ? {}
-                          : { animationDelay: `${0.5 + index * 0.1 + 0.05}s` }
-                      }
-                    >
-                      <FaExchangeAlt className="text-sm" />
-                      Trade
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div

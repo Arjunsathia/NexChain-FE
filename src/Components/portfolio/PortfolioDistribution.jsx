@@ -136,8 +136,7 @@ const PortfolioDistribution = ({
     // Only update if the LIST of coins changes (user buys/sells a new coin)
     // Or if balance changes significantly (deposit)
     // We intentionally OMIT live prices to stop Chart flickering
-    groupedHoldings.length,
-    groupedHoldings.map(c => c.coinId).join(','),
+    groupedHoldings,
     balance
   ]);
 

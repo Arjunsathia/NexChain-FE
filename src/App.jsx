@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AlertChecker from "./Components/Common/AlertChecker";
 import Preloader from "./Components/Common/Preloader";
 import DataLoader from "./Components/Common/DataLoader";
+import SocketManager from "./Components/Common/SocketManager";
 import Admin2FAModal from "./Components/Admin/Security/Admin2FAModal";
 import { initTheme } from "@/utils/theme-manager";
 
@@ -48,6 +49,7 @@ function App() {
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <DataLoader />
+        <SocketManager />
         <Admin2FAModal />
         <AnimatePresence mode="wait">
           {isLoading && <Preloader key="preloader" />}

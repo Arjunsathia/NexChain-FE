@@ -52,7 +52,7 @@ const Watchlist = () => {
       if (userId) {
         const cached = localStorage.getItem(`user_watchlist_cache_${userId}`);
         if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
+          const { data } = JSON.parse(cached);
           // Optional: Check if cache is fresh (e.g., < 5 mins) if strictly needed,
           // but for "instant" feel we usually just show it and update in background.
           return data || [];

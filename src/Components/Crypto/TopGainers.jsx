@@ -6,6 +6,7 @@ import { FaChartLine, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 function TopGainers({ disableAnimations = false }) {
   const isLight = useThemeCheck();
@@ -14,6 +15,7 @@ function TopGainers({ disableAnimations = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isVisited } = useVisitedRoutes();
+  const livePrices = useBinanceTicker();
   const [shouldAnimate] = useState(
     !disableAnimations && !isVisited(location.pathname),
   );
@@ -45,8 +47,6 @@ function TopGainers({ disableAnimations = false }) {
     const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
     const fetchData = async () => {
-      setLoading(true);
-
       setLoading(true);
 
       try {
@@ -141,55 +141,62 @@ function TopGainers({ disableAnimations = false }) {
             ))}
           </div>
         ) : gainers.length > 0 ? (
-          gainers.map((coin, index) => (
-            <div
-              key={coin.id}
-              onClick={() =>
-                navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })
-              }
-              style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
-              className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <img
-                    src={coin.image}
-                    alt={coin.name}
-                    className="w-8 h-8 rounded-full object-cover shadow-sm"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span
-                    className={`text-xs font-bold leading-none ${TC.textPrimary}`}
-                  >
-                    {coin.symbol?.toUpperCase()}
-                  </span>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}
-                  >
-                    {coin.name}
-                  </span>
-                </div>
-              </div>
+          gainers.map((coin, index) => {
+            const liveData = livePrices[coin.id];
+            const displayPrice = liveData?.price || coin.current_price;
+            const displayChange = liveData?.change || coin.price_change_percentage_24h;
 
-              <div className="text-right flex flex-col items-end">
-                <p
-                  className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}
-                >
-                  $
-                  {coin.current_price?.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 6,
-                  })}
-                </p>
-                <p
-                  className={`text-[10px] font-semibold flex items-center ${TC.textPricePositive}`}
-                >
-                  +{coin.price_change_percentage_24h?.toFixed(2)}%
-                </p>
+            return (
+              <div
+                key={coin.id}
+                onClick={() =>
+                  navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })
+                }
+                style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
+                className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <img
+                      src={coin.image}
+                      alt={coin.name}
+                      className="w-8 h-8 rounded-full object-cover shadow-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-xs font-bold leading-none ${TC.textPrimary}`}
+                    >
+                      {coin.symbol?.toUpperCase()}
+                    </span>
+                    <span
+                      className={`text-[10px] sm:text-[11px] font-medium mt-0.5 ${TC.textSecondary} truncate max-w-[80px]`}
+                    >
+                      {coin.name}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right flex flex-col items-end">
+                  <p
+                    className={`text-xs font-bold leading-none ${TC.textPrimary} mb-1`}
+                  >
+                    $
+                    {displayPrice?.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 6,
+                    })}
+                  </p>
+                  <p
+                    className={`text-[10px] font-semibold flex items-center ${displayChange >= 0 ? TC.textPricePositive : TC.textPriceNegative}`}
+                  >
+                    {displayChange >= 0 ? "+" : ""}
+                    {displayChange?.toFixed(2)}%
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div
             className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty} min-h-[200px]`}

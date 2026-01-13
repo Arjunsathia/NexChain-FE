@@ -22,11 +22,29 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
   const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
 
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/notifications");
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    window.addEventListener("refreshNotifications", fetchNotifications);
+    return () =>
+      window.removeEventListener("refreshNotifications", fetchNotifications);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,18 +67,6 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
       };
     }
   }, [isOpen, onClose, triggerRef]);
-
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get("/notifications");
-      setNotifications(res.data);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -117,21 +123,19 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${
-              isDark
-                ? "bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
-                : "bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
-            }`}
+            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
+              ? "bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
+              : "bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
+              }`}
             ref={modalRef}
             style={{ pointerEvents: "auto" }}
           >
-            {}
+            { }
             <div
-              className={`p-3 md:p-4 border-b flex justify-between items-center ${
-                isDark
-                  ? "border-gray-700/50 bg-gray-900/50"
-                  : "border-gray-100 bg-white/50"
-              }`}
+              className={`p-3 md:p-4 border-b flex justify-between items-center ${isDark
+                ? "border-gray-700/50 bg-gray-900/50"
+                : "border-gray-100 bg-white/50"
+                }`}
             >
               <div className="flex items-center gap-2">
                 <div
@@ -145,11 +149,10 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                   Notifications
                 </h3>
                 <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                    isDark
-                      ? "bg-cyan-500/20 text-cyan-400"
-                      : "bg-cyan-100 text-cyan-700"
-                  }`}
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isDark
+                    ? "bg-cyan-500/20 text-cyan-400"
+                    : "bg-cyan-100 text-cyan-700"
+                    }`}
                 >
                   {notifications.length}
                 </span>
@@ -157,16 +160,15 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
               {notifications.length > 0 && (
                 <button
                   onClick={handleClearAll}
-                  className={`text-xs text-red-500 hover:text-red-400 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                    isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
-                  }`}
+                  className={`text-xs text-red-500 hover:text-red-400 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
+                    }`}
                 >
                   <FaTrash className="text-[10px]" /> Clear All
                 </button>
               )}
             </div>
 
-            {}
+            { }
             <div
               className={`max-h-[60vh] md:max-h-[450px] overflow-y-auto custom-scrollbar bg-transparent`}
             >
@@ -199,17 +201,15 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                     <div
                       key={notification._id}
                       onClick={() => handleMarkAsRead(notification._id)}
-                      className={`p-4 transition-colors cursor-pointer relative group ${
-                        isDark ? "hover:bg-gray-800/50" : "hover:bg-gray-50"
-                      } ${
-                        !notification.isRead
+                      className={`p-4 transition-colors cursor-pointer relative group ${isDark ? "hover:bg-gray-800/50" : "hover:bg-gray-50"
+                        } ${!notification.isRead
                           ? isDark
                             ? "bg-cyan-900/10"
                             : "bg-cyan-50/40"
                           : isDark
                             ? "bg-gray-900"
                             : "bg-white"
-                      }`}
+                        }`}
                     >
                       <div className="flex gap-4">
                         <div className="mt-1 flex-shrink-0">
@@ -238,9 +238,8 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                         </div>
                         <button
                           onClick={(e) => handleDelete(notification._id, e)}
-                          className={`opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all self-start -mr-2 -mt-2 ${
-                            isDark ? "hover:bg-red-900/20" : "hover:bg-red-50"
-                          }`}
+                          className={`opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all self-start -mr-2 -mt-2 ${isDark ? "hover:bg-red-900/20" : "hover:bg-red-50"
+                            }`}
                           title="Remove"
                         >
                           <FaTimes size={12} />

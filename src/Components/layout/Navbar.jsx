@@ -47,12 +47,16 @@ export default function Navbar() {
     if (user) {
       fetchUnreadCount();
       interval = setInterval(fetchUnreadCount, 60000);
+
+      // Listen for socket events to refresh immediately
+      window.addEventListener("refreshNotifications", fetchUnreadCount);
     } else {
       setUnreadCount(0);
     }
 
     return () => {
       if (interval) clearInterval(interval);
+      window.removeEventListener("refreshNotifications", fetchUnreadCount);
     };
   }, [user]);
 
@@ -200,7 +204,9 @@ export default function Navbar() {
                 >
                   <Bell size={20} strokeWidth={2.5} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-cyan-500 rounded-full border border-white dark:border-gray-950 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-white dark:border-gray-900 shadow-[0_0_10px_rgba(6,182,212,0.4)] animate-in zoom-in duration-300">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
                   )}
                 </button>
                 <NotificationModal

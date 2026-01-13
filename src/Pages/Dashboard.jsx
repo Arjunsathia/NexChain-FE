@@ -42,8 +42,7 @@ export default function Dashboard() {
     }
   }, [topCoins, selectedCoinId]);
 
-  /* Removed global ticker subscription to prevent full-page re-renders */
-  // const liveData = useBinanceTicker();
+  /* Removed global ticker subscription to prevent full-page re-renders - specialized components now handle their own live data */
 
   const handleCoinClick = useCallback((coinId) => {
     setSelectedCoinId(coinId);

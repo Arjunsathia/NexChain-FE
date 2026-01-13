@@ -5,6 +5,8 @@ import {
   FaArrowDown,
   FaTrophy,
   FaChartLine,
+  FaChevronRight,
+  FaClock,
 } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -15,7 +17,8 @@ const PortfolioHeader = ({
   balance,
   loading,
   topPerformer,
-  topLoser,
+  onOpenOrdersClick,
+  openOrdersCount = 0,
 }) => {
   const TC = useMemo(
     () => ({
@@ -37,6 +40,7 @@ const PortfolioHeader = ({
       gradGreen: "from-green-500 to-emerald-400",
       gradRed: "from-red-500 to-rose-400",
       gradAmber: "from-amber-500 to-yellow-400",
+      gradBlue: "from-blue-600 to-cyan-500",
 
       textProfit: isLight ? "text-emerald-600" : "text-emerald-400",
       textLoss: isLight ? "text-rose-600" : "text-rose-400",
@@ -206,8 +210,9 @@ const PortfolioHeader = ({
         )}
       </div>
 
-      {/* Top Loser Card */}
+      {/* Open Orders Card */}
       <div
+        onClick={onOpenOrdersClick}
         className={`
         rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
         will-change-transform shadow-md hover:shadow-lg
@@ -216,48 +221,31 @@ const PortfolioHeader = ({
       >
         <div className="flex items-center justify-between mb-3">
           <div
-            className={`p-2 bg-gradient-to-r ${TC.gradRed} rounded-lg shadow-sm transition-transform duration-300 lg:group-hover:scale-110`}
+            className={`p-2 bg-gradient-to-r ${TC.gradBlue} rounded-lg shadow-sm transition-transform duration-300 lg:group-hover:scale-110`}
           >
-            <FaChartLine className="text-white text-sm md:text-base transform rotate-180" />
+            <FaClock className="text-white text-sm md:text-base" />
           </div>
-          {topLoser && (
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400`}
-            >
-              {topLoser.profitLossPercentage?.toFixed(1)}%
-            </span>
-          )}
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-bold border border-blue-500/20 shadow-sm transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white">
+            {openOrdersCount} Orders
+          </div>
         </div>
 
         <p
           className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 md:mb-1 ${TC.textSecondary} opacity-60`}
         >
-          Top Loser
+          Open Orders
         </p>
 
-        {loading ? (
-          <Skeleton
-            width={100}
-            height={24}
-            baseColor={TC.skeletonBase}
-            highlightColor={TC.skeletonHighlight}
-          />
-        ) : topLoser ? (
-          <div>
-            <h3
-              className={`text-base md:text-lg font-bold tracking-tight flex items-center gap-2 transition-colors ${TC.textPrimary} group-hover:text-cyan-500`}
-            >
-              <img
-                src={topLoser.image}
-                alt={topLoser.name}
-                className="w-5 h-5 rounded-full"
-              />
-              <span className="truncate max-w-[100px]">{topLoser.name}</span>
-            </h3>
+        <div className="flex items-center justify-between">
+          <h3
+            className={`text-base md:text-xl font-bold tracking-tight transition-colors ${TC.textPrimary} group-hover:text-cyan-500`}
+          >
+            {openOrdersCount} <span className="text-xs font-semibold opacity-60">Pending</span>
+          </h3>
+          <div className={`p-1.5 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-white/5'} ${TC.textSecondary} group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:translate-x-1 duration-300 shadow-sm`}>
+            <FaChevronRight className="text-[10px]" />
           </div>
-        ) : (
-          <h3 className={`text-base font-bold ${TC.textSecondary}`}>No Data</h3>
-        )}
+        </div>
       </div>
     </div>
   );

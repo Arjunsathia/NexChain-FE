@@ -51,29 +51,25 @@ export default function User() {
     <div
       className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}
     >
-      {}
+      { }
       {isDesktop && (
         <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}
 
-      {}
+      { }
       <div className="flex-1 flex flex-col min-h-screen relative w-full overflow-x-hidden">
-        {}
+        { }
         {!isDesktop && (
-          <div className="sticky top-0 z-50">
-            <UserMobileNavbar
-              isOpen={isMobileMenuOpen}
-              onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              onLogout={handleLogout}
-              isLogoutLoading={isLogoutLoading}
-            />
-          </div>
+          <UserMobileNavbar
+            isOpen={isMobileMenuOpen}
+            onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onLogout={handleLogout}
+            isLogoutLoading={isLogoutLoading}
+          />
         )}
-
-        {}
-        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden">
+        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4 pb-20 lg:pb-4">
           <Suspense fallback={<UserLoader />}>
             <Outlet />
           </Suspense>

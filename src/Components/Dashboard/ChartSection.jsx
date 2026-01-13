@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import { getMarketChart } from "@/api/coinApis";
+import { getMarketChart, getBinanceKlines } from "@/api/coinApis";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 const ChartSection = ({ coinId, disableAnimations = false }) => {
@@ -9,12 +9,21 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
   const [series, setSeries] = useState(() => {
     try {
       if (coinId) {
-        // Use the default days value (1) directly or use the state variable if available
-        // Since we just declared `days`, it should be available.
-        const cacheKey = `chart_${coinId}_${days}`;
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          const { data } = JSON.parse(cached);
+        // Preference Binance cache, fallback to Gecko
+        const bCacheKey = `chart_binance_${coinId}_${days}`;
+        const gCacheKey = `chart_${coinId}_${days}`;
+
+        const bCached = localStorage.getItem(bCacheKey);
+        if (bCached) {
+          const { data } = JSON.parse(bCached);
+          if (data?.prices && Array.isArray(data.prices)) {
+            return [{ name: "Price", data: data.prices }];
+          }
+        }
+
+        const gCached = localStorage.getItem(gCacheKey);
+        if (gCached) {
+          const { data } = JSON.parse(gCached);
           if (data?.prices && Array.isArray(data.prices)) {
             return [{ name: "Price", data: data.prices }];
           }
@@ -47,12 +56,9 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     const fetchChart = async () => {
       if (!coinId) return;
 
-      const cacheKey = `chart_${coinId}_${days}`;
+      const cacheKey = `chart_binance_${coinId}_${days}`;
       const now = Date.now();
       const cached = localStorage.getItem(cacheKey);
-
-      // If we already have data, check if it matches cache
-      let shouldFetch = true;
 
       // Helper to set data
       const setData = (data) => {
@@ -68,48 +74,41 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       if (cached) {
         try {
           const { timestamp, data } = JSON.parse(cached);
-          // 5 minutes TTL
-          if (now - timestamp < 5 * 60 * 1000) {
-            // Cache is valid.
-            if (series.length === 0) {
-              setData(data);
-            }
-            shouldFetch = false;
+          if (now - timestamp < 3 * 60 * 1000) { // 3 min cache for precision
+            if (series.length === 0) setData(data);
+            return;
           }
         } catch {
           // ignore
         }
       }
 
-      if (!shouldFetch) {
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
 
-      // Fetch from API
       try {
-        const data = await getMarketChart(coinId, days);
+        // 1. Try Binance (High Precision)
+        let data = await getBinanceKlines(coinId, days);
+        let source = "binance";
 
-        if (active) {
+        // 2. Fallback to CoinGecko (Historical/Wide Coverage)
+        if (!data) {
+          data = await getMarketChart(coinId, days);
+          source = "coingecko";
+        }
+
+        if (active && data) {
+          const finalCacheKey = source === "binance" ? cacheKey : `chart_${coinId}_${days}`;
           localStorage.setItem(
-            cacheKey,
+            finalCacheKey,
             JSON.stringify({ timestamp: now, data }),
           );
           setData(data);
         }
       } catch (error) {
         console.error("Failed to fetch chart data", error);
-
-        // If API fails, fallback to stale cache if available
-        if (active) {
-          if (cached) {
-            const { data } = JSON.parse(cached);
-            setData(data);
-          } else {
-            setSeries([{ name: "Price", data: [] }]);
-          }
+        if (active && cached) {
+          const { data } = JSON.parse(cached);
+          setData(data);
         }
       } finally {
         if (active) setLoading(false);

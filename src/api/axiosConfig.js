@@ -2,9 +2,10 @@ import axios from "axios";
 import { TwoFactorEvent } from "../utils/twoFactorEvent";
 
 const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
   if (import.meta.env.DEV) return `http://${window.location.hostname}:5050/api`;
-  return "/api"; // Production fallback to relative path
+  return "/api"; 
 };
 
 const API_BASE_URL = getBaseUrl();
@@ -151,11 +152,6 @@ export const updateById = async (url, id, updateData) => {
 
 export const deleteById = async (url, id) => {
   const response = await api.delete(`${url}/${id}`);
-  return response.data;
-};
-
-export const login = async (url, credentials) => {
-  const response = await api.post(url, credentials);
   return response.data;
 };
 

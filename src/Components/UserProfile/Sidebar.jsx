@@ -46,9 +46,8 @@ const LogoutConfirmationModal = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${
-              isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
-            }`}
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
+              }`}
           >
             {/* Background Glow */}
             <div
@@ -57,9 +56,8 @@ const LogoutConfirmationModal = ({
 
             <div className="text-center relative z-10">
               <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                  isLight ? "bg-red-50" : "bg-red-500/10"
-                }`}
+                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
+                  }`}
               >
                 <FaSignOutAlt
                   className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
@@ -81,11 +79,10 @@ const LogoutConfirmationModal = ({
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
-                    isLight
+                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
                       ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+                    }`}
                 >
                   Cancel
                 </button>
@@ -163,7 +160,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const menus = [
     { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
     { name: "Market Insights", path: "/user/insights", icon: FaChartBar },
-    { name: "API Keys", path: "/user/api", icon: FaCode },
     { name: "Support", path: "/user/support", icon: FaCommentDots },
     { name: "Settings", path: "/user/settings", icon: FaCog },
   ];
@@ -284,9 +280,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
               >
                 <Link
                   to={item.path}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group overflow-hidden ${
-                    active ? "" : TC.menuItemBase
-                  }`}
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group overflow-hidden ${active ? "" : TC.menuItemBase
+                    }`}
                 >
                   {active && (
                     <motion.div
@@ -388,11 +383,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLogoutLoading}
-            className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 group ${
-              isLight
+            className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 group ${isLight
                 ? "bg-red-50 text-red-600 hover:bg-red-100"
                 : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-            }`}
+              }`}
           >
             <FaSignOutAlt className="group-hover:-translate-x-1 transition-transform" />
             <span>Log Out</span>

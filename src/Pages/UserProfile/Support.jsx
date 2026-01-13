@@ -300,7 +300,7 @@ const TicketForm = ({ TC, isLight }) => {
           transition={{ delay: 0.2 }}
           className={`text-base ${TC.textSecondary} max-w-sm mb-10 leading-relaxed`}
         >
-          Our support team has received your request. We've sent a confirmation email to <b>nexchainsystem@gmail.com</b>. We'll get back to you shortly!
+          Our support team has received your request. We&apos;ve sent a confirmation email to <b>nexchainsystem@gmail.com</b>. We&apos;ll get back to you shortly!
         </motion.p>
 
         <motion.button

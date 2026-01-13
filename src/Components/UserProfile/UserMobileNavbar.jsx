@@ -61,7 +61,6 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const menus = [
     { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
     { name: "Market Insights", path: "/user/insights", icon: FaChartBar },
-    { name: "API Keys", path: "/user/api", icon: FaCode },
     { name: "Support", path: "/user/support", icon: FaCommentDots },
     { name: "Settings", path: "/user/settings", icon: FaCog },
   ];
@@ -108,155 +107,113 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     },
   ];
 
+  const mainNavItems = menus.slice(0, 4);
+  const moreNavItems = menus.slice(4);
+
   return (
-    <div className="lg:hidden sticky top-4 z-[999] px-4 mb-6">
-      <motion.nav
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className={`rounded-2xl transition-all duration-300 relative z-[999] overflow-hidden ${TC.navContainer} ${isOpen ? "ring-2 ring-blue-500/20" : ""}`}
-      >
-        {/* Top Bar */}
-        <div className="flex items-center justify-between p-3 pl-4">
-          <div className="flex items-center gap-3">
-            <Link to={`/user-profile/${user?.id}`} className="relative group">
-              <div
-                className={`w-10 h-10 rounded-full overflow-hidden border-2 ${isLight ? "border-gray-200" : "border-gray-700"} shadow-sm`}
+    <>
+      {/* Bottom Navigation Bar */}
+      <div className={`fixed bottom-0 left-0 right-0 z-[1000] lg:hidden ${isLight ? "bg-white border-t border-gray-200" : "bg-gray-900 border-t border-gray-800"} pb-safe`}>
+        <div className="flex items-center justify-around h-16 px-2">
+          {mainNavItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active ? "text-cyan-500" : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"}`}
               >
-                {user?.image ? (
-                  <img
-                    src={
-                      user.image.startsWith("http")
-                        ? user.image
-                        : `${SERVER_URL}/uploads/${user.image}`
-                    }
-                    alt="User"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className={`w-full h-full flex items-center justify-center ${isLight ? "bg-gray-100 text-gray-500" : "bg-gray-800 text-gray-400"}`}
-                  >
-                    <FaUser size={14} />
-                  </div>
-                )}
-              </div>
-              <div className="absolute lg:block bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse" />
-            </Link>
+                <item.icon className={`text-xl ${active ? "animate-bounce-short" : ""}`} />
+                <span className="text-[10px] font-medium">{item.name === "Market Insights" ? "Market" : item.name === "API Keys" ? "API" : item.name}</span>
+              </Link>
+            );
+          })}
 
-            <div className="leading-tight">
-              <h2 className={`text-sm font-bold ${TC.textPrimary}`}>
-                {user?.name || "User"}
-              </h2>
-              <p
-                className={`text-[10px] font-medium ${TC.textSecondary} uppercase tracking-wide`}
-              >
-                Personal Account
-              </p>
-            </div>
-          </div>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={onToggle}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${
-              isOpen
-                ? "bg-red-500/10 text-red-500" // Active Close State
-                : isLight
-                  ? "bg-gray-100 text-gray-700"
-                  : "bg-white/5 text-gray-300"
-            }`}
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isOpen ? "text-cyan-500" : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"}`}
           >
-            {isOpen ? <FaTimes size={18} /> : <HiMenuAlt3 size={22} />}
-          </motion.button>
+            <HiMenuAlt3 className="text-xl" />
+            <span className="text-[10px] font-medium">Menu</span>
+          </button>
         </div>
+      </div>
 
-        {/* Dropdown Menu */}
-        <AnimatePresence>
-          {isOpen && (
+      {/* Menu / Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className={`border-t ${isLight ? "border-gray-100" : "border-white/5"}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+              className="fixed inset-0 z-[998] bg-black/60 backdrop-blur-sm lg:hidden"
+            />
+
+            {/* Bottom Drawer */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className={`fixed bottom-16 left-0 right-0 z-[999] lg:hidden rounded-t-3xl overflow-hidden ${isLight ? "bg-white" : "bg-gray-900"} border-t ${isLight ? "border-gray-200" : "border-gray-700"}`}
+              style={{ maxHeight: "80vh" }}
             >
               <div className="p-4 space-y-6">
-                <div className="space-y-1">
-                  {menus.map((item) => {
+                {/* User Info Header */}
+                <div className="flex items-center gap-3 pb-4 border-b border-dashed dark:border-gray-800">
+                  <div className={`w-10 h-10 rounded-full border-2 ${isLight ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+                    {user?.image ? (
+                      <img src={user.image.startsWith("http") ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="User" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${isLight ? "bg-gray-100" : "bg-gray-800"}`}><FaUser /></div>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className={`font-bold ${TC.textPrimary}`}>{user?.name || "User"}</h3>
+                    <p className={`text-xs ${TC.textSecondary}`}>Personal Account</p>
+                  </div>
+                  <button onClick={onToggle} className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <FaTimes />
+                  </button>
+                </div>
+
+                {/* More Menu Items */}
+                <div className="grid grid-cols-2 gap-3">
+                  {moreNavItems.map(item => {
                     const active = isActive(item.path);
                     return (
-                      <motion.div
+                      <Link
                         key={item.name}
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.1 }}
+                        to={item.path}
+                        onClick={onToggle}
+                        className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition-all ${active ? "bg-cyan-500/10 text-cyan-500 ring-1 ring-cyan-500/50" : isLight ? "bg-gray-50 text-gray-600 hover:bg-gray-100" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
                       >
-                        <Link
-                          to={item.path}
-                          onClick={onToggle}
-                          className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                            active ? TC.activeItem : TC.itemHover
-                          } group`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`text-lg bg-clip-text ${active ? TC.textAccent : "text-gray-400"}`}
-                            >
-                              <item.icon />
-                            </span>
-                            <span
-                              className={`font-medium text-sm ${active ? TC.textPrimary : TC.textSecondary} group-hover:${TC.textPrimary}`}
-                            >
-                              {item.name}
-                            </span>
-                          </div>
-                          {active && (
-                            <FaChevronRight
-                              size={10}
-                              className="text-blue-500"
-                            />
-                          )}
-                        </Link>
-                      </motion.div>
-                    );
+                        <item.icon className="text-xl" />
+                        <span className="text-xs font-bold">{item.name}</span>
+                      </Link>
+                    )
                   })}
                 </div>
 
+                {/* Stats Section */}
                 <div>
-                  <h3
-                    className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${TC.textSecondary}`}
-                  >
-                    Quick Stats
-                  </h3>
+                  <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${TC.textSecondary}`}>Quick Stats</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {stats.map((stat) => (
-                      <motion.div
-                        key={stat.label}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.1 }}
-                        className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 ${TC.statCard}`}
-                      >
+                      <div key={stat.label} className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 ${TC.statCard}`}>
                         <stat.icon className={`text-sm ${stat.color}`} />
-                        <div className={`font-bold text-sm ${TC.textPrimary}`}>
-                          {stat.value}
-                        </div>
-                        <div
-                          className={`text-[10px] font-medium ${TC.textSecondary}`}
-                        >
-                          {stat.label}
-                        </div>
-                      </motion.div>
+                        <div className={`font-bold text-sm ${TC.textPrimary}`}>{stat.value}</div>
+                        <div className={`text-[10px] font-medium ${TC.textSecondary}`}>{stat.label}</div>
+                      </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Logout Action */}
-                <motion.button
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
+                <button
                   onClick={onLogout}
                   disabled={isLogoutLoading}
                   className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/20 active:scale-95 transition-all"
@@ -271,27 +228,13 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                       <FaSignOutAlt /> Sign Out
                     </>
                   )}
-                </motion.button>
+                </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-
-      {/* Backdrop for closing when clicking outside (Screen Cover) */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onToggle}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
-            style={{ top: 0 }} // Ensure it covers from very top
-          />
+          </>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
 
