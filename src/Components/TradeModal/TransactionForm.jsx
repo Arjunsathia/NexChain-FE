@@ -304,63 +304,91 @@ const TransactionForm = React.memo(
           </div>
         </div>
 
-        {/* Advanced Options */}
-        <AdvancedOptions
-          orderType={orderType}
-          slippage={slippage}
-          setSlippage={setSlippage}
-        />
-
-        {/* Summary Footer */}
-        <div
-          className={`flex justify-between items-center px-3 py-2 rounded-lg text-[10px] font-semibold ${isLight ? "bg-gray-50 text-gray-600" : "bg-white/5 text-gray-400"
-            }`}
-        >
-          <span>
-            Available: {maxAvailable.toFixed(4)}{" "}
-            {isBuyOperation ? "USD" : symbol}
-          </span>
-          <span>Fee: ~0.1%</span>
-        </div>
-
-        {/* Action Button - Responsive: Swipe for Mobile/Tab, Click for Desktop */}
+        {/* Responsive Layout Ordering */}
         {isMobileOrTablet ? (
-          <SwipeButton
-            onSwipeComplete={handleSubmit}
-            text={isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}
-            isSubmitting={isSubmitting}
-            variant={isBuyOperation ? "buy" : "sell"}
-            total={calculateTotal}
-            disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
-          />
-        ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
-            className={`
-              w-full py-4 rounded-xl font-bold text-sm shadow-lg transform active:scale-[0.98] transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-              flex items-center justify-center gap-2
-              ${isBuyOperation
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/20"
-                : "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20"
-              }
-            `}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <span>{isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}</span>
-                <span className="opacity-70 font-normal">
-                  | ${calculateTotal}
+          <>
+            {/* Mobile/Tablet: Button at Top */}
+            <div className="space-y-4">
+              {/* Action Button */}
+              {isMobileOrTablet ? (
+                <SwipeButton
+                  onSwipeComplete={handleSubmit}
+                  text={isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}
+                  isSubmitting={isSubmitting}
+                  variant={isBuyOperation ? "buy" : "sell"}
+                  total={calculateTotal}
+                  disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+                />
+              ) : null}
+
+              <AdvancedOptions
+                orderType={orderType}
+                slippage={slippage}
+                setSlippage={setSlippage}
+              />
+
+              <div
+                className={`flex justify-between items-center px-3 py-2 mt-2 rounded-lg text-[10px] font-semibold ${isLight ? "bg-gray-50 text-gray-600" : "bg-white/5 text-gray-400"
+                  }`}
+              >
+                <span>
+                  Available: {maxAvailable.toFixed(4)}{" "}
+                  {isBuyOperation ? "USD" : symbol}
                 </span>
-              </>
-            )}
-          </button>
+                <span>Fee: ~0.1%</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop: Options at Top, Button at Bottom */}
+            <div className="space-y-4">
+              <div
+                className={`flex justify-between items-center px-3 py-2 rounded-lg text-[10px] font-semibold ${isLight ? "bg-gray-50 text-gray-600" : "bg-white/5 text-gray-400"
+                  }`}
+              >
+                <span>
+                  Available: {maxAvailable.toFixed(4)}{" "}
+                  {isBuyOperation ? "USD" : symbol}
+                </span>
+                <span>Fee: ~0.1%</span>
+              </div>
+
+              <AdvancedOptions
+                orderType={orderType}
+                slippage={slippage}
+                setSlippage={setSlippage}
+              />
+
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+                className={`
+                  w-full py-4 rounded-xl font-bold text-sm shadow-lg transform active:scale-[0.98] transition-all duration-200
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                  flex items-center justify-center gap-2
+                  ${isBuyOperation
+                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/20"
+                    : "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20"
+                  }
+                `}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}</span>
+                    <span className="opacity-70 font-normal">
+                      | ${calculateTotal}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </>
         )}
       </div>
     );

@@ -513,7 +513,8 @@ function TradeModal({
         coinData: coin,
       });
 
-      handleClose();
+      // Show success state on button before closing
+      setTimeout(handleClose, 1000);
     } catch (error) {
       console.error("Trade error:", error);
       const errorMessage =
