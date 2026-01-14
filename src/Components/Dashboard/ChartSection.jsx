@@ -205,7 +205,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         <h3
           className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}
         >
-          Price Chart ({coinId?.toUpperCase()})
+         {coinId?.toUpperCase()}
         </h3>
         <div className="flex gap-2">
           {timeframes.map((tf) => (
