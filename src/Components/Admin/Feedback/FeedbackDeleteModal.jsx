@@ -1,5 +1,6 @@
 import React from "react";
 import { MdDeleteForever } from "react-icons/md";
+import { createPortal } from "react-dom";
 
 function FeedbackDeleteModal({
   showDeleteModal,
@@ -10,18 +11,16 @@ function FeedbackDeleteModal({
 }) {
   if (!showDeleteModal) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
       <div
-        className={`w-[90vw] max-w-[320px] sm:max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl animate-in zoom-in duration-300 border ${
-          isLight ? "bg-white border-gray-200" : "bg-[#0B0E11] border-white/5"
-        }`}
+        className={`w-[90vw] max-w-[320px] sm:max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl animate-in zoom-in duration-300 border ${isLight ? "bg-white border-gray-200" : "bg-[#0B0E11] border-white/5"
+          }`}
       >
         <div className="text-center">
           <div
-            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 rotate-12 group-hover:rotate-0 transition-transform duration-500 shadow-xl ${
-              isLight ? "bg-red-50 text-red-600" : "bg-red-500/10 text-red-500"
-            }`}
+            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 rotate-12 group-hover:rotate-0 transition-transform duration-500 shadow-xl ${isLight ? "bg-red-50 text-red-600" : "bg-red-500/10 text-red-500"
+              }`}
           >
             <MdDeleteForever className="text-3xl sm:text-4xl" />
           </div>
@@ -42,11 +41,10 @@ function FeedbackDeleteModal({
           <div className="flex gap-3">
             <button
               onClick={() => setShowDeleteModal(false)}
-              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${
-                isLight
-                  ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  : "bg-white/5 text-gray-300 hover:bg-white/10"
-              }`}
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${isLight
+                ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                : "bg-white/5 text-gray-300 hover:bg-white/10"
+                }`}
             >
               Cancel
             </button>
@@ -60,7 +58,8 @@ function FeedbackDeleteModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

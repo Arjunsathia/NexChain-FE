@@ -17,7 +17,6 @@ import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import {
   FaGlobeAmericas,
-  FaChartLine,
   FaFire,
   FaLayerGroup,
 } from "react-icons/fa";

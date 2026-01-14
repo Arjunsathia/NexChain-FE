@@ -178,7 +178,7 @@ export default function Navbar() {
                   {active && (
                     <motion.div
                       layoutId="navbar-active"
-                      className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/20 rounded-full -z-0"
+                      className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg rounded-full -z-0"
                       transition={{
                         type: "spring",
                         stiffness: 300,
@@ -273,14 +273,18 @@ export default function Navbar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] lg:hidden"
+                className="fixed inset-0 bg-black/60 z-[2000] lg:hidden sm:backdrop-blur-sm"
               />
               <motion.div
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className={`fixed top-0 left-0 h-full w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 ${isLight ? "bg-white" : "bg-gray-950"}`}
+                transition={{ type: "tween", ease: "easeOut", duration: 0.25 }}
+                className={`fixed top-0 left-0 h-full w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 transform-gpu ${isLight ? "bg-white" : "bg-gray-950"}`}
+                style={{
+                  willChange: "transform",
+                  backfaceVisibility: "hidden",
+                }}
               >
                 {/* Drawer Content */}
                 <div className="flex items-center justify-between mb-8">

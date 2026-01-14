@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FaCog, FaShieldAlt, FaBell, FaKey, FaSave } from "react-icons/fa";
+import { motion } from "framer-motion";
 import GeneralSettings from "@/Components/Admin/Settings/GeneralSettings";
 import SecuritySettings from "@/Components/Admin/Settings/SecuritySettings";
 import NotificationSettings from "@/Components/Admin/Settings/NotificationSettings";
@@ -118,7 +119,7 @@ const AdminSettings = () => {
 
       { }
       <div
-        className={`flex items-center gap-2 p-1.5 rounded-2xl ${TC.bgCard} shadow-sm border ${isLight ? "border-gray-200" : "border-white/5"} overflow-x-auto no-scrollbar max-w-fit mb-2`}
+        className={`p-1.5 rounded-full ${isLight ? "bg-gray-100/80 border border-gray-200" : "bg-gray-900/50 border border-white/5"} backdrop-blur-md inline-flex items-center gap-1 mb-6 relative overflow-visible flex-wrap sm:flex-nowrap`}
       >
         {[
           { id: "general", label: "General", icon: FaCog },
@@ -129,15 +130,25 @@ const AdminSettings = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform-gpu active:scale-95 whitespace-nowrap ${activeTab === tab.id
-                ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
-                : `${TC.textSecondary} hover:bg-gray-100/50 dark:hover:bg-white/5`
-              }`}
+            className={`
+                relative px-5 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 
+                flex items-center gap-2 outline-none select-none flex-1 justify-center sm:flex-none
+                ${activeTab === tab.id ? "text-white" : TC.textSecondary + " hover:text-gray-900 dark:hover:text-gray-200"}
+              `}
           >
-            <tab.icon
-              className={`text-base ${activeTab === tab.id ? "animate-pulse" : ""}`}
-            />
-            {tab.label}
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="active-pill"
+                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg rounded-full z-0"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+              <tab.icon
+                className={`text-base ${activeTab === tab.id ? "text-white" : ""}`}
+              />
+              {tab.label}
+            </span>
           </button>
         ))}
       </div>

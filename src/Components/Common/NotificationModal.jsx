@@ -119,17 +119,22 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
       {isOpen && (
         <div style={{ display: "contents" }}>
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-16 right-2 md:top-20 md:right-20 w-[92vw] max-w-[300px] md:max-w-none md:w-[400px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
-              ? "bg-gray-900/90 backdrop-blur-2xl text-white border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
-              : "bg-white/80 backdrop-blur-2xl text-gray-900 border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
+            className={`fixed top-16 right-0 left-0 mx-auto md:left-auto md:right-20 w-[95vw] md:w-[400px] max-w-[450px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
+              ? "bg-gray-950 md:bg-gray-900/90 sm:backdrop-blur-2xl text-white border-gray-800 md:border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
+              : "bg-white md:bg-white/80 sm:backdrop-blur-2xl text-gray-900 border-gray-200 md:border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
               }`}
             ref={modalRef}
-            style={{ pointerEvents: "auto" }}
+            style={{
+              pointerEvents: "auto",
+              willChange: "transform, opacity",
+              backfaceVisibility: "hidden",
+            }}
           >
+            ...
             { }
             <div
               className={`p-3 md:p-4 border-b flex justify-between items-center ${isDark

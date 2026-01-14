@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
   FaExchangeAlt,
-  FaArrowUp,
-  FaArrowDown,
   FaBell,
   FaLayerGroup,
 } from "react-icons/fa";
@@ -51,7 +49,7 @@ const HoldingsTable = ({
       textNegative: isLight ? "text-rose-600" : "text-rose-400",
 
       btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
     };
   }, [isLight, passedTC]);
 
@@ -176,7 +174,7 @@ const HoldingsTable = ({
                 >
                   <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="relative group/bell">
+                      <div className="relative">
                         <img
                           src={coin.image}
                           alt={coin.coinName}
@@ -187,9 +185,9 @@ const HoldingsTable = ({
                             e.stopPropagation();
                             handleAlertClick(e, coin);
                           }}
-                          className="absolute -top-1 -left-1 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-yellow-500 hover:scale-110"
+                          className="absolute -top-1 -left-1 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-yellow-500"
                         >
-                          <FaBell size={8} />
+                          <FaBell size={10} />
                         </button>
                       </div>
                       <div>
@@ -274,17 +272,19 @@ const HoldingsTable = ({
                   </td>
 
                   <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onTrade(coin);
-                      }}
-                      className={`${TC.btnPrimary || "bg-blue-600 text-white rounded-lg"} px-4 py-2 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-                      title="Trade"
-                    >
-                      <FaExchangeAlt className="text-xs" />
-                      Trade
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onTrade(coin);
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+                        title="Trade"
+                      >
+                        <FaExchangeAlt className="text-xs" />
+                        Trade
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -384,14 +384,25 @@ const HoldingsTable = ({
                 </div>
               </div>
 
-              <div
-                className="mt-4 pt-4 border-t border-dashed relative z-10"
+              <div className="mt-4 pt-4 border-t border-dashed relative z-10 flex gap-2"
                 style={{
                   borderColor: isLight ? "#e2e8f0" : "rgba(255,255,255,0.1)",
                 }}
               >
-                <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20">
-                  Trade Asset
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTrade(coin);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
+                >
+                  Trade Now
+                </button>
+                <button
+                  onClick={(e) => handleAlertClick(e, coin)}
+                  className={`p-2 rounded-xl border ${isLight ? "bg-gray-50 border-gray-200 text-gray-600" : "bg-white/5 border-white/10 text-gray-400"} hover:text-yellow-500 transition-all active:scale-95`}
+                >
+                  <FaBell className="text-sm" />
                 </button>
               </div>
             </div>

@@ -152,18 +152,40 @@ function FeedbackTable({
                   </div>
                 </td>
                 <td className="py-3 px-3 sm:py-4 sm:px-6">
-                  <select
-                    value={feedback.status}
-                    onChange={(e) =>
-                      updateFeedbackStatus(feedback._id, e.target.value)
-                    }
-                    className={`text-[10px] sm:text-xs font-semibold rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 outline-none transition-all cursor-pointer border ${TC.bgInput}`}
-                  >
-                    <option value="new">New</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={feedback.status}
+                      onChange={(e) =>
+                        updateFeedbackStatus(feedback._id, e.target.value)
+                      }
+                      className={`appearance-none w-full text-[10px] sm:text-xs font-bold rounded-lg pl-3 pr-8 py-2 outline-none transition-all cursor-pointer border shadow-sm capitalize ${feedback.status === "new"
+                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                          : feedback.status === "in-progress"
+                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                            : feedback.status === "resolved"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                              : "bg-gray-500/10 text-gray-500 border-gray-500/20"
+                        }`}
+                    >
+                      <option value="new" className="text-gray-900 dark:text-gray-300">New</option>
+                      <option value="in-progress" className="text-gray-900 dark:text-gray-300">In Progress</option>
+                      <option value="resolved" className="text-gray-900 dark:text-gray-300">Resolved</option>
+                      <option value="closed" className="text-gray-900 dark:text-gray-300">Closed</option>
+                    </select>
+                    {/* Custom Dropdown Arrow */}
+                    <div className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${feedback.status === "new"
+                        ? "text-blue-500"
+                        : feedback.status === "in-progress"
+                          ? "text-amber-500"
+                          : feedback.status === "resolved"
+                            ? "text-emerald-500"
+                            : "text-gray-500"
+                      }`}>
+                      <svg className="w-2.5 h-2.5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                    </div>
+                  </div>
                 </td>
                 <td
                   className={`py-3 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden sm:table-cell`}

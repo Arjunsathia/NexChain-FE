@@ -100,7 +100,7 @@ const Settings = () => {
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="active-pill"
-                  className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/30 rounded-full z-0"
+                  className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg rounded-full z-0"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

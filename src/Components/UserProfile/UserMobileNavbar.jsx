@@ -205,7 +205,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 {/* Stats Section */}
                 <div>
                   <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${TC.textSecondary}`}>Quick Stats</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {stats.map((stat) => (
                       <div key={stat.label} className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 ${TC.statCard}`}>
                         <stat.icon className={`text-sm ${stat.color}`} />

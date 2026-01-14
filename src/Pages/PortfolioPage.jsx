@@ -19,7 +19,6 @@ import { useOpenOrders } from "@/hooks/useOpenOrders";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import { useLocation } from "react-router-dom";
-
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
 const PortfolioPage = () => {

@@ -1,6 +1,6 @@
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { FaStar, FaRegStar, FaSearch, FaExchangeAlt } from "react-icons/fa";
+import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
 import useCoinContext from "@/hooks/useCoinContext";
 import useUserContext from "@/hooks/useUserContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -9,6 +9,7 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import toast from "react-hot-toast";
 import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 
 function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
   if (!data || data.length === 0) return <div className="w-24 h-6" />;
@@ -22,7 +23,7 @@ function Sparkline({ data = [], width = 100, height = 24, positive = true }) {
     .map((v, i) => {
       const x = i * step;
       const y = height - ((v - min) / range) * height;
-      return `${x},${y}`;
+      return `${x},${y} `;
     })
     .join(" ");
 
@@ -50,6 +51,7 @@ const CoinRow = React.memo(
     toggleWishlist,
     navigate,
     handleTrade,
+    handleAlertClick,
     disableAnimations,
     formatCurrency,
     liveData,
@@ -118,11 +120,22 @@ const CoinRow = React.memo(
                 : { animationDelay: `${0.6 + index * 0.05 + 0.03}s` }
             }
           >
-            <img
-              src={coin.image}
-              alt={coin.name}
-              className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300"
-            />
+            <div className="relative">
+              <img
+                src={coin.image}
+                alt={coin.name}
+                className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAlertClick(coin);
+                }}
+                className="absolute -top-1 -left-1 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-yellow-500"
+              >
+                <FaBell size={10} />
+              </button>
+            </div>
             <div className="min-w-0 flex-1">
               <div
                 className={`text-base font-semibold transition-colors ${TC.textPrimary} group-hover:text-cyan-600`}
@@ -211,16 +224,18 @@ const CoinRow = React.memo(
               : { animationDelay: `${0.6 + index * 0.05 + 0.09}s` }
           }
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleTrade(coin);
-            }}
-            className={`${TC.btnPrimary} px-4 py-2 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-          >
-            <FaExchangeAlt className="text-xs" />
-            Trade
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTrade(coin);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+            >
+              <FaExchangeAlt className="text-xs" />
+              Trade
+            </button>
+          </div>
         </td>
       </tr>
     );
@@ -249,6 +264,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
 
   const TC = useMemo(
     () => ({
@@ -295,14 +311,13 @@ function CoinTable({ onTrade, disableAnimations = false }) {
         : "text-gray-500 hover:text-yellow-400",
       starFilled: isLight ? "text-yellow-600" : "text-yellow-400",
       btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
+        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
     }),
     [isLight],
   );
 
   useEffect(() => {
     if (Array.isArray(initialCoins) && initialCoins.length > 0) {
-      // Initialize local coins state from the global context data.
       setCoins(initialCoins.slice(0, 100));
     }
   }, [initialCoins]);
@@ -324,7 +339,6 @@ function CoinTable({ onTrade, disableAnimations = false }) {
     fetchWatchlist();
   }, [fetchWatchlist]);
 
-  // Use shared hook for live ticker (limit to first 100 to avoid connection overload)
   const liveData = useBinanceTicker();
 
   const toggleWishlist = useCallback(
@@ -403,6 +417,10 @@ function CoinTable({ onTrade, disableAnimations = false }) {
     [onTrade, refreshPurchasedCoins],
   );
 
+  const handleAlertClick = useCallback((coin) => {
+    setAlertModal({ show: true, coin });
+  }, []);
+
   const filteredCoins = useMemo(() => {
     if (!Array.isArray(coins)) return [];
     if (!searchTerm) return coins;
@@ -424,8 +442,6 @@ function CoinTable({ onTrade, disableAnimations = false }) {
       const userHolding = safePurchasedCoins.find(
         (pc) => pc.coin_id === coin.id || pc.id === coin.id,
       );
-
-      // Pass live ticker data directly to child components to maintain performance.
 
       return {
         ...coin,
@@ -582,8 +598,8 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                       })
                     }
                     className={`p-4 rounded-xl border ${isLight
-                        ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
-                        : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
+                      ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
+                      : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
                       } cursor-pointer transition-all duration-300 group ${shouldAnimate ? "fade-in" : ""}`}
                     style={
                       shouldAnimate
@@ -686,15 +702,18 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                           e.stopPropagation();
                           handleTrade(coin);
                         }}
-                        className={`${TC.btnPrimary} flex-1 px-4 py-2.5 transition-all duration-200 inline-flex items-center justify-center gap-2`}
-                        style={
-                          disableAnimations
-                            ? {}
-                            : { animationDelay: `${0.5 + index * 0.1 + 0.05}s` }
-                        }
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
                       >
-                        <FaExchangeAlt className="text-sm" />
-                        Trade
+                        Trade Now
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAlertClick(coin);
+                        }}
+                        className={`p-2 rounded-xl border ${isLight ? "bg-gray-50 border-gray-200 text-gray-600" : "bg-white/5 border-white/10 text-gray-400"} hover:text-yellow-500 transition-all active:scale-95`}
+                      >
+                        <FaBell className="text-sm" />
                       </button>
                     </div>
                   </div>
@@ -769,21 +788,24 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                       <th
                         className={`py-4 px-6 text-center ${TC.textSecondary}`}
                       >
-                        Trade
+                        Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${TC.tableDivide}`}>
+                  <tbody
+                    className={`divide-y ${isLight ? "divide-gray-100" : "divide-white/5"}`}
+                  >
                     {paginatedCoins.map((coin, index) => (
                       <CoinRow
                         key={coin.id}
                         coin={coin}
                         index={index}
-                        isLight={isLight} // Pass this if CoinRow needs it
+                        isLight={isLight}
                         TC={TC}
                         toggleWishlist={toggleWishlist}
                         navigate={navigate}
                         handleTrade={handleTrade}
+                        handleAlertClick={handleAlertClick}
                         disableAnimations={!shouldAnimate}
                         formatCurrency={formatCurrency}
                         liveData={liveData[coin.id]}
@@ -847,6 +869,11 @@ function CoinTable({ onTrade, disableAnimations = false }) {
           </div>
         )}
       </div>
+      <PriceAlertModal
+        show={alertModal.show}
+        onClose={() => setAlertModal({ show: false, coin: null })}
+        coin={alertModal.coin}
+      />
     </div>
   );
 }
