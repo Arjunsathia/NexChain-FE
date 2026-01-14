@@ -335,6 +335,50 @@ export default function Navbar() {
                       </p>
                     </div>
                   </div>
+                  {/* Stats Section */}
+                  <div>
+                    <h3
+                      className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${isLight ? "text-gray-500" : "text-gray-400"}`}
+                    >
+                      Quick Stats
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div
+                        className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 backdrop-blur-md ${isLight ? "bg-white/60 border border-blue-100 shadow-sm" : "bg-white/5 border border-white/5 shadow-inner"}`}
+                      >
+                        <div
+                          className={`font-bold text-sm ${isLight ? "text-gray-900" : "text-white"}`}
+                        >
+                          $
+                          {(Number(balance) || 0).toLocaleString("en-IN", {
+                            active: true,
+                            notation: "compact",
+                            maximumFractionDigits: 1,
+                          })}
+                        </div>
+                        <div
+                          className={`text-[10px] font-medium ${isLight ? "text-gray-500" : "text-gray-400"}`}
+                        >
+                          Cash Balance
+                        </div>
+                      </div>
+                      {/* Placeholder/Other stat */}
+                      <div
+                        className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 backdrop-blur-md ${isLight ? "bg-white/60 border border-blue-100 shadow-sm" : "bg-white/5 border border-white/5 shadow-inner"}`}
+                      >
+                        <div
+                          className={`font-bold text-sm ${isLight ? "text-gray-900" : "text-white"}`}
+                        >
+                          {unreadCount}
+                        </div>
+                        <div
+                          className={`text-[10px] font-medium ${isLight ? "text-gray-500" : "text-gray-400"}`}
+                        >
+                          Notifications
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <button
                     onClick={() =>
                       user ? navigate("/user/settings") : navigate("/auth")

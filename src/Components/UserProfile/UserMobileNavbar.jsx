@@ -159,9 +159,13 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={`fixed bottom-16 left-0 right-0 z-[999] lg:hidden rounded-t-3xl overflow-hidden ${isLight ? "bg-white" : "bg-gray-900"} border-t ${isLight ? "border-gray-200" : "border-gray-700"} shadow-[0_-20px_50px_rgba(0,0,0,0.3)]`}
-              style={{ maxHeight: "calc(85vh - 4rem)" }}
+              transition={{ type: "tween", ease: "easeOut", duration: 0.25 }}
+              className={`fixed bottom-16 left-0 right-0 z-[999] lg:hidden rounded-t-3xl overflow-hidden transform-gpu ${isLight ? "bg-white" : "bg-gray-900"} border-t ${isLight ? "border-gray-200" : "border-gray-700"} shadow-[0_-20px_50px_rgba(0,0,0,0.3)]`}
+              style={{
+                maxHeight: "calc(85vh - 4rem)",
+                willChange: "transform",
+                backfaceVisibility: "hidden",
+              }}
             >
               <div className="p-4 space-y-5">
                 {/* User Info Header */}
