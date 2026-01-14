@@ -652,7 +652,7 @@ function TradeModal({
       onClick={handleBackdropClick}
     >
       <div
-        className={`w-full sm:max-w-[440px] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative transition-all duration-500 transform-gpu ${isLight
+        className={`w-full sm:max-w-[440px] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative overflow-hidden transition-all duration-500 transform-gpu ${isLight
           ? "bg-white sm:bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
           : "bg-gray-950 sm:bg-gray-900 border border-gray-800 sm:border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
           } ${isVisible
