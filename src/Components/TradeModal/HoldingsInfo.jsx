@@ -9,11 +9,10 @@ const HoldingsInfo = React.memo(
       <div className="mb-4 transition-all duration-300">
         {/* 1. Persistent Data Grid (Always Visible) */}
         <div
-          className={`rounded-xl border transition-all duration-300 overflow-hidden ${
-            activeTab === "details"
-              ? "bg-cyan-500/5 border-cyan-500/20 shadow-sm mb-4"
-              : `${isLight ? "bg-white border-gray-200" : "bg-gray-800/40 border-white/5"}`
-          }`}
+          className={`rounded-xl border transition-all duration-300 overflow-hidden ${activeTab === "details"
+            ? "bg-cyan-500/5 border-cyan-500/20 shadow-sm mb-4"
+            : `${isLight ? "bg-white border-gray-200" : "bg-gray-800/40 border-white/5"}`
+            }`}
         >
           {activeTab === "details" && (
             <div
