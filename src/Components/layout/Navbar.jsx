@@ -280,7 +280,7 @@ export default function Navbar() {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "tween", ease: "easeOut", duration: 0.25 }}
-                className={`fixed top-0 left-0 h-full w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 transform-gpu ${isLight ? "bg-white" : "bg-gray-950"}`}
+                className={`fixed top-0 left-0 h-[100dvh] w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 transform-gpu ${isLight ? "bg-white" : "bg-gray-950"}`}
                 style={{
                   willChange: "transform",
                   backfaceVisibility: "hidden",

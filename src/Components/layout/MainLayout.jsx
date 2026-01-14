@@ -78,7 +78,7 @@ export default function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">
+    <div className="h-[100dvh] w-full overflow-y-auto overflow-x-hidden flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
       { }
       <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
