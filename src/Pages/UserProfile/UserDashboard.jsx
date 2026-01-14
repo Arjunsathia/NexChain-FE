@@ -9,19 +9,14 @@ import { useParams } from "react-router-dom";
 import useUserContext from "@/hooks/useUserContext";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
-import { useLocation } from "react-router-dom";
-
 export default function Dashboard() {
   const { userId } = useParams();
   const { user } = useUserContext();
   const isLight = useThemeCheck();
-  const { isVisited } = useVisitedRoutes();
-  const location = useLocation();
 
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [contentLoaded, setContentLoaded] = useState(() => isVisited(location.pathname));
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   const fetchData = useCallback(async () => {
     const id = userId || user?.id;

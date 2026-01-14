@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, User, ChevronRight, Bell } from "lucide-react";
@@ -19,6 +20,7 @@ export default function Navbar() {
   const location = useLocation();
   const { user } = useUserContext();
   const { role } = useRoleContext();
+  const { balance } = useSelector((state) => state.wallet);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
