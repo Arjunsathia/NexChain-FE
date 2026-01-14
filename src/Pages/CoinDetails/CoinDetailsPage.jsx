@@ -16,6 +16,7 @@ import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
 import OrderBook from "@/Components/CoinDetails/OrderBook";
@@ -51,8 +52,10 @@ function CoinDetailsPage() {
 
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [widgetsReady, setWidgetsReady] = useState(false);
+  const { isVisited } = useVisitedRoutes();
+  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
+  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
+  const [widgetsReady, setWidgetsReady] = useState(() => isVisited(location.pathname));
 
   // Use centralized live ticker feed
   const livePrices = useBinanceTicker();
@@ -99,13 +102,21 @@ function CoinDetailsPage() {
   );
 
   useEffect(() => {
+    if (isReady) {
+      setIsMounted(true);
+      setWidgetsReady(true);
+      return;
+    }
     const timer = setTimeout(() => setIsMounted(true), 10);
-    const widgetTimer = setTimeout(() => setWidgetsReady(true), 50);
+    const widgetTimer = setTimeout(() => {
+      setWidgetsReady(true);
+      setIsReady(true);
+    }, 350);
     return () => {
       clearTimeout(timer);
       clearTimeout(widgetTimer);
     };
-  }, []);
+  }, [isReady]);
 
   const displayCoin = useMemo(() => {
     if (coin) return coin;
@@ -258,8 +269,15 @@ function CoinDetailsPage() {
 
   useEffect(() => {
     if (!coinId) return;
-    fetchCoin();
-  }, [fetchCoin, coinId]);
+    if (isReady) {
+      fetchCoin();
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetchCoin();
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [fetchCoin, coinId, isReady]);
 
   const [tradeModal, setTradeModal] = useState({
     show: false,

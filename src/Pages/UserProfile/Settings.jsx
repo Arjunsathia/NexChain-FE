@@ -10,15 +10,21 @@ import KYCVerification from "@/Components/Settings/KYCVerification";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { useLocation } from "react-router-dom";
+
 const Settings = () => {
   const isLight = useThemeCheck();
   const [activeTab, setActiveTab] = useState("profile");
-  const [isMounted, setIsMounted] = useState(false);
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
 
   useEffect(() => {
+    if (isMounted) return;
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMounted]);
 
   const TC = useMemo(
     () => ({

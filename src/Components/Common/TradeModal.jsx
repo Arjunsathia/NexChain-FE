@@ -13,6 +13,7 @@ import TradeModalHeader from "../TradeModal/TradeModalHeader";
 import TradeModalTabs from "../TradeModal/TradeModalTabs";
 import HoldingsInfo from "../TradeModal/HoldingsInfo";
 import TransactionForm from "../TradeModal/TransactionForm";
+import ConfirmDialog from "./ConfirmDialog";
 
 function TradeModal({
   show,
@@ -46,6 +47,10 @@ function TradeModal({
   // Alerts
   const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
   const [alertTargetPrice, setAlertTargetPrice] = useState("");
+
+  // Confirmation Modal
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmDetails, setConfirmDetails] = useState(null);
 
   const prevCoinIdRef = React.useRef(null);
   const prevShowRef = React.useRef(false);
@@ -487,6 +492,51 @@ function TradeModal({
     ],
   );
 
+  const handleProceedWithTrade = useCallback(async () => {
+    setShowConfirm(false);
+    setIsSubmitting(true);
+    try {
+      const tradeType = shouldShowHoldingsInfo
+        ? activeTab === "deposit"
+          ? "buy"
+          : "sell"
+        : type;
+
+      await handleTradeSubmit({
+        type: tradeType,
+        coin: coin.name || coin.coinName,
+        symbol: coin.symbol || coin.coinSymbol,
+        usdAmount: parseFloat(usdAmount),
+        coinAmount: parseFloat(coinAmount),
+        slippage,
+        total: parseFloat(calculateTotal),
+        coinData: coin,
+      });
+
+      handleClose();
+    } catch (error) {
+      console.error("Trade error:", error);
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Trade failed. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    activeTab,
+    calculateTotal,
+    coin,
+    coinAmount,
+    handleClose,
+    handleTradeSubmit,
+    shouldShowHoldingsInfo,
+    slippage,
+    type,
+    usdAmount,
+  ]);
+
   const handleSubmit = async () => {
     if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
       toast.error("Please enter a valid amount");
@@ -562,37 +612,31 @@ function TradeModal({
       }
     }
 
-    setIsSubmitting(true);
+    const tradeType = shouldShowHoldingsInfo
+      ? activeTab === "deposit"
+        ? "buy"
+        : "sell"
+      : type;
 
-    try {
-      const tradeType = shouldShowHoldingsInfo
-        ? activeTab === "deposit"
-          ? "buy"
-          : "sell"
-        : type;
+    // Instant Fill Confirmation
+    const isLimitOrder = orderType === "limit" || orderType === "stop_limit";
+    if (isLimitOrder && limitPrice) {
+      const lp = parseFloat(limitPrice);
+      const isInstant = tradeType === "buy" ? lp >= currentPrice : lp <= currentPrice;
 
-      await handleTradeSubmit({
-        type: tradeType,
-        coin: coin.name || coin.coinName,
-        symbol: coin.symbol || coin.coinSymbol,
-        usdAmount: parseFloat(usdAmount),
-        coinAmount: parseFloat(coinAmount),
-        slippage,
-        total: parseFloat(calculateTotal),
-        coinData: coin,
-      });
-
-      handleClose();
-    } catch (error) {
-      console.error("Trade error:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        error.message ||
-        "Trade failed. Please try again.";
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+      if (isInstant) {
+        setConfirmDetails({
+          title: "Instant Execution",
+          message: `Your ${orderType} price ($${lp.toLocaleString()}) is ${tradeType === "buy" ? "ABOVE" : "BELOW"} the current market price ($${currentPrice.toLocaleString()}). This order will execute IMMEDIATELY.`,
+          confirmText: "Execute Anyway",
+          cancelText: "Go Back"
+        });
+        setShowConfirm(true);
+        return;
+      }
     }
+
+    await handleProceedWithTrade();
   };
 
   if (!coin) return null;
@@ -682,6 +726,19 @@ function TradeModal({
           )}
         </div>
       </div>
+
+      {showConfirm && confirmDetails && (
+        <ConfirmDialog
+          show={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleProceedWithTrade}
+          title={confirmDetails.title}
+          message={confirmDetails.message}
+          confirmText={confirmDetails.confirmText}
+          cancelText={confirmDetails.cancelText}
+          variant="warning"
+        />
+      )}
     </div>,
     document.body,
   );

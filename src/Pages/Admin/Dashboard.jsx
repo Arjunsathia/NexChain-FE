@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { FaUsers, FaCoins, FaChartLine, FaStar, FaTimes } from "react-icons/fa";
 
 import UserLineChart from "@/Components/Admin/Dashboard/LineChart";
@@ -30,9 +32,9 @@ const formatCompactNumber = (number) =>
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const isLight = useThemeCheck();
-  const isReady = useTransitionDelay();
-  const location = useLocation();
   const { isVisited, markVisited } = useVisitedRoutes();
+  const location = useLocation();
+  const isReady = useTransitionDelay(350, isVisited(location.pathname));
   const [isFirstVisit] = useState(!isVisited(location.pathname));
 
   useEffect(() => {
@@ -289,15 +291,6 @@ const AdminDashboard = () => {
                   Updating live data...
                 </div>
               )}
-            {isReady &&
-              !isUsersLoading &&
-              !isStatsLoading &&
-              !isActivityLoading && (
-                <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium shadow-sm border border-green-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                  System Operational
-                </span>
-              )}
           </div>
         </div>
 
@@ -464,102 +457,126 @@ const AdminDashboard = () => {
       />
 
       {/* Trades Modal */}
-      {isTradesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div
-            className={`w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl ${TC.bgCard} shadow-2xl flex flex-col slide-in`}
-          >
-            <div className="p-4 sm:p-6 border-b border-gray-200/10 flex justify-between items-center">
-              <h2 className={`text-xl font-bold ${TC.textPrimary}`}>
-                Today&apos;s Transactions
-              </h2>
-              <button
-                onClick={() => setIsTradesModalOpen(false)}
-                className={`p-2 rounded-lg hover:bg-gray-100/10 ${TC.textSecondary}`}
+      {createPortal(
+        <AnimatePresence>
+          {isTradesModalOpen && (
+            <div className="fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl ${TC.bgCard} shadow-2xl flex flex-col border ${isLight ? "border-gray-100" : "border-gray-800"}`}
               >
-                <FaTimes />
-              </button>
-            </div>
+                <div className="p-5 sm:p-6 border-b border-gray-200/10 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
+                  <div>
+                    <h2 className={`text-xl font-bold ${TC.textPrimary}`}>
+                      Today&apos;s Transactions
+                    </h2>
+                    <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
+                      Live platform trading activity
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsTradesModalOpen(false)}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${isLight ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500" : "bg-white/5 text-gray-400 hover:bg-red-500/20 hover:text-white"}`}
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
 
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-              {isModalLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              ) : todayTransactions.length === 0 ? (
-                <div className={`text-center py-10 ${TC.textSecondary}`}>
-                  No transactions found for today.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr
-                        className={`border-b border-gray-200/10 text-xs font-semibold uppercase tracking-wider ${TC.textSecondary}`}
-                      >
-                        <th className="pb-3 pl-2">Time</th>
-                        <th className="pb-3">User</th>
-                        <th className="pb-3">Type</th>
-                        <th className="pb-3">Asset</th>
-                        <th className="pb-3 text-right">Amount</th>
-                        <th className="pb-3 text-right pr-2">Value (USD)</th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-200" : "divide-gray-700/50"}`}
-                    >
-                      {todayTransactions.map((tx) => (
-                        <tr
-                          key={tx._id}
-                          className="hover:bg-gray-50/5 transition-colors"
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+                  {isModalLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <p className={`text-sm font-medium ${TC.textSecondary} animate-pulse`}>Fetching transactions...</p>
+                    </div>
+                  ) : todayTransactions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                      <div className={`p-4 rounded-full ${isLight ? "bg-gray-50" : "bg-gray-800/50"}`}>
+                        <FaChartLine className={`text-3xl ${TC.textTertiary}`} />
+                      </div>
+                      <div>
+                        <p className={`text-base font-bold ${TC.textPrimary}`}>No trades today</p>
+                        <p className={`text-sm ${TC.textSecondary}`}>Platform activity will appear here.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto -mx-4 sm:mx-0">
+                      <table className="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                          <tr
+                            className={`border-b border-gray-200/10 text-[10px] sm:text-xs font-bold uppercase tracking-widest ${TC.textSecondary}`}
+                          >
+                            <th className="pb-4 pl-4">Time</th>
+                            <th className="pb-4">User</th>
+                            <th className="pb-4">Type</th>
+                            <th className="pb-4">Asset</th>
+                            <th className="pb-4 text-right">Amount</th>
+                            <th className="pb-4 text-right pr-4">Value (USD)</th>
+                          </tr>
+                        </thead>
+                        <tbody
+                          className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-200" : "divide-gray-700/50"}`}
                         >
-                          <td className="py-3 pl-2 whitespace-nowrap text-xs sm:text-sm">
-                            {new Date(tx.transactionDate).toLocaleTimeString()}
-                          </td>
-                          <td className="py-3">
-                            <div className="flex flex-col">
-                              <span className="font-medium">{tx.userName}</span>
-                              <span className={`text-xs ${TC.textSecondary}`}>
-                                {tx.userEmail}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-3">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-bold ${tx.type === "buy" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}
+                          {todayTransactions.map((tx) => (
+                            <tr
+                              key={tx._id}
+                              className={`group transition-colors ${isLight ? "hover:bg-gray-50" : "hover:bg-white/5"}`}
                             >
-                              {tx.type.toUpperCase()}
-                            </span>
-                          </td>
-                          <td className="py-3 flex items-center gap-2">
-                            {tx.image && (
-                              <img
-                                src={tx.image}
-                                alt=""
-                                className="w-5 h-5 rounded-full"
-                              />
-                            )}
-                            <span>{tx.coinSymbol?.toUpperCase()}</span>
-                          </td>
-                          <td className="py-3 text-right font-medium">
-                            {Number(tx.quantity).toFixed(4)}
-                          </td>
-                          <td className="py-3 text-right pr-2 font-medium">
-                            $
-                            {Number(tx.totalValue).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                              <td className="py-4 pl-4 whitespace-nowrap text-xs font-medium">
+                                {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="py-4">
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold truncate">{tx.userName}</span>
+                                  <span className={`text-[10px] ${TC.textSecondary} truncate`}>
+                                    {tx.userEmail}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4">
+                                <span
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-black tracking-tight ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
+                                >
+                                  {tx.type.toUpperCase()}
+                                </span>
+                              </td>
+                              <td className="py-4">
+                                <div className="flex items-center gap-2">
+                                  {tx.image && (
+                                    <div className="p-0.5 rounded-lg bg-white/10 shadow-sm border border-white/5">
+                                      <img
+                                        src={tx.image}
+                                        alt=""
+                                        className="w-5 h-5 rounded-md object-contain"
+                                      />
+                                    </div>
+                                  )}
+                                  <span className="font-bold tracking-tight">{tx.coinSymbol?.toUpperCase()}</span>
+                                </div>
+                              </td>
+                              <td className="py-4 text-right font-bold font-mono text-xs">
+                                {Number(tx.quantity).toFixed(4)}
+                              </td>
+                              <td className="py-4 text-right pr-4 font-black">
+                                $
+                                {Number(tx.totalValue).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
-              )}
+              </motion.div>
             </div>
-          </div>
-        </div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </>
   );

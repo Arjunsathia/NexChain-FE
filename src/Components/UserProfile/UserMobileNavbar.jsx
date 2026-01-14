@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaChartLine,
   FaCog,
-  FaCode,
   FaCommentDots,
   FaTimes,
   FaWallet,
@@ -12,10 +12,10 @@ import {
   FaStar,
   FaChartBar,
   FaSignOutAlt,
-  FaChevronRight,
   FaUser,
 } from "react-icons/fa";
 import { HiMenuAlt3 } from "react-icons/hi"; // Modern menu icon
+
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import useWalletContext from "@/hooks/useWalletContext";
@@ -36,7 +36,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
       // Glassmorphism & Backgrounds
       navContainer: isLight
         ? "bg-gradient-to-b from-white/90 to-blue-50/90 backdrop-blur-2xl border border-white/50 shadow-lg shadow-blue-500/5"
-        : "bg-gray-900/90 backdrop-blur-2xl border border-white/5 shadow-lg shadow-black/20",
+        : "bg-gray-900/95 backdrop-blur-2xl border border-white/5 shadow-lg shadow-black/20",
 
       // Typography
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -57,7 +57,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
     [isLight],
   );
 
-  // Updated Order: Overview -> Support -> Settings -> API Keys
+  // Updated Order: Overview -> Support -> Settings -> Market
   const menus = [
     { name: "Overview", path: `/user-profile/${user?.id}`, icon: FaChartLine },
     { name: "Market Insights", path: "/user/insights", icon: FaChartBar },
@@ -110,10 +110,12 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const mainNavItems = menus.slice(0, 4);
   const moreNavItems = menus.slice(4);
 
-  return (
+  return createPortal(
     <>
       {/* Bottom Navigation Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 z-[1000] lg:hidden ${isLight ? "bg-white border-t border-gray-200" : "bg-gray-900 border-t border-gray-800"} pb-safe`}>
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-[1000] lg:hidden ${isLight ? "bg-white border-t border-gray-200" : "bg-gray-900 border-t border-gray-800"} pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)]`}
+      >
         <div className="flex items-center justify-around h-16 px-2">
           {mainNavItems.map((item) => {
             const active = isActive(item.path);
@@ -124,14 +126,14 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${active ? "text-cyan-500" : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"}`}
               >
                 <item.icon className={`text-xl ${active ? "animate-bounce-short" : ""}`} />
-                <span className="text-[10px] font-medium">{item.name === "Market Insights" ? "Market" : item.name === "API Keys" ? "API" : item.name}</span>
+                <span className="text-[10px] font-medium">{item.name === "Market Insights" ? "Market" : item.name}</span>
               </Link>
             );
           })}
 
           <button
             onClick={onToggle}
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isOpen ? "text-cyan-500" : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"}`}
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"}`}
           >
             <HiMenuAlt3 className="text-xl" />
             <span className="text-[10px] font-medium">Menu</span>
@@ -158,12 +160,12 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={`fixed bottom-16 left-0 right-0 z-[999] lg:hidden rounded-t-3xl overflow-hidden ${isLight ? "bg-white" : "bg-gray-900"} border-t ${isLight ? "border-gray-200" : "border-gray-700"}`}
-              style={{ maxHeight: "80vh" }}
+              className={`fixed bottom-16 left-0 right-0 z-[999] lg:hidden rounded-t-3xl overflow-hidden ${isLight ? "bg-white" : "bg-gray-900"} border-t ${isLight ? "border-gray-200" : "border-gray-700"} shadow-[0_-20px_50px_rgba(0,0,0,0.3)]`}
+              style={{ maxHeight: "calc(85vh - 4rem)" }}
             >
-              <div className="p-4 space-y-6">
+              <div className="p-4 space-y-5">
                 {/* User Info Header */}
-                <div className="flex items-center gap-3 pb-4 border-b border-dashed dark:border-gray-800">
+                <div className="flex items-center gap-3 pb-4 border-b border-dashed dark:border-gray-800 mb-2">
                   <div className={`w-10 h-10 rounded-full border-2 ${isLight ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
                     {user?.image ? (
                       <img src={user.image.startsWith("http") ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="User" className="w-full h-full object-cover" />
@@ -181,22 +183,24 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 </div>
 
                 {/* More Menu Items */}
-                <div className="grid grid-cols-2 gap-3">
-                  {moreNavItems.map(item => {
-                    const active = isActive(item.path);
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        onClick={onToggle}
-                        className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition-all ${active ? "bg-cyan-500/10 text-cyan-500 ring-1 ring-cyan-500/50" : isLight ? "bg-gray-50 text-gray-600 hover:bg-gray-100" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
-                      >
-                        <item.icon className="text-xl" />
-                        <span className="text-xs font-bold">{item.name}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
+                {moreNavItems.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {moreNavItems.map(item => {
+                      const active = isActive(item.path);
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.path}
+                          onClick={onToggle}
+                          className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition-all ${active ? "bg-cyan-500/10 text-cyan-500 ring-1 ring-cyan-500/50" : isLight ? "bg-gray-50 text-gray-600 hover:bg-gray-100" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
+                        >
+                          <item.icon className="text-xl" />
+                          <span className="text-xs font-bold">{item.name}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
 
                 {/* Stats Section */}
                 <div>
@@ -234,7 +238,8 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
           </>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }
 

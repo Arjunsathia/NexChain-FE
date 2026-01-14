@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, User, ChevronRight, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -153,7 +154,7 @@ export default function Navbar() {
               <img
                 src={isLight ? SiteLogoLight : SiteLogo}
                 alt="NexChain"
-                className="h-10 w-auto object-contain"
+                className="h-8 sm:h-10 w-auto object-contain transition-all duration-300"
               />
             </div>
           </div>
@@ -204,7 +205,7 @@ export default function Navbar() {
                 >
                   <Bell size={20} strokeWidth={2.5} />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-white dark:border-gray-900 shadow-[0_0_10px_rgba(6,182,212,0.4)] animate-in zoom-in duration-300">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-[9px] font-black text-white border-1 dark:border-gray-900 shadow-[0_0_10px_rgba(6,182,212,0.4)] animate-in zoom-in duration-300">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
@@ -263,85 +264,88 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className={`fixed top-0 left-0 h-full w-[280px] z-[70] lg:hidden shadow-2xl flex flex-col p-6 ${isLight ? "bg-white" : "bg-gray-950"}`}
-            >
-              {/* Drawer Content */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center justify-start">
-                  <img
-                    src={isLight ? SiteLogoLight : SiteLogo}
-                    alt="NexChain"
-                    className="h-10 w-auto object-contain"
-                  />
-                </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`p-2 rounded-lg ${TC.actionBtnHover}`}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="flex-1 space-y-2">
-                {navItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => navigate(item.path)}
-                    className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isActive(item.path) ? TC.linkActive : TC.linkIdle}`}
-                  >
-                    {item.label}
-                    <ChevronRight size={16} />
-                  </button>
-                ))}
-              </div>
-
-              {/* User Section at Bottom */}
-              <div
-                className={`mt-auto p-4 rounded-2xl ${isLight ? "bg-gray-50" : "bg-gray-900"}`}
+      {createPortal(
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] lg:hidden"
+              />
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className={`fixed top-0 left-0 h-full w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 ${isLight ? "bg-white" : "bg-gray-950"}`}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-                    <User size={16} />
+                {/* Drawer Content */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center justify-start">
+                    <img
+                      src={isLight ? SiteLogoLight : SiteLogo}
+                      alt="NexChain"
+                      className="h-8 w-auto object-contain"
+                    />
                   </div>
-                  <div className="truncate">
-                    <p
-                      className={`text-sm font-bold truncate ${TC.textPrimary}`}
-                    >
-                      {user?.name || "Guest"}
-                    </p>
-                    <p className={`text-xs ${TC.textSecondary}`}>
-                      {role || "Visitor"}
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`p-2 rounded-lg ${TC.actionBtnHover}`}
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
-                <button
-                  onClick={() =>
-                    user ? navigate("/user/settings") : navigate("/auth")
-                  }
-                  className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+
+                <div className="flex-1 space-y-2">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isActive(item.path) ? TC.linkActive : TC.linkIdle}`}
+                    >
+                      {item.label}
+                      <ChevronRight size={16} />
+                    </button>
+                  ))}
+                </div>
+
+                {/* User Section at Bottom */}
+                <div
+                  className={`mt-auto p-4 rounded-2xl ${isLight ? "bg-gray-50" : "bg-gray-900"}`}
                 >
-                  {user ? "Settings" : "Login"}
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+                      <User size={16} />
+                    </div>
+                    <div className="truncate">
+                      <p
+                        className={`text-sm font-bold truncate ${TC.textPrimary}`}
+                      >
+                        {user?.name || "Guest"}
+                      </p>
+                      <p className={`text-xs ${TC.textSecondary}`}>
+                        {role || "Visitor"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      user ? navigate("/user/settings") : navigate("/auth")
+                    }
+                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+                  >
+                    {user ? "Settings" : "Login"}
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

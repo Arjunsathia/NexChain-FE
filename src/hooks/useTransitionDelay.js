@@ -5,15 +5,16 @@ import { useState, useEffect } from "react";
  * @param {number} delay - Delay in ms (default 150ms to match transition time)
  * @returns {boolean} isReady
  */
-const useTransitionDelay = (delay = 150) => {
-  const [isReady, setIsReady] = useState(false);
+const useTransitionDelay = (delay = 150, skip = false) => {
+  const [isReady, setIsReady] = useState(skip);
 
   useEffect(() => {
+    if (isReady) return;
     const timer = setTimeout(() => {
       setIsReady(true);
     }, delay);
     return () => clearTimeout(timer);
-  }, [delay]);
+  }, [delay, isReady]);
 
   return isReady;
 };

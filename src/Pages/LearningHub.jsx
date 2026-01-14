@@ -105,7 +105,7 @@ function LearningHub() {
   useEffect(() => {
     if (hasVisited) return;
     // Simulate data fetching delay matching other pages
-    const timer = setTimeout(() => setLoading(false), 1500);
+    const timer = setTimeout(() => setLoading(false), 350);
     return () => clearTimeout(timer);
   }, [hasVisited]);
 

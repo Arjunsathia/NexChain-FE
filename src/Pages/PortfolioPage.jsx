@@ -17,6 +17,8 @@ import TransactionHistory from "@/Components/portfolio/TransactionHistory";
 import OpenOrdersModal from "@/Components/portfolio/OpenOrdersModal";
 import { useOpenOrders } from "@/hooks/useOpenOrders";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { useLocation } from "react-router-dom";
 
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
 
@@ -46,13 +48,21 @@ const PortfolioPage = () => {
   const livePrices = useBinanceTicker();
 
   // Defer heavy connections until after page transition (approx 350ms)
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
+
   useEffect(() => {
+    if (isReady) return;
     const timer = setTimeout(() => {
+      setIsReady(true);
     }, 350);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isReady]);
 
   const [tradeModal, setTradeModal] = useState({
+    show: false,
+    coin: null,
     type: "buy",
   });
 
@@ -184,7 +194,7 @@ const PortfolioPage = () => {
               isLight={isLight}
               portfolioSummary={liveSummary}
               balance={balance}
-              loading={portfolioLoading}
+              loading={portfolioLoading || !isReady}
               topPerformer={topPerformer}
               onOpenOrdersClick={() => setIsOrdersModalOpen(true)}
               openOrdersCount={openOrders.length}
@@ -196,7 +206,7 @@ const PortfolioPage = () => {
             <HoldingsTable
               isLight={isLight}
               holdings={finalHoldings}
-              loading={portfolioLoading && finalHoldings.length === 0} // Only show loader if we truly have no data
+              loading={(portfolioLoading && finalHoldings.length === 0) || !isReady} // Only show loader if we truly have no data
               onTrade={handleTrade}
               TC={TC}
             />
@@ -208,7 +218,7 @@ const PortfolioPage = () => {
                 isLight={isLight}
                 groupedHoldings={finalHoldings}
                 balance={balance}
-                loading={portfolioLoading && finalHoldings.length === 0}
+                loading={(portfolioLoading && finalHoldings.length === 0) || !isReady}
                 TC={TC}
               />
             </div>
@@ -217,7 +227,7 @@ const PortfolioPage = () => {
                 isLight={isLight}
                 groupedHoldings={finalHoldings}
                 balance={balance}
-                loading={portfolioLoading && finalHoldings.length === 0}
+                loading={(portfolioLoading && finalHoldings.length === 0) || !isReady}
                 TC={TC}
               />
             </div>

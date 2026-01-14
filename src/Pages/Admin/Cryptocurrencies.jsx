@@ -16,9 +16,9 @@ import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 const AdminCryptocurrencies = () => {
   const isLight = useThemeCheck();
   const queryClient = useQueryClient();
-  const isReady = useTransitionDelay();
-  const location = useLocation();
   const { isVisited, markVisited } = useVisitedRoutes();
+  const location = useLocation();
+  const isReady = useTransitionDelay(350, isVisited(location.pathname));
   const [isFirstVisit] = useState(!isVisited(location.pathname));
 
   useEffect(() => {

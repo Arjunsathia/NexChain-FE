@@ -70,12 +70,12 @@ export default function MainLayout() {
     },
   };
 
-  // Scroll to top instantly when the page key changes (navigation start)
+  // Scroll to top instantly when the pathname changes (navigation start)
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
-  }, [pageKey]);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col relative isolate transition-colors duration-300">

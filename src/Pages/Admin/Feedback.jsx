@@ -9,8 +9,20 @@ import FeedbackDeleteModal from "@/Components/Admin/Feedback/FeedbackDeleteModal
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 
+import useTransitionDelay from "@/hooks/useTransitionDelay";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+
 const AdminFeedback = () => {
   const isLight = useThemeCheck();
+  const location = useLocation();
+  const { isVisited, markVisited } = useVisitedRoutes();
+  const isReady = useTransitionDelay(350, isVisited(location.pathname));
+  const [isFirstVisit] = useState(!isVisited(location.pathname));
+
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
 
   const TC = useMemo(
     () => ({
@@ -207,8 +219,8 @@ const AdminFeedback = () => {
   return (
     <>
       <div
-        className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
-        style={{ animationDelay: "0.1s" }}
+        className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? "fade-in" : ""}`}
+        style={isFirstVisit ? { animationDelay: "0.1s" } : {}}
       >
         <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4 mb-2">
           <div className="w-full sm:w-auto text-center sm:text-left">
@@ -246,11 +258,11 @@ const AdminFeedback = () => {
         </div>
 
         <div
-          className="space-y-4 lg:space-y-6 fade-in"
-          style={{ animationDelay: "0.2s" }}
+          className={isFirstVisit ? "fade-in" : ""}
+          style={isFirstVisit ? { animationDelay: "0.2s" } : {}}
         >
-          {isStatsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {isStatsLoading || !isReady ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
@@ -269,7 +281,7 @@ const AdminFeedback = () => {
             isLight={isLight}
           />
 
-          {isFeedbacksLoading ? (
+          {isFeedbacksLoading || !isReady ? (
             <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
               <div className="space-y-4">
                 <div

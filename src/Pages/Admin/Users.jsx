@@ -47,9 +47,9 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [filterRole, setFilterRole] = useState("all");
   const queryClient = useQueryClient();
-  const isReady = useTransitionDelay();
-  const location = useLocation();
   const { isVisited, markVisited } = useVisitedRoutes();
+  const location = useLocation();
+  const isReady = useTransitionDelay(350, isVisited(location.pathname));
   const [isFirstVisit] = useState(!isVisited(location.pathname));
 
   useEffect(() => {
@@ -210,7 +210,7 @@ const Users = () => {
         setLoadingDetails(false);
       }
     },
-    [selectedUser],
+    [selectedUser?.kycStatus],
   );
 
   // Fetch detailed info when a user is selected
@@ -234,7 +234,7 @@ const Users = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleAction = async () => {
+  const handleAction = useCallback(async () => {
     const { type, user } = actionModal;
     if (!type || !user) return;
 
@@ -302,9 +302,9 @@ const Users = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [actionModal, queryClient, showArchived, selectedUser]);
 
-  const handleToggleFreeze = async (user, e) => {
+  const handleToggleFreeze = useCallback(async (user, e) => {
     if (e) e.stopPropagation();
     if (!user) return;
 
@@ -357,15 +357,15 @@ const Users = () => {
         id: toastId,
       });
     }
-  };
+  }, [currentUserRole, queryClient, showArchived, selectedUser]);
 
-  const openActionModal = (type, user) => {
+  const openActionModal = useCallback((type, user) => {
     setActionModal({
       isOpen: true,
       type,
       user,
     });
-  };
+  }, []);
 
   const TC = useMemo(
     () => ({
@@ -401,111 +401,107 @@ const Users = () => {
     [isLight],
   );
 
-  // UserListItem Component
-  const UserListItem = useMemo(() => {
-    const Component = ({ user, index, shouldAnimate }) => (
-      <div
-        onClick={() => setSelectedUser(user)}
-        style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
-        className={`
+  const UserListItem = React.memo(({ user, index, shouldAnimate, isSelected, onClick, isLight, TC }) => (
+    <div
+      onClick={() => onClick(user)}
+      style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
+      className={`
         group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
         transition-all duration-300 border-l-4 relative overflow-hidden
         ${shouldAnimate ? "fade-in" : ""}
-        ${selectedUser?._id === user._id
-            ? `${isLight ? "bg-white shadow-sm" : "bg-white/10 shadow-none"} border-blue-500 scale-[1.02] z-10`
-            : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
-          }
+        ${isSelected
+          ? `${isLight ? "bg-white shadow-sm" : "bg-white/10 shadow-none"} border-blue-500 scale-[1.02] z-10`
+          : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
+        }
       `}
-      >
-        {/* Subtle background glow on hover */}
-        <div
-          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
+    >
+      {/* Subtle background glow on hover */}
+      <div
+        className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
         ${isLight ? "bg-gradient-to-r from-blue-50/50 to-transparent" : "bg-gradient-to-r from-blue-500/5 to-transparent"}`}
-        />
+      />
 
-        <div className="relative flex-shrink-0 z-10">
-          <div
-            className={`w-11 h-11 rounded-xl bg-gradient-to-br p-0.5 shadow-md transition-all
+      <div className="relative flex-shrink-0 z-10">
+        <div
+          className={`w-11 h-11 rounded-xl bg-gradient-to-br p-0.5 shadow-md transition-all
           ${user.isFrozen
-                ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
-                : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"
-              }
-          ${selectedUser?._id === user._id
-                ? user.isFrozen
-                  ? "ring-2 ring-red-500/20"
-                  : "ring-2 ring-blue-500/20"
-                : ""
-              } 
+              ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
+              : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"
+            }
+          ${isSelected
+              ? user.isFrozen
+                ? "ring-2 ring-red-500/20"
+                : "ring-2 ring-blue-500/20"
+              : ""
+            } 
           `}
-          >
-            <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
-              {user.image ? (
-                <img
-                  src={
-                    user.image.startsWith("http")
-                      ? user.image
-                      : `${SERVER_URL}/uploads/${user.image}`
-                  }
-                  alt={user.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              ) : (
-                <User className="w-5 h-5 text-gray-400" />
-              )}
-            </div>
+        >
+          <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
+            {user.image ? (
+              <img
+                src={
+                  user.image.startsWith("http")
+                    ? user.image
+                    : `${SERVER_URL}/uploads/${user.image}`
+                }
+                alt={user.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <User className="w-5 h-5 text-gray-400" />
+            )}
           </div>
-          {/* Status indicator with higher contrast border */}
-          <div
-            className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
+        </div>
+        {/* Status indicator with higher contrast border */}
+        <div
+          className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
           ${isLight ? "border-white" : "border-gray-800"} 
           ${user.recentlyActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}
-          />
-        </div>
+        />
+      </div>
 
-        <div className="flex-1 min-w-0 relative z-10">
-          <div className="flex justify-between items-center mb-0.5">
-            <h4
-              className={`text-sm font-bold truncate transition-colors ${selectedUser?._id === user._id ? "text-blue-500" : TC.textPrimary}`}
-            >
-              {user.name}
-            </h4>
-            <div className="flex gap-1">
-              {/* Removed Ban Icon */}
-              {user.role === "admin" && (
-                <div className="p-1 rounded-md bg-blue-500/10">
-                  <Shield className="w-3 h-3 text-blue-500" />
-                </div>
-              )}
-              {user.isDeleted && (
-                <div className="p-1 rounded-md bg-red-500/10" title="Archived">
-                  <Archive className="w-3 h-3 text-red-500" />
-                </div>
-              )}
-            </div>
+      <div className="flex-1 min-w-0 relative z-10">
+        <div className="flex justify-between items-center mb-0.5">
+          <h4
+            className={`text-sm font-bold truncate transition-colors ${isSelected ? "text-blue-500" : TC.textPrimary}`}
+          >
+            {user.name}
+          </h4>
+          <div className="flex gap-1">
+            {/* Removed Ban Icon */}
+            {user.role === "admin" && (
+              <div className="p-1 rounded-md bg-blue-500/10">
+                <Shield className="w-3 h-3 text-blue-500" />
+              </div>
+            )}
+            {user.isDeleted && (
+              <div className="p-1 rounded-md bg-red-500/10" title="Archived">
+                <Archive className="w-3 h-3 text-red-500" />
+              </div>
+            )}
           </div>
-          <div className="flex items-center justify-between">
-            <p
-              className={`text-[10px] sm:text-xs truncate transition-colors ${selectedUser?._id === user._id ? "text-blue-400/80" : TC.textSecondary}`}
-            >
-              {user.email}
-            </p>
-            <span
-              className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
-            ${selectedUser?._id === user._id
-                  ? "bg-blue-500 text-white"
-                  : "bg-blue-500/10 text-blue-500/70 border border-blue-500/10"
-                }`}
-            >
-              {user.role}
-            </span>
-            {/* Freeze Toggle Removed from List per request */}
-          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <p
+            className={`text-[10px] sm:text-xs truncate transition-colors ${isSelected ? "text-blue-400/80" : TC.textSecondary}`}
+          >
+            {user.email}
+          </p>
+          <span
+            className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
+            ${isSelected
+                ? "bg-blue-500 text-white"
+                : "bg-blue-500/10 text-blue-500/70 border border-blue-500/10"
+              }`}
+          >
+            {user.role}
+          </span>
+          {/* Freeze Toggle Removed from List per request */}
         </div>
       </div>
-    );
-    Component.displayName = "UserListItem";
-    return Component;
-  }, [selectedUser, isLight, TC]);
+    </div>
+  ));
+  UserListItem.displayName = "UserListItem";
 
   return (
     // Updated Layout: Vertical Flex for Header + Content
@@ -603,9 +599,12 @@ const Users = () => {
                 <UserListItem
                   key={user._id}
                   user={user}
-                  onToggleFreeze={handleToggleFreeze}
                   index={index}
                   shouldAnimate={isFirstVisit}
+                  isSelected={selectedUser?._id === user._id}
+                  onClick={setSelectedUser}
+                  isLight={isLight}
+                  TC={TC}
                 />
               ))
             ) : (

@@ -247,10 +247,6 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                   </div>
                 )}
               </div>
-              {/* Status Dot */}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
             </motion.div>
 
             <div className="min-w-0">

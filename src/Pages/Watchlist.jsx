@@ -18,6 +18,7 @@ import TradeModal from "@/Components/Common/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 import WatchlistHeader from "../Components/Watchlist/WatchlistHeader";
 import WatchlistStats from "../Components/Watchlist/WatchlistStats";
@@ -31,6 +32,7 @@ const Watchlist = () => {
   const { user } = useUserContext();
   const { coins: liveCoins } = useCoinContext();
   const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
+  const isMobile = useMediaQuery("(max-width: 639px)"); // Below Tailwind sm
 
   const navigate = useNavigate();
   const { isVisited, markVisited } = useVisitedRoutes();
@@ -65,11 +67,20 @@ const Watchlist = () => {
   });
 
   const [livePrices, setLivePrices] = useState({});
+  // Defer heavy connections until after page transition
+  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
+
+  useEffect(() => {
+    if (isReady) return;
+    const timer = setTimeout(() => setIsReady(true), 350);
+    return () => clearTimeout(timer);
+  }, [isReady]);
+
   // If we have watchlist data, don't show initial full-screen loading
-  const [loading, setLoading] = useState(() => watchlistData.length === 0);
+  const [loading, setLoading] = useState(() => watchlistData.length === 0 && !isReady);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
   const [tradeModal, setTradeModal] = useState({
     show: false,
     coin: null,
@@ -155,7 +166,7 @@ const Watchlist = () => {
   }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
 
   useEffect(() => {
-    if (watchlistData.length === 0) return;
+    if (watchlistData.length === 0 || !isReady) return;
 
     const symbolMap = {
       bitcoin: "btcusdt",
@@ -210,7 +221,7 @@ const Watchlist = () => {
     return () => {
       if (ws.current) ws.current.close();
     };
-  }, [watchlistData]);
+  }, [watchlistData, isReady]);
 
   const filteredCoins = useMemo(() => {
     if (!searchTerm) return mergedCoins;
@@ -441,27 +452,29 @@ const Watchlist = () => {
               </div>
             ) : (
               <>
-                <WatchlistTable
-                  coins={paginatedCoins}
-                  TC={TC}
-                  isLight={isLight}
-                  handleCoinClick={handleCoinClick}
-                  handleTrade={handleTrade}
-                  setRemoveModal={setRemoveModal}
-                  handleAlertClick={handleAlertClick}
-                  disableAnimations={hasVisited}
-                />
-
-                <WatchlistMobileCards
-                  coins={paginatedCoins}
-                  TC={TC}
-                  isLight={isLight}
-                  handleCoinClick={handleCoinClick}
-                  handleTrade={handleTrade}
-                  setRemoveModal={setRemoveModal}
-                  handleAlertClick={handleAlertClick}
-                  disableAnimations={hasVisited}
-                />
+                {!isMobile ? (
+                  <WatchlistTable
+                    coins={paginatedCoins}
+                    TC={TC}
+                    isLight={isLight}
+                    handleCoinClick={handleCoinClick}
+                    handleTrade={handleTrade}
+                    setRemoveModal={setRemoveModal}
+                    handleAlertClick={handleAlertClick}
+                    disableAnimations={hasVisited}
+                  />
+                ) : (
+                  <WatchlistMobileCards
+                    coins={paginatedCoins}
+                    TC={TC}
+                    isLight={isLight}
+                    handleCoinClick={handleCoinClick}
+                    handleTrade={handleTrade}
+                    setRemoveModal={setRemoveModal}
+                    handleAlertClick={handleAlertClick}
+                    disableAnimations={hasVisited}
+                  />
+                )}
               </>
             )}
           </div>

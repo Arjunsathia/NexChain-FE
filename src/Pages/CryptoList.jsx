@@ -1,5 +1,7 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
+import useThemeCheck from "@/hooks/useThemeCheck";
+import { useLocation } from "react-router-dom";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
 import NewsSection from "../Components/Crypto/NewsSection";
@@ -21,7 +23,11 @@ import {
 } from "react-icons/fa";
 function CryptoList() {
   const isLight = useThemeCheck();
-  // Freeze validated state on mount so it doesn't change during the visit (allowing animation to finish)
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+
+  // Defer heavy fetching on first visit
+  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
 
   const [globalData, setGlobalData] = useState(() => {
     try {
@@ -93,29 +99,35 @@ function CryptoList() {
 
     try {
       const res = await getGlobalMarketStats();
-      setGlobalData(res);
-      localStorage.setItem(
-        "globalMarketStats_v1",
-        JSON.stringify({
-          data: res,
-          timestamp: Date.now(),
-        }),
-      );
+      if (res) {
+        setGlobalData(res);
+        localStorage.setItem(
+          "globalMarketStats_v1",
+          JSON.stringify({
+            data: res,
+            timestamp: Date.now(),
+          }),
+        );
+      }
     } catch (err) {
       console.error("Failed to fetch global market stats", err);
     } finally {
       setLoading(false);
     }
-  }, [globalData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only the logic inside matters, globalData check is internal
 
   useEffect(() => {
-    // Defer fetching until after page transition (350ms)
-    // This allows the "enter" animation to play at 60fps without network contention
+    if (isReady) {
+      fetchData();
+      return;
+    }
     const timer = setTimeout(() => {
+      setIsReady(true);
       fetchData();
     }, 350);
     return () => clearTimeout(timer);
-  }, [fetchData]);
+  }, [fetchData, isReady]);
 
   const handleTrade = useCallback((coin, options = {}) => {
     if (options.initialAlertMode) {
@@ -350,15 +362,15 @@ function CryptoList() {
           </div>
 
           <div className={`flex flex-col h-full`}>
-            <TrendingCoinsWidget limit={5} showViewAll={false} />
+            {isReady && <TrendingCoinsWidget limit={5} showViewAll={false} />}
           </div>
 
           <div className={`flex flex-col h-full`}>
-            <TopGainers />
+            {isReady && <TopGainers />}
           </div>
 
           <div className={`flex flex-col h-full`}>
-            <TopLosers />
+            {isReady && <TopLosers />}
           </div>
         </div>
 

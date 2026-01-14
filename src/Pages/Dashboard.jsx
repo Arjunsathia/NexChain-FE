@@ -13,9 +13,13 @@ import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useMediaQuery from "@/hooks/useMediaQuery";
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { useLocation } from "react-router-dom";
 
 export default function Dashboard() {
   const isLight = useThemeCheck();
+  const isDesktop = useMediaQuery("(min-width: 1280px)"); // 1280px is xl in Tailwind
 
   // React Query for caching Top Coins (prevents reload on navigation)
   const { data: topCoins = [], isLoading: loading } = useQuery({
@@ -56,7 +60,18 @@ export default function Dashboard() {
   const TRENDING_HEIGHT = "h-[250px]";
   const LEARNING_HUB_HEIGHT = "h-[186px]";
 
-  if (loading && topCoins.length === 0) {
+  // Defer showing heavy content until after entrance animation (350ms)
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
+
+  useEffect(() => {
+    if (isReady) return;
+    const timer = setTimeout(() => setIsReady(true), 350);
+    return () => clearTimeout(timer);
+  }, [isReady]);
+
+  if (!isReady || (loading && topCoins.length === 0)) {
     return <DashboardSkeleton />;
   }
 
@@ -64,105 +79,107 @@ export default function Dashboard() {
     <div
       className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
-      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="md:col-span-2">
-          <UserProfileCard />
-        </div>
-
-        <div className="md:col-span-2">
-          <div className="space-y-1">
-            <h2
-              className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}
-            >
-              Top{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Cryptos
-              </span>
-            </h2>
-            <TopCoins
-              topCoins={topCoins}
-              selectedCoinId={selectedCoinId}
-              setSelectedCoinId={handleCoinClick}
-              isMobile={true}
-              loading={loading}
-            />
-          </div>
-        </div>
-
-        <div className="md:col-span-2">
-          <ChartSection coinId={selectedCoinId} />
-        </div>
-
-        <div>
-          <PortfolioCard />
-        </div>
-
-        <div>
-          <div className="flex flex-col gap-4">
-            <WatchlistPreview />
-            <TrendingCoinsWidget variant="dashboard" />
-          </div>
-        </div>
-
-        <div className="md:col-span-2">
-          <NewsPanel />
-        </div>
-
-        <div className="md:col-span-2">
-          <RecentTradesCard />
-        </div>
-
-        <div className="md:col-span-2">
-          <LearningHub />
-        </div>
-      </div>
-
-      <div className="hidden xl:flex flex-col gap-6">
-        <div className="grid grid-cols-12 gap-6 items-start">
-          <div className="col-span-3 flex flex-col gap-6">
-            <div className={`${USERDATA_HEIGHT}`}>
-              <UserProfileCard />
-            </div>
-            <div className={`${PORTFOLIO_HEIGHT}`}>
-              <PortfolioCard />
-            </div>
-            <div className={`${TRADES_HEIGHT}`}>
-              <RecentTradesCard />
-            </div>
+      {!isDesktop ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <UserProfileCard />
           </div>
 
-          <div className="col-span-6 flex flex-col gap-6">
-            <div>
+          <div className="md:col-span-2">
+            <div className="space-y-1">
+              <h2
+                className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}
+              >
+                Top{" "}
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                  Cryptos
+                </span>
+              </h2>
               <TopCoins
                 topCoins={topCoins}
                 selectedCoinId={selectedCoinId}
                 setSelectedCoinId={handleCoinClick}
-                isMobile={false}
+                isMobile={true}
                 loading={loading}
               />
             </div>
-            <div className={`${CHART_HEIGHT}`}>
-              <ChartSection coinId={selectedCoinId} />
-            </div>
           </div>
 
-          <div className="col-span-3 flex flex-col gap-6">
-            <div className={`${WATCHLIST_HEIGHT}`}>
+          <div className="md:col-span-2">
+            <ChartSection coinId={selectedCoinId} />
+          </div>
+
+          <div>
+            <PortfolioCard />
+          </div>
+
+          <div>
+            <div className="flex flex-col gap-4">
               <WatchlistPreview />
-            </div>
-            <div className={`${TRENDING_HEIGHT}`}>
               <TrendingCoinsWidget variant="dashboard" />
             </div>
-            <div className={`${LEARNING_HUB_HEIGHT}`}>
-              <LearningHub />
-            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <NewsPanel />
+          </div>
+
+          <div className="md:col-span-2">
+            <RecentTradesCard />
+          </div>
+
+          <div className="md:col-span-2">
+            <LearningHub />
           </div>
         </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-12 gap-6 items-start">
+            <div className="col-span-3 flex flex-col gap-6">
+              <div className={`${USERDATA_HEIGHT}`}>
+                <UserProfileCard />
+              </div>
+              <div className={`${PORTFOLIO_HEIGHT}`}>
+                <PortfolioCard />
+              </div>
+              <div className={`${TRADES_HEIGHT}`}>
+                <RecentTradesCard />
+              </div>
+            </div>
 
-        <div>
-          <NewsPanel />
+            <div className="col-span-6 flex flex-col gap-6">
+              <div>
+                <TopCoins
+                  topCoins={topCoins}
+                  selectedCoinId={selectedCoinId}
+                  setSelectedCoinId={handleCoinClick}
+                  isMobile={false}
+                  loading={loading}
+                />
+              </div>
+              <div className={`${CHART_HEIGHT}`}>
+                <ChartSection coinId={selectedCoinId} />
+              </div>
+            </div>
+
+            <div className="col-span-3 flex flex-col gap-6">
+              <div className={`${WATCHLIST_HEIGHT}`}>
+                <WatchlistPreview />
+              </div>
+              <div className={`${TRENDING_HEIGHT}`}>
+                <TrendingCoinsWidget variant="dashboard" />
+              </div>
+              <div className={`${LEARNING_HUB_HEIGHT}`}>
+                <LearningHub />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <NewsPanel />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

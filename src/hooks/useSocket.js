@@ -37,12 +37,11 @@ export const useSocket = () => {
         socketRef.current.close();
       }
 
-      console.log("🌐 [Real-time] Connecting to NexChain Server...");
       const ws = new WebSocket(SOCKET_URL);
       socketRef.current = ws;
 
       ws.onopen = () => {
-        console.log("✅ [Real-time] Connected!");
+        // Connection established
       };
 
       ws.onmessage = (event) => {
@@ -51,7 +50,6 @@ export const useSocket = () => {
 
           if (type === "ORDER_FILLED") {
             if (data.targetUserId === user.id) {
-              console.log("💰 [Real-time] Order Filled:", data.symbol);
               
               toast.success(`${data.type.toUpperCase()} ${data.symbol.toUpperCase()} Order Filled`, {
                 duration: 4000,
@@ -68,7 +66,6 @@ export const useSocket = () => {
             }
           } else if (type === "ORDER_TRIGGERED") {
             if (data.targetUserId === user.id) {
-              console.log("🔔 [Real-time] Order Triggered:", data.symbol);
               
               toast(`Triggered: ${data.symbol.toUpperCase()} - Limit order active at $${data.limit_price.toLocaleString()}`, {
                 duration: 6000,
@@ -90,7 +87,6 @@ export const useSocket = () => {
       };
 
       ws.onclose = () => {
-        console.log("🔌 [Real-time] Connection closed. Retrying in 5s...");
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       };
 

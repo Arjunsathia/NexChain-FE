@@ -412,18 +412,24 @@ const TicketForm = ({ TC, isLight }) => {
   );
 };
 
+import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { useLocation } from "react-router-dom";
+
 export default function Support() {
   const isLight = useThemeCheck();
   const [activeSection, setActiveSection] = useState("ticket"); // 'ticket' or 'chat'
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const location = useLocation();
+  const { isVisited } = useVisitedRoutes();
+  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
 
   useEffect(() => {
+    if (isMounted) return;
     //  Short delay to trigger the fade-in animation nicely after mount
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMounted]);
 
   const TC = useMemo(
     () => ({
