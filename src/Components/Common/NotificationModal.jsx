@@ -123,8 +123,8 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-16 right-0 left-0 mx-auto md:left-auto md:right-20 w-[95vw] md:w-[400px] max-w-[450px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
-              ? "bg-gray-950 md:bg-gray-900/90 sm:backdrop-blur-2xl text-white border-gray-800 md:border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
+            className={`fixed top-[76px] left-4 right-4 md:left-auto md:right-8 lg:right-20 w-auto md:w-[400px] max-w-[450px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
+              ? "bg-gray-950/95 md:bg-gray-900/90 sm:backdrop-blur-2xl text-white border-gray-800 md:border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
               : "bg-white md:bg-white/80 sm:backdrop-blur-2xl text-gray-900 border-gray-200 md:border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
               }`}
             ref={modalRef}
@@ -134,7 +134,6 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
               backfaceVisibility: "hidden",
             }}
           >
-            ...
             { }
             <div
               className={`p-3 md:p-4 border-b flex justify-between items-center ${isDark
@@ -220,38 +219,40 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                         <div className="mt-1 flex-shrink-0">
                           {getIcon(notification.type)}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start gap-2 mb-1">
-                            <h4
-                              className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"} ${notification.isRead ? (isDark ? "text-gray-300" : "text-gray-700") : ""}`}
-                            >
-                              {notification.title}
-                            </h4>
-                            <span
-                              className={`text-[10px] text-gray-400 whitespace-nowrap px-1.5 py-0.5 rounded ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
-                            >
-                              {new Date(
-                                notification.createdAt,
-                              ).toLocaleDateString()}
-                            </span>
+                        <div className="flex-1 min-w-0 relative pr-6">
+                          <div className="flex flex-col mb-1">
+                            <div className="flex justify-between items-start gap-2">
+                              <h4
+                                className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"} ${notification.isRead ? (isDark ? "text-gray-300" : "text-gray-700") : ""}`}
+                              >
+                                {notification.title}
+                              </h4>
+                              <span
+                                className={`text-[10px] text-gray-400 whitespace-nowrap px-1.5 py-0.5 rounded ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
+                              >
+                                {new Date(
+                                  notification.createdAt,
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
                           <p
-                            className={`text-sm leading-relaxed line-clamp-2 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                            className={`text-sm leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"}`}
                           >
                             {notification.message}
                           </p>
+                          <button
+                            onClick={(e) => handleDelete(notification._id, e)}
+                            className={`absolute top-0 -right-2 p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all ${isDark ? "hover:bg-red-900/20" : "hover:bg-red-50"
+                              } md:opacity-0 md:group-hover:opacity-100`}
+                            title="Remove"
+                          >
+                            <FaTimes size={12} />
+                          </button>
                         </div>
-                        <button
-                          onClick={(e) => handleDelete(notification._id, e)}
-                          className={`opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all self-start -mr-2 -mt-2 ${isDark ? "hover:bg-red-900/20" : "hover:bg-red-50"
-                            }`}
-                          title="Remove"
-                        >
-                          <FaTimes size={12} />
-                        </button>
                       </div>
                       {!notification.isRead && (
-                        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 bg-cyan-500 rounded-r-full"></div>
+                        <div className="absolute inset-y-0 left-0 w-1 bg-cyan-500"></div>
                       )}
                     </div>
                   ))}
