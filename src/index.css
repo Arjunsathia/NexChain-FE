@@ -421,7 +421,9 @@ body {
 }
 
 html {
-  height: 100%;
+  min-height: 100%;
+  /* Fix for mobile overscroll white space - must apply to HTML too */
+  overscroll-behavior-y: none;
 }
 
 [data-theme="dark"] html {
