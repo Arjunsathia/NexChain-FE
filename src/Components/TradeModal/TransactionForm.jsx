@@ -1,7 +1,9 @@
 import React from "react";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { FaArrowDown, FaChevronDown } from "react-icons/fa";
 import AdvancedOptions from "./AdvancedOptions";
+import SwipeButton from "../Common/SwipeButton";
 
 const TransactionForm = React.memo(
   ({
@@ -29,6 +31,7 @@ const TransactionForm = React.memo(
     currentPrice,
   }) => {
     const isLight = useThemeCheck();
+    const isMobileOrTablet = useMediaQuery("(max-width: 1024px)");
     const [isOrderTypeOpen, setIsOrderTypeOpen] = React.useState(false);
     const dropdownRef = React.useRef(null);
 
@@ -320,34 +323,45 @@ const TransactionForm = React.memo(
           <span>Fee: ~0.1%</span>
         </div>
 
-        {/* Action Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
-          className={`
-          w-full py-4 rounded-xl font-bold text-sm shadow-lg transform active:scale-[0.98] transition-all duration-200
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-          flex items-center justify-center gap-2
-          ${isBuyOperation
-              ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/20"
-              : "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20"
-            }
-        `}
-        >
-          {isSubmitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Processing...</span>
-            </>
-          ) : (
-            <>
-              <span>{isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}</span>
-              <span className="opacity-70 font-normal">
-                | ${calculateTotal}
-              </span>
-            </>
-          )}
-        </button>
+        {/* Action Button - Responsive: Swipe for Mobile/Tab, Click for Desktop */}
+        {isMobileOrTablet ? (
+          <SwipeButton
+            onSwipeComplete={handleSubmit}
+            text={isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}
+            isSubmitting={isSubmitting}
+            variant={isBuyOperation ? "buy" : "sell"}
+            total={calculateTotal}
+            disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+          />
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+            className={`
+              w-full py-4 rounded-xl font-bold text-sm shadow-lg transform active:scale-[0.98] transition-all duration-200
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+              flex items-center justify-center gap-2
+              ${isBuyOperation
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/20"
+                : "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20"
+              }
+            `}
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>{isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}</span>
+                <span className="opacity-70 font-normal">
+                  | ${calculateTotal}
+                </span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     );
   },
