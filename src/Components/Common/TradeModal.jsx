@@ -1,5 +1,5 @@
 import useThemeCheck from "@/hooks/useThemeCheck";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
@@ -38,6 +38,9 @@ function TradeModal({
   const livePrices = useBinanceTicker();
   const [currentPrice, setCurrentPrice] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isHoldingsView, setIsHoldingsView] = useState(false);
+  const [isTradeSuccess, setIsTradeSuccess] = useState(false);
+  const viewLockedRef = useRef(false);
 
   // Order Types
   const [orderType, setOrderType] = useState("market");
@@ -52,8 +55,8 @@ function TradeModal({
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmDetails, setConfirmDetails] = useState(null);
 
-  const prevCoinIdRef = React.useRef(null);
-  const prevShowRef = React.useRef(false);
+  const prevCoinIdRef = useRef(null);
+  const prevShowRef = useRef(false);
 
   const userHoldings = useMemo(() => {
     if (!coin || !purchasedCoins || purchasedCoins.length === 0) return null;
@@ -80,10 +83,9 @@ function TradeModal({
     );
   }, [userHoldings]);
 
-  const shouldShowHoldingsInfo = showHoldingsInfo || hasHoldings;
   const isBuyOperation = useMemo(
-    () => (shouldShowHoldingsInfo ? activeTab === "deposit" : type === "buy"),
-    [shouldShowHoldingsInfo, activeTab, type],
+    () => (isHoldingsView ? activeTab === "deposit" : type === "buy"),
+    [isHoldingsView, activeTab, type],
   );
 
   const handleBackdropClick = (e) => {
@@ -99,7 +101,7 @@ function TradeModal({
   }, [onClose]);
 
   const holdingsSummary = useMemo(() => {
-    if (!shouldShowHoldingsInfo || !coin) return null;
+    if (!isHoldingsView || !coin) return null;
 
     const holdings = userHoldings || {};
     const totalQuantity = holdings.totalQuantity || holdings.quantity || 0;
@@ -128,7 +130,7 @@ function TradeModal({
       coinName: coin.coinName || coin.name,
       coinSymbol: coin.coinSymbol || coin.symbol,
     };
-  }, [shouldShowHoldingsInfo, coin, currentPrice, userHoldings]);
+  }, [isHoldingsView, coin, currentPrice, userHoldings]);
 
   const effectivePrice = useMemo(() => {
     return (orderType === "limit" || orderType === "stop_limit") && limitPrice
@@ -137,7 +139,7 @@ function TradeModal({
   }, [orderType, limitPrice, currentPrice]);
 
   const maxAvailable = useMemo(() => {
-    const isSellMode = shouldShowHoldingsInfo
+    const isSellMode = isHoldingsView
       ? activeTab === "withdraw"
       : type === "sell";
     if (isSellMode && holdingsSummary) {
@@ -151,7 +153,7 @@ function TradeModal({
 
     return 0;
   }, [
-    shouldShowHoldingsInfo,
+    isHoldingsView,
     activeTab,
     type,
     holdingsSummary,
@@ -160,30 +162,37 @@ function TradeModal({
   ]);
 
   const shouldShowSellAll = useMemo(() => {
-    const isSellMode = shouldShowHoldingsInfo
+    const isSellMode = isHoldingsView
       ? activeTab === "withdraw"
       : type === "sell";
     return isSellMode && holdingsSummary && holdingsSummary.totalQuantity > 0;
-  }, [holdingsSummary, shouldShowHoldingsInfo, activeTab, type]);
+  }, [holdingsSummary, isHoldingsView, activeTab, type]);
 
   useEffect(() => {
     const currentCoinId = coin?.id || coin?.coinId;
     const isDifferentCoin = currentCoinId !== prevCoinIdRef.current;
+    if (show && isDifferentCoin) {
+      viewLockedRef.current = false;
+    }
+  }, [show, coin]);
+
+  useEffect(() => {
+    const currentCoinId = coin?.id || coin?.coinId;
     const isOpening = show && !prevShowRef.current;
+    const isDifferentCoin = currentCoinId !== prevCoinIdRef.current;
 
     if (show && coin) {
-      if (isOpening || isDifferentCoin) {
+      if ((isOpening || isDifferentCoin) && !viewLockedRef.current) {
         setUsdAmount("");
         setCoinAmount("");
         setSlippage(1.0);
         setIsSubmitting(false);
+        setIsTradeSuccess(false);
         setIsAlertMode(initialAlertMode || false);
 
-        if (shouldShowHoldingsInfo) {
-          setActiveTab("details");
-        } else {
-          setActiveTab(type === "buy" ? "deposit" : "withdraw");
-        }
+        const mode = showHoldingsInfo || hasHoldings;
+        setIsHoldingsView(mode);
+        setActiveTab(mode ? "details" : (type === "buy" ? "deposit" : "withdraw"));
 
         const price =
           coin.current_price ||
@@ -192,21 +201,22 @@ function TradeModal({
           coin.market_data?.current_price?.usd ||
           0;
         setCurrentPrice(price);
-        setLimitPrice(""); // Start empty to force intentional input
-        setStopPrice("");  // Start empty to force intentional input
+        setLimitPrice("");
+        setStopPrice("");
         setOrderType("market");
         setAlertTargetPrice(price);
 
-        // Trigger visibility animation
+        viewLockedRef.current = true;
         const timer = setTimeout(() => setIsVisible(true), 10);
         prevCoinIdRef.current = currentCoinId;
         return () => clearTimeout(timer);
       }
     } else {
       setIsVisible(false);
+      viewLockedRef.current = false;
     }
     prevShowRef.current = show;
-  }, [show, coin, initialAlertMode, shouldShowHoldingsInfo, type]);
+  }, [show, coin, initialAlertMode, showHoldingsInfo, hasHoldings, type]);
 
   // Dedicated effect for live price updates to avoid form resets
   useEffect(() => {
@@ -285,7 +295,7 @@ function TradeModal({
       const calculatedUSD = truncated * effectivePrice;
       setUsdAmount(calculatedUSD.toFixed(2));
 
-      const isSellMode = shouldShowHoldingsInfo
+      const isSellMode = isHoldingsView
         ? activeTab === "withdraw"
         : type === "sell";
       if (isSellMode) {
@@ -496,7 +506,7 @@ function TradeModal({
     setShowConfirm(false);
     setIsSubmitting(true);
     try {
-      const tradeType = shouldShowHoldingsInfo
+      const tradeType = isHoldingsView
         ? activeTab === "deposit"
           ? "buy"
           : "sell"
@@ -514,7 +524,15 @@ function TradeModal({
       });
 
       // Show success state on button before closing
-      setTimeout(handleClose, 1000);
+      setIsTradeSuccess(true);
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
+      // Clean submit state only after modal is long gone
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setIsTradeSuccess(false);
+      }, 2000);
     } catch (error) {
       console.error("Trade error:", error);
       const errorMessage =
@@ -522,7 +540,6 @@ function TradeModal({
         error.message ||
         "Trade failed. Please try again.";
       toast.error(errorMessage);
-    } finally {
       setIsSubmitting(false);
     }
   }, [
@@ -532,7 +549,7 @@ function TradeModal({
     coinAmount,
     handleClose,
     handleTradeSubmit,
-    shouldShowHoldingsInfo,
+    isHoldingsView,
     slippage,
     type,
     usdAmount,
@@ -544,7 +561,7 @@ function TradeModal({
       return;
     }
 
-    const isSellMode = shouldShowHoldingsInfo
+    const isSellMode = isHoldingsView
       ? activeTab === "withdraw"
       : type === "sell";
     if (isSellMode) {
@@ -578,7 +595,7 @@ function TradeModal({
       }
     }
 
-    const isBuyMode = shouldShowHoldingsInfo
+    const isBuyMode = isHoldingsView
       ? activeTab === "deposit"
       : type === "buy";
 
@@ -613,7 +630,7 @@ function TradeModal({
       }
     }
 
-    const tradeType = shouldShowHoldingsInfo
+    const tradeType = isHoldingsView
       ? activeTab === "deposit"
         ? "buy"
         : "sell"
@@ -671,14 +688,11 @@ function TradeModal({
           symbol={symbol}
           currentPrice={currentPrice}
           priceChange={livePrices[coin.id || coin.coinId]?.price_change_percentage_24h || coin.price_change_percentage_24h || 0}
-          shouldShowHoldingsInfo={shouldShowHoldingsInfo}
-          activeTab={activeTab}
-          isBuyOperation={isBuyOperation}
           isLight={isLight}
           handleClose={handleClose}
         />
 
-        {shouldShowHoldingsInfo && (
+        {isHoldingsView && (
           <TradeModalTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -687,7 +701,7 @@ function TradeModal({
         )}
 
         <div className="p-3 sm:p-4 pt-1">
-          {shouldShowHoldingsInfo && holdingsSummary && (
+          {isHoldingsView && holdingsSummary && (
             <HoldingsInfo
               holdingsSummary={holdingsSummary}
               activeTab={activeTab}
@@ -699,7 +713,7 @@ function TradeModal({
             />
           )}
 
-          {(!shouldShowHoldingsInfo || activeTab !== "details") && (
+          {(!isHoldingsView || activeTab !== "details") && (
             <TransactionForm
               coinAmount={coinAmount}
               handleCoinAmountChange={handleCoinAmountChange}
@@ -716,7 +730,7 @@ function TradeModal({
               calculateTotal={calculateTotal}
               isBuyOperation={isBuyOperation}
               handleSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isTradeSuccess}
               orderType={orderType}
               setOrderType={setOrderType}
               limitPrice={limitPrice}

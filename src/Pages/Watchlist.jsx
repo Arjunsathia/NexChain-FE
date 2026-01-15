@@ -244,8 +244,8 @@ const Watchlist = () => {
   const fetchData = useCallback(
     async (shouldLoad = true) => {
       if (!userId) return;
-      // If we already have data, don't show loading (background refresh)
-      // Only show loading if we have NO data AND we are explicitly asked to load
+
+      // If we don't have data, show skeleton
       if (watchlistData.length === 0 && shouldLoad) setLoading(true);
 
       try {
@@ -263,27 +263,14 @@ const Watchlist = () => {
         );
       } catch (err) {
         console.error("Failed to fetch watchlist data", err);
-        // Only error toast if we don't have cached data looking good
         if (watchlistData.length === 0) {
-          toast.error("Failed to fetch watchlist data", {
-            style: {
-              background: "#FEE2E2",
-              color: "#991B1B",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "14px",
-              padding: "12px 16px",
-              border: "none",
-            },
-            iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-          });
+          toast.error("Failed to fetch watchlist data");
         }
       } finally {
         if (shouldLoad) setLoading(false);
       }
     },
-    [userId, watchlistData.length], // dependence on watchlistData.length to know if we should show loading
+    [userId],
   );
 
   useEffect(() => {
