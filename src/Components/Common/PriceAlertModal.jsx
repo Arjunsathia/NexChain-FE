@@ -125,15 +125,15 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
   return createPortal(
     <div
       className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${isVisible
-          ? "bg-black/50 backdrop-blur-sm"
-          : "bg-black/0 backdrop-blur-none pointer-events-none"
+        ? "bg-black/50 backdrop-blur-sm"
+        : "bg-black/0 backdrop-blur-none pointer-events-none"
         }`}
       onClick={onClose}
     >
       <div
-        className={`w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 relative transition-all duration-500 transform ${isVisible
-            ? "translate-y-0 opacity-100 scale-100"
-            : "translate-y-full sm:translate-y-8 opacity-0 sm:scale-95"
+        className={`w-full max-w-[90vw] sm:max-w-md rounded-2xl p-6 relative transition-all duration-500 transform ${isVisible
+          ? "translate-y-0 opacity-100 scale-100"
+          : "translate-y-8 opacity-0 scale-95"
           } ${TC.bgModal}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -210,8 +210,8 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
               >
                 <div
                   className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${isAbove
-                      ? "text-green-600 bg-green-100 dark:bg-green-500/10 dark:text-green-400"
-                      : "text-red-600 bg-red-100 dark:bg-red-500/10 dark:text-red-400"
+                    ? "text-green-600 bg-green-100 dark:bg-green-500/10 dark:text-green-400"
+                    : "text-red-600 bg-red-100 dark:bg-red-500/10 dark:text-red-400"
                     }`}
                 >
                   {isAbove ? <FaArrowUp /> : <FaArrowDown />}

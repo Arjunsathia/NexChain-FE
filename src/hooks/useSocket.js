@@ -4,7 +4,7 @@ import useUserContext from "./useUserContext";
 import useWalletContext from "./useWalletContext";
 import { usePurchasedCoins } from "./usePurchasedCoins";
 
-const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5050";
+const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:6000";
 
 export const useSocket = () => {
   const { user } = useUserContext();
@@ -37,7 +37,9 @@ export const useSocket = () => {
         socketRef.current.close();
       }
 
-      const ws = new WebSocket(SOCKET_URL);
+      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      // Add token to connection URL for backend verification
+      const ws = new WebSocket(`${SOCKET_URL}?token=${token}`);
       socketRef.current = ws;
 
       ws.onopen = () => {
@@ -80,6 +82,23 @@ export const useSocket = () => {
               window.dispatchEvent(new CustomEvent("refreshNotifications"));
               window.dispatchEvent(new CustomEvent("refreshOrders"));
             }
+          } else if (type === "ALERT_TRIGGERED") {
+             if (data.targetUserId === user.id) {
+                 toast.success(`🚀 Price Alert Hit!\n${data.message}`, {
+                     duration: 8000,
+                     position: "top-right",
+                     style: {
+                         background: '#fff',
+                         color: '#333',
+                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                         padding: '12px 16px',
+                         borderRadius: '12px'
+                     }
+                 });
+                 
+                 // Trigger global refresh for notifications
+                 window.dispatchEvent(new CustomEvent("refreshNotifications"));
+             }
           }
         } catch (error) {
           console.error("❌ [Real-time] Error parsing message:", error);

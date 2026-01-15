@@ -4,8 +4,8 @@ import { TwoFactorEvent } from "../utils/twoFactorEvent";
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
-  if (import.meta.env.DEV) return `http://${window.location.hostname}:6000/api`;
-  return "/api"; 
+  // Fallback / Hardcode to ensure correlation with backend
+  return "http://localhost:6000/api";
 };
 
 const API_BASE_URL = getBaseUrl();
