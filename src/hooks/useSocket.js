@@ -51,8 +51,7 @@ export const useSocket = () => {
           const { type, data } = JSON.parse(event.data);
 
           if (type === "ORDER_FILLED") {
-            if (data.targetUserId === user.id) {
-              
+            
               toast.success(`${data.type.toUpperCase()} ${data.symbol.toUpperCase()} Order Filled`, {
                 duration: 4000,
                 position: "top-right",
@@ -65,9 +64,7 @@ export const useSocket = () => {
               // Trigger global refresh for notifications and open orders
               window.dispatchEvent(new CustomEvent("refreshNotifications"));
               window.dispatchEvent(new CustomEvent("refreshOrders"));
-            }
           } else if (type === "ORDER_TRIGGERED") {
-            if (data.targetUserId === user.id) {
               
               toast(`Triggered: ${data.symbol.toUpperCase()} - Limit order active at $${data.limit_price.toLocaleString()}`, {
                 duration: 6000,
@@ -81,9 +78,7 @@ export const useSocket = () => {
               // Trigger global refresh for notifications and open orders
               window.dispatchEvent(new CustomEvent("refreshNotifications"));
               window.dispatchEvent(new CustomEvent("refreshOrders"));
-            }
           } else if (type === "ALERT_TRIGGERED") {
-             if (data.targetUserId === user.id) {
                  toast.success(`🚀 Price Alert Hit!\n${data.message}`, {
                      duration: 8000,
                      position: "top-right",
@@ -98,7 +93,6 @@ export const useSocket = () => {
                  
                  // Trigger global refresh for notifications
                  window.dispatchEvent(new CustomEvent("refreshNotifications"));
-             }
           }
         } catch (error) {
           console.error("❌ [Real-time] Error parsing message:", error);
