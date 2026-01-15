@@ -79,8 +79,6 @@ export const addPurchase = createAsyncThunk(
       const finalPurchaseData = { ...purchaseData, user_id: userId };
       const response = await postForm("/purchases/buy", finalPurchaseData);
       if (response.success) {
-        dispatch(refreshBalance());
-        dispatch(fetchPurchasedCoins());
         dispatch(fetchTransactionHistory());
         return response;
       } else {
@@ -102,8 +100,6 @@ export const sellCoins = createAsyncThunk(
       const finalSellData = { ...sellData, user_id: userId };
       const response = await postForm("/purchases/sell", finalSellData);
       if (response.success) {
-        dispatch(refreshBalance());
-        dispatch(fetchPurchasedCoins());
         dispatch(fetchTransactionHistory());
         return response;
       } else {
@@ -141,6 +137,54 @@ const portfolioSlice = createSlice({
       })
       .addCase(fetchTransactionHistory.fulfilled, (state, action) => {
         state.transactionHistory = action.payload;
+      })
+      .addCase(addPurchase.fulfilled, (state, action) => {
+        const newPurchase = action.payload.purchase;
+        if (newPurchase) {
+          state.purchasedCoins.push({
+            id: newPurchase._id,
+            coinId: newPurchase.coinId,
+            coinName: newPurchase.coinName,
+            coinSymbol: newPurchase.coinSymbol,
+            coinPriceUSD: newPurchase.coinPriceUSD,
+            quantity: newPurchase.quantity,
+            totalCost: newPurchase.totalCost,
+            fees: newPurchase.fees,
+            image: newPurchase.image,
+            purchaseDate: newPurchase.purchaseDate,
+            remainingInvestment: newPurchase.totalCost,
+            totalQuantity: newPurchase.quantity,
+          });
+        }
+      })
+      .addCase(sellCoins.fulfilled, (state, action) => {
+        const { deletedPurchases, updatedPurchases } = action.payload;
+        
+        // Remove deleted coins
+        if (deletedPurchases && deletedPurchases.length > 0) {
+          state.purchasedCoins = state.purchasedCoins.filter(
+            (coin) => !deletedPurchases.includes(coin.id)
+          );
+        }
+
+        // Update modified coins
+        if (updatedPurchases && updatedPurchases.length > 0) {
+          state.purchasedCoins = state.purchasedCoins.map((coin) => {
+            const updated = updatedPurchases.find((u) => u._id === coin.id);
+            if (updated) {
+              return {
+                ...coin,
+                quantity: updated.quantity,
+                totalCost: updated.totalCost,
+                remainingInvestment: updated.totalCost, // Assuming reset on update? Or check logic. 
+                // Usually sell reduces quantity and totalCost proportionally or specifically. 
+                // Backend executeSell updates these fields.
+                totalQuantity: updated.quantity,
+              };
+            }
+            return coin;
+          });
+        }
       });
   },
 });

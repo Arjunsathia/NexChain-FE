@@ -71,7 +71,8 @@ const walletSlice = createSlice({
     builder
 
       .addCase(refreshBalance.pending, (state) => {
-        state.loading = true;
+        // Only show loading if we really don't have a balance yet (optional, or just remove loading for refreshes)
+        // state.loading = true; 
       })
       .addCase(refreshBalance.fulfilled, (state, action) => {
         state.loading = false;
@@ -92,6 +93,18 @@ const walletSlice = createSlice({
       .addCase(resetBalance.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      
+      // Handle immediate balance updates from portfolio actions
+      .addCase('portfolio/addPurchase/fulfilled', (state, action) => {
+        if (action.payload.newBalance !== undefined) {
+          state.balance = action.payload.newBalance;
+        }
+      })
+      .addCase('portfolio/sellCoins/fulfilled', (state, action) => {
+        if (action.payload.newBalance !== undefined) {
+          state.balance = action.payload.newBalance;
+        }
       });
   },
 });

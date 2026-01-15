@@ -29,7 +29,7 @@ const initialRegisterKeys = {
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { fetchUsers, setToken } = useUserContext();
+  const { fetchUsers, setToken, updateUser } = useUserContext();
 
   // Auth State
   const [activeTab, setActiveTab] = useState("login");
@@ -57,10 +57,11 @@ const AuthPage = () => {
           setToken(res.accessToken);
           setMemoryToken(res.accessToken);
           localStorage.setItem("NEXCHAIN_USER_TOKEN", res.accessToken);
-          if (res?.user)
+          if (res?.user) {
+            updateUser(res.user);
             localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
+          }
 
-          await fetchUsers();
           toast.success(`Welcome back ${res.user.name}!`, {
             id: "google-auth",
           });
@@ -89,9 +90,10 @@ const AuthPage = () => {
         setToken(res.accessToken);
         setMemoryToken(res.accessToken);
         localStorage.setItem("NEXCHAIN_USER_TOKEN", res.accessToken);
-        if (res?.user)
+        if (res?.user) {
+          updateUser(res.user);
           localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
-        await fetchUsers();
+        }
         toast.success(`Welcome back!`);
         navigate("/dashboard");
       }

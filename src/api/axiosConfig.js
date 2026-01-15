@@ -4,7 +4,7 @@ import { TwoFactorEvent } from "../utils/twoFactorEvent";
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
-  if (import.meta.env.DEV) return `http://${window.location.hostname}:5050/api`;
+  if (import.meta.env.DEV) return `http://${window.location.hostname}:6000/api`;
   return "/api"; 
 };
 

@@ -10,7 +10,7 @@ import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 function WatchlistPreview({ disableAnimations = false }) {
   const isLight = useThemeCheck();
-  const { user } = useUserContext();
+  const { user, accessToken } = useUserContext();
 
   // Determine User ID (Context or direct token decode for instant cache key availability)
   const getInstantUserId = () => {
@@ -114,7 +114,7 @@ function WatchlistPreview({ disableAnimations = false }) {
 
     if (effectiveUserId) fetchWatchlist();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveUserId]);
+  }, [effectiveUserId, accessToken]);
 
   const mergedCoins = useMemo(() => {
     if (!Array.isArray(watchlistData)) return [];

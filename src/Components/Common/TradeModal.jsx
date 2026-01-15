@@ -206,6 +206,11 @@ function TradeModal({
         setOrderType("market");
         setAlertTargetPrice(price);
 
+        // Warm up backend cache for instant execution
+        if (coin.symbol || coin.coinSymbol) {
+          api.post("/coins/track", { symbol: coin.symbol || coin.coinSymbol }).catch(() => { });
+        }
+
         viewLockedRef.current = true;
         const timer = setTimeout(() => setIsVisible(true), 10);
         prevCoinIdRef.current = currentCoinId;
@@ -527,12 +532,12 @@ function TradeModal({
       setIsTradeSuccess(true);
       setTimeout(() => {
         handleClose();
-      }, 1000);
+      }, 100);
       // Clean submit state only after modal is long gone
       setTimeout(() => {
         setIsSubmitting(false);
         setIsTradeSuccess(false);
-      }, 2000);
+      }, 300);
     } catch (error) {
       console.error("Trade error:", error);
       const errorMessage =

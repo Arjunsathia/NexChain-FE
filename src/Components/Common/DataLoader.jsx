@@ -10,7 +10,7 @@ import { fetchCoins } from "@/redux/slices/coinSlice";
 
 const DataLoader = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
+  const { user, accessToken } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -28,7 +28,7 @@ const DataLoader = () => {
       dispatch(fetchPurchasedCoins());
       dispatch(fetchTransactionHistory());
     }
-  }, [dispatch, user?.id]);
+  }, [dispatch, user?.id, accessToken]);
 
   return null;
 };
