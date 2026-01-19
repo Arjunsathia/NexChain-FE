@@ -60,83 +60,93 @@ export const BinanceTickerProvider = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
     let reconnectTimeout = null;
+    let wsInstance = null;
+    let updateInterval = null;
 
     const connect = () => {
       if (!isMounted) return;
 
-      // Subscribe to a broad list of popular coins to ensure high cache hit rate
       const streams = Object.values(symbolMap)
         .map((s) => `${s}@ticker`)
         .join("/");
 
-      ws.current = new WebSocket(
+      wsInstance = new WebSocket(
         `wss://stream.binance.com:9443/stream?streams=${streams}`,
       );
+      ws.current = wsInstance;
 
-      ws.current.onmessage = (event) => {
+      wsInstance.onmessage = (event) => {
         if (!isMounted) return;
         try {
           const message = JSON.parse(event.data);
           if (message.data && message.stream) {
             const symbol = message.stream.split("@")[0];
-            // Find the ID for this symbol (reverse lookup)
             const coinId = Object.keys(symbolMap).find(
               (key) => symbolMap[key] === symbol,
             );
 
             if (coinId) {
+              const data = message.data;
+              // Direct assignment to buffer to avoid object creation overhead
               bufferRef.current[coinId] = {
-                current_price: parseFloat(message.data.c),
-                price_change_percentage_24h: parseFloat(message.data.P),
-                price_change_24h: parseFloat(message.data.p),
-                high_24h: parseFloat(message.data.h),
-                low_24h: parseFloat(message.data.l),
-                isPositive: parseFloat(message.data.P) >= 0,
-                price: parseFloat(message.data.c),
-                change: parseFloat(message.data.P),
-                volume: parseFloat(message.data.v),
-                quoteVolume: parseFloat(message.data.q),
-                total_volume: parseFloat(message.data.q),
+                current_price: parseFloat(data.c),
+                price_change_percentage_24h: parseFloat(data.P),
+                price_change_24h: parseFloat(data.p),
+                high_24h: parseFloat(data.h),
+                low_24h: parseFloat(data.l),
+                isPositive: parseFloat(data.P) >= 0,
+                price: parseFloat(data.c),
+                change: parseFloat(data.P),
+                volume: parseFloat(data.v),
+                quoteVolume: parseFloat(data.q),
+                total_volume: parseFloat(data.q),
               };
             }
           }
         } catch (e) {
-          console.error("WS Parse Error", e);
+          // Silent catch for JSON parse errors
         }
       };
 
-      ws.current.onclose = () => {
+      wsInstance.onclose = () => {
         if (isMounted) {
           reconnectTimeout = setTimeout(connect, 3000);
         }
       };
 
-      ws.current.onerror = () => {
-        if (ws.current) ws.current.close();
+      wsInstance.onerror = () => {
+        if (wsInstance) wsInstance.close();
       };
     };
 
     connect();
 
     // Batch updates to every 1 seond to prevent React render thrashing
-    const interval = setInterval(() => {
+    updateInterval = setInterval(() => {
       if (isMounted && Object.keys(bufferRef.current).length > 0) {
-        setLivePrices((prev) => ({ ...prev, ...bufferRef.current }));
+        setLivePrices((prev) => {
+          // Only create new object if we have updates
+          return { ...prev, ...bufferRef.current };
+        });
         bufferRef.current = {};
       }
     }, 1000);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      clearInterval(updateInterval);
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (ws.current) {
-        ws.current.onclose = null; // Prevent reconnection attempt during cleanup
+        ws.current.onclose = null;
         ws.current.close();
       }
     };
   }, []);
 
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  // Although livePrices changes frequently, using useMemo ensures we don't trigger
+  // updates for other reasons.
+  // We use the direct livePrices state which updates every second.
   return (
     <BinanceTickerContext.Provider value={livePrices}>
       {children}

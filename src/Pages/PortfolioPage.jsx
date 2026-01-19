@@ -130,16 +130,16 @@ const PortfolioPage = () => {
     });
   }, [groupedHoldings, livePrices]);
 
-  // Update Cache when mergedHoldings has data
+  // Update Cache only when structural data changes (groupedHoldings), not prices
   useEffect(() => {
-    if (mergedHoldings.length > 0) {
-      setCachedHoldings(mergedHoldings);
+    if (groupedHoldings && groupedHoldings.length > 0) {
+      // Only cache the base data, not the derived price data
       localStorage.setItem(
         `portfolio_holdings_v1_${userId}`,
-        JSON.stringify(mergedHoldings)
+        JSON.stringify(groupedHoldings)
       );
     }
-  }, [mergedHoldings, userId]);
+  }, [groupedHoldings, userId]);
 
   // Use cached data if fresh data is loading or empty (flicker prevention)
   const finalHoldings = useMemo(() => {

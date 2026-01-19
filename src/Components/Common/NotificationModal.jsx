@@ -13,11 +13,14 @@ import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import NotificationDetailsModal from "./NotificationDetailsModal";
 
 const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
   const isLight = useThemeCheck();
   const isDark = !isLight;
 
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
@@ -48,6 +51,9 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Don't close if details modal is open
+      if (isDetailsModalOpen) return;
+
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target) &&
@@ -66,7 +72,16 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }
-  }, [isOpen, onClose, triggerRef]);
+  }, [isOpen, onClose, triggerRef, isDetailsModalOpen]);
+
+  const handleNotificationClick = async (notification) => {
+    setSelectedNotification(notification);
+    setIsDetailsModalOpen(true);
+
+    if (!notification.isRead) {
+      handleMarkAsRead(notification._id);
+    }
+  };
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -204,7 +219,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                   {notifications.map((notification) => (
                     <div
                       key={notification._id}
-                      onClick={() => handleMarkAsRead(notification._id)}
+                      onClick={() => handleNotificationClick(notification)}
                       className={`p-4 transition-colors cursor-pointer relative group ${isDark ? "hover:bg-gray-800/50" : "hover:bg-gray-50"
                         } ${!notification.isRead
                           ? isDark
@@ -237,7 +252,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                             </div>
                           </div>
                           <p
-                            className={`text-sm leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                            className={`text-sm leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"} line-clamp-2`}
                           >
                             {notification.message}
                           </p>
@@ -260,6 +275,12 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
               )}
             </div>
           </motion.div>
+
+          <NotificationDetailsModal
+            isOpen={isDetailsModalOpen}
+            onClose={() => setIsDetailsModalOpen(false)}
+            notification={selectedNotification}
+          />
         </div>
       )}
     </AnimatePresence>

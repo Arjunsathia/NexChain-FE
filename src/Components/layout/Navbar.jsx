@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import SiteLogo from "../../assets/Img/logo.png";
 import SiteLogoLight from "../../assets/Img/logo-2.png";
 
-export default function Navbar() {
+function NavbarComponent() {
   const { toggleTheme } = useTheme();
   const isLight = useThemeCheck();
   const navigate = useNavigate();
@@ -114,11 +114,29 @@ export default function Navbar() {
     [role],
   );
 
-  const isActive = (path) => {
-    if (path === "/admin") return location.pathname.startsWith("/admin");
-    if (path === "/dashboard")
-      return location.pathname === "/dashboard" || location.pathname === "/";
-    return location.pathname.startsWith(path);
+  // Optimistic Navigation State
+  const [activeTab, setActiveTab] = useState(location.pathname);
+
+  // Sync activeTab with location (handles back/forward button)
+  useEffect(() => {
+    setActiveTab(location.pathname);
+  }, [location.pathname]);
+
+  const handleNavClick = useCallback(
+    (path) => {
+      setActiveTab(path); // Instant visual update
+      navigate(path);
+      setIsMobileMenuOpen(false);
+    },
+    [navigate],
+  );
+
+  const isTabActive = (path) => {
+    // Special case for dashboard root
+    if (path === "/dashboard") {
+      return activeTab === "/dashboard" || activeTab === "/";
+    }
+    return activeTab.startsWith(path);
   };
 
   return (
@@ -150,7 +168,7 @@ export default function Navbar() {
             </button>
 
             <div
-              onClick={() => navigate("/")}
+              onClick={() => handleNavClick("/")}
               className="flex items-center justify-center h-full group cursor-pointer"
             >
               <img
@@ -166,11 +184,11 @@ export default function Navbar() {
             className={`hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 px-2 h-[52px] rounded-full ${TC.capsule} z-10`}
           >
             {navItems.map((item) => {
-              const active = isActive(item.path);
+              const active = isTabActive(item.path);
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleNavClick(item.path)}
                   className={`
                                         relative px-6 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 
                                         outline-none select-none
@@ -399,3 +417,6 @@ export default function Navbar() {
     </>
   );
 }
+
+const Navbar = React.memo(NavbarComponent);
+export default Navbar;

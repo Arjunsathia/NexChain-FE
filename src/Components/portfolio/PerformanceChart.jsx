@@ -535,4 +535,4 @@ const Chart = React.memo(({ chartData, isPositive, tooltipDataRef, TC, disableAn
 
 Chart.displayName = "Chart";
 
-export default PerformanceChart;
+export default React.memo(PerformanceChart);

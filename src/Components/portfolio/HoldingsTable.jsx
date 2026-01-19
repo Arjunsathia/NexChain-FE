@@ -418,4 +418,4 @@ const HoldingsTable = ({
   );
 };
 
-export default HoldingsTable;
+export default React.memo(HoldingsTable);
