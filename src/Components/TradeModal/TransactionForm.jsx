@@ -54,6 +54,8 @@ const TransactionForm = React.memo(
         market: "Market",
         limit: "Limit",
         stop_limit: "Stop-Limit",
+        stop_market: "Stop-Market",
+        oco: "OCO",
       };
       return types[type] || type;
     };
@@ -102,7 +104,7 @@ const TransactionForm = React.memo(
                     : "bg-[#1a1d24] border-white/10"
                     }`}
                 >
-                  {["market", "limit", "stop_limit"].map((type) => (
+                  {["market", "limit", "stop_limit", "stop_market", "oco"].map((type) => (
                     <button
                       key={type}
                       onClick={() => {
@@ -133,9 +135,10 @@ const TransactionForm = React.memo(
         {/* Limit/Stop Price Inputs */}
         {(orderType === "limit" ||
           orderType === "stop_limit" ||
-          orderType === "stop_market") && (
+          orderType === "stop_market" ||
+          orderType === "oco") && (
             <div className="flex gap-2 animate-in slide-in-from-top-2">
-              {(orderType === "stop_limit" || orderType === "stop_market") && (
+              {(orderType === "stop_limit" || orderType === "stop_market" || orderType === "oco") && (
                 <div
                   className={`flex-1 px-3 py-2.5 rounded-lg border ${isLight
                     ? "bg-gray-50 border-gray-200"
@@ -144,20 +147,26 @@ const TransactionForm = React.memo(
                 >
                   <div className="flex justify-between items-center mb-1">
                     <div className="text-[9px] font-bold text-gray-400 uppercase">
-                      Stop Price
+                      {orderType === "oco"
+                        ? (isBuyOperation ? "Buy Stop (Breakout)" : "Stop Loss (Lower)")
+                        : "Stop Price"}
                     </div>
                   </div>
                   <input
                     type="number"
                     value={stopPrice}
                     onChange={(e) => setStopPrice(e.target.value)}
-                    placeholder="0.00"
+                    placeholder={
+                      orderType === "oco"
+                        ? (isBuyOperation ? "> Current Price" : "< Current Price")
+                        : "0.00"
+                    }
                     className={`w-full bg-transparent font-mono font-bold text-sm outline-none ${isLight ? "text-gray-900" : "text-white"
                       }`}
                   />
                 </div>
               )}
-              {(orderType === "limit" || orderType === "stop_limit") && (
+              {(orderType === "limit" || orderType === "stop_limit" || orderType === "oco") && (
                 <div
                   className={`flex-1 px-3 py-2.5 rounded-lg border ${isLight
                     ? "bg-gray-50 border-gray-200"
@@ -166,7 +175,9 @@ const TransactionForm = React.memo(
                 >
                   <div className="flex justify-between items-center mb-1">
                     <div className="text-[9px] font-bold text-gray-400 uppercase">
-                      Limit Price
+                      {orderType === "oco"
+                        ? (isBuyOperation ? "Buy Limit (Dip)" : "Take Profit (Higher)")
+                        : "Limit Price"}
                     </div>
                     {orderType === "limit" && limitPrice && (
                       <div className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tight
@@ -184,7 +195,11 @@ const TransactionForm = React.memo(
                     type="number"
                     value={limitPrice}
                     onChange={handleLimitPriceChange}
-                    placeholder="0.00"
+                    placeholder={
+                      orderType === "oco"
+                        ? (isBuyOperation ? "< Current Price" : "> Current Price")
+                        : "0.00"
+                    }
                     className={`w-full bg-transparent font-mono font-bold text-sm outline-none ${isLight ? "text-gray-900" : "text-white"
                       }`}
                   />

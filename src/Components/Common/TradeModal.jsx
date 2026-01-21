@@ -58,6 +58,17 @@ function TradeModal({
   const prevCoinIdRef = useRef(null);
   const prevShowRef = useRef(false);
 
+  const formatOrderType = (type) => {
+    const types = {
+      market: "Market",
+      limit: "Limit",
+      stop_limit: "Stop-Limit",
+      stop_market: "Stop-Market",
+      oco: "OCO",
+    };
+    return types[type] || type;
+  };
+
   const userHoldings = useMemo(() => {
     if (!coin || !purchasedCoins || purchasedCoins.length === 0) return null;
 
@@ -133,10 +144,14 @@ function TradeModal({
   }, [isHoldingsView, coin, currentPrice, userHoldings]);
 
   const effectivePrice = useMemo(() => {
-    return (orderType === "limit" || orderType === "stop_limit") && limitPrice
+    if (orderType === "stop_market" && stopPrice) return parseFloat(stopPrice);
+    if (orderType === "oco" && limitPrice && stopPrice) {
+      return Math.max(parseFloat(limitPrice), parseFloat(stopPrice));
+    }
+    return (orderType === "limit" || orderType === "stop_limit" || orderType === "oco") && limitPrice
       ? parseFloat(limitPrice)
       : currentPrice;
-  }, [orderType, limitPrice, currentPrice]);
+  }, [orderType, limitPrice, stopPrice, currentPrice]);
 
   const maxAvailable = useMemo(() => {
     const isSellMode = isHoldingsView
@@ -404,7 +419,7 @@ function TradeModal({
         return;
       }
 
-      if (orderType === "limit" || orderType === "stop_limit") {
+      if (orderType === "limit" || orderType === "stop_limit" || orderType === "stop_market") {
         const orderData = {
           user_id: user.id,
           coin_id: coinData.coinId || coinData.id,
@@ -413,9 +428,9 @@ function TradeModal({
           coin_image: coinData.image,
           type: type,
           category: orderType,
-          limit_price: parseFloat(limitPrice),
+          limit_price: orderType === "stop_market" ? undefined : parseFloat(limitPrice),
           stop_price:
-            orderType === "stop_limit" ? parseFloat(stopPrice) : undefined,
+            (orderType === "stop_limit" || orderType === "stop_market") ? parseFloat(stopPrice) : undefined,
           quantity: parseFloat(coinAmount),
         };
 
@@ -426,10 +441,37 @@ function TradeModal({
         }
 
         toast.success(
-          `${orderType === "stop_limit" ? "Stop-Limit" : "Limit"} Order Placed Successfully!`,
+          `${formatOrderType(orderType)} Order Placed Successfully!`,
         );
 
         // Non-blocking updates
+        runBackgroundUpdates();
+        return;
+      } else if (orderType === "oco") {
+        // OCO Handling
+        const ocoData = {
+          user_id: user.id,
+          coin_id: coinData.coinId || coinData.id,
+          coin_symbol: symbol,
+          coin_name: coinData.name || coinData.coinName,
+          coin_image: coinData.image,
+          type: type,
+          quantity: parseFloat(coinAmount),
+          tp_limit_price: parseFloat(limitPrice),
+          sl_stop_price: parseFloat(stopPrice),
+          // For now assuming SL is Stop-Market as per standard simple OCO. 
+          // If we added SL Limit input, we would pass it here.
+          sl_limit_price: undefined
+        };
+
+        const res = await api.post("/orders/create-oco", ocoData);
+
+        if (!res.data.success) {
+          throw new Error(res.data.error || "Failed to create OCO order");
+        }
+
+        toast.success("OCO Order Placed Successfully!");
+
         runBackgroundUpdates();
         return;
       } else {
@@ -604,25 +646,79 @@ function TradeModal({
       ? activeTab === "deposit"
       : type === "buy";
 
-    // Stop-Limit Validations
-    if (orderType === "stop_limit") {
+    // Stop-Limit & OCO Validations
+    if (orderType === "stop_limit" || orderType === "stop_market" || orderType === "oco") {
       const stop = parseFloat(stopPrice);
       const limit = parseFloat(limitPrice);
 
-      if (isNaN(stop) || isNaN(limit)) {
-        toast.error("Please enter both Stop and Limit prices");
-        return;
-      }
-
-      if (isBuyMode) {
-        if (stop <= currentPrice) {
-          toast.error(`Buy Stop must be ABOVE current price ($${currentPrice.toLocaleString()}). Use a Limit order to buy lower.`);
+      if (orderType === "stop_market") {
+        if (isNaN(stop)) {
+          toast.error("Please enter Stop price");
+          return;
+        }
+      } else if (orderType === "oco") {
+        if (isNaN(stop) || isNaN(limit)) {
+          toast.error("Please enter both Take Profit (Limit) and Stop Loss (Stop) prices");
           return;
         }
       } else {
-        if (stop >= currentPrice) {
-          toast.error(`Sell Stop must be BELOW current price ($${currentPrice.toLocaleString()}). Use a Limit order to sell higher.`);
+        // Stop Limit
+        if (isNaN(stop) || isNaN(limit)) {
+          toast.error("Please enter both Stop and Limit prices");
           return;
+        }
+      }
+
+      // Additional Logic checks for OCO
+      if (orderType === "oco") {
+        if (isBuyMode) {
+          // Buy OCO:
+          // 1. Limit Order (Take Profit / Buy Dip) -> MUST be BELOW current price
+          // 2. Stop Order (Stop Loss / Breakout Buy) -> MUST be ABOVE current price
+
+          if (limit >= currentPrice) {
+            toast.error(
+              `For Buy OCO, Take Profit (Limit) acts as a "Buy Limit" and must be LOWER than current price ($${currentPrice.toLocaleString()}). Use this to catch a dip.`
+            );
+            return;
+          }
+          if (stop <= currentPrice) {
+            toast.error(
+              `For Buy OCO, Stop Loss (Trigger) acts as a "Buy Stop" and must be HIGHER than current price ($${currentPrice.toLocaleString()}). Use this to buy a breakout.`
+            );
+            return;
+          }
+        } else {
+          // Sell OCO:
+          // 1. Limit Order (Take Profit) -> MUST be ABOVE current price (Sell High)
+          // 2. Stop Order (Stop Loss) -> MUST be BELOW current price (Cut Loss)
+
+          if (limit <= currentPrice) {
+            toast.error(
+              `For Sell OCO, Take Profit (Limit) must be HIGHER than current price ($${currentPrice.toLocaleString()}). You want to sell at a profit.`
+            );
+            return;
+          }
+          if (stop >= currentPrice) {
+            toast.error(
+              `For Sell OCO, Stop Loss (Trigger) must be LOWER than current price ($${currentPrice.toLocaleString()}). You want to limit your losses.`
+            );
+            return;
+          }
+        }
+      }
+
+      if (orderType === "stop_limit") {
+        if (isBuyMode) {
+          if (stop <= currentPrice) {
+            toast.error(`Buy Stop must be ABOVE current price ($${currentPrice.toLocaleString()}). Use a Limit order to buy lower.`);
+            return;
+          }
+        } else {
+          if (stop >= currentPrice) {
+            toast.error(`Sell Stop must be BELOW current price ($${currentPrice.toLocaleString()}). Use a Limit order to sell higher.`);
+            return;
+          }
         }
       }
     }

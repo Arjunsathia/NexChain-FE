@@ -4,9 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import SparklineGraph from "../Components/Crypto/SparklineGraph";
 import CoinTable from "../Components/Crypto/CoinTable";
-import NewsSection from "../Components/Crypto/NewsSection";
 import TopGainers from "@/Components/Crypto/TopGainers";
-
 import TopLosers from "@/Components/Crypto/TopLosers";
 import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
 import Skeleton from "react-loading-skeleton";
@@ -20,6 +18,7 @@ import {
   FaFire,
   FaLayerGroup,
 } from "react-icons/fa";
+
 function CryptoList() {
   const isLight = useThemeCheck();
   const location = useLocation();
@@ -377,13 +376,7 @@ function CryptoList() {
           <CoinTable onTrade={handleTrade} />
         </div>
 
-        <div className={`pt-8 border-t border-gray-200/10`}>
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <FaFire className="text-orange-500" />
-            Latest Crypto News
-          </h2>
-          <NewsSection />
-        </div>
+    
       </div>
 
       <TradeModal

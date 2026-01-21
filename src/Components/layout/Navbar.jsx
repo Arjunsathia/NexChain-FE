@@ -106,6 +106,7 @@ function NavbarComponent() {
       { path: "/cryptolist", label: "Markets" },
       { path: "/portfolio", label: "Portfolio" },
       { path: "/watchlist", label: "Watchlist" },
+      { path: "/news", label: "News" },
       { path: "/learning", label: "Learn" },
       ...(role === "admin" || role === "superadmin"
         ? [{ path: "/admin", label: "Admin" }]
@@ -328,7 +329,7 @@ function NavbarComponent() {
                     <button
                       key={item.path}
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isActive(item.path) ? TC.linkActive : TC.linkIdle}`}
+                      className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isTabActive(item.path) ? TC.linkActive : TC.linkIdle}`}
                     >
                       {item.label}
                       <ChevronRight size={16} />

@@ -86,8 +86,8 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", duration: 0.5 }}
                         className={`relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border ${isDark
-                                ? "bg-gray-900 border-gray-700"
-                                : "bg-white border-gray-200"
+                            ? "bg-gray-900 border-gray-700"
+                            : "bg-white border-gray-200"
                             }`}
                     >
                         {notification && (
@@ -114,8 +114,8 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                                     <button
                                         onClick={onClose}
                                         className={`p-2 rounded-lg transition-colors ${isDark
-                                                ? "text-gray-400 hover:bg-gray-800 hover:text-white"
-                                                : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                                            ? "text-gray-400 hover:bg-gray-800 hover:text-white"
+                                            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                                             }`}
                                     >
                                         <FaTimes />
@@ -136,6 +136,18 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                                         </div>
                                     </div>
 
+                                    {notification.category && (
+                                        <div
+                                            className={`mb-6 p-3 rounded-lg flex items-center gap-3 ${isDark ? "bg-gray-800/50 text-gray-300" : "bg-gray-50 text-gray-700"
+                                                }`}
+                                        >
+                                            <span className="font-semibold text-sm uppercase opacity-70">Order Type:</span>
+                                            <span className="font-medium capitalize">
+                                                {notification.category.replace(/_/g, " ")}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <div
                                         className={`prose ${isDark ? "prose-invert" : ""
                                             } max-w-none`}
@@ -152,15 +164,15 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                                 {/* Footer */}
                                 <div
                                     className={`p-4 border-t ${isDark
-                                            ? "bg-gray-900/50 border-gray-800"
-                                            : "bg-gray-50 border-gray-100"
+                                        ? "bg-gray-900/50 border-gray-800"
+                                        : "bg-gray-50 border-gray-100"
                                         } flex justify-end`}
                                 >
                                     <button
                                         onClick={onClose}
                                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDark
-                                                ? "bg-gray-800 text-white hover:bg-gray-700"
-                                                : "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50"
+                                            ? "bg-gray-800 text-white hover:bg-gray-700"
+                                            : "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50"
                                             }`}
                                     >
                                         Close

@@ -12,6 +12,7 @@ import CryptoList from "../Pages/CryptoList";
 import PortfolioPage from "@/Pages/PortfolioPage";
 import Watchlist from "@/Pages/Watchlist";
 import LearningHub from "@/Pages/LearningHub";
+import NewsPage from "@/Pages/NewsPage";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
 
@@ -66,7 +67,7 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
-        {}
+        { }
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -74,6 +75,7 @@ export default function AppRoutes() {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/learning" element={<LearningHub />} />
+            <Route path="/news" element={<NewsPage />} />
             <Route path="/coin" element={<CoinPageOutlet />}>
               <Route
                 path="coin-details/:coinId"

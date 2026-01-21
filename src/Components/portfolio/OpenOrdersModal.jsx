@@ -34,7 +34,7 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                     onClick={onClose}
                 />
 
-                <div className={`relative w-full max-w-4xl max-h-[85vh] ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${isLight ? 'border-gray-200' : 'border-gray-800'} animate-in slide-in-from-bottom-4 duration-300`}>
+                <div className={`relative w-full max-w-6xl max-h-[85vh] ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${isLight ? 'border-gray-200' : 'border-gray-800'} animate-in slide-in-from-bottom-4 duration-300`}>
                     {/* Header */}
                     <div className={`p-4 sm:p-6 border-b ${isLight ? 'border-gray-100' : 'border-gray-800'} flex justify-between items-center bg-transparent`}>
                         <div className="flex items-center gap-3">
@@ -74,8 +74,14 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                 <th className="pb-4 pl-2">Asset</th>
                                                 <th className="pb-4">Type</th>
                                                 <th className="pb-4">Market Price</th>
-                                                <th className="pb-4">Stop Price</th>
-                                                <th className="pb-4">Limit Price</th>
+                                                <th className="pb-4">
+                                                    Trigger Price
+                                                    <span className="ml-1 text-[9px] opacity-50 lowercase">(stop)</span>
+                                                </th>
+                                                <th className="pb-4">
+                                                    Exec. Price
+                                                    <span className="ml-1 text-[9px] opacity-50 lowercase">(limit)</span>
+                                                </th>
                                                 <th className="pb-4">Amount</th>
                                                 <th className="pb-4 text-right">Order Value</th>
                                                 <th className="pb-4 text-right pr-2">Actions</th>
@@ -95,9 +101,16 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                     </td>
                                                     <td className="py-4">
                                                         <div className="flex flex-col gap-1">
-                                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                                                {order.category.replace('_', ' ')} {order.type}
-                                                            </span>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                                                    {order.category.replace('_', ' ')} {order.type}
+                                                                </span>
+                                                                {order.oco_group_id && (
+                                                                    <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20" title="One Cancels the Other">
+                                                                        OCO
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                             {order.status === 'triggered' && (
                                                                 <span className="px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20 w-fit">
                                                                     Triggered
@@ -115,10 +128,16 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                         )}
                                                     </td>
                                                     <td className={`py-4 font-mono font-bold ${TC.textPrimary}`}>
-                                                        {order.stop_price ? `$${order.stop_price.toLocaleString()}` : '—'}
+                                                        {order.stop_price ? `$${order.stop_price.toLocaleString()}` : <span className="text-gray-500 text-xs font-sans font-medium">—</span>}
                                                     </td>
                                                     <td className={`py-4 font-mono font-bold ${TC.textPrimary}`}>
-                                                        {order.limit_price ? `$${order.limit_price.toLocaleString()}` : 'MKT'}
+                                                        {order.limit_price ? (
+                                                            `$${order.limit_price.toLocaleString()}`
+                                                        ) : (
+                                                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${isLight ? 'bg-gray-100 text-gray-500' : 'bg-white/10 text-gray-400'}`}>
+                                                                MARKET PRICE
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className={`py-4 font-mono font-bold ${TC.textPrimary}`}>
                                                         {order.quantity}
@@ -169,9 +188,16 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-1">
-                                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                                        {order.category.replace('_', ' ')} {order.type}
-                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        {order.oco_group_id && (
+                                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                                                OCO
+                                                            </span>
+                                                        )}
+                                                        <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                                            {order.category.replace('_', ' ')} {order.type}
+                                                        </span>
+                                                    </div>
                                                     {order.status === 'triggered' && (
                                                         <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
                                                             Triggered
@@ -182,16 +208,19 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
 
                                             <div className={`grid grid-cols-3 gap-2 py-3 border-y ${isLight ? 'border-gray-100' : 'border-gray-800'}`}>
                                                 <div className="flex flex-col gap-1">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Market Price</span>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Current Price</span>
                                                     <span className="text-sm font-mono font-bold text-blue-500">
                                                         {livePrices[order.coin_id]?.current_price ? `$${livePrices[order.coin_id].current_price.toLocaleString()}` : "..."}
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-col gap-1">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Prices (S/L)</span>
-                                                    <span className={`text-sm font-mono font-bold ${TC.textPrimary}`}>
-                                                        {order.stop_price ? `$${order.stop_price.toLocaleString()}` : "—"} / {order.limit_price ? `$${order.limit_price.toLocaleString()}` : "MKT"}
-                                                    </span>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Trigger / Exec</span>
+                                                    <div className={`text-sm font-mono font-bold ${TC.textPrimary} flex flex-col`}>
+                                                        <span>{order.stop_price ? `$${order.stop_price.toLocaleString()}` : <span className="opacity-30">—</span>}</span>
+                                                        <span className="text-[10px] opacity-70">
+                                                            {order.limit_price ? `$${order.limit_price.toLocaleString()}` : "MARKET"}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div className="flex flex-col gap-1 text-right">
                                                     <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Value</span>
@@ -203,8 +232,8 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
 
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Amount</span>
-                                                    <span className={`text-sm font-mono font-bold ${TC.textPrimary}`}>{order.quantity} Tokens</span>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${TC.textSecondary}`}>Quantity</span>
+                                                    <span className={`text-sm font-mono font-bold ${TC.textPrimary}`}>{order.quantity}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button
