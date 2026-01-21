@@ -4,7 +4,7 @@ import useUserContext from "./useUserContext";
 import useWalletContext from "./useWalletContext";
 import { usePurchasedCoins } from "./usePurchasedCoins";
 
-const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:6000";
+const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000";
 
 export const useSocket = () => {
   const { user } = useUserContext();

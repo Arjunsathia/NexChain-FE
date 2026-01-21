@@ -18,7 +18,7 @@ export default function NewsPanel() {
     const fetchNews = async () => {
       try {
         setLoading(true);
-        // GET /news -> calls http://localhost:6000/api/news
+        // GET /news -> calls http://localhost:5000/api/news
         const data = await getData("/news");
 
         // Data is likely an array directly if backend returns res.json(response.data.Data) which is an array
