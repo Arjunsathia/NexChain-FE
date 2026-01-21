@@ -18,37 +18,42 @@ export default function NewsPage() {
     const [activeCategory, setActiveCategory] = useState("All");
 
     useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                setLoading(true);
+                const data = await getData("/news");
+                if (Array.isArray(data)) {
+                    // Map raw data to UI format
+                    const formatted = data.map((item) => ({
+                        id: item.id,
+                        title: item.title,
+                        body: item.body,
+                        image: item.imageurl || FALLBACK_IMAGE,
+                        source: item.source_info?.name || item.source,
+                        time: item.published_on, // Keep as timestamp for sorting if needed
+                        timeAgo: formatTimeAgo(item.published_on),
+                        link: item.url,
+                        categories: item.categories ? item.categories.split("|") : [],
+                    }));
+                    setNews(formatted);
+                    setFilteredNews(formatted);
+                } else {
+                    console.error("News API returned non-array data:", data);
+                    // If we get an object with error, show it
+                    if (data?.error) throw new Error(data.error);
+                    throw new Error("Invalid news data format received");
+                }
+            } catch (err) {
+                console.error("Failed to fetch news:", err);
+                setError("Failed to load news feed. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         window.scrollTo(0, 0);
         fetchNews();
     }, []);
-
-    const fetchNews = async () => {
-        try {
-            setLoading(true);
-            const data = await getData("/news");
-            if (Array.isArray(data)) {
-                // Map raw data to UI format
-                const formatted = data.map((item) => ({
-                    id: item.id,
-                    title: item.title,
-                    body: item.body,
-                    image: item.imageurl || FALLBACK_IMAGE,
-                    source: item.source_info?.name || item.source,
-                    time: item.published_on, // Keep as timestamp for sorting if needed
-                    timeAgo: formatTimeAgo(item.published_on),
-                    link: item.url,
-                    categories: item.categories ? item.categories.split("|") : [],
-                }));
-                setNews(formatted);
-                setFilteredNews(formatted);
-            }
-        } catch (err) {
-            console.error("Failed to fetch news:", err);
-            setError("Failed to load news feed. Please try again later.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const formatTimeAgo = (timestamp) => {
         if (!timestamp) return "";

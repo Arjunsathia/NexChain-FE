@@ -29,7 +29,7 @@ const initialRegisterKeys = {
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { fetchUsers, setToken, updateUser } = useUserContext();
+  const { setToken, updateUser } = useUserContext();
 
   // Auth State
   const [activeTab, setActiveTab] = useState("login");

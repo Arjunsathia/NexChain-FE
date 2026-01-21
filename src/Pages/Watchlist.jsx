@@ -270,7 +270,7 @@ const Watchlist = () => {
         if (shouldLoad) setLoading(false);
       }
     },
-    [userId],
+    [userId, watchlistData.length],
   );
 
   useEffect(() => {

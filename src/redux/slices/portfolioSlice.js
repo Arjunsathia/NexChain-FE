@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
 import { jwtDecode } from "jwt-decode";
-import { refreshBalance } from "./walletSlice";
+
 
 const getUserId = () => {
   const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");

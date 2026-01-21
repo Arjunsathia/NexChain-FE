@@ -5,7 +5,7 @@ const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
   // Fallback / Hardcode to ensure correlation with backend
-  return "http://localhost:6000/api";
+  return "http://localhost:5000/api";
 };
 
 const API_BASE_URL = getBaseUrl();
@@ -66,6 +66,14 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
+    const contentType = response?.headers?.["content-type"];
+    if (contentType && !contentType.includes("application/json") && !contentType.includes("multipart/form-data")) {
+       // Check if response is string and looks like HTML
+       if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
+          console.warn("API Error: Received HTML instead of JSON. Check your API_BASE_URL.");
+          return Promise.reject(new Error("Invalid API response: Received HTML (Check API URL)"));
+       }
+    }
     return response;
   },
   async (error) => {

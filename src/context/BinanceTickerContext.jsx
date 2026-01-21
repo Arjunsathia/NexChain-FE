@@ -103,7 +103,7 @@ export const BinanceTickerProvider = ({ children }) => {
               };
             }
           }
-        } catch (e) {
+        } catch {
           // Silent catch for JSON parse errors
         }
       };

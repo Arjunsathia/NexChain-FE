@@ -70,7 +70,7 @@ const walletSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      .addCase(refreshBalance.pending, (state) => {
+      .addCase(refreshBalance.pending, () => {
         // Only show loading if we really don't have a balance yet (optional, or just remove loading for refreshes)
         // state.loading = true; 
       })

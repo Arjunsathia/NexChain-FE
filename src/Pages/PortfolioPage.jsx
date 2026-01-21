@@ -34,7 +34,7 @@ const PortfolioPage = () => {
   const userId = userStr ? JSON.parse(userStr).id : "guest";
 
   // Cache State
-  const [cachedHoldings, setCachedHoldings] = useState(() => {
+  const [cachedHoldings] = useState(() => {
     try {
       const cached = localStorage.getItem(`portfolio_holdings_v1_${userId}`);
       return cached ? JSON.parse(cached) : [];
