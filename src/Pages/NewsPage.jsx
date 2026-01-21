@@ -45,7 +45,9 @@ export default function NewsPage() {
                 }
             } catch (err) {
                 console.error("Failed to fetch news:", err);
-                setError("Failed to load news feed. Please try again later.");
+                // Show the actual error message to help debugging
+                const errorMessage = err.response?.data?.error || err.message || "Failed to load news feed.";
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }
