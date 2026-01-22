@@ -39,9 +39,11 @@ export default function NewsPage() {
                     setFilteredNews(formatted);
                 } else {
                     console.error("News API returned non-array data:", data);
-                    // If we get an object with error, show it
+                    // Determine what went wrong
+                    const debugInfo = typeof data === 'object' ? JSON.stringify(data).slice(0, 100) : String(data);
+
                     if (data?.error) throw new Error(data.error);
-                    throw new Error("Invalid news data format received");
+                    throw new Error(`Invalid news data format. Received: ${typeof data} (${debugInfo})`);
                 }
             } catch (err) {
                 console.error("Failed to fetch news:", err);
