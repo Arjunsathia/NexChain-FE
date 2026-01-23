@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ReactApexChart from "react-apexcharts";
 import { getMarketChart, getBinanceKlines } from "@/api/coinApis";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 const ChartSection = ({ coinId, disableAnimations = false }) => {
   const isLight = useThemeCheck();
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const [days, setDays] = useState(1);
   const [series, setSeries] = useState(() => {
     try {
@@ -122,7 +124,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coinId, days]);
 
-  const options = {
+  const options = useMemo(() => ({
     chart: {
       type: "area",
       height: 350,
@@ -130,19 +132,20 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       toolbar: { show: false },
       background: "transparent",
       animations: { enabled: !disableAnimations },
+      sparkline: { enabled: false },
     },
     colors: ["#00E396"],
     stroke: {
       curve: "smooth",
-      width: 2,
+      width: isMobile ? 1.5 : 2,
     },
     fill: {
       type: "gradient",
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.5,
+        opacityFrom: 0.45,
         opacityTo: 0.05,
-        stops: [0, 100],
+        stops: [0, 90, 100],
       },
     },
     dataLabels: { enabled: false },
@@ -150,41 +153,84 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
       show: true,
       borderColor: isLight ? "#e0e0e0" : "#2e2e2e",
       strokeDashArray: 4,
+      padding: {
+        top: 10,
+        right: isMobile ? 5 : 20,
+        bottom: 0,
+        left: isMobile ? 10 : 20
+      },
+      xaxis: {
+        lines: { show: false }
+      },
+      yaxis: {
+        lines: { show: true }
+      }
     },
     xaxis: {
       type: "datetime",
       labels: {
-        style: { colors: isLight ? "#333" : "#888" },
+        style: {
+          colors: isLight ? "#64748b" : "#94a3b8",
+          fontSize: isMobile ? '10px' : '12px',
+          fontWeight: 500
+        },
         datetimeFormatter: {
           year: "yyyy",
           month: "MMM 'yy",
           day: "dd MMM",
-          hour: "hh:mm tt", // Updated to 12h format for better readability
+          hour: "hh:mm tt",
         },
-        datetimeUTC: false, // Critical Fix: Force local time
+        datetimeUTC: false,
+        offsetY: 0,
       },
       tooltip: {
-        enabled: false, // Disable x-axis tooltip to reduce clutter
+        enabled: false,
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
+      crosshairs: {
+        show: true,
+        stroke: {
+          color: '#3b82f6',
+          width: 1,
+          dashArray: 3,
+        },
+      },
     },
     yaxis: {
+      opposite: false,
       labels: {
-        style: { colors: isLight ? "#333" : "#888" },
-        formatter: (value) => `$${value.toLocaleString()}`,
+        style: {
+          colors: isLight ? "#64748b" : "#94a3b8",
+          fontSize: isMobile ? '10px' : '11px',
+          fontWeight: 600
+        },
+        formatter: (value) => {
+          if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
+          return `$${value.toLocaleString()}`;
+        },
+        offsetX: isMobile ? -5 : 0,
       },
+      tickAmount: isMobile ? 4 : 6,
     },
     theme: {
       mode: isLight ? "light" : "dark",
     },
     tooltip: {
       theme: isLight ? "light" : "dark",
+      shared: true,
+      intersect: false,
       x: {
-        format: "dd MMM yyyy hh:mm tt", // Full date with 12h time
+        format: "dd MMM yyyy, hh:mm tt",
       },
+      y: {
+        formatter: (v) => `$${v?.toLocaleString()}`
+      },
+      style: {
+        fontSize: '12px',
+      }
     },
-  };
+  }), [isLight, isMobile, disableAnimations]);
 
   const timeframes = [
     { label: "24H", value: 1 },
@@ -196,28 +242,34 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
 
   return (
     <div
-      className={`p-4 rounded-2xl ${isLight
+      className={`p-3 sm:p-5 rounded-2xl ${isLight
         ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
         : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
         }`}
     >
-      <div className="flex justify-between items-center mb-4">
-        <h3
-          className={`font-bold text-lg ${isLight ? "text-gray-900" : "text-white"}`}
-        >
-         {coinId?.toUpperCase()}
-        </h3>
-        <div className="flex gap-2">
+      <div className="flex flex-row justify-between items-center mb-4 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-1 h-5 bg-blue-500 rounded-full flex-shrink-0" />
+          <h3
+            className={`font-bold text-sm sm:text-lg tracking-tight truncate ${isLight ? "text-gray-900" : "text-white"}`}
+          >
+            {coinId?.toUpperCase()}
+          </h3>
+        </div>
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {timeframes.map((tf) => (
             <button
               key={tf.value}
               onClick={() => setDays(tf.value)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${days === tf.value
-                ? "bg-blue-600 text-white shadow-lg"
-                : isLight
-                  ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
+              className={`
+                px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all duration-200
+                ${days === tf.value
+                  ? "bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20"
+                  : isLight
+                    ? "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                    : "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                }
+              `}
             >
               {tf.label}
             </button>
@@ -225,14 +277,10 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         </div>
       </div>
 
-      <div className="w-full h-[350px] sm:h-[450px] lg:h-[560px] relative">
-        { }
+      <div className="w-full h-[280px] sm:h-[400px] lg:h-[500px] relative">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-[1px] z-10 rounded-xl transition-all duration-300">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              { }
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-[2px] z-50 rounded-xl transition-all duration-300">
+            <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin shadow-lg"></div>
           </div>
         )}
 

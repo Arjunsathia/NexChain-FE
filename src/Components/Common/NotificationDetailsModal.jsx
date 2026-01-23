@@ -15,17 +15,8 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
     const isLight = useThemeCheck();
     const isDark = !isLight;
-    const [isVisible, setIsVisible] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-        } else {
-            setTimeout(() => setIsVisible(false), 300);
-        }
-    }, [isOpen]);
-
-    if (!isVisible && !isOpen) return null;
+    if (!isOpen && !notification) return null;
 
     const getIcon = (type) => {
         switch (type) {
@@ -72,88 +63,92 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 details-modal-overlay">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                        }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                     />
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", duration: 0.5 }}
-                        className={`relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border ${isDark
-                            ? "bg-gray-900 border-gray-700"
-                            : "bg-white border-gray-200"
-                            }`}
+                        exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className={`relative w-[92%] md:w-full max-w-md rounded-[32px] shadow-[0_30px_90px_rgba(0,0,0,0.4)] overflow-hidden border transform-gpu details-modal-content ${isDark
+                            ? "bg-[#0B1221]/95 text-white border-white/10"
+                            : "bg-white/95 text-gray-900 border-gray-200/50"
+                            } backdrop-blur-3xl`}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {notification && (
                             <>
                                 {/* Header */}
                                 <div
-                                    className={`p-6 border-b ${isDark ? "border-gray-800" : "border-gray-100"
-                                        } flex items-start justify-between gap-4`}
+                                    className={`p-5 md:p-7 flex items-start justify-between gap-4`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-3 rounded-xl ${getHeaderColor(notification.type)}`}>
-                                            {getIcon(notification.type)}
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-3.5 rounded-2xl shadow-sm ${getHeaderColor(notification.type)}`}>
+                                            <div className="transform scale-110">
+                                                {getIcon(notification.type)}
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                                        <div className="min-w-0">
+                                            <h2 className={`text-lg md:text-xl font-black tracking-tight leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
                                                 {notification.title}
                                             </h2>
-                                            <p className={`text-xs font-medium uppercase tracking-wider mt-1 ${isDark ? "text-gray-400" : "text-gray-500"
+                                            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mt-1.5 ${isDark ? "text-cyan-400 opacity-80" : "text-blue-600"
                                                 }`}>
-                                                {notification.type || "Notification"}
+                                                {notification.type || "Update"}
                                             </p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={onClose}
-                                        className={`p-2 rounded-lg transition-colors ${isDark
-                                            ? "text-gray-400 hover:bg-gray-800 hover:text-white"
+                                        className={`p-2 rounded-xl transition-all active:scale-90 ${isDark
+                                            ? "text-gray-400 hover:bg-white/5 hover:text-white"
                                             : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                                             }`}
                                     >
-                                        <FaTimes />
+                                        <FaTimes size={18} />
                                     </button>
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-6">
+                                <div className="px-5 md:px-7 pb-2 mt-[-5px]">
                                     {/* Time Info */}
-                                    <div className={`flex flex-wrap gap-4 mb-6 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                                    <div className={`flex flex-wrap gap-x-5 gap-y-2 mb-6 text-[11px] font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                                         <div className="flex items-center gap-2">
-                                            <FaCalendarAlt className="opacity-70" />
+                                            <FaCalendarAlt className="text-cyan-500/60" />
                                             <span>{formattedDate}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <FaClock className="opacity-70" />
+                                            <FaClock className="text-cyan-500/60" />
                                             <span>{formattedTime}</span>
                                         </div>
                                     </div>
 
                                     {notification.category && (
                                         <div
-                                            className={`mb-6 p-3 rounded-lg flex items-center gap-3 ${isDark ? "bg-gray-800/50 text-gray-300" : "bg-gray-50 text-gray-700"
+                                            className={`mb-6 p-4 rounded-2xl flex items-center gap-3 border ${isDark
+                                                ? "bg-white/5 border-white/5 text-gray-300"
+                                                : "bg-gray-50 border-gray-100 text-gray-700"
                                                 }`}
                                         >
-                                            <span className="font-semibold text-sm uppercase opacity-70">Order Type:</span>
-                                            <span className="font-medium capitalize">
+                                            <span className="font-black text-[10px] uppercase tracking-widest opacity-50">Category:</span>
+                                            <span className="font-bold text-sm tracking-tight capitalize">
                                                 {notification.category.replace(/_/g, " ")}
                                             </span>
                                         </div>
                                     )}
 
-                                    <div
-                                        className={`prose ${isDark ? "prose-invert" : ""
-                                            } max-w-none`}
-                                    >
+                                    <div className="mb-8">
                                         <p
-                                            className={`text-base leading-relaxed whitespace-pre-wrap ${isDark ? "text-gray-300" : "text-gray-600"
+                                            className={`text-[15px] leading-[1.6] font-medium whitespace-pre-wrap ${isDark ? "text-slate-300" : "text-slate-600"
                                                 }`}
                                         >
                                             {notification.message}
@@ -163,16 +158,16 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
 
                                 {/* Footer */}
                                 <div
-                                    className={`p-4 border-t ${isDark
-                                        ? "bg-gray-900/50 border-gray-800"
-                                        : "bg-gray-50 border-gray-100"
+                                    className={`p-5 md:p-6 border-t ${isDark
+                                        ? "bg-black/20 border-white/5"
+                                        : "bg-gray-50/50 border-gray-100"
                                         } flex justify-end`}
                                 >
                                     <button
                                         onClick={onClose}
-                                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDark
-                                            ? "bg-gray-800 text-white hover:bg-gray-700"
-                                            : "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50"
+                                        className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-lg ${isDark
+                                            ? "bg-gray-800 text-white hover:bg-gray-700 shadow-black/40"
+                                            : "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 shadow-gray-200/50"
                                             }`}
                                     >
                                         Close

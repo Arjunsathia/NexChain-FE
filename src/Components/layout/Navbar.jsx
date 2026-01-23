@@ -104,7 +104,12 @@ function NavbarComponent() {
       // Removing main nav background
       navContainer: "bg-transparent",
 
-      // New Shared Capsule Style for all 3 islands
+      // Mobile Header Bar Style
+      mobileHeader: isLight
+        ? "bg-white/90 backdrop-blur-xl border-b border-slate-200/60 shadow-sm"
+        : "bg-[#0B1221]/80 backdrop-blur-xl border-b border-white/5", // Darker, sleeker mobile header
+
+      // Desktop Capsule Style
       capsule: isLight
         ? "bg-white/80 backdrop-blur-xl shadow-sm border border-slate-200/60 glass-card"
         : "bg-gray-900/90 backdrop-blur-xl shadow-none border border-white/10 glass-card",
@@ -171,34 +176,91 @@ function NavbarComponent() {
     return activeTab.startsWith(path);
   };
 
+  // Custom Hamburger Toggle
+  const MobileToggle = () => (
+    <button
+      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      className="p-2 -ml-2 rounded-lg transition-transform active:scale-95 group"
+      aria-label="Toggle Menu"
+    >
+      <div className="w-6 h-5 flex flex-col justify-between relative cursor-pointer">
+        <span
+          className={`w-full h-[2.5px] rounded-full transform transition-all duration-300 origin-left ${isLight ? "bg-slate-800" : "bg-white"
+            } ${isMobileMenuOpen ? "rotate-45" : ""}`}
+        />
+        <span
+          className={`w-3/4 h-[2.5px] rounded-full transition-all duration-300 ${isLight ? "bg-slate-800" : "bg-cyan-500"
+            } ${isMobileMenuOpen ? "opacity-0" : "opacity-100"}`}
+        />
+        <span
+          className={`w-full h-[2.5px] rounded-full transform transition-all duration-300 origin-left ${isLight ? "bg-slate-800" : "bg-white"
+            } ${isMobileMenuOpen ? "-rotate-45" : ""}`}
+        />
+      </div>
+    </button>
+  );
+
   return (
     <>
       <nav
         className={`
-                    relative mx-2 sm:mx-6 mt-4 z-50
-                    transition-all duration-500 ease-out
-                    ${TC.navContainer}
-                    ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
-                `}
+          fixed top-0 left-0 right-0 z-50
+          transition-all duration-500 ease-out
+          lg:static lg:bg-transparent lg:mt-4 lg:mx-6
+          ${TC.navContainer}
+          ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
+        `}
         style={{
           willChange: "transform, opacity",
           backfaceVisibility: "hidden",
           transform: "translateZ(0)", // Force GPU layer
         }}
       >
-        <div className="relative flex items-center justify-between max-w-[1600px] mx-auto w-full h-full">
+        {/* Mobile Header Container (Full Width) */}
+        <div className={`lg:hidden w-full h-[60px] px-6 flex items-center justify-between ${TC.mobileHeader}`}>
+          <div className="flex items-center gap-3">
+            <MobileToggle />
+            <div onClick={() => handleNavClick("/")} className="cursor-pointer">
+              <img
+                src={isLight ? SiteLogoLight : SiteLogo}
+                alt="NexChain"
+                className="h-8 w-auto object-contain"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {user?.id && (
+              <div className="relative">
+                <button
+                  ref={bellRef}
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${TC.actionBtnHover}`}
+                >
+                  <Bell size={20} className={isLight ? "text-slate-700" : "text-slate-300"} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white ring-2 ring-white dark:ring-[#0B1221] shadow-lg">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+                <NotificationModal
+                  isOpen={isNotificationOpen}
+                  onClose={() => setIsNotificationOpen(false)}
+                  triggerRef={bellRef}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+
+        {/* Desktop Container (Original Layout) */}
+        <div className="hidden lg:relative lg:flex items-center justify-between max-w-[1600px] mx-auto w-full h-full">
           {/* Left Island - Branding */}
           <div
             className={`relative z-20 rounded-full ${TC.capsule} h-[52px] flex items-center px-4 gap-3 sm:gap-4`}
           >
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className={`lg:hidden p-2 -ml-2 rounded-full transition-all duration-200 ${TC.actionBtnHover}`}
-              aria-label="Open Menu"
-            >
-              <Menu size={20} strokeWidth={2.5} />
-            </button>
-
             <div
               onClick={() => handleNavClick("/")}
               className="flex items-center justify-center h-full group cursor-pointer"
@@ -315,168 +377,204 @@ function NavbarComponent() {
         </div>
       </nav>
 
-      {/* Mobile Sidebar */}
-      {createPortal(
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 z-[2000] lg:hidden sm:backdrop-blur-sm"
-              />
-              <motion.div
-                initial={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className={`fixed top-0 left-0 h-[100dvh] w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 transform-gpu ${isLight ? "bg-white" : "bg-gray-950"}`}
-                style={{
-                  willChange: "transform",
-                  backfaceVisibility: "hidden",
-                }}
-              >
-                {/* Drawer Content */}
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center justify-start">
-                    <img
-                      src={isLight ? SiteLogoLight : SiteLogo}
-                      alt="NexChain"
-                      className="h-8 w-auto object-contain"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`p-2 rounded-lg ${TC.actionBtnHover}`}
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
 
-                <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-                  {navItems.map((item) => {
-                    const active = isTabActive(item.path);
-                    return (
-                      <button
-                        key={item.path}
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center justify-between p-4 mb-2 rounded-2xl transition-all duration-300 group
-                          ${active
-                            ? isLight
-                              ? "bg-blue-50/80 text-blue-600 shadow-sm shadow-blue-500/10 ring-1 ring-blue-500/20"
-                              : "bg-gradient-to-r from-blue-900/30 to-blue-800/10 text-cyan-400 border border-blue-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-                            : isLight
-                              ? "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                              : "text-slate-400 hover:bg-white/5 hover:text-white"
-                          }
-                        `}
+
+
+
+      {/* Mobile Sidebar (Premium Drawer) */}
+      {
+        createPortal(
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="fixed inset-0 bg-black/60 z-[2000] lg:hidden backdrop-blur-[2px]"
+                />
+
+                {/* Drawer */}
+                <motion.div
+                  initial={{ x: "-100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "-100%" }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className={`
+                    fixed top-0 left-0 h-[100dvh] w-[300px] z-[2001] lg:hidden 
+                    flex flex-col p-6 shadow-2xl overflow-hidden
+                    ${isLight
+                      ? "bg-white/95 backdrop-blur-2xl border-r border-slate-200"
+                      : "bg-[#0B1221]/95 backdrop-blur-2xl border-r border-white/5"}
+                `}
+                  style={{
+                    willChange: "transform",
+                  }}
+                >
+
+                  {/* Decorative Glows */}
+                  {!isLight && (
+                    <>
+                      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-50" />
+                      <div className="absolute top-[-20%] left-[-20%] w-[200px] h-[200px] bg-blue-600/20 blur-[100px] rounded-full pointer-events-none" />
+                      <div className="absolute bottom-[-10%] right-[-10%] w-[150px] h-[150px] bg-cyan-600/10 blur-[80px] rounded-full pointer-events-none" />
+                    </>
+                  )}
+
+                  {/* Drawer Header & Profile */}
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    {user?.id ? (
+                      <div
+                        onClick={() => {
+                          navigate(`/user-profile/${user.id}`);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 cursor-pointer group flex-1 min-w-0"
                       >
-                        <div className="flex items-center gap-3.5">
-                          <div
-                            className={`p-2 rounded-xl transition-all duration-300 ${active
-                              ? isLight
-                                ? "bg-white text-blue-600 shadow-sm"
-                                : "bg-cyan-500/10 text-cyan-400"
-                              : isLight
-                                ? "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:shadow-sm group-hover:text-blue-600"
-                                : "bg-white/5 text-slate-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-300"
-                              }`}
-                          >
-                            <item.icon size={18} strokeWidth={2} />
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white/5 shadow-md">
+                            {user?.image ? (
+                              <img
+                                src={
+                                  user.image.startsWith("http")
+                                    ? user.image
+                                    : `${SERVER_URL}/uploads/${user.image}`
+                                }
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white`}>
+                                <User size={18} />
+                              </div>
+                            )}
                           </div>
-                          <span className={`font-semibold text-[15px] ${active ? "tracking-wide" : ""}`}>
-                            {item.label}
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-[2px] border-[#0B1221]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-sm font-bold truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}>
+                            {user?.name || "User"}
+                          </h4>
+                          <span className={`text-[10px] uppercase font-bold tracking-wider ${isLight ? "text-slate-500" : "text-slate-400"}`}>
+                            {role || "Member"}
                           </span>
                         </div>
-                        <ChevronRight
-                          size={16}
-                          className={`transition-transform duration-300 ${active
-                            ? "translate-x-0 opacity-100"
-                            : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                            }`}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-start">
+                        <img
+                          src={isLight ? SiteLogoLight : SiteLogo}
+                          alt="NexChain"
+                          className="h-9 w-auto object-contain"
                         />
-                      </button>
-                    );
-                  })}
-                </div>
+                      </div>
+                    )}
 
-                {/* User Section at Bottom */}
-                <div
-                  className={`mt-auto p-5 rounded-3xl border backdrop-blur-xl relative overflow-hidden group
-                    ${isLight
-                      ? "bg-white/60 border-slate-200/60 shadow-lg shadow-slate-200/50"
-                      : "bg-gray-900/40 border-white/5 shadow-2xl shadow-black/20"
-                    }`}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                  <div className="flex items-center gap-4 mb-5 relative z-10">
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-2xl overflow-hidden ring-4 ring-white/10 shadow-lg">
-                        {user?.image ? (
-                          <img
-                            src={
-                              user.image.startsWith("http")
-                                ? user.image
-                                : `${SERVER_URL}/uploads/${user.image}`
-                            }
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        onClick={toggleTheme}
+                        className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${TC.actionBtnHover}`}
+                        aria-label="Toggle Theme"
+                      >
+                        {isLight ? (
+                          <Moon size={20} className="text-indigo-600" />
                         ) : (
-                          <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white`}>
-                            <User size={20} />
-                          </div>
+                          <Sun size={20} className="text-amber-400" />
                         )}
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-[3px] border-gray-950 flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse" />
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h4 className={`text-base font-bold truncate ${TC.textPrimary}`}>
-                        {user?.name || "Guest User"}
-                      </h4>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isLight ? "bg-slate-100 text-slate-500 border border-slate-200" : "bg-white/5 text-slate-400 border border-white/5"
-                          }`}>
-                          {role || "Visitor"}
-                        </span>
-                      </div>
+                      </button>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      if (user?.id) {
-                        dispatch(logout());
-                        navigate("/auth");
-                        setIsMobileMenuOpen(false);
-                      } else {
-                        navigate("/auth");
-                      }
-                    }}
-                    className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border mt-2 relative z-10
+                  {/* Navigation Items */}
+                  <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar relative z-10 px-1">
+                    {navItems.map((item) => {
+                      const active = isTabActive(item.path);
+                      return (
+                        <button
+                          key={item.path}
+                          onClick={() => navigate(item.path)}
+                          className={`
+                            w-full flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden
+                            ${active
+                              ? isLight
+                                ? "bg-blue-50 text-blue-700 font-bold shadow-sm"
+                                : "bg-white/5 text-cyan-400 font-bold shadow-[0_0_15px_rgba(6,182,212,0.15)] border border-cyan-500/20"
+                              : isLight
+                                ? "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                : "text-slate-400 hover:bg-white/5 hover:text-white border border-transparent"
+                            }
+                        `}
+                        >
+                          {/* Active Indicator Line */}
+                          {active && !isLight && (
+                            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-blue-500 to-cyan-500" />
+                          )}
+
+                          <div className="flex items-center gap-4">
+                            <div
+                              className={`p-2 rounded-lg transition-all duration-300 ${active
+                                ? isLight
+                                  ? "bg-white text-blue-600"
+                                  : "bg-cyan-500/10 text-cyan-400"
+                                : isLight
+                                  ? "bg-slate-100/50 text-slate-500 group-hover:bg-white group-hover:text-blue-600"
+                                  : "bg-white/5 text-slate-500 group-hover:text-cyan-400"
+                                }`}
+                            >
+                              <item.icon size={18} strokeWidth={active ? 2.5 : 2} />
+                            </div>
+                            <span className="text-[15px] pt-0.5">
+                              {item.label}
+                            </span>
+                          </div>
+
+                          {/* Arrow or Active Dot */}
+                          {active ? (
+                            <div className={`w-2 h-2 rounded-full ${isLight ? "bg-blue-500" : "bg-cyan-400 shadow-[0_0_5px_cyan]"}`} />
+                          ) : (
+                            <ChevronRight
+                              size={14}
+                              className={`opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 ${isLight ? "text-slate-400" : "text-slate-500"}`}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Logout Section at Bottom */}
+                  <div className="mt-6 relative z-10 mb-4 px-1">
+                    <button
+                      onClick={() => {
+                        if (user?.id) {
+                          dispatch(logout());
+                          navigate("/auth");
+                          setIsMobileMenuOpen(false);
+                        } else {
+                          navigate("/auth");
+                        }
+                      }}
+                      className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 border shadow-sm cursor-pointer
                       ${user?.id
-                        ? isLight
-                          ? "border-red-200 text-red-600 hover:bg-red-50"
-                          : "border-red-900/30 text-red-400 hover:bg-red-900/10"
-                        : "bg-blue-600 text-white border-transparent hover:bg-blue-700"
-                      }`}
-                  >
-                    {user?.id && <LogOut size={16} />}
-                    {user?.id ? "Logout" : "Login"}
-                  </button>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+                          ? isLight
+                            ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100"
+                            : "border-red-900/30 text-red-400 hover:bg-red-900/20 bg-red-900/10"
+                          : "bg-blue-600 text-white border-transparent hover:bg-blue-700 shadow-blue-500/20 shadow-lg"
+                        }`}
+                    >
+                      {user?.id ? "Logout" : "Login"}
+                      {user?.id && <LogOut size={14} />}
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )
+      }
     </>
   );
 }

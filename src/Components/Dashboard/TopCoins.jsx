@@ -6,7 +6,7 @@ import { FaCrown, FaTrophy, FaAward, FaCoins } from "react-icons/fa";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 
 const BentoCoinCard = React.memo(
-  ({ coin, index, isSelected, onSelect, liveData, isLoading }) => {
+  ({ coin, index, isSelected, onSelect, liveData, isLoading, isMobile }) => {
     const isLight = useThemeCheck();
 
     const TC = useMemo(
@@ -30,8 +30,8 @@ const BentoCoinCard = React.memo(
           : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
 
         selectedState: isLight
-          ? "bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-lg shadow-blue-500/10 ring-2 ring-blue-500/20 scale-105 z-10 isolation-isolate prevent-seam force-layer"
-          : "bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-none scale-105 z-10 isolation-isolate prevent-seam force-layer",
+          ? `bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-lg shadow-blue-500/10 ring-2 ring-blue-500/20 ${isMobile ? "scale-[1.02]" : "scale-105"} z-10 isolation-isolate prevent-seam force-layer`
+          : `bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-none ${isMobile ? "scale-[1.02]" : "scale-105"} z-10 isolation-isolate prevent-seam force-layer`,
 
         hoverEffect: isLight
           ? "hover:bg-white/90 hover:border-gray-300 hover:shadow-lg"
@@ -46,7 +46,7 @@ const BentoCoinCard = React.memo(
           return isLight ? "text-cyan-600" : "text-cyan-400";
         },
       }),
-      [isLight],
+      [isLight, isMobile],
     );
 
     const formatPrice = useCallback((price) => {
@@ -148,7 +148,7 @@ const BentoCoinCard = React.memo(
           ${isSelected ? TC.selectedState : `${TC.bgBase} ${TC.hoverEffect}`}
         `}
       >
-        {}
+        { }
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
@@ -176,7 +176,7 @@ const BentoCoinCard = React.memo(
           </div>
         </div>
 
-        {}
+        { }
         <div className="mt-2">
           <p className={`text-lg font-bold ${TC.priceColor}`}>{displayPrice}</p>
           <div className="flex items-center gap-2 mt-0.5">
@@ -202,7 +202,7 @@ const TopCoins = React.memo(
 
     const containerClasses = useMemo(() => {
       return isMobile
-        ? "grid grid-cols-1 gap-3 w-full"
+        ? "grid grid-cols-1 gap-3 w-full px-1"
         : "grid grid-cols-1 md:grid-cols-3 gap-3 w-full";
     }, [isMobile]);
 
@@ -215,7 +215,7 @@ const TopCoins = React.memo(
               coin={{}}
               index={i}
               isSelected={false}
-              onSelect={() => {}}
+              onSelect={() => { }}
               isMobile={isMobile}
               liveData={{}}
               isLoading={true}

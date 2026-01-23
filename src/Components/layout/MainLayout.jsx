@@ -59,26 +59,29 @@ export default function MainLayout() {
     }
   }, [location.pathname]);
 
+
   return (
-    <div className="h-[100dvh] w-full overflow-y-auto overflow-x-hidden flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
+    <div className="min-h-screen w-full flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
       { }
       <div
-        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light"
+        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light pointer-events-none"
         style={{
           background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)",
         }}
       />
       <div
-        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-dark"
+        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-dark pointer-events-none"
         style={{
           background:
             "linear-gradient(to bottom right, #000000, #0b182d, #000000)",
         }}
       />
 
+
+
       <Navbar />
 
-      <main className="flex-1 p-2 sm:p-4 transition-colors duration-300">
+      <main className="flex-1 w-full max-w-full p-0 pt-[60px] lg:pt-0 sm:p-4 transition-colors duration-300">
         <AnimatePresence mode="wait">
           <motion.div
             key={pageKey}

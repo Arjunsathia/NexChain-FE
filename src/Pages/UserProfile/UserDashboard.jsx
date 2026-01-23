@@ -55,7 +55,7 @@ export default function Dashboard() {
   const skelShapeBg = isLight ? "bg-gray-200" : "bg-gray-700";
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-4 lg:p-6 space-y-6">
       <style>{`
         @keyframes wave {
           0% { transform: rotate(0.0deg) }

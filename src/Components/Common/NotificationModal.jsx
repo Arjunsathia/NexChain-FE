@@ -57,7 +57,9 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target) &&
-        (!triggerRef?.current || !triggerRef.current.contains(event.target))
+        (!triggerRef?.current || !triggerRef.current.contains(event.target)) &&
+        !event.target.closest('.details-modal-content') &&
+        !event.target.closest('.notification-item') // Avoid closing when clicking the item itself
       ) {
         onClose();
       }
@@ -65,16 +67,17 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
 
     if (isOpen) {
       const timer = setTimeout(() => {
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
       }, 100);
       return () => {
         clearTimeout(timer);
-        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("click", handleClickOutside);
       };
     }
   }, [isOpen, onClose, triggerRef, isDetailsModalOpen]);
 
-  const handleNotificationClick = async (notification) => {
+  const handleNotificationClick = async (notification, e) => {
+    if (e) e.stopPropagation();
     setSelectedNotification(notification);
     setIsDetailsModalOpen(true);
 
@@ -138,10 +141,10 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed top-[76px] left-4 right-4 md:left-auto md:right-8 lg:right-20 w-auto md:w-[400px] max-w-[450px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
-              ? "bg-gray-950/95 md:bg-gray-900/90 sm:backdrop-blur-2xl text-white border-gray-800 md:border-gray-700/50 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
-              : "bg-white md:bg-white/80 sm:backdrop-blur-2xl text-gray-900 border-gray-200 md:border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
-              }`}
+            className={`fixed top-[76px] left-4 right-4 md:left-auto md:right-8 lg:right-20 w-auto md:w-[420px] max-w-[500px] rounded-3xl border z-[9999] overflow-hidden transform-gpu ${isDark
+              ? "bg-[#0B1221]/95 text-white border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.8)]"
+              : "bg-white/95 text-gray-900 border-gray-200/50 shadow-[0_30px_90px_rgba(0,0,0,0.1)]"
+              } backdrop-blur-3xl`}
             ref={modalRef}
             style={{
               pointerEvents: "auto",
@@ -213,81 +216,91 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                   </p>
                 </div>
               ) : (
-                <div
-                  className={`divide-y ${isDark ? "divide-gray-800" : "divide-gray-100"}`}
-                >
+                <AnimatePresence initial={false}>
                   {notifications.map((notification) => (
-                    <div
+                    <motion.div
                       key={notification._id}
-                      onClick={() => handleNotificationClick(notification)}
-                      className={`p-4 transition-colors cursor-pointer relative group ${isDark ? "hover:bg-gray-800/50" : "hover:bg-gray-50"
-                        } ${!notification.isRead
-                          ? isDark
-                            ? "bg-cyan-900/10"
-                            : "bg-cyan-50/40"
-                          : isDark
-                            ? "bg-gray-900"
-                            : "bg-white"
-                        }`}
+                      layout
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
+                      className="relative overflow-hidden"
                     >
-                      <div className="flex gap-4">
-                        <div className="mt-1 flex-shrink-0">
-                          {getIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0 relative pr-6">
-                          <div className="flex flex-col mb-1">
-                            <div className="flex justify-between items-start gap-2">
-                              <h4
-                                className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"} ${notification.isRead ? (isDark ? "text-gray-300" : "text-gray-700") : ""}`}
-                              >
-                                {notification.title}
-                              </h4>
-                              <span
-                                className={`text-[10px] text-gray-400 whitespace-nowrap px-1.5 py-0.5 rounded ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
-                              >
-                                {new Date(
-                                  notification.createdAt,
-                                ).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                          <p
-                            className={`text-sm leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"} line-clamp-2`}
-                          >
-                            {notification.message}
-                          </p>
-                          <button
-                            onClick={(e) => handleDelete(notification._id, e)}
-                            className={`absolute top-0 -right-2 p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all ${isDark ? "hover:bg-red-900/20" : "hover:bg-red-50"
-                              } md:opacity-0 md:group-hover:opacity-100`}
-                            title="Remove"
-                          >
-                            <FaTimes size={12} />
-                          </button>
-                        </div>
+                      {/* Swipe Background (Trash Icon) */}
+                      <div className="absolute inset-0 flex items-center justify-between px-6 bg-red-500/10">
+                        <FaTrash className="text-red-500 text-lg opacity-40" />
+                        <FaTrash className="text-red-500 text-lg opacity-40" />
                       </div>
-                      {!notification.isRead && (
-                        <div className="absolute inset-y-0 left-0 w-1 bg-cyan-500"></div>
-                      )}
-                    </div>
+
+                      <motion.div
+                        drag="x"
+                        dragConstraints={{ left: -150, right: 150 }}
+                        dragElastic={0.4}
+                        dragDirectionLock
+                        dragThreshold={10}
+                        onDragEnd={(_, info) => {
+                          if (Math.abs(info.offset.x) > 110) {
+                            handleDelete(notification._id, { stopPropagation: () => { } });
+                          }
+                        }}
+                        onClick={(e) => handleNotificationClick(notification, e)}
+                        whileTap={{ scale: 0.995 }}
+                        className={`
+                            notification-item p-4 transition-colors cursor-pointer relative z-10 border-b
+                            ${isDark
+                            ? "bg-gray-900 hover:bg-gray-800/80 border-white/5"
+                            : "bg-white hover:bg-gray-50 border-gray-100"}
+                            ${!notification.isRead ? (isDark ? "shadow-[inset_4px_0_0_#06b6d4]" : "shadow-[inset_4px_0_0_#06b6d4]") : ""}
+                          `}
+                      >
+                        <div className="flex gap-4">
+                          <div className="mt-1 flex-shrink-0">
+                            {getIcon(notification.type)}
+                          </div>
+                          <div className="flex-1 min-w-0 pr-2">
+                            <div className="flex flex-col mb-1">
+                              <div className="flex justify-between items-start gap-2">
+                                <h4
+                                  className={`text-sm font-bold ${isDark ? "text-white" : "text-gray-900"} ${notification.isRead ? (isDark ? "text-gray-300" : "text-gray-600") : ""}`}
+                                >
+                                  {notification.title}
+                                </h4>
+                                <span
+                                  className={`text-[9px] font-black uppercase tracking-tighter text-gray-400 whitespace-nowrap px-1.5 py-0.5 rounded-md ${isDark ? "bg-gray-800/80 border border-white/5" : "bg-gray-100 border border-gray-200"}`}
+                                >
+                                  {new Date(notification.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <p
+                              className={`text-sm leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"} line-clamp-2`}
+                            >
+                              {notification.message}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
                   ))}
-                </div>
+                </AnimatePresence>
               )}
             </div>
           </motion.div>
-
-          <NotificationDetailsModal
-            isOpen={isDetailsModalOpen}
-            onClose={() => setIsDetailsModalOpen(false)}
-            notification={selectedNotification}
-          />
         </div>
       )}
     </AnimatePresence>
   );
 
-  if (typeof document === "undefined") return null;
-  return createPortal(modalContent, document.body);
+  return (
+    <>
+      {typeof document !== "undefined" && createPortal(modalContent, document.body)}
+      <NotificationDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        notification={selectedNotification}
+      />
+    </>
+  );
 };
 
 export default NotificationModal;
