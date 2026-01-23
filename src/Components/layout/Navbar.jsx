@@ -410,7 +410,7 @@ function NavbarComponent() {
                       : "bg-gray-900/40 border-white/5 shadow-2xl shadow-black/20"
                     }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                   <div className="flex items-center gap-4 mb-5 relative z-10">
                     <div className="relative">
@@ -459,7 +459,7 @@ function NavbarComponent() {
                         navigate("/auth");
                       }
                     }}
-                    className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border mt-2
+                    className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border mt-2 relative z-10
                       ${user?.id
                         ? isLight
                           ? "border-red-200 text-red-600 hover:bg-red-50"
