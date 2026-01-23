@@ -247,11 +247,11 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
         }`}
     >
-      <div className="flex flex-row justify-between items-center mb-4 gap-2">
+      <div className="flex flex-row justify-between items-center mb-3 sm:mb-4 gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-1 h-5 bg-blue-500 rounded-full flex-shrink-0" />
+          <div className="w-1 h-4 sm:h-5 bg-blue-500 rounded-full flex-shrink-0" />
           <h3
-            className={`font-bold text-sm sm:text-lg tracking-tight truncate ${isLight ? "text-gray-900" : "text-white"}`}
+            className={`font-bold text-[13px] sm:text-lg tracking-tight truncate ${isLight ? "text-gray-900" : "text-white"}`}
           >
             {coinId?.toUpperCase()}
           </h3>
@@ -262,7 +262,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
               key={tf.value}
               onClick={() => setDays(tf.value)}
               className={`
-                px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all duration-200
+                px-2 py-0.5 sm:px-4 sm:py-1.5 rounded-lg text-[9px] sm:text-[11px] font-bold transition-all duration-200
                 ${days === tf.value
                   ? "bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20"
                   : isLight
@@ -277,7 +277,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         </div>
       </div>
 
-      <div className="w-full h-[280px] sm:h-[400px] lg:h-[500px] relative">
+      <div className="w-full h-[240px] sm:h-[400px] lg:h-[500px] relative">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-[2px] z-50 rounded-xl transition-all duration-300">
             <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin shadow-lg"></div>

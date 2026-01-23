@@ -144,47 +144,51 @@ const BentoCoinCard = React.memo(
       <div
         onClick={() => onSelect(coin.id)}
         className={`
-          relative cursor-pointer rounded-xl p-3 h-28 flex flex-col justify-between transition-all duration-200
+          relative cursor-pointer rounded-xl p-2 sm:p-3 h-24 sm:h-28 flex flex-col justify-between transition-all duration-200
           ${isSelected ? TC.selectedState : `${TC.bgBase} ${TC.hoverEffect}`}
         `}
       >
         { }
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <img
               src={coin.image}
               alt={coin.name}
-              className="w-8 h-8 rounded-full object-cover"
+              className="w-5 h-5 sm:w-8 sm:h-8 rounded-full object-cover"
             />
-            <div>
+            <div className="min-w-0">
               <h3
-                className={`font-bold text-sm leading-tight ${TC.textPrimary}`}
+                className={`font-black text-[11px] sm:text-sm leading-tight truncate ${TC.textPrimary}`}
               >
                 {coin.symbol?.toUpperCase()}
               </h3>
-              <p
-                className={`text-[10px] ${TC.textSecondary} truncate max-w-[80px]`}
-              >
-                {coin.name}
-              </p>
+              {!isMobile && (
+                <p
+                  className={`text-[10px] ${TC.textSecondary} truncate max-w-[80px]`}
+                >
+                  {coin.name}
+                </p>
+              )}
             </div>
           </div>
-          <div
-            className={`p-1 rounded-full bg-opacity-10 ${index === 0 ? "bg-yellow-500/10" : "bg-gray-500/10"}`}
-          >
-            {getPositionIcon()}
-          </div>
+          {!isMobile && (
+            <div
+              className={`p-1 rounded-full bg-opacity-10 ${index === 0 ? "bg-yellow-500/10" : "bg-gray-500/10"}`}
+            >
+              {getPositionIcon()}
+            </div>
+          )}
         </div>
 
         { }
-        <div className="mt-2">
-          <p className={`text-lg font-bold ${TC.priceColor}`}>{displayPrice}</p>
-          <div className="flex items-center gap-2 mt-0.5">
+        <div className="mt-1 sm:mt-2">
+          <p className={`text-[13px] sm:text-lg font-black ${TC.priceColor} truncate`}>{displayPrice}</p>
+          <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
             <span
-              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isPositive ? TC.bgPLPositive : TC.bgPLNegative}`}
+              className={`text-[8px] sm:text-[10px] font-bold px-1 py-0.5 rounded-full ${isPositive ? TC.bgPLPositive : TC.bgPLNegative}`}
             >
               {isPositive ? "+" : ""}
-              {Math.abs(displayChange).toFixed(2)}%
+              {Math.abs(displayChange).toFixed(1)}%
             </span>
           </div>
         </div>
@@ -202,7 +206,7 @@ const TopCoins = React.memo(
 
     const containerClasses = useMemo(() => {
       return isMobile
-        ? "grid grid-cols-1 gap-3 w-full px-1"
+        ? "grid grid-cols-3 gap-2 w-full"
         : "grid grid-cols-1 md:grid-cols-3 gap-3 w-full";
     }, [isMobile]);
 

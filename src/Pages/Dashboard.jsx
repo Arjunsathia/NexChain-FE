@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import ChartSection from "@/Components/Dashboard/ChartSection";
 import NewsPanel from "@/Components/Dashboard/NewsPanel";
 import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
@@ -71,6 +72,14 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [isReady]);
 
+  const [activeTab, setActiveTab] = useState("markets");
+
+  const tabs = [
+    { id: "markets", label: "Markets" },
+    { id: "watchlist", label: "Watchlist" },
+    { id: "activity", label: "Activity" },
+  ];
+
   if (!isReady || (loading && topCoins.length === 0)) {
     return <DashboardSkeleton />;
   }
@@ -80,56 +89,79 @@ export default function Dashboard() {
       className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
       {!isDesktop ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <UserProfileCard />
-          </div>
+        <div className="flex flex-col gap-5">
+          {/* Top Profile Card */}
+          <UserProfileCard />
 
-          <div className="md:col-span-2">
-            <div className="space-y-1">
-              <h2
-                className={`text-lg font-bold mb-3 px-1 tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}
-              >
-                Top{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  Cryptos
-                </span>
-              </h2>
-              <TopCoins
-                topCoins={topCoins}
-                selectedCoinId={selectedCoinId}
-                setSelectedCoinId={handleCoinClick}
-                isMobile={true}
-                loading={loading}
-              />
+          {/* Quick Stats / Portfolio */}
+          <PortfolioCard />
+
+          {/* Mobile Tabs Navigation */}
+          <div className="sticky top-[60px] z-30 py-2 -mx-2 px-2 backdrop-blur-md bg-opacity-80">
+            <div className={`p-1 rounded-2xl flex gap-1 ${isLight ? "bg-gray-100" : "bg-gray-800/50"}`}>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all duration-300 ${activeTab === tab.id
+                    ? (isLight ? "bg-white text-blue-600 shadow-sm" : "bg-gray-700 text-cyan-400 shadow-lg")
+                    : (isLight ? "text-gray-500 hover:text-gray-700" : "text-gray-400 hover:text-gray-200")
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="md:col-span-2">
-            <ChartSection coinId={selectedCoinId} />
-          </div>
+          {/* Tabbed Content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              {activeTab === "markets" && (
+                <>
+                  <div className="space-y-3">
+                    <h2 className={`text-sm font-black uppercase tracking-[0.2em] px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+                      Top Assets
+                    </h2>
+                    <TopCoins
+                      topCoins={topCoins}
+                      selectedCoinId={selectedCoinId}
+                      setSelectedCoinId={handleCoinClick}
+                      isMobile={true}
+                      loading={loading}
+                    />
+                  </div>
+                  <ChartSection coinId={selectedCoinId} />
+                  <TrendingCoinsWidget variant="dashboard" />
+                </>
+              )}
 
-          <div>
-            <PortfolioCard />
-          </div>
+              {activeTab === "watchlist" && (
+                <WatchlistPreview />
+              )}
 
-          <div>
-            <div className="flex flex-col gap-4">
-              <WatchlistPreview />
-              <TrendingCoinsWidget variant="dashboard" />
+              {activeTab === "activity" && (
+                <RecentTradesCard />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Permanent Bottom Sections */}
+          <div className="pt-4 border-t border-white/5">
+            <h2 className={`text-sm font-black uppercase tracking-[0.2em] mb-4 px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+              Latest Discovery
+            </h2>
+            <div className="space-y-6">
+              <NewsPanel />
+              <LearningHub />
             </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <NewsPanel />
-          </div>
-
-          <div className="md:col-span-2">
-            <RecentTradesCard />
-          </div>
-
-          <div className="md:col-span-2">
-            <LearningHub />
           </div>
         </div>
       ) : (
