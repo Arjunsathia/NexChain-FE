@@ -23,7 +23,6 @@ export default function NewsPage() {
                 setLoading(true);
                 const data = await getData("/news");
                 if (Array.isArray(data)) {
-                    // Map raw data to UI format
                     const formatted = data.map((item) => ({
                         id: item.id,
                         title: item.title,
@@ -39,7 +38,6 @@ export default function NewsPage() {
                     setFilteredNews(formatted);
                 } else {
                     console.error("News API returned non-array data:", data);
-                    // Determine what went wrong
                     const debugInfo = typeof data === 'object' ? JSON.stringify(data).slice(0, 100) : String(data);
 
                     if (data?.error) throw new Error(data.error);
@@ -47,7 +45,6 @@ export default function NewsPage() {
                 }
             } catch (err) {
                 console.error("Failed to fetch news:", err);
-                // Show the actual error message to help debugging
                 const errorMessage = err.response?.data?.error || err.message || "Failed to load news feed.";
                 setError(errorMessage);
             } finally {
@@ -71,11 +68,9 @@ export default function NewsPage() {
         return `${Math.floor(hours / 24)}d ago`;
     };
 
-    // Filter Logic
     useEffect(() => {
         let result = news;
 
-        // Search Filter
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
             result = result.filter(
@@ -86,7 +81,6 @@ export default function NewsPage() {
             );
         }
 
-        // Category Filter
         if (activeCategory !== "All") {
             result = result.filter((item) =>
                 item.categories.includes(activeCategory)
@@ -96,13 +90,11 @@ export default function NewsPage() {
         setFilteredNews(result);
     }, [searchQuery, activeCategory, news]);
 
-    // Extract unique categories for filter tabs
     const categories = useMemo(() => {
         const all = new Set(news.flatMap((item) => item.categories));
         const popular = ["BTC", "ETH", "ALTCOIN", "BUSINESS", "TECHNOLOGY"];
-        // Prioritize popular ones, then others
         const filtered = Array.from(all).filter((c) => !popular.includes(c));
-        return ["All", ...popular, ...filtered].slice(0, 10); // Limit tabs
+        return ["All", ...popular, ...filtered].slice(0, 10); 
     }, [news]);
 
     const TC = useMemo(
@@ -110,7 +102,7 @@ export default function NewsPage() {
             bgHeader: isLight
                 ? "sm:bg-white/80 sm:backdrop-blur-md sm:border sm:border-gray-100"
                 : "sm:bg-gray-900/95 sm:backdrop-blur-none sm:border-b sm:border-gray-700/50 sm:isolation-isolate sm:prevent-seam",
-            bgContainer: "", // Removed specific background
+            bgContainer: "", 
             cardBg: isLight
                 ? "bg-white border-gray-200 shadow-sm hover:shadow-md"
                 : "bg-[#1E2026] border-gray-800 hover:border-gray-700 hover:bg-[#252830]",
@@ -128,7 +120,6 @@ export default function NewsPage() {
         <div className={`min-h-screen pb-20 pt-4 sm:pt-6`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Header Section */}
                 <div
                     className={`
                         sticky top-0 sm:top-2 z-40 
@@ -141,7 +132,6 @@ export default function NewsPage() {
                 >
                     <div className="px-3 py-3 sm:px-6 sm:py-4">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-                            {/* Logo/Title - Hidden on Mobile, Visible on Desktop */}
                             <div className="hidden sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                 <div
                                     className={`p-1.5 sm:p-2 rounded-lg ${isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400"}`}
@@ -156,7 +146,6 @@ export default function NewsPage() {
                                 </div>
                             </div>
 
-                            {/* Search Bar - Full width on mobile */}
                             <div className="relative w-full sm:w-64">
                                 <FaSearch
                                     className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textSecondary} text-xs sm:text-sm`}
@@ -176,7 +165,6 @@ export default function NewsPage() {
                     </div>
                 </div>
 
-                {/* Categories / Filters */}
                 <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-2">
                     {categories.map((cat) => (
                         <button
@@ -197,7 +185,6 @@ export default function NewsPage() {
                     ))}
                 </div>
 
-                {/* News Grid */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {Array(9).fill(0).map((_, i) => (

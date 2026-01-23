@@ -4,7 +4,12 @@ import { TwoFactorEvent } from "../utils/twoFactorEvent";
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
-  // Fallback / Hardcode to ensure correlation with backend
+  
+  // Dynamic fallback for local development (supports mobile testing via IP)
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+  }
+  
   return "http://localhost:5000/api";
 };
 
