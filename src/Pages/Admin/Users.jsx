@@ -506,7 +506,7 @@ const Users = () => {
   return (
     // Updated Layout: Vertical Flex for Header + Content
     <div
-      className={`flex flex-col h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
+      className={`flex flex-col h-[100dvh] md:h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
     >
       {/* 1. Page Header (Admin Styled) */}
       <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
@@ -589,7 +589,7 @@ const Users = () => {
           </div>
 
           {/* List Items */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 pb-20 md:pb-2">
             {loading || !isReady ? (
               <div className="flex justify-center p-8">
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />

@@ -53,7 +53,7 @@ function NavbarComponent() {
   useEffect(() => {
     let interval;
     const fetchUnreadCount = async () => {
-      if (!user) return;
+      if (!user?.id) return;
       try {
         const res = await api.get("/notifications");
         const count = Array.isArray(res.data)
@@ -65,7 +65,7 @@ function NavbarComponent() {
       }
     };
 
-    if (user) {
+    if (user?.id) {
       fetchUnreadCount();
       interval = setInterval(fetchUnreadCount, 60000);
 
@@ -248,7 +248,7 @@ function NavbarComponent() {
           <div
             className={`flex items-center gap-2 relative z-20 rounded-full ${TC.capsule} h-[52px] px-2.5`}
           >
-            {user && (
+            {user?.id && (
               <div className="relative">
                 <button
                   ref={bellRef}
@@ -451,7 +451,7 @@ function NavbarComponent() {
 
                   <button
                     onClick={() => {
-                      if (user) {
+                      if (user?.id) {
                         dispatch(logout());
                         navigate("/auth");
                         setIsMobileMenuOpen(false);
@@ -460,15 +460,15 @@ function NavbarComponent() {
                       }
                     }}
                     className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border mt-2
-                      ${user
+                      ${user?.id
                         ? isLight
                           ? "border-red-200 text-red-600 hover:bg-red-50"
                           : "border-red-900/30 text-red-400 hover:bg-red-900/10"
                         : "bg-blue-600 text-white border-transparent hover:bg-blue-700"
                       }`}
                   >
-                    {user && <LogOut size={16} />}
-                    {user ? "Logout" : "Login"}
+                    {user?.id && <LogOut size={16} />}
+                    {user?.id ? "Logout" : "Login"}
                   </button>
                 </div>
               </motion.div>
