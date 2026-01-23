@@ -125,10 +125,9 @@ export default function NewsPage() {
     );
 
     return (
-        <div className={`min-h-screen pb-20 pt-6`}>
+        <div className={`min-h-screen pb-20 pt-4 sm:pt-6`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Header Section */}
                 {/* Header Section */}
                 <div
                     className={`
@@ -137,36 +136,37 @@ export default function NewsPage() {
                         sm:rounded-xl sm:shadow-md
                         ${TC.bgHeader} 
                         transition-colors duration-300
-                        p-0 mb-6 
+                        p-0 mb-4 sm:mb-6 
                     `}
                 >
-                    <div className="px-4 py-3 sm:px-6 sm:py-4">
+                    <div className="px-3 py-3 sm:px-6 sm:py-4">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-                            <div className="hidden sm:flex items-center gap-3 w-full sm:w-auto">
+                            {/* Logo/Title - Hidden on Mobile, Visible on Desktop */}
+                            <div className="hidden sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                 <div
-                                    className={`p-2 rounded-lg ${isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400"}`}
+                                    className={`p-1.5 sm:p-2 rounded-lg ${isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400"}`}
                                 >
-                                    <FaNewspaper className="text-lg" />
+                                    <FaNewspaper className="text-base sm:text-lg" />
                                 </div>
-                                <div>
-                                    <h1 className={`text-lg sm:text-xl font-bold leading-none ${TC.textPrimary}`}>Crypto News</h1>
-                                    <p className={`text-[10px] sm:text-xs mt-1 ${TC.textSecondary}`}>
-                                        Stay updated with the latest trends
+                                <div className="flex-1 sm:flex-none">
+                                    <h1 className={`text-base sm:text-xl font-bold leading-none ${TC.textPrimary}`}>Crypto News</h1>
+                                    <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${TC.textSecondary}`}>
+                                        Latest market insights
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Search Bar on the right */}
+                            {/* Search Bar - Full width on mobile */}
                             <div className="relative w-full sm:w-64">
                                 <FaSearch
-                                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textSecondary} text-sm`}
+                                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${TC.textSecondary} text-xs sm:text-sm`}
                                 />
                                 <input
                                     type="text"
                                     placeholder="Search news..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl border outline-none transition-all duration-200 text-sm ${isLight
+                                    className={`w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl border outline-none transition-all duration-200 text-sm ${isLight
                                         ? "bg-white border-gray-200 text-gray-900 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                                         : "bg-gray-800 border-gray-700 text-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
                                         }`}
@@ -177,20 +177,20 @@ export default function NewsPage() {
                 </div>
 
                 {/* Categories / Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-6 custom-scrollbar mb-4">
+                <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-2">
                     {categories.map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`
-                px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border
-                ${activeCategory === cat
+                                px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all border
+                                ${activeCategory === cat
                                     ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
                                     : isLight
                                         ? "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
                                         : "bg-[#1E2026] text-gray-400 border-gray-800 hover:bg-[#2B2F36] hover:text-white"
                                 }
-              `}
+                            `}
                         >
                             {cat}
                         </button>
@@ -199,16 +199,13 @@ export default function NewsPage() {
 
                 {/* News Grid */}
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array(9)
-                            .fill(0)
-                            .map((_, i) => (
-                                <div key={i} className="rounded-2xl overflow-hidden p-4 space-y-3">
-                                    <Skeleton height={200} borderRadius="1rem" baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
-                                    <Skeleton count={2} baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
-                                    <Skeleton width="60%" baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
-                                </div>
-                            ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {Array(9).fill(0).map((_, i) => (
+                            <div key={i} className="rounded-2xl overflow-hidden p-4 space-y-3 border border-transparent">
+                                <Skeleton height={200} borderRadius="1rem" baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
+                                <Skeleton count={2} baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
+                            </div>
+                        ))}
                     </div>
                 ) : error ? (
                     <div className="text-center py-20">
@@ -219,7 +216,7 @@ export default function NewsPage() {
                         <p>No news found matching your criteria.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {filteredNews.map((item) => (
                             <a
                                 key={item.id}
@@ -227,19 +224,25 @@ export default function NewsPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`
-                  group block rounded-2xl overflow-hidden border transition-all duration-300 h-full flex flex-col
-                  ${TC.cardBg}
-                `}
+                                  group block sm:rounded-2xl overflow-hidden sm:border transition-all duration-300 h-full
+                                  rounded-xl border
+                                  flex flex-row sm:flex-col 
+                                  items-start sm:items-stretch
+                                  gap-3 sm:gap-0
+                                  p-3 sm:p-0
+                                  ${TC.cardBg}
+                                `}
                             >
                                 {/* Image Container */}
-                                <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-800">
+                                <div className="relative w-24 h-24 sm:w-full sm:h-48 flex-shrink-0 overflow-hidden rounded-lg sm:rounded-none bg-gray-200 dark:bg-gray-800">
                                     <img
                                         src={item.image}
                                         alt={item.title}
                                         onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
-                                    <div className="absolute top-3 left-3 flex gap-2">
+                                    {/* Categories - Hidden on mobile small view, shown on desktop */}
+                                    <div className="absolute top-2 left-2 hidden sm:flex gap-2">
                                         {item.categories.slice(0, 2).map((cat, idx) => (
                                             <span key={idx} className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
                                                 {cat}
@@ -249,26 +252,30 @@ export default function NewsPage() {
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <div className="flex items-center justify-between mb-3 text-xs">
-                                        <span className={`font-bold uppercase tracking-wider ${TC.accentText}`}>
+                                <div className="flex-1 sm:p-5 flex flex-col min-h-0 sm:min-h-[200px]">
+                                    {/* Mobile Source/Time Header */}
+                                    <div className="flex items-center justify-between mb-1.5 sm:mb-3 text-[10px] sm:text-xs">
+                                        <span className={`font-bold uppercase tracking-wider ${TC.accentText} truncate max-w-[80px] sm:max-w-none`}>
                                             {item.source}
                                         </span>
-                                        <span className={`flex items-center gap-1 ${TC.textSecondary}`}>
+                                        <span className={`flex items-center gap-1 ${TC.textSecondary} whitespace-nowrap`}>
                                             <FaClock size={10} />
                                             {item.timeAgo}
                                         </span>
                                     </div>
 
-                                    <h3 className={`text-lg font-bold mb-3 leading-snug line-clamp-3 group-hover:text-blue-500 transition-colors ${TC.textPrimary}`}>
+                                    {/* Title */}
+                                    <h3 className={`text-sm sm:text-lg font-bold mb-1 sm:mb-3 leading-snug line-clamp-2 sm:line-clamp-3 group-hover:text-blue-500 transition-colors ${TC.textPrimary}`}>
                                         {item.title}
                                     </h3>
 
-                                    <p className={`text-sm line-clamp-3 mb-4 flex-1 ${TC.textSecondary}`}>
+                                    {/* Body Text - Hidden on Mobile */}
+                                    <p className={`hidden sm:block text-sm line-clamp-3 mb-4 flex-1 ${TC.textSecondary}`}>
                                         {item.body}
                                     </p>
 
-                                    <div className={`pt-4 border-t ${isLight ? 'border-gray-100' : 'border-gray-700/50'} flex items-center justify-between text-xs font-semibold`}>
+                                    {/* Desktop Footer */}
+                                    <div className={`hidden sm:flex pt-4 border-t ${isLight ? 'border-gray-100' : 'border-gray-700/50'} items-center justify-between text-xs font-semibold`}>
                                         <span className="flex items-center gap-1 group-hover:gap-2 transition-all text-blue-500">
                                             Read Full Story <FaExternalLinkAlt size={10} />
                                         </span>

@@ -1,12 +1,29 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, User, ChevronRight, Bell } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  Menu,
+  X,
+  User,
+  ChevronRight,
+  Bell,
+  LogOut,
+  LayoutDashboard,
+  TrendingUp,
+  Briefcase,
+  Star,
+  Newspaper,
+  GraduationCap,
+  ShieldCheck,
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
+import { logout } from "@/redux/slices/userSlice";
 import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -16,6 +33,7 @@ import SiteLogoLight from "../../assets/Img/logo-2.png";
 function NavbarComponent() {
   const { toggleTheme } = useTheme();
   const isLight = useThemeCheck();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUserContext();
@@ -63,6 +81,19 @@ function NavbarComponent() {
     };
   }, [user]);
 
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
@@ -102,14 +133,14 @@ function NavbarComponent() {
 
   const navItems = useMemo(
     () => [
-      { path: "/dashboard", label: "Dashboard" },
-      { path: "/cryptolist", label: "Markets" },
-      { path: "/portfolio", label: "Portfolio" },
-      { path: "/watchlist", label: "Watchlist" },
-      { path: "/news", label: "News" },
-      { path: "/learning", label: "Learn" },
+      { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { path: "/cryptolist", label: "Markets", icon: TrendingUp },
+      { path: "/portfolio", label: "Portfolio", icon: Briefcase },
+      { path: "/watchlist", label: "Watchlist", icon: Star },
+      { path: "/news", label: "News", icon: Newspaper },
+      { path: "/learning", label: "Learn", icon: GraduationCap },
       ...(role === "admin" || role === "superadmin"
-        ? [{ path: "/admin", label: "Admin" }]
+        ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }]
         : []),
     ],
     [role],
@@ -300,7 +331,7 @@ function NavbarComponent() {
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
-                transition={{ type: "tween", ease: "easeOut", duration: 0.25 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
                 className={`fixed top-0 left-0 h-[100dvh] w-[280px] z-[2001] lg:hidden shadow-2xl flex flex-col p-6 transform-gpu ${isLight ? "bg-white" : "bg-gray-950"}`}
                 style={{
                   willChange: "transform",
@@ -324,89 +355,120 @@ function NavbarComponent() {
                   </button>
                 </div>
 
-                <div className="flex-1 space-y-2">
-                  {navItems.map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-medium ${isTabActive(item.path) ? TC.linkActive : TC.linkIdle}`}
-                    >
-                      {item.label}
-                      <ChevronRight size={16} />
-                    </button>
-                  ))}
+                <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+                  {navItems.map((item) => {
+                    const active = isTabActive(item.path);
+                    return (
+                      <button
+                        key={item.path}
+                        onClick={() => navigate(item.path)}
+                        className={`w-full flex items-center justify-between p-4 mb-2 rounded-2xl transition-all duration-300 group
+                          ${active
+                            ? isLight
+                              ? "bg-blue-50/80 text-blue-600 shadow-sm shadow-blue-500/10 ring-1 ring-blue-500/20"
+                              : "bg-gradient-to-r from-blue-900/30 to-blue-800/10 text-cyan-400 border border-blue-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                            : isLight
+                              ? "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                              : "text-slate-400 hover:bg-white/5 hover:text-white"
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div
+                            className={`p-2 rounded-xl transition-all duration-300 ${active
+                              ? isLight
+                                ? "bg-white text-blue-600 shadow-sm"
+                                : "bg-cyan-500/10 text-cyan-400"
+                              : isLight
+                                ? "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:shadow-sm group-hover:text-blue-600"
+                                : "bg-white/5 text-slate-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-300"
+                              }`}
+                          >
+                            <item.icon size={18} strokeWidth={2} />
+                          </div>
+                          <span className={`font-semibold text-[15px] ${active ? "tracking-wide" : ""}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        <ChevronRight
+                          size={16}
+                          className={`transition-transform duration-300 ${active
+                            ? "translate-x-0 opacity-100"
+                            : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                            }`}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* User Section at Bottom */}
                 <div
-                  className={`mt-auto p-4 rounded-2xl ${isLight ? "bg-gray-50" : "bg-gray-900"}`}
+                  className={`mt-auto p-5 rounded-3xl border backdrop-blur-xl relative overflow-hidden group
+                    ${isLight
+                      ? "bg-white/60 border-slate-200/60 shadow-lg shadow-slate-200/50"
+                      : "bg-gray-900/40 border-white/5 shadow-2xl shadow-black/20"
+                    }`}
                 >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-                      <User size={16} />
-                    </div>
-                    <div className="truncate">
-                      <p
-                        className={`text-sm font-bold truncate ${TC.textPrimary}`}
-                      >
-                        {user?.name || "Guest"}
-                      </p>
-                      <p className={`text-xs ${TC.textSecondary}`}>
-                        {role || "Visitor"}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Stats Section */}
-                  <div>
-                    <h3
-                      className={`text-xs font-bold uppercase tracking-widest mb-3 px-1 ${isLight ? "text-gray-500" : "text-gray-400"}`}
-                    >
-                      Quick Stats
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div
-                        className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 backdrop-blur-md ${isLight ? "bg-white/60 border border-blue-100 shadow-sm" : "bg-white/5 border border-white/5 shadow-inner"}`}
-                      >
-                        <div
-                          className={`font-bold text-sm ${isLight ? "text-gray-900" : "text-white"}`}
-                        >
-                          $
-                          {(Number(balance) || 0).toLocaleString("en-IN", {
-                            active: true,
-                            notation: "compact",
-                            maximumFractionDigits: 1,
-                          })}
-                        </div>
-                        <div
-                          className={`text-[10px] font-medium ${isLight ? "text-gray-500" : "text-gray-400"}`}
-                        >
-                          Cash Balance
-                        </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="flex items-center gap-4 mb-5 relative z-10">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-2xl overflow-hidden ring-4 ring-white/10 shadow-lg">
+                        {user?.image ? (
+                          <img
+                            src={
+                              user.image.startsWith("http")
+                                ? user.image
+                                : `${SERVER_URL}/uploads/${user.image}`
+                            }
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${TC.logoGradient} text-white`}>
+                            <User size={20} />
+                          </div>
+                        )}
                       </div>
-                      {/* Placeholder/Other stat */}
-                      <div
-                        className={`p-3 rounded-xl flex flex-col items-center justify-center text-center gap-1.5 backdrop-blur-md ${isLight ? "bg-white/60 border border-blue-100 shadow-sm" : "bg-white/5 border border-white/5 shadow-inner"}`}
-                      >
-                        <div
-                          className={`font-bold text-sm ${isLight ? "text-gray-900" : "text-white"}`}
-                        >
-                          {unreadCount}
-                        </div>
-                        <div
-                          className={`text-[10px] font-medium ${isLight ? "text-gray-500" : "text-gray-400"}`}
-                        >
-                          Notifications
-                        </div>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-[3px] border-gray-950 flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`text-base font-bold truncate ${TC.textPrimary}`}>
+                        {user?.name || "Guest User"}
+                      </h4>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isLight ? "bg-slate-100 text-slate-500 border border-slate-200" : "bg-white/5 text-slate-400 border border-white/5"
+                          }`}>
+                          {role || "Visitor"}
+                        </span>
                       </div>
                     </div>
                   </div>
+
                   <button
-                    onClick={() =>
-                      user ? navigate("/user/settings") : navigate("/auth")
-                    }
-                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+                    onClick={() => {
+                      if (user) {
+                        dispatch(logout());
+                        navigate("/auth");
+                        setIsMobileMenuOpen(false);
+                      } else {
+                        navigate("/auth");
+                      }
+                    }}
+                    className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border mt-2
+                      ${user
+                        ? isLight
+                          ? "border-red-200 text-red-600 hover:bg-red-50"
+                          : "border-red-900/30 text-red-400 hover:bg-red-900/10"
+                        : "bg-blue-600 text-white border-transparent hover:bg-blue-700"
+                      }`}
                   >
-                    {user ? "Settings" : "Login"}
+                    {user && <LogOut size={16} />}
+                    {user ? "Logout" : "Login"}
                   </button>
                 </div>
               </motion.div>

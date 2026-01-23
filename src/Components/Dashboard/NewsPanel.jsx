@@ -121,12 +121,12 @@ export default function NewsPanel() {
               target="_blank"
               rel="noopener noreferrer"
               className={`
-                group flex items-start gap-4 p-3 rounded-xl transition-all duration-200 cursor-pointer
+                group flex items-start gap-3 sm:gap-4 p-2 sm:p-3 rounded-xl transition-all duration-200 cursor-pointer
                 ${isLight ? "hover:shadow-sm" : ""}
                 ${index !== 4 ? TC.bgItem : "hover:bg-gray-50 dark:hover:bg-white/5"}
               `}
             >
-              <div className="relative w-24 h-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800">
+              <div className="relative w-16 h-16 sm:w-24 sm:h-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800">
                 <img
                   src={news.image}
                   alt={news.title}
@@ -135,9 +135,9 @@ export default function NewsPanel() {
                 />
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 flex flex-col justify-between h-16 sm:h-auto">
                 <h3
-                  className={`font-semibold text-sm mb-1 leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
+                  className={`font-semibold text-xs sm:text-sm leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
                 >
                   {news.title}
                 </h3>
