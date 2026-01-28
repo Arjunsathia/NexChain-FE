@@ -105,7 +105,7 @@ export default function RecentTradesCard({ disableAnimations = false }) {
     <div
       className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer}`}
     >
-      {}
+      { }
       <div className="px-4 pt-3 flex items-center justify-between mb-2">
         <h3
           className={`font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2`}
@@ -122,7 +122,7 @@ export default function RecentTradesCard({ disableAnimations = false }) {
         )}
       </div>
 
-      {}
+      { }
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
         {recentTrades.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
@@ -144,15 +144,15 @@ export default function RecentTradesCard({ disableAnimations = false }) {
                 }
                 className={`flex items-center justify-between p-2 rounded-lg transition-colors ${disableAnimations ? "" : "fade-in"} ${TC.bgItem}`}
               >
-                {}
-                <div className="flex items-center gap-3">
+                { }
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${isBuy ? TC.bgBuyIcon : TC.bgSellIcon}`}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs ${isBuy ? TC.bgBuyIcon : TC.bgSellIcon}`}
                   >
                     {isBuy ? <FaArrowUp /> : <FaArrowDown />}
                   </div>
                   <div>
-                    <p className={`text-xs font-bold ${TC.textPrimary}`}>
+                    <p className={`text-[11px] sm:text-xs font-bold ${TC.textPrimary}`}>
                       {tx.coinSymbol?.toUpperCase() || "COIN"}
                     </p>
                     <p className={`text-[10px] ${TC.textSecondary}`}>
@@ -161,7 +161,7 @@ export default function RecentTradesCard({ disableAnimations = false }) {
                   </div>
                 </div>
 
-                {}
+                { }
                 <div className="text-right">
                   <p
                     className={`text-xs font-bold ${isBuy ? TC.textBuy : TC.textSell}`}

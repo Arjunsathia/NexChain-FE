@@ -295,7 +295,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 lg:gap-6">
           {/* Stats Grid */}
           <div
             className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 ${isFirstVisit ? "fade-in" : ""}`}
@@ -356,16 +356,16 @@ const AdminDashboard = () => {
 
           {/* Charts & Actions Row */}
           <div
-            className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isFirstVisit ? "fade-in" : ""}`}
+            className={`grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 ${isFirstVisit ? "fade-in" : ""}`}
             style={{ animationDelay: "0.4s" }}
           >
             {/* Main Chart Card (User Registration) */}
             <div
-              className={`lg:col-span-2 ${TC.bgCard} rounded-2xl p-5 sm:p-6 relative overflow-hidden group`}
+              className={`lg:col-span-2 ${TC.bgCard} rounded-2xl p-4 sm:p-6 relative overflow-hidden group`}
             >
               {/* Background Decorative Gradient */}
 
-              <div className="flex items-center justify-between mb-6 relative z-10">
+              <div className="flex items-center justify-between mb-4 sm:mb-6 relative z-10">
                 <div className="flex items-center gap-3">
                   <div
                     className={`p-2.5 rounded-xl transition-transform duration-300 group-hover:scale-110 shadow-sm ${isLight ? "bg-cyan-50 text-cyan-600" : "bg-cyan-500/10 text-cyan-400"}`}
@@ -374,7 +374,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <h2
-                      className={`text-lg font-bold tracking-tight ${TC.textPrimary} flex items-center gap-2`}
+                      className={`text-base sm:text-lg font-bold tracking-tight ${TC.textPrimary} flex items-center gap-2`}
                     >
                       User Registration
                     </h2>
@@ -390,7 +390,7 @@ const AdminDashboard = () => {
                       key={range}
                       onClick={() => setTimeRange(range)}
                       className={`
-                      px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-300
+                      px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all duration-300
                       ${timeRange === range
                           ? isLight
                             ? "bg-white text-cyan-600 shadow-sm"
@@ -408,16 +408,16 @@ const AdminDashboard = () => {
               </div>
 
               {!isReady || isUsersLoading ? (
-                <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/10 rounded-xl" />
+                <div className="h-[220px] sm:h-[250px] lg:h-[300px] w-full animate-pulse bg-gray-700/10 rounded-xl" />
               ) : (
-                <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full relative z-10">
+                <div className="h-[220px] sm:h-[250px] lg:h-[300px] w-full relative z-10">
                   <UserLineChart users={users} timeRange={timeRange} />
                 </div>
               )}
             </div>
 
             {/* Side Actions */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 lg:gap-6">
               <PlatformHealth isLoading={false} TC={TC} />
               <QuickActions
                 isLoading={false}
@@ -429,7 +429,7 @@ const AdminDashboard = () => {
 
           {/* Bottom Reports & Users */}
           <div
-            className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${isFirstVisit ? "fade-in" : ""}`}
+            className={`grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 ${isFirstVisit ? "fade-in" : ""}`}
             style={{ animationDelay: "0.5s" }}
           >
             <RecentReports

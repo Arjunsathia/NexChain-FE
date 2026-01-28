@@ -102,19 +102,19 @@ function FeedbackTable({
         <table className="w-full text-left border-collapse">
           <thead className={TC.tableHead}>
             <tr>
-              <th className="py-3 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold">
+              <th className="py-2.5 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold">
                 Feedback
               </th>
-              <th className="py-3 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold hidden md:table-cell">
+              <th className="py-2.5 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold hidden md:table-cell">
                 Type & Priority
               </th>
-              <th className="py-3 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold">
+              <th className="py-2.5 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold">
                 Status
               </th>
-              <th className="py-3 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold hidden sm:table-cell">
+              <th className="py-2.5 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold hidden sm:table-cell">
                 Date
               </th>
-              <th className="py-3 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold text-center">
+              <th className="py-2.5 px-3 sm:py-4 sm:px-6 uppercase tracking-wider text-[10px] sm:text-xs font-semibold text-center">
                 Actions
               </th>
             </tr>
@@ -122,24 +122,24 @@ function FeedbackTable({
           <tbody className="divide-y divide-gray-800/50">
             {filteredFeedbacks.map((feedback) => (
               <tr key={feedback._id} className={`${TC.tableRow}`}>
-                <td className="py-3 px-3 sm:py-4 sm:px-6">
-                  <div className="max-w-xs sm:max-w-md">
+                <td className="py-2.5 px-3 sm:py-4 sm:px-6">
+                  <div className="max-w-[120px] sm:max-w-md">
                     <p
-                      className={`text-xs sm:text-sm font-medium ${TC.textPrimary} line-clamp-2`}
+                      className={`text-xs sm:text-sm font-medium ${TC.textPrimary} truncate sm:whitespace-normal sm:line-clamp-2`}
                     >
                       {feedback.message}
                     </p>
                     {feedback.userEmail && (
                       <p
-                        className={`text-[10px] sm:text-xs ${TC.textSecondary} mt-1 truncate`}
+                        className={`text-[9px] sm:text-xs ${TC.textSecondary} mt-0.5 sm:mt-1 truncate`}
                       >
                         {feedback.userEmail}
                       </p>
                     )}
                   </div>
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6 hidden md:table-cell">
-                  <div className="space-y-2">
+                <td className="py-2.5 px-3 sm:py-4 sm:px-6 hidden md:table-cell">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center gap-2">
                       {getTypeIcon(feedback.type)}
                       <span
@@ -151,20 +151,20 @@ function FeedbackTable({
                     {getPriorityBadge(feedback.priority)}
                   </div>
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6">
-                  <div className="relative">
+                <td className="py-2.5 px-3 sm:py-4 sm:px-6">
+                  <div className="relative w-[100px] sm:w-auto">
                     <select
                       value={feedback.status}
                       onChange={(e) =>
                         updateFeedbackStatus(feedback._id, e.target.value)
                       }
-                      className={`appearance-none w-full text-[10px] sm:text-xs font-bold rounded-lg pl-3 pr-8 py-2 outline-none transition-all cursor-pointer border shadow-sm capitalize ${feedback.status === "new"
-                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                          : feedback.status === "in-progress"
-                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                            : feedback.status === "resolved"
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                              : "bg-gray-500/10 text-gray-500 border-gray-500/20"
+                      className={`appearance-none w-full text-[10px] sm:text-xs font-bold rounded-lg pl-2 sm:pl-3 pr-6 sm:pr-8 py-1.5 sm:py-2 outline-none transition-all cursor-pointer border shadow-sm capitalize ${feedback.status === "new"
+                        ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                        : feedback.status === "in-progress"
+                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          : feedback.status === "resolved"
+                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                            : "bg-gray-500/10 text-gray-500 border-gray-500/20"
                         }`}
                     >
                       <option value="new" className="text-gray-900 dark:text-gray-300">New</option>
@@ -173,44 +173,44 @@ function FeedbackTable({
                       <option value="closed" className="text-gray-900 dark:text-gray-300">Closed</option>
                     </select>
                     {/* Custom Dropdown Arrow */}
-                    <div className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${feedback.status === "new"
-                        ? "text-blue-500"
-                        : feedback.status === "in-progress"
-                          ? "text-amber-500"
-                          : feedback.status === "resolved"
-                            ? "text-emerald-500"
-                            : "text-gray-500"
+                    <div className={`absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${feedback.status === "new"
+                      ? "text-blue-500"
+                      : feedback.status === "in-progress"
+                        ? "text-amber-500"
+                        : feedback.status === "resolved"
+                          ? "text-emerald-500"
+                          : "text-gray-500"
                       }`}>
-                      <svg className="w-2.5 h-2.5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                       </svg>
                     </div>
                   </div>
                 </td>
                 <td
-                  className={`py-3 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden sm:table-cell`}
+                  className={`py-2.5 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden sm:table-cell`}
                 >
                   {new Date(feedback.createdAt).toLocaleDateString()}
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6">
-                  <div className="flex items-center justify-center gap-2">
+                <td className="py-2.5 px-3 sm:py-4 sm:px-6">
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                     <button
                       onClick={() => {
                         setSelectedFeedback(feedback);
                         setEditNotes(feedback.adminNotes || "");
                         setShowModal(true);
                       }}
-                      className={TC.btnSecondary}
+                      className={`${TC.btnSecondary} !p-1.5 sm:!p-2.5`}
                       title="View Details"
                     >
-                      <FaEye className="text-sm" />
+                      <FaEye className="text-xs sm:text-sm" />
                     </button>
                     <button
                       onClick={() => confirmDelete(feedback)}
-                      className={TC.btnDanger}
+                      className={`${TC.btnDanger} p-1.5 sm:p-2.5`}
                       title="Delete"
                     >
-                      <FaTrash className="text-sm" />
+                      <FaTrash className="text-xs sm:text-sm" />
                     </button>
                   </div>
                 </td>

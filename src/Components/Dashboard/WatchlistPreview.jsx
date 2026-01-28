@@ -220,26 +220,26 @@ function WatchlistPreview({ disableAnimations = false }) {
               style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
               className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 {coin.image ? (
                   <img
                     src={coin.image}
                     alt={coin.name}
-                    className="w-8 h-8 rounded-lg object-cover"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover"
                   />
                 ) : (
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${TC.bgIcon}`}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-bold ${TC.bgIcon}`}
                   >
                     {coin.symbol?.substring(0, 2).toUpperCase()}
                   </div>
                 )}
                 <div>
-                  <p className={`text-xs font-bold ${TC.textPrimary}`}>
+                  <p className={`text-[11px] sm:text-xs font-bold ${TC.textPrimary}`}>
                     {coin.symbol?.toUpperCase()}
                   </p>
                   <p
-                    className={`text-[10px] ${TC.textSecondary} truncate max-w-[80px]`}
+                    className={`text-[9px] sm:text-[10px] ${TC.textSecondary} truncate max-w-[60px] sm:max-w-[80px]`}
                   >
                     {coin.name}
                   </p>

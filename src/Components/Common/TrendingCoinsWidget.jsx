@@ -92,7 +92,7 @@ function TrendingCoinsWidget({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide max-h-[400px] md:max-h-full relative z-10">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 pb-2 scrollbar-hide max-h-[265px] md:max-h-full relative z-10">
         {error && displayedCoins.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
             <div

@@ -236,25 +236,7 @@ const AdminFeedback = () => {
               Manage user feedback and reports
             </p>
           </div>
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            {(isFeedbacksLoading || isStatsLoading) && (
-              <div className="flex items-center text-sm text-gray-300">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Loading...
-              </div>
-            )}
-            <button
-              onClick={() => {
-                fetchFeedbacks();
-                fetchStats();
-              }}
-              disabled={isFeedbacksLoading}
-              className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} flex-1 sm:flex-initial justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              <FaSync className={isFeedbacksLoading ? "animate-spin" : ""} />{" "}
-              Refresh
-            </button>
-          </div>
+        
         </div>
 
         <div

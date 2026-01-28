@@ -506,20 +506,20 @@ const Users = () => {
   return (
     // Updated Layout: Vertical Flex for Header + Content
     <div
-      className={`flex flex-col h-[100dvh] md:h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-4 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
+      className={`flex flex-col h-[100dvh] md:h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-3 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
     >
       {/* 1. Page Header (Admin Styled) */}
-      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center sm:items-center gap-3 md:gap-4">
         <div className="w-full sm:w-auto text-center sm:text-left">
           <h1
-            className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
+            className={`text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-0.5 sm:mb-1 ${TC.textPrimary}`}
           >
             User{" "}
             <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
               Management
             </span>
           </h1>
-          <p className={`text-sm font-medium ${TC.textSecondary}`}>
+          <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>
             Manage system users, permissions, and accounts
           </p>
         </div>
@@ -537,25 +537,25 @@ const Users = () => {
         {/* Left Pane: User List */}
         <div
           className={`
-          flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-3xl overflow-hidden
+          flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-2xl md:rounded-3xl overflow-hidden
           transition-all duration-200 ease-out
           w-full ${selectedUser ? "md:w-[380px]" : "md:w-full"}
         `}
         >
           {/* List Toolbar (Search & Filter) */}
-          <div className="p-4 sticky top-0 z-10 backdrop-blur-md bg-transparent border-b border-gray-100 dark:border-gray-800/50 space-y-3">
+          <div className="p-3 md:p-4 sticky top-0 z-10 backdrop-blur-md bg-transparent border-b border-gray-100 dark:border-gray-800/50 space-y-3">
             {/* Search and Filters Row */}
             <div className="flex gap-2">
               <div className="relative group flex-1">
                 <Search
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${TC.textSecondary} group-focus-within:text-blue-500`}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 md:w-4 md:h-4 transition-colors ${TC.textSecondary} group-focus-within:text-blue-500`}
                 />
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none border transition-all ${isLight
+                  className={`w-full pl-8 md:pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl outline-none border transition-all ${isLight
                     ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500"
                     : "bg-gray-900/50 border-white/10 focus:bg-black/50 focus:border-cyan-500 text-white placeholder-gray-500"
                     }`}
@@ -565,31 +565,31 @@ const Users = () => {
                 onClick={() =>
                   setFilterRole(filterRole === "all" ? "admin" : "all")
                 }
-                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${filterRole === "admin"
+                className={`px-2.5 md:px-3 py-1.5 md:py-2 rounded-xl border transition-all flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold ${filterRole === "admin"
                   ? "bg-purple-500/10 border-purple-500/50 text-purple-500"
                   : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
                   }`}
                 title="Toggle Admin Filter"
               >
-                <Shield className="w-4 h-4" />
+                <Shield className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 <span className="hidden sm:inline">Admin</span>
               </button>
               <button
                 onClick={() => setShowArchived(!showArchived)}
-                className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold ${showArchived
+                className={`px-2.5 md:px-3 py-1.5 md:py-2 rounded-xl border transition-all flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold ${showArchived
                   ? "bg-red-500/10 border-red-500/50 text-red-500"
                   : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
                   }`}
                 title="Toggle Archived"
               >
-                <Archive className="w-4 h-4" />
+                <Archive className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 <span className="hidden sm:inline">Archived</span>
               </button>
             </div>
           </div>
 
           {/* List Items */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 pb-20 md:pb-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-1.5 md:p-2 pb-20 md:pb-2">
             {loading || !isReady ? (
               <div className="flex justify-center p-8">
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />

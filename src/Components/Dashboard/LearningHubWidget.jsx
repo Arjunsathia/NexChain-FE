@@ -54,10 +54,10 @@ export default function LearningHubWidget() {
                 className={`w-1.5 h-1.5 mt-1.5 rounded-full ${isLight ? "bg-blue-400" : "bg-blue-500"}`}
               ></div>
               <div
-                className={`flex-1 p-2 rounded-lg ${isLight ? "bg-gray-50 border border-gray-100" : "bg-gray-800/50 border border-gray-700/30"}`}
+                className={`flex-1 p-1.5 sm:p-2 rounded-lg ${isLight ? "bg-gray-50 border border-gray-100" : "bg-gray-800/50 border border-gray-700/30"}`}
               >
                 <p
-                  className={`text-[11px] leading-relaxed font-medium ${TC.textSecondary}`}
+                  className={`text-[10px] sm:text-[11px] leading-relaxed font-medium ${TC.textSecondary}`}
                 >
                   {text}
                 </p>

@@ -80,8 +80,8 @@ const LogoutConfirmationModal = ({
                 <button
                   onClick={onClose}
                   className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
-                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                 >
                   Cancel
@@ -212,7 +212,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6 sticky top-4 overflow-hidden 
+        className={`hidden lg:flex flex-col w-72 h-full rounded-3xl p-6 
           transition-all duration-500 ease-out
           ${TC.bgSidebar}
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}
@@ -380,8 +380,8 @@ function Sidebar({ onLogout, isLogoutLoading }) {
             onClick={() => setShowLogoutModal(true)}
             disabled={isLogoutLoading}
             className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 group ${isLight
-                ? "bg-red-50 text-red-600 hover:bg-red-100"
-                : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+              ? "bg-red-50 text-red-600 hover:bg-red-100"
+              : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
               }`}
           >
             <FaSignOutAlt className="group-hover:-translate-x-1 transition-transform" />

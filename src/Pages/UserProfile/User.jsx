@@ -49,11 +49,11 @@ export default function User() {
 
   return (
     <div
-      className={`min-h-screen flex font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}
+      className={`min-h-screen flex items-start font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}
     >
       { }
       {isDesktop && (
-        <div className="sticky top-0 h-screen flex-shrink-0 p-4 z-50">
+        <div className="sticky top-0 h-screen flex-shrink-0 z-40 hidden lg:flex items-start py-6 pl-4">
           <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
         </div>
       )}

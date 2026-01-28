@@ -56,7 +56,7 @@ function CryptoTable({
                 key={coin.id}
                 className={`${TC.tableRow} transition-all duration-200 hover:bg-gray-800/30`}
               >
-                <td className="py-3 px-3 sm:py-4 sm:px-6">
+                <td className="py-2.5 px-2.5 sm:py-4 sm:px-6">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <img
                       src={coin.image}
@@ -65,26 +65,26 @@ function CryptoTable({
                     />
                     <div className="min-w-0 flex-1">
                       <p
-                        className={`text-xs sm:text-sm font-bold ${TC.textPrimary} truncate`}
+                        className={`text-xs sm:text-sm font-bold ${TC.textPrimary} truncate max-w-[80px] sm:max-w-none`}
                       >
                         {coin.name}
                       </p>
-                      <p className="text-[10px] sm:text-xs text-cyan-400 uppercase">
+                      <p className="text-[9px] sm:text-xs text-cyan-400 uppercase">
                         {coin.symbol}
                       </p>
                     </div>
                   </div>
                 </td>
                 <td
-                  className={`py-3 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm font-medium ${TC.textPrimary}`}
+                  className={`py-2.5 px-2.5 sm:py-4 sm:px-6 text-xs sm:text-sm font-medium ${TC.textPrimary}`}
                 >
                   {formatCurrency(coin.current_price)}
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">
+                <td className="py-2.5 px-2.5 sm:py-4 sm:px-6 hidden sm:table-cell">
                   <div
                     className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${coin.price_change_percentage_24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
+                      ? "text-green-400"
+                      : "text-red-400"
                       }`}
                   >
                     {coin.price_change_percentage_24h >= 0 ? (
@@ -96,21 +96,21 @@ function CryptoTable({
                   </div>
                 </td>
                 <td
-                  className={`py-3 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden md:table-cell`}
+                  className={`py-2.5 px-2.5 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden md:table-cell`}
                 >
                   ${formatLargeNumber(coin.market_cap)}
                 </td>
                 <td
-                  className={`py-3 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden lg:table-cell`}
+                  className={`py-2.5 px-2.5 sm:py-4 sm:px-6 text-xs sm:text-sm ${TC.textSecondary} hidden lg:table-cell`}
                 >
                   ${formatLargeNumber(coin.total_volume)}
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6 text-center">
-                  <div className="flex items-center justify-center gap-2">
+                <td className="py-2.5 px-2.5 sm:py-4 sm:px-6 text-center">
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                     <span
-                      className={`px-2 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider ${coin.isFrozen
-                          ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                          : "bg-green-500/10 text-green-500 border border-green-500/20"
+                      className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold tracking-wider ${coin.isFrozen
+                        ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                        : "bg-green-500/10 text-green-500 border border-green-500/20"
                         }`}
                     >
                       {coin.isFrozen ? "Frozen" : "Active"}
@@ -119,33 +119,33 @@ function CryptoTable({
                     <button
                       onClick={() => onToggleFreeze && onToggleFreeze(coin)}
                       disabled={loadingId === coin.id}
-                      className={`p-1.5 rounded-lg transition-all duration-300 hover:scale-110 ${coin.isFrozen
-                          ? "text-red-500 hover:bg-red-500/10"
-                          : "text-green-500 hover:bg-green-500/10"
+                      className={`p-1 sm:p-1.5 rounded-lg transition-all duration-300 hover:scale-110 ${coin.isFrozen
+                        ? "text-red-500 hover:bg-red-500/10"
+                        : "text-green-500 hover:bg-green-500/10"
                         }`}
                       title={coin.isFrozen ? "Unfreeze Coin" : "Freeze Coin"}
                     >
                       {loadingId === coin.id ? (
-                        <FaSpinner className="animate-spin text-sm" />
+                        <FaSpinner className="animate-spin text-xs sm:text-sm" />
                       ) : coin.isFrozen ? (
-                        <FaToggleOn size={18} className="rotate-180" />
+                        <FaToggleOn className="rotate-180 text-base sm:text-lg" />
                       ) : (
-                        <FaToggleOff size={18} className="rotate-180" />
+                        <FaToggleOff className="rotate-180 text-base sm:text-lg" />
                       )}
                     </button>
                   </div>
                 </td>
-                <td className="py-3 px-3 sm:py-4 sm:px-6 text-center">
+                <td className="py-2.5 px-2.5 sm:py-4 sm:px-6 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => setSelectedCoin(coin)}
                       className={`p-1.5 sm:p-2.5 rounded-xl transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-cyan-500/20 ${isLight
-                          ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
-                          : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
+                        ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-100"
+                        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
                         }`}
                       title="View Details"
                     >
-                      <FaEye className="text-sm" />
+                      <FaEye className="text-xs sm:text-sm" />
                     </button>
                   </div>
                 </td>
@@ -162,8 +162,8 @@ function CryptoTable({
             onClick={() => paginate(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800/50"
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50"
               } ${isLight
                 ? "text-gray-600 bg-gray-100"
                 : "text-gray-300 bg-gray-800/50"
@@ -207,13 +207,13 @@ function CryptoTable({
                 onClick={() => typeof page === "number" && paginate(page)}
                 disabled={typeof page !== "number"}
                 className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-300 ${page === currentPage
-                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
-                    : typeof page === "number"
-                      ? `${isLight
-                        ? "bg-gray-100/80 text-gray-600 hover:bg-gray-200"
-                        : "bg-white/5 text-gray-300 hover:bg-white/10"
-                      }`
-                      : `${TC.textSecondary}`
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+                  : typeof page === "number"
+                    ? `${isLight
+                      ? "bg-gray-100/80 text-gray-600 hover:bg-gray-200"
+                      : "bg-white/5 text-gray-300 hover:bg-white/10"
+                    }`
+                    : `${TC.textSecondary}`
                   }`}
               >
                 {page}
@@ -225,8 +225,8 @@ function CryptoTable({
             onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800/50"
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-800/50"
               } ${isLight
                 ? "text-gray-600 bg-gray-100"
                 : "text-gray-300 bg-gray-800/50"

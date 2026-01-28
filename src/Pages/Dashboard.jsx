@@ -89,7 +89,7 @@ export default function Dashboard() {
       className={`min-h-screen p-2 sm:p-4 lg:p-6 ${isLight ? "text-gray-900" : "text-white"}`}
     >
       {!isDesktop ? (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3">
           {/* Top Profile Card */}
           <UserProfileCard />
 
@@ -97,15 +97,15 @@ export default function Dashboard() {
           <PortfolioCard />
 
           {/* Mobile Tabs Navigation */}
-          <div className="sticky top-[60px] z-30 py-2 -mx-2 px-2 backdrop-blur-md bg-opacity-80">
-            <div className={`p-1 rounded-2xl flex gap-1 ${isLight ? "bg-gray-100" : "bg-gray-800/50"}`}>
+          <div className="sticky top-[56px] z-30 py-1 -mx-2 px-2 backdrop-blur-md bg-opacity-90">
+            <div className={`p-1 rounded-xl flex gap-1 ${isLight ? "bg-gray-100 shadow-sm" : "bg-gray-800/80 shadow-md"}`}>
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all duration-300 ${activeTab === tab.id
-                    ? (isLight ? "bg-white text-blue-600 shadow-sm" : "bg-gray-700 text-cyan-400 shadow-lg")
-                    : (isLight ? "text-gray-500 hover:text-gray-700" : "text-gray-400 hover:text-gray-200")
+                  className={`flex-1 py-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wide rounded-lg transition-all duration-300 ${activeTab === tab.id
+                    ? (isLight ? "bg-white text-blue-600 shadow" : "bg-gray-700 text-cyan-400 shadow")
+                    : (isLight ? "text-gray-400 hover:text-gray-600" : "text-gray-500 hover:text-gray-300")
                     }`}
                 >
                   {tab.label}
@@ -118,16 +118,16 @@ export default function Dashboard() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-6"
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-4"
             >
               {activeTab === "markets" && (
                 <>
-                  <div className="space-y-3">
-                    <h2 className={`text-sm font-black uppercase tracking-[0.2em] px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+                  <div className="space-y-2">
+                    <h2 className={`text-xs font-black uppercase tracking-[0.1em] px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
                       Top Assets
                     </h2>
                     <TopCoins
@@ -138,7 +138,9 @@ export default function Dashboard() {
                       loading={loading}
                     />
                   </div>
-                  <ChartSection coinId={selectedCoinId} />
+                  <div className="min-h-[300px]">
+                    <ChartSection coinId={selectedCoinId} />
+                  </div>
                   <TrendingCoinsWidget variant="dashboard" />
                 </>
               )}
@@ -154,11 +156,11 @@ export default function Dashboard() {
           </AnimatePresence>
 
           {/* Permanent Bottom Sections */}
-          <div className="pt-4 border-t border-white/5">
-            <h2 className={`text-sm font-black uppercase tracking-[0.2em] mb-4 px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+          <div className="pt-2 border-t border-dashed border-gray-200 dark:border-gray-800">
+            <h2 className={`text-xs font-black uppercase tracking-[0.1em] mb-3 px-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
               Latest Discovery
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <NewsPanel />
               <LearningHub />
             </div>

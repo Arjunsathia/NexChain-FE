@@ -410,10 +410,8 @@ body {
   background-attachment: fixed;
   min-height: 100dvh;
   margin: 0;
-  overflow-x: hidden;
   /* Fix for mobile overscroll white space */
   /* overscroll-behavior-y: none; */
-  overflow-x: hidden;
   width: 100%;
 }
 
@@ -426,7 +424,6 @@ html {
   min-height: 100%;
   /* Fix for mobile overscroll white space - must apply to HTML too */
   /* overscroll-behavior-y: none; */
-  overflow-x: hidden;
   width: 100%;
 }
 
@@ -604,11 +601,6 @@ html.lenis body {
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-}
-
-/* Prevent scrollbar 1px layout jump */
-html {
-  /* scrollbar-gutter: stable; - Removed to fix mobile right side whitespace */
 }
 
 .no-scrollbar {

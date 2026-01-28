@@ -142,19 +142,19 @@ function LearningHub() {
   return (
     // No global background, fits into parent
     <div
-      className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 font-sans ${hasVisited ? "" : `transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}`}
+      className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 font-sans ${hasVisited ? "" : `transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}`}
     >
       {/* --- Hero: "Start Here" (Premium Banner) --- */}
       {!loading && selectedCategory === "all" && (
         <div
-          className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
+          className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden mb-6 md:mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
         >
           {/* Abstract Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
           <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2"></div>
 
-          <div className="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="relative z-10 p-5 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-300 text-xs font-bold mb-4 backdrop-blur-sm">
                 <FaBolt size={10} /> RECOMMENDED STARTER
@@ -163,16 +163,16 @@ function LearningHub() {
                 Crypto 101: <br />
                 The Foundation
               </h2>
-              <p className="text-slate-300 text-lg mb-8 leading-relaxed">
+              <p className="text-slate-300 text-sm md:text-lg mb-6 md:mb-8 leading-relaxed">
                 Everything you need to know to start trading. From blockchain
                 basics to setting up your first wallet securely.
               </p>
 
               <div className="flex items-center gap-4">
-                <button className="px-8 py-3.5 bg-white text-slate-900 rounded-full font-bold text-sm hover:bg-cyan-50 transition-colors flex items-center gap-2">
+                <button className="px-6 md:px-8 py-3 md:py-3.5 bg-white text-slate-900 rounded-full font-bold text-xs md:text-sm hover:bg-cyan-50 transition-colors flex items-center gap-2">
                   <FaPlay size={12} /> Start Lesson 1
                 </button>
-                <span className="text-slate-400 text-sm font-medium">
+                <span className="text-slate-400 text-xs md:text-sm font-medium">
                   12 Lessons • 2h 15m
                 </span>
               </div>
@@ -188,7 +188,7 @@ function LearningHub() {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-6 mb-8 border-b border-gray-200 dark:border-gray-800 pb-4 md:pb-1">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8 border-b border-gray-200 dark:border-gray-800 pb-4 md:pb-1">
         <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar w-full md:w-auto pb-2 md:pb-0 px-1">
           {CATEGORIES.map((cat) => (
             <button
@@ -229,7 +229,7 @@ function LearningHub() {
 
       {/* --- Premium Grid --- */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -285,7 +285,7 @@ function LearningHub() {
         </div>
       ) : (
         <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
         >
           {filteredCourses.map((course) => (
             <PremiumCard key={course.id} course={course} TC={TC} />
@@ -293,7 +293,7 @@ function LearningHub() {
 
           {/* "Coming Soon" Placeholder for visual balance */}
           <div
-            className={`rounded-2xl border border-dashed ${isLight ? "border-gray-300" : "border-gray-800"} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[260px]`}
+            className={`rounded-2xl border border-dashed ${isLight ? "border-gray-300" : "border-gray-800"} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[220px] md:min-h-[260px]`}
           >
             <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
               <span className="text-xl">✨</span>
@@ -314,13 +314,13 @@ const PremiumCard = ({ course, TC }) => {
   return (
     <div
       className={`
-      group relative rounded-2xl p-6 transition-all duration-500 ease-out cursor-pointer
+      group relative rounded-2xl p-5 md:p-6 transition-all duration-500 ease-out cursor-pointer
       ${TC.cardBase} ${TC.cardHover}
-      flex flex-col h-full min-h-[260px]
+      flex flex-col h-full min-h-[220px] md:min-h-[260px]
     `}
     >
       {/* Icon Top Right */}
-      <div className="flex justify-between items-start mb-12">
+      <div className="flex justify-between items-start mb-8 md:mb-12">
         <div className={`p-3 rounded-2xl ${course.bg} ${course.border} border`}>
           {course.category === "basics" && (
             <FaGraduationCap className={course.color} size={20} />
@@ -347,11 +347,11 @@ const PremiumCard = ({ course, TC }) => {
       {/* Info */}
       <div className="mt-auto">
         <h3
-          className={`text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
+          className={`text-base md:text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
         >
           {course.title}
         </h3>
-        <p className={`text-sm ${TC.textSecondary} mb-6`}>{course.subtitle}</p>
+        <p className={`text-xs md:text-sm ${TC.textSecondary} mb-4 md:mb-6`}>{course.subtitle}</p>
 
         {/* Footer Meta */}
         <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">

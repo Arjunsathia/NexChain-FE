@@ -277,7 +277,7 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         </div>
       </div>
 
-      <div className="w-full h-[240px] sm:h-[400px] lg:h-[500px] relative">
+      <div className="w-full h-[220px] sm:h-[400px] lg:h-[500px] relative">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-[2px] z-50 rounded-xl transition-all duration-300">
             <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin shadow-lg"></div>

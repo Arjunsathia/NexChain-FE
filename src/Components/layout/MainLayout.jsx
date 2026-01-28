@@ -60,6 +60,11 @@ export default function MainLayout() {
   }, [location.pathname]);
 
 
+  const isSidebarPage =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/user") ||
+    location.pathname.startsWith("/user-profile");
+
   return (
     <div className="min-h-screen w-full flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
       { }
@@ -83,16 +88,22 @@ export default function MainLayout() {
 
       <main className="flex-1 w-full max-w-full p-0 pt-[60px] lg:pt-0 sm:p-4 transition-colors duration-300">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={pageKey}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }} // Slightly longer but smoother
-            className="w-full h-full"
-          >
-            <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
-          </motion.div>
+          {!isSidebarPage ? (
+            <motion.div
+              key={pageKey}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }} // Slightly longer but smoother
+              className="w-full h-full"
+            >
+              <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
+            </motion.div>
+          ) : (
+            <div key={pageKey} className="w-full h-full">
+              <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
+            </div>
+          )}
         </AnimatePresence>
       </main>
 

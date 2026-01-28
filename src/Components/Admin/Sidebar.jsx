@@ -136,7 +136,7 @@ function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] rounded-3xl p-6 sticky top-4 
+        className={`hidden lg:flex flex-col w-72 h-full rounded-3xl p-6 
           transition-transform duration-300 ease-out
           ${TC.bgSidebar}
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}

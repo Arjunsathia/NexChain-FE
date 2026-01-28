@@ -376,7 +376,7 @@ function CryptoList() {
           <CoinTable onTrade={handleTrade} />
         </div>
 
-    
+
       </div>
 
       <TradeModal
