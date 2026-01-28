@@ -13,6 +13,7 @@ import {
   FaCog,
   FaChevronRight,
   FaUserCircle,
+  FaPaperPlane,
 } from "react-icons/fa";
 import useUserContext from "@/hooks/useUserContext";
 import useWalletContext from "@/hooks/useWalletContext";
@@ -21,6 +22,7 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import { SERVER_URL } from "@/api/axiosConfig";
 import { createPortal } from "react-dom";
+import FeedbackModal from "../Common/FeedbackModal";
 
 // Logout Modal Component
 const LogoutConfirmationModal = ({
@@ -118,6 +120,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
   const { purchasedCoins } = usePurchasedCoins() || { purchasedCoins: [] };
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -313,9 +316,27 @@ function Sidebar({ onLogout, isLogoutLoading }) {
           })}
         </nav>
 
+        {/* Feedback Option - Added specifically above the divider */}
+        <div className="mt-2 relative z-10 slide-in" style={{ animationDelay: "0.2s" }}>
+          <button
+            onClick={() => setShowFeedback(true)}
+            className={`w-full relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group overflow-hidden ${TC.menuItemBase}`}
+          >
+            <span
+              className={`relative z-10 text-lg transition-colors duration-200 ${isLight ? "text-gray-400 group-hover:text-blue-500" : "text-gray-500 group-hover:text-cyan-400"}`}
+            >
+              <FaPaperPlane />
+            </span>
+            <span className="relative z-10 font-medium text-sm">
+              Share Feedback
+            </span>
+            <FaChevronRight className={`relative z-10 ml-auto text-xs transition-opacity duration-200 opacity-0 group-hover:opacity-100 ${isLight ? "text-gray-400" : "text-gray-500"}`} />
+          </button>
+        </div>
+
         {/* Bottom Stats & Logout */}
         <div
-          className="mt-6 pt-6 border-t border-dashed relative z-10 slide-in"
+          className="mt-4 pt-6 border-t border-dashed relative z-10 slide-in"
           style={{
             borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)",
             animationDelay: "0.2s",
@@ -401,6 +422,10 @@ function Sidebar({ onLogout, isLogoutLoading }) {
         onConfirm={onLogout}
         isLight={isLight}
         isLoading={isLogoutLoading}
+      />
+      <FeedbackModal
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
       />
     </>
   );

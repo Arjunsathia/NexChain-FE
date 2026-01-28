@@ -26,21 +26,14 @@ export default defineConfig({
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
           "vendor-apexcharts": ["apexcharts", "react-apexcharts"],
-          "vendor-chartjs": ["chart.js", "react-chartjs-2"],
           "vendor-recharts": ["recharts"],
           "vendor-ui": [
             "framer-motion", 
-            "lottie-react", 
-            "react-confetti", 
             "react-loading-skeleton",
-            "react-simple-typewriter"
           ],
           "vendor-utils": [
              "axios", 
-             "zod", 
-             "react-hook-form", 
              "@tanstack/react-query",
-             "@stripe/stripe-js"
           ],
           "vendor-icons": ["react-icons", "lucide-react"],
         },

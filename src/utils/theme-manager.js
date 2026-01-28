@@ -6,7 +6,7 @@ export const getInitialTheme = () => {
   return "dark";
 };
 
-export const applyTheme = (theme) => {
+const applyTheme = (theme) => {
   const root = document.documentElement;
   root.setAttribute("data-theme", theme);
 

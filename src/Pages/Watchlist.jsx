@@ -14,7 +14,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import toast from "react-hot-toast";
-import TradeModal from "@/Components/Common/TradeModal";
+import TradeModal from "@/Components/TradeModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";

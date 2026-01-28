@@ -107,7 +107,8 @@ export default function MainLayout() {
         </AnimatePresence>
       </main>
 
-      <Footer />
+      {/* Footer - Only on Landing Page */}
+      {location.pathname === "/" && <Footer />}
 
       { }
       <ChatbotWidget />

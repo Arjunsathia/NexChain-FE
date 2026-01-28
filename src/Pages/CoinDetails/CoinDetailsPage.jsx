@@ -11,7 +11,7 @@ import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import TradeModal from "@/Components/Common/TradeModal";
+import TradeModal from "@/Components/TradeModal";
 import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";

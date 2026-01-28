@@ -10,7 +10,7 @@ import TrendingCoinsWidget from "@/Components/Common/TrendingCoinsWidget";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getGlobalMarketStats } from "@/api/coinApis";
-import TradeModal from "@/Components/Common/TradeModal";
+import TradeModal from "@/Components/TradeModal";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import {

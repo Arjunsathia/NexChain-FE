@@ -12,7 +12,7 @@ import PortfolioHeader from "@/Components/portfolio/PortfolioHeader";
 import PerformanceChart from "@/Components/portfolio/PerformanceChart";
 import PortfolioDistribution from "@/Components/portfolio/PortfolioDistribution";
 import HoldingsTable from "@/Components/portfolio/HoldingsTable";
-import TradeModal from "@/Components/Common/TradeModal";
+import TradeModal from "@/Components/TradeModal";
 import TransactionHistory from "@/Components/portfolio/TransactionHistory";
 import OpenOrdersModal from "@/Components/portfolio/OpenOrdersModal";
 import { useOpenOrders } from "@/hooks/useOpenOrders";
