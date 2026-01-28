@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 import HeroSection from "../Components/Landing/HeroSection";
 import { TC } from "../Components/Landing/theme";
+import useLandingLenis from "@/hooks/useLandingLenis";
 
 const FeaturesSection = React.lazy(
   () => import("../Components/Landing/FeaturesSection"),
@@ -47,6 +48,7 @@ const MemoizedTestimonialsSection = React.memo(TestimonialsSection);
 const MemoizedCTASection = React.memo(CTASection);
 
 export default function Landing() {
+  useLandingLenis();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [livePrices, setLivePrices] = useState({});

@@ -580,6 +580,7 @@ function TradeModal({
                 setIsSubmitting(false);
                 setIsTradeSuccess(false);
             }, 300);
+            return true;
         } catch (error) {
             console.error("Trade error:", error);
             const errorMessage =
@@ -588,6 +589,7 @@ function TradeModal({
                 "Trade failed. Please try again.";
             toast.error(errorMessage);
             setIsSubmitting(false);
+            return false;
         }
     }, [
         activeTab,
@@ -605,7 +607,7 @@ function TradeModal({
     const handleSubmit = async () => {
         if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
             toast.error("Please enter a valid amount");
-            return;
+            return false;
         }
 
         const isSellMode = isHoldingsView
@@ -617,7 +619,7 @@ function TradeModal({
 
             if (quantity <= 0) {
                 toast.error("Please enter a valid amount to sell");
-                return;
+                return false;
             }
 
             if (quantity > availableQuantity + 1e-9) {
@@ -626,19 +628,19 @@ function TradeModal({
                         coin.symbol || coin.coinSymbol
                     )?.toUpperCase()} available`,
                 );
-                return;
+                return false;
             }
 
             if (quantity < 0.000001) {
                 toast.error("Minimum sell amount is 0.000001");
-                return;
+                return false;
             }
 
             if (!holdingsSummary || availableQuantity === 0) {
                 toast.error(
                     "No holdings found for this coin. Please refresh and try again.",
                 );
-                return;
+                return false;
             }
         }
 
@@ -654,18 +656,18 @@ function TradeModal({
             if (orderType === "stop_market") {
                 if (isNaN(stop)) {
                     toast.error("Please enter Stop price");
-                    return;
+                    return false;
                 }
             } else if (orderType === "oco") {
                 if (isNaN(stop) || isNaN(limit)) {
                     toast.error("Please enter both Take Profit (Limit) and Stop Loss (Stop) prices");
-                    return;
+                    return false;
                 }
             } else {
                 // Stop Limit
                 if (isNaN(stop) || isNaN(limit)) {
                     toast.error("Please enter both Stop and Limit prices");
-                    return;
+                    return false;
                 }
             }
 
@@ -680,13 +682,13 @@ function TradeModal({
                         toast.error(
                             `For Buy OCO, Take Profit (Limit) acts as a "Buy Limit" and must be LOWER than current price ($${currentPrice.toLocaleString()}). Use this to catch a dip.`
                         );
-                        return;
+                        return false;
                     }
                     if (stop <= currentPrice) {
                         toast.error(
                             `For Buy OCO, Stop Loss (Trigger) acts as a "Buy Stop" and must be HIGHER than current price ($${currentPrice.toLocaleString()}). Use this to buy a breakout.`
                         );
-                        return;
+                        return false;
                     }
                 } else {
                     // Sell OCO:
@@ -697,13 +699,13 @@ function TradeModal({
                         toast.error(
                             `For Sell OCO, Take Profit (Limit) must be HIGHER than current price ($${currentPrice.toLocaleString()}). You want to sell at a profit.`
                         );
-                        return;
+                        return false;
                     }
                     if (stop >= currentPrice) {
                         toast.error(
                             `For Sell OCO, Stop Loss (Trigger) must be LOWER than current price ($${currentPrice.toLocaleString()}). You want to limit your losses.`
                         );
-                        return;
+                        return false;
                     }
                 }
             }
@@ -712,12 +714,12 @@ function TradeModal({
                 if (isBuyMode) {
                     if (stop <= currentPrice) {
                         toast.error(`Buy Stop must be ABOVE current price ($${currentPrice.toLocaleString()}). Use a Limit order to buy lower.`);
-                        return;
+                        return false;
                     }
                 } else {
                     if (stop >= currentPrice) {
                         toast.error(`Sell Stop must be BELOW current price ($${currentPrice.toLocaleString()}). Use a Limit order to sell higher.`);
-                        return;
+                        return false;
                     }
                 }
             }
@@ -727,7 +729,7 @@ function TradeModal({
             const quantity = parseFloat(coinAmount);
             if (quantity > maxAvailable) {
                 toast.error("Insufficient balance for this purchase");
-                return;
+                return false;
             }
         }
 
@@ -751,11 +753,11 @@ function TradeModal({
                     cancelText: "Go Back"
                 });
                 setShowConfirm(true);
-                return;
+                return false;
             }
         }
 
-        await handleProceedWithTrade();
+        return await handleProceedWithTrade();
     };
 
     if (!coin) return null;
@@ -771,7 +773,7 @@ function TradeModal({
             onClick={handleBackdropClick}
         >
             <div
-                className={`w-full sm:max-w-[440px] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative overflow-hidden transform-gpu transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isLight
+                className={`w-full sm:max-w-[440px] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative overflow-hidden transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isLight
                     ? "bg-white sm:bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
                     : "bg-gray-950 sm:bg-gray-900 border-t border-gray-800 sm:border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
                     } ${isVisible

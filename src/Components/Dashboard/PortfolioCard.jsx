@@ -119,7 +119,10 @@ function PortfolioCard({ disableAnimations = false }) {
       </div>
 
       { }
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full">
+      <div
+        data-lenis-prevent
+        className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full"
+      >
         {allCoins.length === 0 ? (
           <div
             className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty}`}

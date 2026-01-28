@@ -2,6 +2,148 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bitcoin, Circle, TrendingUp, TrendingDown } from "lucide-react";
 
+// --- SVG Icons ---
+const CoinLogo = ({ symbol, className }) => {
+  switch (symbol) {
+    case "BTC":
+      return <Bitcoin className={className} />;
+    case "ETH":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm7.994-15.781L16.498 4 9 16.22l7.498 4.353 7.496-4.354zM24 17.616l-7.502 4.351L9 17.617l7.498 10.378 7.502-10.379z" />
+        </svg>
+      );
+    case "ADA":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm-3.773-18.735l-2.016 2.684-2.67-2.028 2.016-2.684 2.67 2.028zm6.443-4.896l-2.684 2.016-2.028-2.67 2.684-2.016 2.028 2.67zm4.896 6.443l-2.016-2.684 2.67-2.028 2.016 2.684-2.67 2.028zm-6.443 4.896l2.684-2.016 2.028 2.67-2.684 2.016-2.028-2.67zm-8.457-1.547a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm13.547 0a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm-6.773 5.227a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm0-13.547a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008z" />
+        </svg>
+      );
+    case "DOGE":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm2.667-22.667h-6.667v13.333h6.667c3.682 0 6.667-2.985 6.667-6.667s-2.985-6.667-6.667-6.667zm0 10.667h-4v-8h4c2.209 0 4 1.791 4 4s-1.791 4-4 4z" />
+        </svg>
+      );
+    case "SOL":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <path d="M4.6 22.85l2.25-2.25h18.3l2.25 2.25-2.25 2.25H6.85L4.6 22.85zm0-13.7l2.25-2.25h18.3l2.25 2.25-2.25 2.25H6.85L4.6 9.15zm22.8 6.85l-2.25 2.25H6.85l-2.25-2.25 2.25-2.25h18.3l2.25 2.25z" />
+        </svg>
+      );
+    case "XRP":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm-5.26-21.74L4.22 16.78l6.52 6.52 6.52-6.52-6.52-6.52zm10.52 0l-6.52 6.52 6.52 6.52 6.52-6.52-6.52-6.52z" />
+        </svg>
+      );
+    case "DOT":
+      return (
+        <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+          <circle cx="16" cy="16" r="16" />
+          <path fill="white" d="M10 16a6 6 0 1 1 12 0 6 6 0 0 1-12 0z" />
+        </svg>
+      );
+    default:
+      return <Circle className={className} />;
+  }
+};
+
+// --- Coin Data Configuration ---
+const desktopCoins = [
+  {
+    id: "bitcoin",
+    symbol: "BTC",
+    name: "Bitcoin",
+    pos: "top-[5%] left-[5%] md:left-[10%]",
+    float: { y: [0, -15, 0] },
+    theme: {
+      text: "text-orange-500",
+      bg: "bg-orange-500",
+      border: "hover:border-orange-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(249,115,22,0.3)]",
+    },
+  },
+  {
+    id: "ethereum",
+    symbol: "ETH",
+    name: "Ethereum",
+    pos: "top-[40%] left-[-2%] md:left-[2%]",
+    float: { y: [0, 10, 0] },
+    theme: {
+      text: "text-purple-500",
+      bg: "bg-purple-600",
+      border: "hover:border-purple-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(168,85,247,0.3)]",
+    },
+  },
+  {
+    id: "cardano",
+    symbol: "ADA",
+    name: "Cardano",
+    pos: "bottom-[10%] left-[10%] md:left-[15%]",
+    float: { y: [0, -8, 0] },
+    theme: {
+      text: "text-blue-500",
+      bg: "bg-blue-600",
+      border: "hover:border-blue-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(59,130,246,0.3)]",
+    },
+  },
+  {
+    id: "dogecoin",
+    symbol: "DOGE",
+    name: "Dogecoin",
+    pos: "bottom-[15%] right-[5%] md:right-[15%]",
+    float: { y: [0, 12, 0] },
+    theme: {
+      text: "text-yellow-500",
+      bg: "bg-yellow-600",
+      border: "hover:border-yellow-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(234,179,8,0.3)]",
+    },
+  },
+  {
+    id: "solana",
+    symbol: "SOL",
+    name: "Solana",
+    pos: "top-[25%] right-[2%] md:right-[5%]",
+    float: { y: [0, -10, 0] },
+    theme: {
+      text: "text-indigo-500",
+      bg: "bg-indigo-600",
+      border: "hover:border-indigo-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(99,102,241,0.3)]",
+    },
+  },
+  {
+    id: "ripple",
+    symbol: "XRP",
+    name: "Ripple",
+    pos: "top-[5%] left-[50%] -translate-x-1/2",
+    float: { y: [0, 8, 0] },
+    theme: {
+      text: "text-cyan-500",
+      bg: "bg-cyan-600",
+      border: "hover:border-cyan-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(34,211,238,0.3)]",
+    },
+  },
+  {
+    id: "polkadot",
+    symbol: "DOT",
+    name: "Polkadot",
+    pos: "bottom-[5%] left-[50%] -translate-x-1/2",
+    float: { y: [0, -6, 0] },
+    theme: {
+      text: "text-pink-500",
+      bg: "bg-pink-600",
+      border: "hover:border-pink-500/50",
+      shadow: "hover:shadow-[0_0_40px_rgba(236,72,153,0.3)]",
+    },
+  },
+];
+
 const MarketNetworkVisual = ({ livePrices }) => {
   // --- Helpers ---
   const getPrice = (id) =>
@@ -14,148 +156,6 @@ const MarketNetworkVisual = ({ livePrices }) => {
       currency: "USD",
       minimumFractionDigits: p < 1 ? 4 : 2,
     }).format(p);
-
-  // --- SVG Icons ---
-  const CoinLogo = ({ symbol, className }) => {
-    switch (symbol) {
-      case "BTC":
-        return <Bitcoin className={className} />;
-      case "ETH":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm7.994-15.781L16.498 4 9 16.22l7.498 4.353 7.496-4.354zM24 17.616l-7.502 4.351L9 17.617l7.498 10.378 7.502-10.379z" />
-          </svg>
-        );
-      case "ADA":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm-3.773-18.735l-2.016 2.684-2.67-2.028 2.016-2.684 2.67 2.028zm6.443-4.896l-2.684 2.016-2.028-2.67 2.684-2.016 2.028 2.67zm4.896 6.443l-2.016-2.684 2.67-2.028 2.016 2.684-2.67 2.028zm-6.443 4.896l2.684-2.016 2.028 2.67-2.684 2.016-2.028-2.67zm-8.457-1.547a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm13.547 0a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm-6.773 5.227a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008zm0-13.547a2.004 2.004 0 1 1 0-4.008 2.004 2.004 0 0 1 0 4.008z" />
-          </svg>
-        );
-      case "DOGE":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm2.667-22.667h-6.667v13.333h6.667c3.682 0 6.667-2.985 6.667-6.667s-2.985-6.667-6.667-6.667zm0 10.667h-4v-8h4c2.209 0 4 1.791 4 4s-1.791 4-4 4z" />
-          </svg>
-        );
-      case "SOL":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <path d="M4.6 22.85l2.25-2.25h18.3l2.25 2.25-2.25 2.25H6.85L4.6 22.85zm0-13.7l2.25-2.25h18.3l2.25 2.25-2.25 2.25H6.85L4.6 9.15zm22.8 6.85l-2.25 2.25H6.85l-2.25-2.25 2.25-2.25h18.3l2.25 2.25z" />
-          </svg>
-        );
-      case "XRP":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm-5.26-21.74L4.22 16.78l6.52 6.52 6.52-6.52-6.52-6.52zm10.52 0l-6.52 6.52 6.52 6.52 6.52-6.52-6.52-6.52z" />
-          </svg>
-        );
-      case "DOT":
-        return (
-          <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-            <circle cx="16" cy="16" r="16" />
-            <path fill="white" d="M10 16a6 6 0 1 1 12 0 6 6 0 0 1-12 0z" />
-          </svg>
-        );
-      default:
-        return <Circle className={className} />;
-    }
-  };
-
-  // --- Coin Data Configuration ---
-  const desktopCoins = [
-    {
-      id: "bitcoin",
-      symbol: "BTC",
-      name: "Bitcoin",
-      pos: "top-[5%] left-[5%] md:left-[10%]",
-      float: { y: [0, -15, 0] },
-      theme: {
-        text: "text-orange-500",
-        bg: "bg-orange-500",
-        border: "hover:border-orange-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(249,115,22,0.3)]",
-      },
-    },
-    {
-      id: "ethereum",
-      symbol: "ETH",
-      name: "Ethereum",
-      pos: "top-[40%] left-[-2%] md:left-[2%]",
-      float: { y: [0, 10, 0] },
-      theme: {
-        text: "text-purple-500",
-        bg: "bg-purple-600",
-        border: "hover:border-purple-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(168,85,247,0.3)]",
-      },
-    },
-    {
-      id: "cardano",
-      symbol: "ADA",
-      name: "Cardano",
-      pos: "bottom-[10%] left-[10%] md:left-[15%]",
-      float: { y: [0, -8, 0] },
-      theme: {
-        text: "text-blue-500",
-        bg: "bg-blue-600",
-        border: "hover:border-blue-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(59,130,246,0.3)]",
-      },
-    },
-    {
-      id: "dogecoin",
-      symbol: "DOGE",
-      name: "Dogecoin",
-      pos: "bottom-[15%] right-[5%] md:right-[15%]",
-      float: { y: [0, 12, 0] },
-      theme: {
-        text: "text-yellow-500",
-        bg: "bg-yellow-600",
-        border: "hover:border-yellow-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(234,179,8,0.3)]",
-      },
-    },
-    {
-      id: "solana",
-      symbol: "SOL",
-      name: "Solana",
-      pos: "top-[25%] right-[2%] md:right-[5%]",
-      float: { y: [0, -10, 0] },
-      theme: {
-        text: "text-indigo-500",
-        bg: "bg-indigo-600",
-        border: "hover:border-indigo-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(99,102,241,0.3)]",
-      },
-    },
-    {
-      id: "ripple",
-      symbol: "XRP",
-      name: "Ripple",
-      pos: "top-[5%] left-[50%] -translate-x-1/2",
-      float: { y: [0, 8, 0] },
-      theme: {
-        text: "text-cyan-500",
-        bg: "bg-cyan-600",
-        border: "hover:border-cyan-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(34,211,238,0.3)]",
-      },
-    },
-    {
-      id: "polkadot",
-      symbol: "DOT",
-      name: "Polkadot",
-      pos: "bottom-[5%] left-[50%] -translate-x-1/2",
-      float: { y: [0, -6, 0] },
-      theme: {
-        text: "text-pink-500",
-        bg: "bg-pink-600",
-        border: "hover:border-pink-500/50",
-        shadow: "hover:shadow-[0_0_40px_rgba(236,72,153,0.3)]",
-      },
-    },
-  ];
 
   // --- Responsive Logic ---
   const [isMobile, setIsMobile] = useState(false);

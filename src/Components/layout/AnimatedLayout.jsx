@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useEffect } from "react";
 import { useLocation, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import InteractiveGridPattern from "../Landing/Background";
-import LenisScroll from "../Common/LenisScroll";
 import { useVisitedRoutes } from "../../hooks/useVisitedRoutes";
 
 const AnimatedLayout = () => {
@@ -68,9 +67,6 @@ const AnimatedLayout = () => {
 
   return (
     <div className="relative min-h-screen w-full bg-[#02040a] overflow-x-hidden overflow-y-scroll">
-      {/* GLOBAL LENIS SCROLL INSTANCE */}
-      <LenisScroll />
-
       {/* 1. PERSISTENT BACKGROUND LAYER */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <InteractiveGridPattern />

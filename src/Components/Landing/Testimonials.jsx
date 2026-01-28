@@ -159,7 +159,10 @@ const TestimonialGrid = () => {
 
       <div className="w-full max-w-7xl mx-auto px-6 relative z-10">
         {/* Mobile: Horizontal Swipe */}
-        <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6 [&::-webkit-scrollbar]:hidden">
+        <div
+          data-lenis-prevent
+          className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6 [&::-webkit-scrollbar]:hidden"
+        >
           {testimonials.map((t, i) => (
             <div key={i} className="min-w-[280px] w-[85vw] snap-center">
               <TraderReviewCard testimonial={t} />

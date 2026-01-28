@@ -1,14 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-.font-outfit {
-  font-family: "Outfit", sans-serif;
-}
-
-.font-manrope {
-  font-family: "Manrope", sans-serif;
-}
-
+/* 
+================================================================
+   1. COLOR TOKENS & DESIGN SYSTEM (THEME)
+================================================================
+*/
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -34,6 +31,8 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar Variables */
   --sidebar: oklch(0.984 0.003 247.858);
   --sidebar-foreground: oklch(0.129 0.042 264.695);
   --sidebar-primary: oklch(0.546 0.245 262.881);
@@ -43,8 +42,10 @@
   --sidebar-border: oklch(0.897 0.01 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
+  /* Application Colors */
   --app-bg: linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff);
 
+  /* Navbar Styles - Light */
   --nav-bg: rgba(255, 255, 255, 0.6);
   --nav-border: transparent;
   --nav-text: #4b5563;
@@ -84,6 +85,8 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Sidebar Dark Variables */
   --sidebar: oklch(0.279 0.041 260.031);
   --sidebar-foreground: oklch(0.984 0.003 247.858);
   --sidebar-primary: oklch(0.783 0.108 231.176);
@@ -95,6 +98,7 @@
 
   --app-bg: linear-gradient(to bottom right, #000000, #0b182d, #000000);
 
+  /* Navbar Styles - Dark */
   --nav-bg: rgba(31, 41, 55, 0.5);
   --nav-border: transparent;
   --nav-text: #9ca3af;
@@ -109,46 +113,14 @@
   --nav-item-active-text: #67e8f9;
 }
 
-.show-in-light {
-  display: block;
-}
-.show-in-dark {
-  display: none;
-}
-
-[data-theme="dark"] .show-in-light {
-  display: none;
-}
-[data-theme="dark"] .show-in-dark {
-  display: block;
-}
-
-.toggle-knob {
-  transform: translateX(0);
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-[data-theme="dark"] .toggle-knob {
-  transform: translateX(1.1rem);
-}
-
-.bg-layer-light {
-  opacity: 1;
-  transition: opacity 150ms ease-out;
-}
-.bg-layer-dark {
-  opacity: 0;
-  transition: opacity 150ms ease-out;
-}
-
-[data-theme="dark"] .bg-layer-light {
-  opacity: 0;
-}
-[data-theme="dark"] .bg-layer-dark {
-  opacity: 1;
+/* 
+================================================================
+   2. BASE STYLES & RESET
+================================================================
+*/
+html {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
@@ -162,90 +134,62 @@ body {
   width: 100%;
 }
 
-/* Force dark background on body/html in dark mode to prevent white overscroll */
-[data-theme="dark"] body {
-  background-color: #000000;
-}
-
-html {
-  min-height: 100%;
-  width: 100%;
-}
-
+/* Dark Mode Overscroll Fix */
+[data-theme="dark"] body,
 [data-theme="dark"] html {
   background-color: #000000;
 }
 
-.toggle-knob {
-  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Typography */
+.font-outfit { font-family: "Outfit", sans-serif; }
+.font-manrope { font-family: "Manrope", sans-serif; }
 
-.transition-colors {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 100ms;
-}
-
-.transition-opacity {
-  transition-property: opacity;
-  transition-duration: 200ms;
-}
-
-.hover\:scale-110:hover {
-  will-change: transform;
-}
-
-.transform,
-.transition-transform {
-  transition-property: transform;
-}
-.transition-colors {
-  transition-property: background-color, border-color, color, fill, stroke;
-}
-.transition-opacity {
-  transition-property: opacity;
-}
-.transition-all {
-  transition-property: all;
-}
-
-img,
-video,
-canvas {
+img, video, canvas {
   transition-property: opacity, filter;
   transition-duration: 200ms;
 }
 
+/* 
+================================================================
+   3. SCROLLBAR CUSTOMIZATION
+================================================================
+*/
 ::-webkit-scrollbar {
-  width: 12px; /* Wider for better visibility on mobile */
+  width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(31, 41, 55, 0.8); /* Darker track */
+  background: rgba(31, 41, 55, 0.8);
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.8); /* Lighter thumb */
+  background: rgba(156, 163, 175, 0.8);
   border-radius: 6px;
-  border: 2px solid rgba(31, 41, 55, 0.8); /* Contrast border */
+  border: 2px solid rgba(31, 41, 55, 0.8);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 114, 128, 0.7);
 }
 
-.custom-scrollbar,
-.no-scrollbar {
+.no-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar,
+.custom-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.custom-scrollbar::-webkit-scrollbar,
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
+/* 
+================================================================
+   4. LENIS SMOOTH SCROLL (ONLY ACTIVE ON LANDING)
+================================================================
+*/
 html.lenis,
 html.lenis body {
   height: auto;
@@ -255,52 +199,84 @@ html.lenis body {
   scroll-behavior: auto !important;
 }
 
-.lenis.lenis-smooth [data-lenis-prevent] {
+/* Fix for nested scrolling containers inside Lenis */
+.lenis.lenis-smooth [data-lenis-prevent],
+.no-lenis {
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
 
-.preserve-3d {
-  transform-style: preserve-3d;
-}
+/* 
+================================================================
+   5. UTILITY CLASSES & HELPERS
+================================================================
+*/
+/* Visibility Helpers */
+.show-in-light { display: block; }
+.show-in-dark { display: none; }
+[data-theme="dark"] .show-in-light { display: none; }
+[data-theme="dark"] .show-in-dark { display: block; }
+
+/* Transitions */
+.transition-all { transition-property: all; }
+.transition-colors { transition-property: background-color, border-color, color, fill, stroke; transition-duration: 100ms; }
+.transition-opacity { transition-property: opacity; transition-duration: 200ms; }
+.transition-transform { transition-property: transform; }
 
 .smooth-colors {
-  transition-property:
-    background-color, border-color, color, fill, stroke, background-image;
+  transition-property: background-color, border-color, color, fill, stroke, background-image;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 
-.perspective-1000 {
-  perspective: 1000px;
+/* Theme Toggle Knob */
+.toggle-knob {
+  transform: translateX(0);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+[data-theme="dark"] .toggle-knob {
+  transform: translateX(1.1rem);
 }
 
-/* ===============================
-   CHROMIUM GLASSMORPHISM FIX
-   Prevents 1px flashing seams on dark mode glass cards
-   =============================== */
+/* Layer Transitions */
+.bg-layer-light, .bg-layer-dark {
+  transition: opacity 150ms ease-out;
+}
+.bg-layer-light { opacity: 1; }
+.bg-layer-dark { opacity: 0; }
+[data-theme="dark"] .bg-layer-light { opacity: 0; }
+[data-theme="dark"] .bg-layer-dark { opacity: 1; }
 
+/* Effects */
+.preserve-3d { transform-style: preserve-3d; }
+.perspective-1000 { perspective: 1000px; }
+.will-change-transform { will-change: transform; }
+.hover\:scale-110:hover { will-change: transform; }
+
+/* 
+================================================================
+   6. COMPONENT FIXES (CHROMIUM SEAMS)
+================================================================
+*/
 .glass-card {
   isolation: isolate;
   background-clip: padding-box;
   -webkit-background-clip: padding-box;
-
-  /* Prevent Chromium seam flicker */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-
-  /* Keep layer promotion but avoid repaint bugs */
   transform: translateZ(0);
 }
 
-/* Dark mode specific: Drop shadows cause the light-line artifact adjacent to blur */
-.dark .glass-card {
-  box-shadow: none !important;
-}
-
+/* Dark mode glass card shadow fix */
+.dark .glass-card { box-shadow: none !important; }
 .dark .glass-card::before,
 [data-theme="dark"] .glass-card::before {
   content: "";
@@ -308,13 +284,11 @@ html.lenis body {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-
-  /* Stable shadow rendered separately from blur */
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
   opacity: 0.65;
 }
 
-/* Update Legacy Helpers */
+/* Legacy Helpers */
 .prevent-seam {
   background-clip: padding-box;
   -webkit-background-clip: padding-box;
@@ -325,14 +299,4 @@ html.lenis body {
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-}
-
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* scrollbar-gutter: stable; */
-}
-
-.will-change-transform {
-  will-change: transform;
 }

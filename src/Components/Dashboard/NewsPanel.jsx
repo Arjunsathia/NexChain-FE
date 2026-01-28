@@ -98,7 +98,10 @@ export default function NewsPanel() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 custom-scrollbar pr-1">
+      <div
+        data-lenis-prevent
+        className="flex flex-col gap-1.5 overflow-y-auto flex-1 custom-scrollbar pr-1"
+      >
         {loading ? (
           Array(4).fill(0).map((_, i) => (
             <div key={i} className="flex gap-4 p-2">

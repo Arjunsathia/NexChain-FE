@@ -10,6 +10,7 @@ const SwipeButton = ({
     total,
     disabled = false,
 }) => {
+    const [loadingGap, setLoadingGap] = useState(false);
     const [complete, setComplete] = useState(false);
     const containerRef = useRef(null);
     const x = useMotionValue(0);
@@ -41,24 +42,41 @@ const SwipeButton = ({
     );
 
     const handleDragEnd = async (_, info) => {
-        if (info.offset.x >= constraints.right * 0.85) {
-            setComplete(true);
+        if (info.offset.x >= constraints.right * 0.6) {
+            // Visualize "Snapping to Right" immediately
             x.set(constraints.right);
             // Don't snap back if we reached the end
-            await controls.start({ x: constraints.right, transition: { type: "spring", stiffness: 300, damping: 30 } });
-            onSwipeComplete();
+            await controls.start({ x: constraints.right, transition: { type: "spring", stiffness: 400, damping: 30 } });
+
+            setLoadingGap(true);
+            try {
+                // Wait for parent generic action. 
+                // Expect parent to return TRUE for success, FALSE/Undefined for failure/validation error.
+                const success = await onSwipeComplete();
+                setLoadingGap(false);
+
+                if (success === true) {
+                    setComplete(true);
+                } else {
+                    // Reset if validation failed or user cancelled
+                    controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
+                }
+            } catch (e) {
+                setLoadingGap(false);
+                controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
+            }
         } else {
-            controls.start({ x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } });
+            controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
         }
     };
 
     // Reset when isSubmitting becomes false (if not complete or after success)
     useEffect(() => {
-        if (!isSubmitting && !complete) {
+        if (!isSubmitting && !complete && !loadingGap) {
             x.set(0);
             controls.start({ x: 0 });
         }
-    }, [isSubmitting, complete, controls, x]);
+    }, [isSubmitting, complete, loadingGap, controls, x]);
 
     // Handle external reset (e.g. on error)
     useEffect(() => {
@@ -114,7 +132,7 @@ const SwipeButton = ({
                     style={{ x, backgroundColor: handleBg }}
                     className="z-10 w-12 h-12 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg border border-black/5 transition-colors duration-200"
                 >
-                    {isSubmitting ? (
+                    {isSubmitting || loadingGap ? (
                         <div className={`w-5 h-5 border-2 rounded-full animate-spin ${variant === "buy" ? "border-emerald-800/30 border-t-emerald-800" : "border-rose-800/30 border-t-rose-800"}`} />
                     ) : complete ? (
                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
