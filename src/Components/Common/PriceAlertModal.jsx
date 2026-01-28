@@ -124,17 +124,11 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${isVisible
-        ? "bg-black/50 backdrop-blur-sm"
-        : "bg-black/0 backdrop-blur-none pointer-events-none"
-        }`}
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div
-        className={`w-full max-w-[90vw] sm:max-w-md rounded-2xl p-6 relative transition-all duration-500 transform ${isVisible
-          ? "translate-y-0 opacity-100 scale-100"
-          : "translate-y-8 opacity-0 scale-95"
-          } ${TC.bgModal}`}
+        className={`w-full max-w-[90vw] sm:max-w-md rounded-2xl p-6 relative animate-in zoom-in duration-300 ${TC.bgModal}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

@@ -14,10 +14,10 @@ function CryptoDetailsModal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[2005] flex items-center justify-center p-4 ${TC.modalOverlay}`}
+      className={`fixed inset-0 z-[2005] flex items-center justify-center p-4 ${TC.modalOverlay} animate-in fade-in duration-300`}
     >
       <div
-        className={`w-full max-w-[450px] sm:max-w-2xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in fade-in zoom-in duration-300 shadow-2xl border ${isLight ? "border-gray-100" : "border-gray-800"}`}
+        className={`w-full max-w-[450px] sm:max-w-2xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300 shadow-2xl border ${isLight ? "border-gray-100" : "border-gray-800"}`}
       >
         <div
           className={`px-4 py-4 sm:px-8 sm:py-6 flex justify-between items-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
@@ -42,8 +42,8 @@ function CryptoDetailsModal({
           <button
             onClick={() => setSelectedCoin(null)}
             className={`transition-all duration-300 p-2 rounded-xl hover:rotate-90 transform group ${isLight
-                ? "bg-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50"
-                : "bg-white/5 text-gray-400 hover:text-white hover:bg-red-500/20"
+              ? "bg-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50"
+              : "bg-white/5 text-gray-400 hover:text-white hover:bg-red-500/20"
               }`}
           >
             <FaTimes className="text-base group-hover:scale-110" />

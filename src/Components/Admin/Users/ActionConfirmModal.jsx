@@ -75,16 +75,15 @@ const ActionConfirmModal = ({
       as="div"
       className="relative z-[99999]"
       onClose={onClose}
-      transition
     >
       <DialogBackdrop
-        className={`fixed inset-0 ${TC.modalOverlay} transition duration-300 data-[closed]:opacity-0 ease-out`}
+        className={`fixed inset-0 ${TC.modalOverlay} animate-in fade-in duration-300`}
       />
 
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4 text-center">
           <DialogPanel
-            className={`w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 ${TC.bgPanel} border ${TC.border}`}
+            className={`w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl animate-in zoom-in duration-300 ${TC.bgPanel} border ${TC.border}`}
           >
             <div className="flex items-center justify-between mb-4">
               <div

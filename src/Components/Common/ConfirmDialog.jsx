@@ -27,16 +27,6 @@ const ConfirmDialog = ({
     variant = "warning"
 }) => {
     const isLight = useThemeCheck();
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        if (show) {
-            setTimeout(() => setIsVisible(true), 10);
-        } else {
-            setIsVisible(false);
-        }
-    }, [show]);
-
     if (!show) return null;
 
     const getVariantStyles = () => {
@@ -63,13 +53,11 @@ const ConfirmDialog = ({
 
     return createPortal(
         <div
-            className={`fixed inset-0 z-[10001] flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? "bg-black/60 backdrop-blur-sm" : "bg-black/0 backdrop-blur-none pointer-events-none"
-                }`}
+            className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={onClose}
         >
             <div
-                className={`w-full max-w-sm rounded-[1.5rem] p-6 transition-all duration-300 transform ${isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
-                    } ${isLight ? "bg-white shadow-2xl" : "bg-gray-900 border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"}`}
+                className={`w-full max-w-sm rounded-[1.5rem] p-6 animate-in zoom-in duration-300 ${isLight ? "bg-white shadow-2xl" : "bg-gray-900 border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col items-center text-center gap-5">
@@ -90,16 +78,15 @@ const ConfirmDialog = ({
                         <button
                             onClick={onClose}
                             className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.98] ${isLight
-                                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    : "bg-white/5 text-gray-300 hover:bg-white/10"
+                                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                : "bg-white/5 text-gray-300 hover:bg-white/10"
                                 }`}
                         >
                             {cancelText}
                         </button>
                         <button
                             onClick={() => {
-                                setIsVisible(false);
-                                setTimeout(onConfirm, 200);
+                                onConfirm();
                             }}
                             className={`flex-1 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg transform active:scale-[0.98] transition-all bg-gradient-to-r ${styles.buttonBg}`}
                         >

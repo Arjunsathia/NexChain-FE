@@ -458,186 +458,181 @@ const AdminDashboard = () => {
 
       {/* Trades Modal */}
       {createPortal(
-        <AnimatePresence>
-          {isTradesModalOpen && (
-            <div className="fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl ${TC.bgCard} shadow-2xl flex flex-col border ${isLight ? "border-gray-100" : "border-gray-800"}`}
-              >
-                <div className="p-5 sm:p-6 border-b border-gray-200/10 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
-                  <div>
-                    <h2 className={`text-xl font-bold ${TC.textPrimary}`}>
-                      Today&apos;s Transactions
-                    </h2>
-                    <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-                      Live platform trading activity
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setIsTradesModalOpen(false)}
-                    className={`p-2.5 rounded-xl transition-all duration-300 ${isLight ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500" : "bg-white/5 text-gray-400 hover:bg-red-500/20 hover:text-white"}`}
-                  >
-                    <FaTimes />
-                  </button>
+        isTradesModalOpen && (
+          <div className="fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div
+              className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl ${TC.bgCard} shadow-2xl flex flex-col border ${isLight ? "border-gray-100" : "border-gray-800"} animate-in zoom-in duration-300`}
+            >
+              <div className="p-5 sm:p-6 border-b border-gray-200/10 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
+                <div>
+                  <h2 className={`text-xl font-bold ${TC.textPrimary}`}>
+                    Today&apos;s Transactions
+                  </h2>
+                  <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
+                    Live platform trading activity
+                  </p>
                 </div>
+                <button
+                  onClick={() => setIsTradesModalOpen(false)}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${isLight ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500" : "bg-white/5 text-gray-400 hover:bg-red-500/20 hover:text-white"}`}
+                >
+                  <FaTimes />
+                </button>
+              </div>
 
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-                  {isModalLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className={`text-sm font-medium ${TC.textSecondary} animate-pulse`}>Fetching transactions...</p>
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+                {isModalLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className={`text-sm font-medium ${TC.textSecondary} animate-pulse`}>Fetching transactions...</p>
+                  </div>
+                ) : todayTransactions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                    <div className={`p-4 rounded-full ${isLight ? "bg-gray-50" : "bg-gray-800/50"}`}>
+                      <FaChartLine className={`text-3xl ${TC.textTertiary}`} />
                     </div>
-                  ) : todayTransactions.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-                      <div className={`p-4 rounded-full ${isLight ? "bg-gray-50" : "bg-gray-800/50"}`}>
-                        <FaChartLine className={`text-3xl ${TC.textTertiary}`} />
-                      </div>
-                      <div>
-                        <p className={`text-base font-bold ${TC.textPrimary}`}>No trades today</p>
-                        <p className={`text-sm ${TC.textSecondary}`}>Platform activity will appear here.</p>
-                      </div>
+                    <div>
+                      <p className={`text-base font-bold ${TC.textPrimary}`}>No trades today</p>
+                      <p className={`text-sm ${TC.textSecondary}`}>Platform activity will appear here.</p>
                     </div>
-                  ) : (
-                    <>
-                      {/* Desktop Table View */}
-                      <div className="hidden md:block overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                          <thead>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr
+                            className={`border-b border-gray-200/10 text-xs font-bold uppercase tracking-widest ${TC.textSecondary}`}
+                          >
+                            <th className="pb-4 pl-4">Time</th>
+                            <th className="pb-4">User</th>
+                            <th className="pb-4">Type</th>
+                            <th className="pb-4">Asset</th>
+                            <th className="pb-4 text-right">Amount</th>
+                            <th className="pb-4 text-right pr-4">Value (USD)</th>
+                          </tr>
+                        </thead>
+                        <tbody
+                          className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-200" : "divide-gray-700/50"}`}
+                        >
+                          {todayTransactions.map((tx) => (
                             <tr
-                              className={`border-b border-gray-200/10 text-xs font-bold uppercase tracking-widest ${TC.textSecondary}`}
+                              key={tx._id}
+                              className={`group transition-colors ${isLight ? "hover:bg-gray-50" : "hover:bg-white/5"}`}
                             >
-                              <th className="pb-4 pl-4">Time</th>
-                              <th className="pb-4">User</th>
-                              <th className="pb-4">Type</th>
-                              <th className="pb-4">Asset</th>
-                              <th className="pb-4 text-right">Amount</th>
-                              <th className="pb-4 text-right pr-4">Value (USD)</th>
-                            </tr>
-                          </thead>
-                          <tbody
-                            className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-200" : "divide-gray-700/50"}`}
-                          >
-                            {todayTransactions.map((tx) => (
-                              <tr
-                                key={tx._id}
-                                className={`group transition-colors ${isLight ? "hover:bg-gray-50" : "hover:bg-white/5"}`}
-                              >
-                                <td className="py-4 pl-4 whitespace-nowrap text-xs font-medium">
-                                  {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </td>
-                                <td className="py-4">
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="font-bold truncate max-w-[150px]">{tx.userName}</span>
-                                    <span className={`text-[10px] ${TC.textSecondary} truncate max-w-[150px]`}>
-                                      {tx.userEmail}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-4">
-                                  <span
-                                    className={`px-2 py-1 rounded-lg text-[10px] font-black tracking-tight ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
-                                  >
-                                    {tx.type.toUpperCase()}
-                                  </span>
-                                </td>
-                                <td className="py-4">
-                                  <div className="flex items-center gap-2">
-                                    {tx.image && (
-                                      <div className="p-0.5 rounded-lg bg-white/10 shadow-sm border border-white/5">
-                                        <img
-                                          src={tx.image}
-                                          alt=""
-                                          className="w-6 h-6 rounded-md object-contain"
-                                        />
-                                      </div>
-                                    )}
-                                    <span className="font-bold tracking-tight">{tx.coinSymbol?.toUpperCase()}</span>
-                                  </div>
-                                </td>
-                                <td className="py-4 text-right font-bold font-mono text-xs">
-                                  {Number(tx.quantity).toFixed(4)}
-                                </td>
-                                <td className="py-4 text-right pr-4 font-black">
-                                  $
-                                  {Number(tx.totalValue).toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      {/* Mobile Card View */}
-                      <div className="md:hidden flex flex-col gap-3">
-                        {todayTransactions.map((tx) => (
-                          <div
-                            key={tx._id}
-                            className={`p-4 rounded-xl border ${isLight ? 'bg-gray-50/50 border-gray-100' : 'bg-white/5 border-gray-800'} flex flex-col gap-3`}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex items-center gap-3">
-                                {tx.image ? (
-                                  <img
-                                    src={tx.image}
-                                    alt=""
-                                    className="w-10 h-10 rounded-full bg-white/5 p-1"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                                    <FaCoins className="text-gray-400" />
-                                  </div>
-                                )}
-                                <div>
-                                  <h3 className={`font-bold text-sm ${TC.textPrimary}`}>
-                                    {tx.userName}
-                                  </h3>
-                                  <p className={`text-[10px] ${TC.textSecondary} truncate max-w-[120px]`}>
+                              <td className="py-4 pl-4 whitespace-nowrap text-xs font-medium">
+                                {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="py-4">
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold truncate max-w-[150px]">{tx.userName}</span>
+                                  <span className={`text-[10px] ${TC.textSecondary} truncate max-w-[150px]`}>
                                     {tx.userEmail}
-                                  </p>
+                                  </span>
                                 </div>
-                              </div>
-                              <div className="flex flex-col items-end">
-                                <span className={`text-xs font-bold ${TC.textPrimary}`}>
-                                  {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                              </td>
+                              <td className="py-4">
                                 <span
-                                  className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-black tracking-tight ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
                                 >
-                                  {tx.type}
+                                  {tx.type.toUpperCase()}
                                 </span>
+                              </td>
+                              <td className="py-4">
+                                <div className="flex items-center gap-2">
+                                  {tx.image && (
+                                    <div className="p-0.5 rounded-lg bg-white/10 shadow-sm border border-white/5">
+                                      <img
+                                        src={tx.image}
+                                        alt=""
+                                        className="w-6 h-6 rounded-md object-contain"
+                                      />
+                                    </div>
+                                  )}
+                                  <span className="font-bold tracking-tight">{tx.coinSymbol?.toUpperCase()}</span>
+                                </div>
+                              </td>
+                              <td className="py-4 text-right font-bold font-mono text-xs">
+                                {Number(tx.quantity).toFixed(4)}
+                              </td>
+                              <td className="py-4 text-right pr-4 font-black">
+                                $
+                                {Number(tx.totalValue).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden flex flex-col gap-3">
+                      {todayTransactions.map((tx) => (
+                        <div
+                          key={tx._id}
+                          className={`p-4 rounded-xl border ${isLight ? 'bg-gray-50/50 border-gray-100' : 'bg-white/5 border-gray-800'} flex flex-col gap-3`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-3">
+                              {tx.image ? (
+                                <img
+                                  src={tx.image}
+                                  alt=""
+                                  className="w-10 h-10 rounded-full bg-white/5 p-1"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                                  <FaCoins className="text-gray-400" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className={`font-bold text-sm ${TC.textPrimary}`}>
+                                  {tx.userName}
+                                </h3>
+                                <p className={`text-[10px] ${TC.textSecondary} truncate max-w-[120px]`}>
+                                  {tx.userEmail}
+                                </p>
                               </div>
                             </div>
-
-                            <div className={`grid grid-cols-2 gap-4 pt-3 border-t ${isLight ? 'border-gray-200' : 'border-gray-700/50'}`}>
-                              <div>
-                                <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Asset</p>
-                                <p className={`text-sm font-bold ${TC.textPrimary} mt-0.5`}>
-                                  {Number(tx.quantity).toFixed(4)} {tx.coinSymbol?.toUpperCase()}
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Value</p>
-                                <p className={`text-sm font-black ${TC.textPrimary} mt-0.5`}>
-                                  ${Number(tx.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                </p>
-                              </div>
+                            <div className="flex flex-col items-end">
+                              <span className={`text-xs font-bold ${TC.textPrimary}`}>
+                                {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <span
+                                className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
+                              >
+                                {tx.type}
+                              </span>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </motion.div>
+
+                          <div className={`grid grid-cols-2 gap-4 pt-3 border-t ${isLight ? 'border-gray-200' : 'border-gray-700/50'}`}>
+                            <div>
+                              <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Asset</p>
+                              <p className={`text-sm font-bold ${TC.textPrimary} mt-0.5`}>
+                                {Number(tx.quantity).toFixed(4)} {tx.coinSymbol?.toUpperCase()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Value</p>
+                              <p className={`text-sm font-black ${TC.textPrimary} mt-0.5`}>
+                                ${Number(tx.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          )}
-        </AnimatePresence>,
+          </div>
+        ),
         document.body
       )}
     </>

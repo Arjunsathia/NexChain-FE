@@ -49,9 +49,9 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div
-        className={`w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} scale-in-95 animate-in duration-200`}
+        className={`w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -94,22 +94,20 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
             <button
               type="button"
               onClick={() => setMessageType("email")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${
-                messageType === "email"
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${messageType === "email"
                   ? "bg-white text-blue-600 shadow-sm dark:bg-gray-800 dark:text-blue-400"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-              }`}
+                }`}
             >
               <Mail className="w-4 h-4" /> Email
             </button>
             <button
               type="button"
               onClick={() => setMessageType("internal")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${
-                messageType === "internal"
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${messageType === "internal"
                   ? "bg-white text-purple-600 shadow-sm dark:bg-gray-800 dark:text-purple-400"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-              }`}
+                }`}
             >
               <MessageSquare className="w-4 h-4" /> Internal Msg
             </button>
@@ -128,11 +126,10 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Enter email subject..."
-                className={`w-full p-3 rounded-xl outline-none border transition-all text-sm ${
-                  isLight
+                className={`w-full p-3 rounded-xl outline-none border transition-all text-sm ${isLight
                     ? "bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                     : "bg-gray-900/50 border-white/10 focus:border-blue-500 text-white"
-                }`}
+                  }`}
               />
             </div>
           )}
@@ -149,11 +146,10 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Write your message here..."
               rows={5}
-              className={`w-full p-3 rounded-xl outline-none border resize-none transition-all text-sm ${
-                isLight
+              className={`w-full p-3 rounded-xl outline-none border resize-none transition-all text-sm ${isLight
                   ? "bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                   : "bg-gray-900/50 border-white/10 focus:border-blue-500 text-white"
-              }`}
+                }`}
             ></textarea>
           </div>
 
@@ -163,22 +159,20 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-colors ${
-                isLight
+              className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-colors ${isLight
                   ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   : "bg-white/5 text-gray-300 hover:bg-white/10"
-              }`}
+                }`}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-sm text-white shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${
-                loading
+              className={`flex-1 py-2.5 rounded-xl font-bold text-sm text-white shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${loading
                   ? "bg-blue-600/50 cursor-not-allowed"
                   : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
-              }`}
+                }`}
             >
               {loading ? (
                 <>Sending...</>

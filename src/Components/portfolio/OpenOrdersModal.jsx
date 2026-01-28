@@ -28,13 +28,13 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
 
     return createPortal(
         <>
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
                 <div
                     className="absolute inset-0"
                     onClick={onClose}
                 />
 
-                <div className={`relative w-full max-w-6xl max-h-[85vh] ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${isLight ? 'border-gray-200' : 'border-gray-800'} animate-in slide-in-from-bottom-4 duration-300`}>
+                <div className={`relative w-full max-w-6xl max-h-[85vh] ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${isLight ? 'border-gray-200' : 'border-gray-800'} animate-in zoom-in duration-300`}>
                     {/* Header */}
                     <div className={`p-4 sm:p-6 border-b ${isLight ? 'border-gray-100' : 'border-gray-800'} flex justify-between items-center bg-transparent`}>
                         <div className="flex items-center gap-3">

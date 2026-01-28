@@ -29,6 +29,7 @@ import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import SiteLogo from "../../assets/Img/logo.png";
 import SiteLogoLight from "../../assets/Img/logo-2.png";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
 
 function NavbarComponent() {
   const { toggleTheme } = useTheme();
@@ -44,6 +45,7 @@ function NavbarComponent() {
   const [isMounted, setIsMounted] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const bellRef = useRef(null);
 
   useEffect(() => {
@@ -80,6 +82,34 @@ function NavbarComponent() {
       window.removeEventListener("refreshNotifications", fetchUnreadCount);
     };
   }, [user]);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const handleMobileLogout = () => {
+    if (user?.id) {
+      dispatch(logout());
+      navigate("/auth");
+      setIsMobileMenuOpen(false);
+      setShowLogoutConfirm(false);
+    } else {
+      navigate("/auth");
+    }
+  };
 
   // Lock scroll when mobile menu is open
   useEffect(() => {
@@ -549,9 +579,7 @@ function NavbarComponent() {
                     <button
                       onClick={() => {
                         if (user?.id) {
-                          dispatch(logout());
-                          navigate("/auth");
-                          setIsMobileMenuOpen(false);
+                          setShowLogoutConfirm(true);
                         } else {
                           navigate("/auth");
                         }
@@ -575,6 +603,16 @@ function NavbarComponent() {
           document.body
         )
       }
+      <ConfirmDialog
+        show={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleMobileLogout}
+        title="Sign Out?"
+        message="Are you sure you want to sign out of your account?"
+        confirmText="Sign Out"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </>
   );
 }

@@ -98,11 +98,11 @@ export default function NewsPanel() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 overflow-y-auto flex-1 custom-scrollbar pr-1">
+      <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 custom-scrollbar pr-1">
         {loading ? (
           Array(4).fill(0).map((_, i) => (
             <div key={i} className="flex gap-4 p-2">
-              <Skeleton baseColor={isLight ? "#e5e7eb" : "#374151"} highlightColor={isLight ? "#f3f4f6" : "#4b5563"} width={96} height={64} borderRadius="0.5rem" />
+              <Skeleton baseColor={isLight ? "#e5e7eb" : "#374151"} highlightColor={isLight ? "#f3f4f6" : "#4b5563"} width={48} height={48} borderRadius="0.5rem" />
               <div className="flex-1">
                 <Skeleton baseColor={isLight ? "#e5e7eb" : "#374151"} highlightColor={isLight ? "#f3f4f6" : "#4b5563"} count={2} />
                 <Skeleton baseColor={isLight ? "#e5e7eb" : "#374151"} highlightColor={isLight ? "#f3f4f6" : "#4b5563"} width="40%" className="mt-2" />
@@ -121,12 +121,12 @@ export default function NewsPanel() {
               target="_blank"
               rel="noopener noreferrer"
               className={`
-                group flex items-start gap-2.5 sm:gap-4 p-2 sm:p-3 rounded-xl transition-all duration-200 cursor-pointer
+                group flex items-start gap-2 p-2 rounded-xl transition-all duration-200 cursor-pointer
                 ${isLight ? "hover:shadow-sm" : ""}
                 ${index !== 4 ? TC.bgItem : "hover:bg-gray-50 dark:hover:bg-white/5"}
               `}
             >
-              <div className="relative w-14 h-14 sm:w-24 sm:h-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800">
+              <div className="relative w-10 h-10 sm:w-14 sm:h-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800">
                 <img
                   src={news.image}
                   alt={news.title}
@@ -135,23 +135,23 @@ export default function NewsPanel() {
                 />
               </div>
 
-              <div className="flex-1 min-w-0 flex flex-col justify-between h-14 sm:h-auto">
+              <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[2.5rem] sm:h-auto gap-1">
                 <h3
-                  className={`font-semibold text-[11px] sm:text-sm leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
+                  className={`font-semibold text-[11px] sm:text-xs leading-snug line-clamp-2 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
                 >
                   {news.title}
                 </h3>
 
                 <div className="flex items-center justify-between mt-1">
                   <span
-                    className={`text-[10px] uppercase font-bold tracking-wider ${TC.textSource}`}
+                    className={`text-[9px] uppercase font-bold tracking-wider ${TC.textSource}`}
                   >
                     {news.source}
                   </span>
                   <div
-                    className={`flex items-center gap-1 text-[10px] ${TC.textSecondary}`}
+                    className={`flex items-center gap-1 text-[9px] ${TC.textSecondary}`}
                   >
-                    <FaClock className="text-[10px]" />
+                    <FaClock className="text-[9px]" />
                     {news.time}
                   </div>
                 </div>

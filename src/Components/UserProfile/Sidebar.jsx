@@ -35,79 +35,70 @@ const LogoutConfirmationModal = ({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    show && (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+      >
+        <div
+          className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-in zoom-in duration-300 ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
+            }`}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden ${isLight ? "bg-white" : "bg-gray-900 border border-gray-800"
-              }`}
-          >
-            {/* Background Glow */}
-            <div
-              className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
-            />
+          {/* Background Glow */}
+          <div
+            className={`absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
+          />
 
-            <div className="text-center relative z-10">
-              <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
+          <div className="text-center relative z-10">
+            <div
+              className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLight ? "bg-red-50" : "bg-red-500/10"
+                }`}
+            >
+              <FaSignOutAlt
+                className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
+              />
+            </div>
+
+            <h3
+              className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}
+            >
+              Sign Out?
+            </h3>
+
+            <p
+              className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}
+            >
+              Are you sure you want to end your session?
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                   }`}
               >
-                <FaSignOutAlt
-                  className={`text-2xl ${isLight ? "text-red-500" : "text-red-400"}`}
-                />
-              </div>
-
-              <h3
-                className={`text-xl font-bold mb-2 ${isLight ? "text-gray-900" : "text-white"}`}
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                disabled={isLoading}
+                className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-lg shadow-red-500/20 transition-all flex items-center justify-center gap-2"
               >
-                Sign Out?
-              </h3>
-
-              <p
-                className={`text-sm mb-6 ${isLight ? "text-gray-500" : "text-gray-400"}`}
-              >
-                Are you sure you want to end your session?
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${isLight
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={onConfirm}
-                  disabled={isLoading}
-                  className="flex-1 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-lg shadow-red-500/20 transition-all flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Signing Out...</span>
-                    </>
-                  ) : (
-                    "Sign Out"
-                  )}
-                </button>
-              </div>
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Signing Out...</span>
+                  </>
+                ) : (
+                  "Sign Out"
+                )}
+              </button>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>
+      </div>
+    ),
     document.body,
   );
 };

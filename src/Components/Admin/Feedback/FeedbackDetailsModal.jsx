@@ -15,10 +15,10 @@ function FeedbackDetailsModal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 ${TC.modalOverlay}`}
+      className={`fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 ${TC.modalOverlay} animate-in fade-in duration-300`}
     >
       <div
-        className={`w-full max-w-[450px] sm:max-w-2xl lg:max-w-4xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in fade-in zoom-in duration-300 relative shadow-2xl border ${isLight ? "border-gray-200" : "border-white/5"}`}
+        className={`w-full max-w-[450px] sm:max-w-2xl lg:max-w-4xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300 relative shadow-2xl border ${isLight ? "border-gray-200" : "border-white/5"}`}
       >
         <div
           className={`px-5 py-5 sm:px-8 sm:py-6 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b ${isLight ? "border-gray-100" : "border-white/5"}`}
@@ -34,8 +34,8 @@ function FeedbackDetailsModal({
           <button
             onClick={() => setShowModal(false)}
             className={`transition-all duration-300 p-2.5 rounded-xl group hover:scale-105 ${isLight
-                ? "bg-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50"
-                : "bg-white/5 text-gray-400 hover:text-white hover:bg-red-500/20"
+              ? "bg-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50"
+              : "bg-white/5 text-gray-400 hover:text-white hover:bg-red-500/20"
               }`}
           >
             <FaTimes className="text-lg group-hover:rotate-90 transition-transform" />

@@ -22,8 +22,9 @@ export default function NewsPage() {
             try {
                 setLoading(true);
                 const data = await getData("/news");
-                if (Array.isArray(data)) {
-                    const formatted = data.map((item) => ({
+                const payload = data.data || data.news || data; // Handle various API response structures
+                if (Array.isArray(payload)) {
+                    const formatted = payload.map((item) => ({
                         id: item.id,
                         title: item.title,
                         body: item.body,
@@ -37,11 +38,11 @@ export default function NewsPage() {
                     setNews(formatted);
                     setFilteredNews(formatted);
                 } else {
-                    console.error("News API returned non-array data:", data);
-                    const debugInfo = typeof data === 'object' ? JSON.stringify(data).slice(0, 100) : String(data);
+                    console.error("News API returned non-array payload:", payload);
+                    const debugInfo = typeof payload === 'object' ? JSON.stringify(payload).slice(0, 100) : String(payload);
 
                     if (data?.error) throw new Error(data.error);
-                    throw new Error(`Invalid news data format. Received: ${typeof data} (${debugInfo})`);
+                    throw new Error(`Invalid news data format. Received: ${typeof payload} (${debugInfo})`);
                 }
             } catch (err) {
                 console.error("Failed to fetch news:", err);
@@ -94,7 +95,7 @@ export default function NewsPage() {
         const all = new Set(news.flatMap((item) => item.categories));
         const popular = ["BTC", "ETH", "ALTCOIN", "BUSINESS", "TECHNOLOGY"];
         const filtered = Array.from(all).filter((c) => !popular.includes(c));
-        return ["All", ...popular, ...filtered].slice(0, 10); 
+        return ["All", ...popular, ...filtered].slice(0, 10);
     }, [news]);
 
     const TC = useMemo(
@@ -102,7 +103,7 @@ export default function NewsPage() {
             bgHeader: isLight
                 ? "sm:bg-white/80 sm:backdrop-blur-md sm:border sm:border-gray-100"
                 : "sm:bg-gray-900/95 sm:backdrop-blur-none sm:border-b sm:border-gray-700/50 sm:isolation-isolate sm:prevent-seam",
-            bgContainer: "", 
+            bgContainer: "",
             cardBg: isLight
                 ? "bg-white border-gray-200 shadow-sm hover:shadow-md"
                 : "bg-[#1E2026] border-gray-800 hover:border-gray-700 hover:bg-[#252830]",
@@ -189,7 +190,7 @@ export default function NewsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {Array(9).fill(0).map((_, i) => (
                             <div key={i} className="rounded-2xl overflow-hidden p-4 space-y-3 border border-transparent">
-                                <Skeleton height={200} borderRadius="1rem" baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
+                                <Skeleton height={150} borderRadius="1rem" baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
                                 <Skeleton count={2} baseColor={isLight ? "#e5e7eb" : "#1f2937"} highlightColor={isLight ? "#f3f4f6" : "#374151"} />
                             </div>
                         ))}
@@ -221,17 +222,17 @@ export default function NewsPage() {
                                 `}
                             >
                                 {/* Image Container */}
-                                <div className="relative w-24 h-24 sm:w-full sm:h-48 flex-shrink-0 overflow-hidden rounded-lg sm:rounded-none bg-gray-200 dark:bg-gray-800">
+                                <div className="relative w-16 h-16 sm:w-full sm:h-28 flex-shrink-0 overflow-hidden rounded-lg sm:rounded-none bg-gray-200 dark:bg-gray-800">
                                     <img
                                         src={item.image}
                                         alt={item.title}
                                         onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
-                                    {/* Categories - Hidden on mobile small view, shown on desktop */}
-                                    <div className="absolute top-2 left-2 hidden sm:flex gap-2">
+                                    {/* Categories */}
+                                    <div className="absolute top-2 left-2 hidden sm:flex gap-1.5">
                                         {item.categories.slice(0, 2).map((cat, idx) => (
-                                            <span key={idx} className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                                            <span key={idx} className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                                                 {cat}
                                             </span>
                                         ))}
@@ -239,40 +240,48 @@ export default function NewsPage() {
                                 </div>
 
                                 {/* Content */}
-                                <div className="flex-1 sm:p-5 flex flex-col min-h-0 sm:min-h-[200px]">
+                                <div className="flex-1 sm:p-3 flex flex-col min-h-0 sm:h-[144px]">
                                     {/* Mobile Source/Time Header */}
-                                    <div className="flex items-center justify-between mb-1.5 sm:mb-3 text-[10px] sm:text-xs">
+                                    <div className="flex items-center justify-between mb-1.5 sm:mb-2 text-[10px]">
                                         <span className={`font-bold uppercase tracking-wider ${TC.accentText} truncate max-w-[80px] sm:max-w-none`}>
                                             {item.source}
                                         </span>
                                         <span className={`flex items-center gap-1 ${TC.textSecondary} whitespace-nowrap`}>
-                                            <FaClock size={10} />
+                                            <FaClock size={9} />
                                             {item.timeAgo}
                                         </span>
                                     </div>
 
-                                    {/* Title */}
-                                    <h3 className={`text-sm sm:text-lg font-bold mb-1 sm:mb-3 leading-snug line-clamp-2 sm:line-clamp-3 group-hover:text-blue-500 transition-colors ${TC.textPrimary}`}>
+                                    {/* Title - Fixed height 2 lines */}
+                                    <h3
+                                        className={`text-sm font-bold mb-1 leading-tight h-9 overflow-hidden group-hover:text-blue-500 transition-colors ${TC.textPrimary}`}
+                                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                                    >
                                         {item.title}
                                     </h3>
 
-                                    {/* Body Text - Hidden on Mobile */}
-                                    <p className={`hidden sm:block text-sm line-clamp-3 mb-4 flex-1 ${TC.textSecondary}`}>
+                                    {/* Body Text - Fixed height 3 lines */}
+                                    <p
+                                        className={`hidden sm:block text-[11px] leading-snug mb-2 h-12 overflow-hidden ${TC.textSecondary}`}
+                                        style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}
+                                    >
                                         {item.body}
                                     </p>
 
                                     {/* Desktop Footer */}
-                                    <div className={`hidden sm:flex pt-4 border-t ${isLight ? 'border-gray-100' : 'border-gray-700/50'} items-center justify-between text-xs font-semibold`}>
-                                        <span className="flex items-center gap-1 group-hover:gap-2 transition-all text-blue-500">
-                                            Read Full Story <FaExternalLinkAlt size={10} />
+                                    <div className={`hidden sm:flex mt-auto pt-1 border-t ${isLight ? 'border-gray-100' : 'border-gray-700/50'} items-center justify-between text-[10px] font-semibold`}>
+                                        <span className="flex items-center gap-1 group-hover:gap-1.5 transition-all text-blue-500">
+                                            Read Full Story <FaExternalLinkAlt size={9} />
                                         </span>
                                     </div>
                                 </div>
+
+
                             </a>
                         ))}
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

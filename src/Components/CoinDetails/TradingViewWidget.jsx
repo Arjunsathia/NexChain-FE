@@ -76,11 +76,10 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       <div className="tradingview-widget-container__widget h-full w-full"></div>
       <button
         onClick={() => setIsFullScreen(!isFullScreen)}
-        className={`absolute top-4 right-20 z-10 p-2 rounded-lg transition-all ${
-          isLight
+        className={`absolute top-4 right-20 z-10 p-2 rounded-lg transition-all ${isLight
             ? "bg-white/80 hover:bg-white text-gray-700 shadow-sm border border-gray-200"
             : "bg-black/50 hover:bg-black/80 text-gray-200 border border-white/10"
-        }`}
+          }`}
         title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
       >
         {isFullScreen ? (
@@ -94,7 +93,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
 
   if (isFullScreen) {
     return ReactDOM.createPortal(
-      <div className="fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] w-screen h-screen overflow-hidden">
+      <div className="fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] w-screen h-screen overflow-hidden animate-in fade-in duration-300">
         {WidgetContent}
       </div>,
       document.body,

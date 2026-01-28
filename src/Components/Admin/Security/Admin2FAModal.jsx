@@ -68,12 +68,8 @@ const Admin2FAModal = () => {
       <Dialog as="div" className="relative z-[1000000]" onClose={handleClose}>
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enter="animate-in fade-in duration-300"
+          leave="animate-out fade-out duration-200"
         >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
         </TransitionChild>
@@ -82,12 +78,8 @@ const Admin2FAModal = () => {
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="animate-in zoom-in duration-300"
+              leave="animate-out zoom-out duration-200"
             >
               <DialogPanel
                 className={`w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all ${isLight ? "bg-white" : "bg-[#0f172a] border border-white/10"}`}

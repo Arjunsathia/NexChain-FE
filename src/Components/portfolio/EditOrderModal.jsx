@@ -83,11 +83,11 @@ const EditOrderModal = ({ isOpen, onClose, order, onOrderUpdated }) => {
     return createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
             />
 
-            <div className={`relative w-full max-w-md ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} border ${isLight ? 'border-gray-200 shadow-xl' : 'border-gray-800 shadow-2xl'} rounded-2xl overflow-hidden animate-in fade-in zoom-in duration-200`}>
+            <div className={`relative w-full max-w-md ${isLight ? 'bg-white' : 'bg-[#0B0E11]'} border ${isLight ? 'border-gray-200 shadow-xl' : 'border-gray-800 shadow-2xl'} rounded-2xl overflow-hidden animate-in zoom-in duration-300`}>
                 <div className={`p-4 sm:p-6 border-b ${isLight ? 'border-gray-100 bg-gray-50/50' : 'border-gray-800 bg-gray-900/50'} flex items-center justify-between`}>
                     <h2 className={`text-lg sm:text-xl font-bold ${isLight ? 'text-gray-900' : 'text-white'} flex items-center gap-2`}>
                         <FaEdit className="text-blue-500" />

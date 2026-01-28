@@ -61,25 +61,21 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
         : "";
 
     return createPortal(
-        <AnimatePresence>
+        <>
             {isOpen && (
-                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 details-modal-overlay">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
                         onClick={(e) => {
                             e.stopPropagation();
                             onClose();
                         }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
                     />
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        className={`relative w-[92%] md:w-full max-w-md rounded-[32px] shadow-[0_30px_90px_rgba(0,0,0,0.4)] overflow-hidden border transform-gpu details-modal-content ${isDark
+
+                    {/* Modal Content */}
+                    <div
+                        className={`relative w-[92%] md:w-full max-w-md rounded-[32px] shadow-[0_30px_90px_rgba(0,0,0,0.4)] overflow-hidden border animate-in zoom-in duration-300 ${isDark
                             ? "bg-[#0B1221]/95 text-white border-white/10"
                             : "bg-white/95 text-gray-900 border-gray-200/50"
                             } backdrop-blur-3xl`}
@@ -175,10 +171,10 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                                 </div>
                             </>
                         )}
-                    </motion.div>
+                    </div>
                 </div>
             )}
-        </AnimatePresence>,
+        </>,
         document.body
     );
 };

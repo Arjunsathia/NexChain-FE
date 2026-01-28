@@ -7,10 +7,10 @@ const CoinListModal = ({ title, coins, onClose, TC, formatCurrency }) => {
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[2005] flex items-center justify-center p-4 ${TC.modalOverlay}`}
+      className={`fixed inset-0 z-[2005] flex items-center justify-center p-4 ${TC.modalOverlay} animate-in fade-in duration-300`}
     >
       <div
-        className={`w-full max-w-[400px] sm:max-w-2xl rounded-3xl max-h-[85vh] flex flex-col ${TC.modalContent} animate-in fade-in zoom-in duration-300 shadow-2xl border border-white/5`}
+        className={`w-full max-w-[400px] sm:max-w-2xl rounded-3xl max-h-[85vh] flex flex-col ${TC.modalContent} animate-in zoom-in duration-300 shadow-2xl border border-white/5`}
       >
         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
           <div>
@@ -58,8 +58,8 @@ const CoinListModal = ({ title, coins, onClose, TC, formatCurrency }) => {
                 </p>
                 <div
                   className={`text-[10px] font-black inline-flex items-center px-1.5 py-0.5 rounded ${coin.price_change_percentage_24h >= 0
-                      ? "bg-emerald-500/10 text-emerald-500"
-                      : "bg-rose-500/10 text-rose-500"
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-rose-500/10 text-rose-500"
                     }`}
                 >
                   {coin.price_change_percentage_24h >= 0 ? "+" : ""}

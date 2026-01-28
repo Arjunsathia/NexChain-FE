@@ -248,11 +248,11 @@ const UserStatDetailModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div
-        className={`w-[90vw] sm:w-full sm:max-w-md rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} scale-in-95 animate-in duration-200`}
+        className={`w-[90vw] sm:w-full sm:max-w-md rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

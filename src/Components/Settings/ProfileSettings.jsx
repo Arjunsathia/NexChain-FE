@@ -439,9 +439,9 @@ const ProfileSettings = ({ TC, isLight }) => {
       {/* Cropper Modal - Portaled to Body */}
       {isCropping &&
         createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
             <div
-              className={`w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl ${isDark ? "bg-gray-900 border border-gray-800" : "bg-white"}`}
+              className={`w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in duration-300 ${isDark ? "bg-gray-900 border border-gray-800" : "bg-white"}`}
             >
               <div
                 className={`p-5 flex justify-between items-center border-b ${isDark ? "border-gray-800" : "border-gray-100"}`}
@@ -497,11 +497,10 @@ const ProfileSettings = ({ TC, isLight }) => {
                       setIsCropping(false);
                       setImageSrc(null);
                     }}
-                    className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
-                      isDark
+                    className={`flex-1 py-3 rounded-xl font-bold transition-colors ${isDark
                         ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     Cancel
                   </button>

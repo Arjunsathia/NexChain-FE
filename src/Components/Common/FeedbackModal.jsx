@@ -91,20 +91,14 @@ const FeedbackModal = ({ isOpen, onClose }) => {
     if (typeof document === "undefined") return null;
 
     return createPortal(
-        <AnimatePresence>
+        <>
             {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                <div
+                    className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300"
                     onClick={handleClose}
                 >
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0, y: 10 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 10 }}
-                        className={`relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${TC.bgModal}`}
+                    <div
+                        className={`relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-300 ${TC.bgModal}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {showSuccess ? (
@@ -214,10 +208,10 @@ const FeedbackModal = ({ isOpen, onClose }) => {
                                 </form>
                             </div>
                         )}
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
             )}
-        </AnimatePresence>,
+        </>,
         document.body
     );
 };
