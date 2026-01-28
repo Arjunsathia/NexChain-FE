@@ -13,7 +13,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
 
   return (
     <section
-      className="min-h-screen flex items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 relative bg-transparent"
+      className="min-h-screen flex items-center justify-center pt-16 pb-12 md:pt-0 md:pb-0 relative bg-transparent"
       ref={ref}
     >
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10">
@@ -44,7 +44,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 order-3 lg:order-1 relative z-20 max-w-[520px] mx-auto lg:mx-0"
+            className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-4 md:space-y-8 order-3 lg:order-1 relative z-20 max-w-[520px] mx-auto lg:mx-0"
           >
             {/* BADGE: Match Image - Sleek & Darker - DESKTOP ONLY */}
             <div className="hidden lg:inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase bg-[#0B0E14] text-cyan-200 border border-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
@@ -75,7 +75,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             </p>
 
             {/* BUTTONS: CTA Row - Fixed Sizing & Styling */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto pt-2 sm:pt-6">
               {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
               {/* Primary Button: Cyan Border + Gloss + Semi-Transparent */}
               <button
@@ -132,7 +132,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative order-2 lg:order-2 h-[280px] xs:h-[320px] md:h-[600px] flex flex-col items-center justify-center mb-0 md:mb-0 pointer-events-none lg:translate-x-12"
+            className="relative order-2 lg:order-2 h-[220px] xs:h-[260px] md:h-[600px] flex flex-col items-center justify-center mb-0 md:mb-0 pointer-events-none lg:translate-x-12"
             style={{ y: fgParallaxY }}
           >
             <HeroGlobe />
