@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import { FaExclamationTriangle } from "react-icons/fa";

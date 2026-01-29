@@ -300,3 +300,28 @@ html.lenis body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
+
+/* 
+================================================================
+   7. ANIMATIONS
+================================================================
+*/
+@keyframes scroll {
+  0% { transform: translateY(-10px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(15px); opacity: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-scroll {
+  animation: scroll 2.2s cubic-bezier(0.15, 0, 0.45, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

@@ -61,7 +61,7 @@ export const getCroppedImgBlob = async (imageSrc, pixelCrop, rotation = 0, flip 
 
   ctx.putImageData(data, 0, 0)
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     canvas.toBlob((file) => {
       resolve(file)
     }, 'image/jpeg')

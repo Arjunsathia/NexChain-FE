@@ -61,7 +61,7 @@ const SwipeButton = ({
                     // Reset if validation failed or user cancelled
                     controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
                 }
-            } catch (e) {
+            } catch {
                 setLoadingGap(false);
                 controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
             }

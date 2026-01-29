@@ -62,9 +62,7 @@ const AuthPage = () => {
             localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
           }
 
-          toast.success(`Welcome back ${res.user.name}!`, {
-            id: "google-auth",
-          });
+
           navigate("/dashboard");
         }
       } catch (err) {
@@ -94,7 +92,7 @@ const AuthPage = () => {
           updateUser(res.user);
           localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
         }
-        toast.success(`Welcome back!`);
+
         navigate("/dashboard");
       }
     } catch (err) {

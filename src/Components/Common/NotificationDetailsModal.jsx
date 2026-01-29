@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import {
     FaTimes,
@@ -9,7 +9,6 @@ import {
     FaCalendarAlt,
     FaClock,
 } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
 import useThemeCheck from "@/hooks/useThemeCheck";
 
 const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {

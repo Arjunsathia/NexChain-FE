@@ -325,16 +325,14 @@ const TransactionForm = React.memo(
             {/* Mobile/Tablet: Button at Top */}
             <div className="space-y-4">
               {/* Action Button */}
-              {isMobileOrTablet ? (
-                <SwipeButton
-                  onSwipeComplete={handleSubmit}
-                  text={isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}
-                  isSubmitting={isSubmitting}
-                  variant={isBuyOperation ? "buy" : "sell"}
-                  total={calculateTotal}
-                  disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
-                />
-              ) : null}
+              <SwipeButton
+                onSwipeComplete={handleSubmit}
+                text={isBuyOperation ? `Buy ${symbol}` : `Sell ${symbol}`}
+                isSubmitting={isSubmitting}
+                variant={isBuyOperation ? "buy" : "sell"}
+                total={calculateTotal}
+                disabled={isSubmitting || !usdAmount || parseFloat(usdAmount) <= 0}
+              />
 
               <AdvancedOptions
                 orderType={orderType}

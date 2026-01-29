@@ -17,8 +17,6 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
   const { user } = useUserContext();
   const [targetPrice, setTargetPrice] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
   // Normalized current price
   const currentPrice = coin?.current_price || coin?.currentPrice || 0;
 
@@ -28,10 +26,6 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
       // Default to current price if no target set
       setTargetPrice(currentPrice);
       setIsSubmitting(false);
-      // Small delay for animation
-      setTimeout(() => setIsVisible(true), 10);
-    } else {
-      setIsVisible(false);
     }
   }, [show, currentPrice]);
 

@@ -1,5 +1,5 @@
 import Navbar from "./Navbar";
-import Footer from "./Footer";
+
 import { useOutlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, Suspense } from "react";
 import useUserContext from "@/hooks/useUserContext";
@@ -108,7 +108,7 @@ export default function MainLayout() {
       </main>
 
       {/* Footer - Only on Landing Page */}
-      {location.pathname === "/" && <Footer />}
+      {/* Footer Removed as per user request */}
 
       { }
       <ChatbotWidget />

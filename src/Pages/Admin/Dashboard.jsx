@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
 import { FaUsers, FaCoins, FaChartLine, FaStar, FaTimes } from "react-icons/fa";
 
 import UserLineChart from "@/Components/Admin/Dashboard/LineChart";

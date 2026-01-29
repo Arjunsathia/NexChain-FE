@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -39,7 +39,6 @@ function NavbarComponent() {
   const location = useLocation();
   const { user } = useUserContext();
   const { role } = useRoleContext();
-  const { balance } = useSelector((state) => state.wallet);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
