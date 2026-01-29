@@ -54,6 +54,8 @@ function CryptoList() {
     type: "buy",
   });
 
+  const [mobileTab, setMobileTab] = useState("trending");
+
   const [alertModal, setAlertModal] = useState({
     show: false,
     coin: null,
@@ -257,93 +259,67 @@ function CryptoList() {
       <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 py-2 sm:py-8 space-y-4 sm:space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 md:auto-rows-fr">
           <div
-            className={`rounded-xl p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard}`}
+            className={`rounded-2xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden group ${TC.bgCard}`}
           >
-            <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10 transform translate-x-2 sm:translate-x-4 -translate-y-2 sm:-translate-y-4">
-              <FaGlobeAmericas className="text-6xl sm:text-[5rem]" />
+            <div className="absolute top-0 right-0 p-3 opacity-5 transform translate-x-2 -translate-y-2">
+              <FaGlobeAmericas className="text-[5rem]" />
             </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-3">
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-4">
                 <div className={`p-1.5 rounded-lg ${TC.iconBg}`}>
-                  <FaGlobeAmericas className="text-base" />
+                  <FaGlobeAmericas className="text-xs" />
                 </div>
-                <h3
-                  className={`font-bold text-sm md:text-base ${TC.textPrimary}`}
-                >
+                <h3 className={`font-black text-sm tracking-wide ${TC.textPrimary}`}>
                   Global Market
                 </h3>
               </div>
 
-              <div className="space-y-1 mb-4">
-                <p
-                  className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-                >
+              <div className="mb-5">
+                <p className={`text-[9px] font-black uppercase tracking-widest ${TC.textSecondary} mb-1 opacity-70`}>
                   Total Market Cap
                 </p>
-                <div className="flex items-end gap-2">
-                  <h2
-                    className={`text-xl sm:text-2xl font-bold ${TC.textPrimary}`}
-                  >
+                <div className="flex items-center gap-3">
+                  <h2 className={`text-2xl font-black tracking-tight ${TC.textPrimary}`}>
                     {loading ? (
-                      <Skeleton
-                        width={100}
-                        className="sm:w-[140px]"
-                        baseColor={TC.skeletonBase}
-                        highlightColor={TC.skeletonHighlight}
-                      />
+                      <Skeleton width={100} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
                     ) : (
                       `$${formatCompactNumber(globalData?.total_market_cap?.usd)}`
                     )}
                   </h2>
                   {!loading && (
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg ${getPillClasses(globalData?.market_cap_change_percentage_24h_usd)} flex items-center`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${getPillClasses(
+                        globalData?.market_cap_change_percentage_24h_usd
+                      )}`}
                     >
-                      {globalData?.market_cap_change_percentage_24h_usd >= 0
-                        ? "+"
-                        : ""}
-                      {globalData?.market_cap_change_percentage_24h_usd?.toFixed(
-                        2,
-                      )}
-                      %
+                      {globalData?.market_cap_change_percentage_24h_usd >= 0 ? "+" : ""}
+                      {globalData?.market_cap_change_percentage_24h_usd?.toFixed(2)}%
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <p
-                    className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60 mb-1`}
-                  >
+                  <p className={`text-[9px] font-black uppercase tracking-widest ${TC.textSecondary} mb-1 opacity-70`}>
                     24h Volume
                   </p>
                   <p className={`text-sm font-bold ${TC.textPrimary}`}>
                     {loading ? (
-                      <Skeleton
-                        width={60}
-                        baseColor={TC.skeletonBase}
-                        highlightColor={TC.skeletonHighlight}
-                      />
+                      <Skeleton width={60} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
                     ) : (
                       `$${formatCompactNumber(globalData?.total_volume?.usd)}`
                     )}
                   </p>
                 </div>
                 <div>
-                  <p
-                    className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60 mb-1`}
-                  >
+                  <p className={`text-[9px] font-black uppercase tracking-widest ${TC.textSecondary} mb-1 opacity-70`}>
                     BTC Dominance
                   </p>
                   <p className={`text-sm font-bold ${TC.textPrimary}`}>
                     {loading ? (
-                      <Skeleton
-                        width={40}
-                        baseColor={TC.skeletonBase}
-                        highlightColor={TC.skeletonHighlight}
-                      />
+                      <Skeleton width={40} baseColor={TC.skeletonBase} highlightColor={TC.skeletonHighlight} />
                     ) : (
                       `${globalData?.market_cap_percentage?.btc?.toFixed(1)}%`
                     )}
@@ -352,22 +328,55 @@ function CryptoList() {
               </div>
             </div>
 
-            <div className="mt-3 h-12 sm:h-14 w-full opacity-60">
-              {!loading && (
-                <SparklineGraph color={isLight ? "#4f46e5" : "#6366f1"} />
-              )}
+            <div className="mt-4 pt-4 border-t border-gray-100/10 h-10 w-full opacity-80 -mb-2">
+              {!loading && <SparklineGraph color={isLight ? "#2563eb" : "#3b82f6"} />}
             </div>
           </div>
 
-          <div className={`flex flex-col h-full`}>
+
+
+          {/* Mobile Tabs for Market Widgets */}
+          <div className="md:hidden flex flex-col h-full">
+            <div className={`p-1 rounded-xl flex gap-1 mb-4 ${isLight ? "bg-gray-100 shadow-sm" : "bg-gray-800/80 shadow-md"}`}>
+              {["trending", "gainers", "losers"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setMobileTab(tab)}
+                  className={`flex-1 py-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wide rounded-lg transition-all duration-300
+                    ${mobileTab === tab
+                      ? (isLight ? "bg-white text-blue-600 shadow" : "bg-gray-700 text-cyan-400 shadow")
+                      : (isLight ? "text-gray-400 hover:text-gray-600" : "text-gray-500 hover:text-gray-300")
+                    }
+                  `}
+                >
+                  {tab === "trending"
+                    ? "Trending"
+                    : tab === "gainers"
+                      ? "Gainers"
+                      : "Losers"}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 transition-all duration-300">
+              {isReady && mobileTab === "trending" && (
+                <TrendingCoinsWidget limit={5} showViewAll={false} />
+              )}
+              {isReady && mobileTab === "gainers" && <TopGainers />}
+              {isReady && mobileTab === "losers" && <TopLosers />}
+            </div>
+          </div>
+
+          {/* Desktop Grid Items (Hidden on Mobile) */}
+          <div className={`hidden md:flex flex-col h-full`}>
             {isReady && <TrendingCoinsWidget limit={5} showViewAll={false} />}
           </div>
 
-          <div className={`flex flex-col h-full`}>
+          <div className={`hidden md:flex flex-col h-full`}>
             {isReady && <TopGainers />}
           </div>
 
-          <div className={`flex flex-col h-full`}>
+          <div className={`hidden md:flex flex-col h-full`}>
             {isReady && <TopLosers />}
           </div>
         </div>
@@ -392,7 +401,7 @@ function CryptoList() {
         onClose={handleCloseAlertModal}
         coin={alertModal.coin}
       />
-    </div>
+    </div >
   );
 }
 

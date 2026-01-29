@@ -18,10 +18,10 @@ function MarketCoinDetailsModal({
       className={`fixed inset-0 z-[2005] flex items-center justify-center p-4 ${TC.modalOverlay} animate-in fade-in duration-300`}
     >
       <div
-        className={`w-full max-w-[450px] sm:max-w-2xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300 shadow-2xl border ${isLight ? "border-gray-100" : "border-gray-800"}`}
+        className={`w-full max-w-[350px] sm:max-w-xl rounded-3xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300 shadow-2xl border ${isLight ? "border-gray-100" : "border-gray-800"}`}
       >
         <div
-          className={`px-4 py-4 sm:px-8 sm:py-6 flex justify-between items-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
+          className={`px-4 py-3 sm:px-8 sm:py-6 flex justify-between items-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b ${isLight ? "border-gray-100" : "border-gray-800"}`}
         >
           <div className="flex items-center gap-3">
             <div className="p-1 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10">
@@ -32,7 +32,7 @@ function MarketCoinDetailsModal({
               />
             </div>
             <div>
-              <h2 className={`text-lg sm:text-xl font-bold ${TC.textPrimary}`}>
+              <h2 className={`text-base sm:text-xl font-bold ${TC.textPrimary}`}>
                 {selectedCoin.name}
               </h2>
               <div className="flex items-center gap-2">
@@ -52,14 +52,14 @@ function MarketCoinDetailsModal({
               : "bg-white/5 text-gray-400 hover:text-white hover:bg-red-500/20"
               }`}
           >
-            <FaTimes className="text-base group-hover:scale-110" />
+            <FaTimes className="text-sm sm:text-base group-hover:scale-110" />
           </button>
         </div>
-        <div className="p-4 sm:p-8 space-y-4 sm:space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+        <div className="p-4 sm:p-8 space-y-3 sm:space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-2 gap-2 sm:gap-4">
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 Current Price
               </p>
@@ -67,9 +67,9 @@ function MarketCoinDetailsModal({
                 {formatCurrency(selectedCoin.current_price)}
               </p>
             </div>
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 Market Cap
               </p>
@@ -77,9 +77,9 @@ function MarketCoinDetailsModal({
                 {formatCompactNumber(selectedCoin.market_cap)}
               </p>
             </div>
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 24h High
               </p>
@@ -87,9 +87,9 @@ function MarketCoinDetailsModal({
                 {formatCurrency(selectedCoin.high_24h)}
               </p>
             </div>
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 24h Low
               </p>
@@ -99,31 +99,31 @@ function MarketCoinDetailsModal({
             </div>
           </div>
 
-          <div className={`p-4 sm:p-6 rounded-2xl ${TC.bgItem} bg-gradient-to-br from-transparent to-cyan-500/5 border border-white/5`}>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className={`p-3 sm:p-6 rounded-2xl ${TC.bgItem} bg-gradient-to-br from-transparent to-cyan-500/5 border border-white/5`}>
+            <div className="flex items-center justify-between mb-2 sm:mb-6">
               <h3
-                className={`text-sm sm:text-lg font-bold ${TC.textPrimary}`}
+                className={`text-xs sm:text-lg font-bold ${TC.textPrimary}`}
               >
                 Price Performance (7d)
               </h3>
-              <div className="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider">
+              <div className="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
                 Live Sparkline
               </div>
             </div>
-            <div className="h-28 sm:h-36 w-full flex items-center justify-center">
+            <div className="h-24 sm:h-36 w-full flex items-center justify-center">
               <SimpleSparkline
                 data={selectedCoin.sparkline_in_7d.price}
                 color="#06b6d4"
-                width={500}
-                height={120}
+                width={280}
+                height={100}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+          <div className="grid grid-cols-2 gap-2 sm:gap-4">
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 All Time High
               </p>
@@ -131,22 +131,22 @@ function MarketCoinDetailsModal({
                 {formatCurrency(selectedCoin.ath)}
               </p>
               <div className="mt-1 flex items-center gap-1">
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500`}>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500`}>
                   {selectedCoin.ath_change_percentage.toFixed(2)}%
                 </span>
-                <span className={`text-[10px] ${TC.textSecondary}`}>from ATH</span>
+                <span className={`text-[9px] ${TC.textSecondary}`}>from ATH</span>
               </div>
             </div>
-            <div className={`p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
+            <div className={`p-3 sm:p-4 rounded-2xl ${TC.bgItem} group hover:scale-[1.02] transition-transform duration-300`}>
               <p
-                className={`text-[10px] sm:text-xs uppercase font-bold tracking-widest mb-1.5 ${TC.textSecondary}`}
+                className={`text-[9px] sm:text-xs uppercase font-bold tracking-widest mb-1 ${TC.textSecondary}`}
               >
                 Circulating Supply
               </p>
               <p className={`text-sm sm:text-lg font-black ${TC.textPrimary}`}>
                 {formatCompactNumber(selectedCoin.circulating_supply)}
               </p>
-              <p className={`text-[10px] font-bold ${TC.textSecondary} mt-1 uppercase tracking-tight`}>
+              <p className={`text-[9px] font-bold ${TC.textSecondary} mt-1 uppercase tracking-tight`}>
                 {selectedCoin.symbol} Tokens
               </p>
             </div>

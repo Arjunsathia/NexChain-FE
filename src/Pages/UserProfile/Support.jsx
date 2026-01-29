@@ -29,7 +29,7 @@ const SupportCategory = ({
     whileHover={{ scale: 1.01 }}
     whileTap={{ scale: 0.99 }}
     onClick={onClick}
-    className={`${TC.bgCard} p-4 sm:p-5 rounded-2xl transition-all text-left w-full h-full group relative overflow-hidden`}
+    className={`${TC.bgCard} p-3 sm:p-5 rounded-2xl transition-all text-left w-full h-full group relative overflow-hidden`}
   >
     {/* Decorative Background Gradient */}
     <div
@@ -37,18 +37,18 @@ const SupportCategory = ({
     />
 
     <div
-      className={`p-3 rounded-xl mb-4 w-fit bg-gradient-to-br ${color} shadow-lg shadow-black/5 relative z-10 group-hover:scale-110 transition-transform duration-300`}
+      className={`p-2 sm:p-3 rounded-xl mb-3 sm:mb-4 w-fit bg-gradient-to-br ${color} shadow-lg shadow-black/5 relative z-10 group-hover:scale-110 transition-transform duration-300`}
     >
-      <Icon className="text-xl text-white" />
+      <Icon className="text-base sm:text-xl text-white" />
     </div>
 
     <div className="relative z-10">
       <h3
-        className={`font-bold text-lg mb-2 ${TC.textPrimary} group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors`}
+        className={`font-bold text-sm sm:text-lg mb-1 sm:mb-2 ${TC.textPrimary} group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors`}
       >
         {title}
       </h3>
-      <p className={`text-sm leading-relaxed ${TC.textSecondary}`}>
+      <p className={`text-[10px] sm:text-sm leading-relaxed ${TC.textSecondary}`}>
         {description}
       </p>
     </div>
@@ -532,7 +532,7 @@ export default function Support() {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {categories.map((cat, idx) => (
             <SupportCategory
               key={idx}
