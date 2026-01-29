@@ -226,154 +226,165 @@ const ChatbotWidget = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className={`
+          <>
+            {/* Mobile Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] sm:hidden"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className={`
               fixed ${hasBottomNav ? "bottom-20" : "bottom-4"} sm:bottom-6 right-4 sm:right-6 z-[1001]
               w-[calc(100vw-32px)] sm:w-[400px] max-w-[400px]
               h-[calc(100%-100px)] sm:h-[700px] max-h-[85vh]
               rounded-2xl shadow-2xl
               ${isLight
-                ? "bg-white border border-gray-200"
-                : "bg-gray-900 border border-gray-700"
-              }
+                  ? "bg-white border border-gray-200"
+                  : "bg-gray-900 border border-gray-700"
+                }
               flex flex-col overflow-hidden
             `}
-          >
-            <div className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between shadow-md z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <SmartBotIcon className="w-5 h-5 text-white" />
+            >
+              <div className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between shadow-md z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <SmartBotIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm leading-tight">
+                      Learning Assistant
+                    </h3>
+                    <p className="text-white/80 text-[10px] leading-tight">Always here to help</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-white font-bold text-sm leading-tight">
-                    Learning Assistant
-                  </h3>
-                  <p className="text-white/80 text-[10px] leading-tight">Always here to help</p>
-                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
-            </div>
 
-            <div
-              className={`
+              <div
+                className={`
               flex-1 overflow-y-auto p-4 space-y-4
               [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
               ${isLight ? "bg-gray-50" : "bg-gray-800/50"}
             `}
-            >
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`
+              >
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`
                       max-w-[85%] rounded-2xl px-3 py-2 whitespace-pre-wrap shadow-sm
                       ${message.sender === "user"
-                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                        : message.isError
-                          ? "bg-red-500/10 border border-red-500/20 text-red-500"
-                          : isLight
-                            ? "bg-white border border-gray-100 text-gray-800"
-                            : "bg-gray-800/80 border border-gray-700/50 text-gray-200"
-                      }
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                          : message.isError
+                            ? "bg-red-500/10 border border-red-500/20 text-red-500"
+                            : isLight
+                              ? "bg-white border border-gray-100 text-gray-800"
+                              : "bg-gray-800/80 border border-gray-700/50 text-gray-200"
+                        }
                     `}
-                  >
-                    <p className="text-[13px] leading-relaxed font-medium">
-                      {message.text.split(/(\*\*.*?\*\*)/g).map((part, i) =>
-                        part.startsWith('**') && part.endsWith('**') ?
-                          <strong key={i}>{part.slice(2, -2)}</strong> : part
-                      )}
-                    </p>
-                    <p
-                      className={`text-[10px] mt-1 text-right ${message.sender === "user" ? "text-white/70" : "text-gray-400"}`}
                     >
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+                      <p className="text-[13px] leading-relaxed font-medium">
+                        {message.text.split(/(\*\*.*?\*\*)/g).map((part, i) =>
+                          part.startsWith('**') && part.endsWith('**') ?
+                            <strong key={i}>{part.slice(2, -2)}</strong> : part
+                        )}
+                      </p>
+                      <p
+                        className={`text-[10px] mt-1 text-right ${message.sender === "user" ? "text-white/70" : "text-gray-400"}`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
 
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start"
-                >
-                  <div className={`
+                {isTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-start"
+                  >
+                    <div className={`
                    rounded-2xl px-4 py-3
                    ${isLight ? "bg-white border border-gray-200" : "bg-gray-700 border border-gray-600"}
                  `}>
-                    <div className="flex gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="flex gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+                  </motion.div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
 
-            <div
-              className={`
+              <div
+                className={`
               p-4 border-t
               ${isLight ? "bg-white border-gray-200" : "bg-gray-900 border-gray-700"}
             `}
-            >
-              <div className="flex gap-2 items-center">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask me about crypto..."
-                  disabled={isTyping}
-                  className={`
+              >
+                <div className="flex gap-2 items-center">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask me about crypto..."
+                    disabled={isTyping}
+                    className={`
                     flex-1 px-3 py-2 rounded-xl text-sm
                     outline-none focus:ring-1 focus:ring-cyan-500/50
                     transition-all
                     ${isLight
-                      ? "bg-gray-100 text-gray-900 placeholder-gray-400"
-                      : "bg-gray-800 text-white placeholder-gray-500 border border-gray-700"
-                    }
+                        ? "bg-gray-100 text-gray-900 placeholder-gray-400"
+                        : "bg-gray-800 text-white placeholder-gray-500 border border-gray-700"
+                      }
                     ${isTyping ? "opacity-50" : "opacity-100"}
                   `}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isTyping}
-                  className={`
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!inputValue.trim() || isTyping}
+                    className={`
                     w-9 h-9 rounded-xl
                     bg-gradient-to-r from-cyan-500 to-blue-600
                     flex items-center justify-center
                     transition-all
                     ${inputValue.trim() && !isTyping
-                      ? "opacity-100 hover:shadow-lg hover:shadow-cyan-500/50 scale-100"
-                      : "opacity-50 cursor-not-allowed scale-95"
-                    }
+                        ? "opacity-100 hover:shadow-lg hover:shadow-cyan-500/50 scale-100"
+                        : "opacity-50 cursor-not-allowed scale-95"
+                      }
                   `}
-                >
-                  <Send className="w-4 h-4 text-white" />
-                </button>
+                  >
+                    <Send className="w-4 h-4 text-white" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
