@@ -73,7 +73,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         containerElement.innerHTML = "";
       }
     };
-  }, [symbol, widgetOptions, isFullScreen]);
+  }, [symbol, widgetOptions, isFullScreen, forceLandscape]);
 
   const WidgetContent = (
     <div
@@ -102,14 +102,14 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       {isFullScreen && isMobile && (
         <button
           onClick={() => setForceLandscape(!forceLandscape)}
-          className={`absolute bottom-6 left-6 z-[100] flex items-center gap-2 px-3 py-3 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
+          className={`absolute ${forceLandscape ? 'top-4 left-4' : 'bottom-6 left-6'} z-[100] flex items-center gap-2 px-3 py-3 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
             ? "bg-white/95 hover:bg-white text-gray-800 shadow-xl border border-gray-200"
             : "bg-[#1e222d]/95 hover:bg-[#2a2e39] text-gray-100 border border-white/20 shadow-2xl"
             }`}
-          title="Force Landscape"
+          title="Toggle Orientation"
         >
-          <RotateCcw className={`w-5 h-5 transition-transform ${forceLandscape ? 'rotate-90' : ''}`} />
-          <span className="font-bold">{forceLandscape ? "Portrait" : "Landscape"}</span>
+          <RotateCcw className={`w-5 h-5 transition-transform ${forceLandscape ? '-rotate-90' : 'rotate-0'}`} />
+          <span className="font-bold">{forceLandscape ? "Portrait Mode" : "Landscape Mode"}</span>
         </button>
       )}
     </div>
@@ -118,16 +118,24 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   if (isFullScreen) {
     return ReactDOM.createPortal(
       <div
-        className={`fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] w-screen h-screen overflow-hidden animate-in fade-in duration-300 ${forceLandscape ? 'flex items-center justify-center p-0 md:p-0' : ''}`}
+        className="fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] overflow-hidden animate-in fade-in duration-300"
       >
         <div
-          className={`w-full h-full transition-all duration-500 ease-in-out ${forceLandscape ? 'landscape-mobile-view' : ''}`}
+          className="relative transition-all duration-300 ease-in-out"
           style={forceLandscape ? {
-            width: '100vh',
-            height: '100vw',
+            width: '100vmax',
+            height: '100vmin',
             transform: 'rotate(90deg)',
-            transformOrigin: 'center center'
-          } : {}}
+            transformOrigin: 'center center',
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            marginLeft: '-50vmax',
+            marginTop: '-50vmin'
+          } : {
+            width: '100%',
+            height: '100%'
+          }}
         >
           {WidgetContent}
         </div>
