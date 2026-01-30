@@ -9,7 +9,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   const container = useRef();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 1024px)");
-  const [forceLandscape, setForceLandscape] = useState(false);
+  const forceLandscape = isFullScreen && isMobile;
 
   const widgetOptions = useMemo(() => {
     const theme = isLight ? "light" : "dark";
@@ -99,19 +99,6 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         )}
       </button>
 
-      {isFullScreen && isMobile && (
-        <button
-          onClick={() => setForceLandscape(!forceLandscape)}
-          className={`absolute ${forceLandscape ? 'top-4 left-4' : 'bottom-6 left-6'} z-[100] flex items-center gap-2 px-3 py-3 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
-            ? "bg-white/95 hover:bg-white text-gray-800 shadow-xl border border-gray-200"
-            : "bg-[#1e222d]/95 hover:bg-[#2a2e39] text-gray-100 border border-white/20 shadow-2xl"
-            }`}
-          title="Toggle Orientation"
-        >
-          <RotateCcw className={`w-5 h-5 transition-transform ${forceLandscape ? '-rotate-90' : 'rotate-0'}`} />
-          <span className="font-bold">{forceLandscape ? "Portrait Mode" : "Landscape Mode"}</span>
-        </button>
-      )}
     </div>
   );
 
@@ -123,15 +110,14 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         <div
           className="relative transition-all duration-300 ease-in-out"
           style={forceLandscape ? {
-            width: '100vmax',
-            height: '100vmin',
-            transform: 'rotate(90deg)',
+            width: '100dvh',
+            height: '100dvw',
+            transform: 'translate(-50%, -50%) rotate(90deg)',
             transformOrigin: 'center center',
             position: 'absolute',
             left: '50%',
             top: '50%',
-            marginLeft: '-50vmax',
-            marginTop: '-50vmin'
+            background: isLight ? '#fff' : '#0f111a'
           } : {
             width: '100%',
             height: '100%'
