@@ -128,7 +128,6 @@ body {
   transition-timing-function: ease-out;
   transition-duration: 0ms;
   background: var(--app-bg);
-  background-attachment: fixed;
   min-height: 100dvh;
   margin: 0;
   width: 100%;
@@ -318,10 +317,38 @@ html.lenis body {
   50% { transform: translateY(-12px); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
 .animate-scroll {
   animation: scroll 2.2s cubic-bezier(0.15, 0, 0.45, 1) infinite;
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-slow-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+.animate-spin-slow-reverse {
+  animation: spin-slow-reverse 12s linear infinite;
 }

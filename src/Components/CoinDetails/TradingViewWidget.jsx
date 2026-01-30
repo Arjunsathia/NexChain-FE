@@ -1,12 +1,15 @@
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useEffect, useRef, memo, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, RotateCcw } from "lucide-react";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 function TradingViewWidget({ symbol = "BTCUSD" }) {
   const isLight = useThemeCheck();
   const container = useRef();
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const [forceLandscape, setForceLandscape] = useState(false);
 
   const widgetOptions = useMemo(() => {
     const theme = isLight ? "light" : "dark";
@@ -48,13 +51,17 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       enable_publishing: false,
       allow_symbol_change: true,
       calendar: false,
-      hide_side_toolbar: false,
+      hide_side_toolbar: isMobile ? !isFullScreen : !isFullScreen,
       hide_top_toolbar: false,
-      hide_legend: false,
-      save_image: false,
+      hide_legend: isMobile && !isFullScreen, // Hide legend on mobile to save vertical space
+      save_image: isFullScreen,
       backgroundColor: widgetOptions.backgroundColor,
       gridColor: widgetOptions.gridColor,
       support_host: "https://www.tradingview.com",
+      withdateranges: !isMobile || isFullScreen, // Only show date ranges on desktop or mobile fullscreen
+      details: isFullScreen && !isMobile, // Details take too much space on mobile
+      hotlist: isFullScreen && !isMobile,
+      container_id: "tradingview_chart",
     });
 
     if (containerElement) {
@@ -71,30 +78,59 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   const WidgetContent = (
     <div
       className={`tradingview-widget-container h-full w-full relative ${isFullScreen ? "bg-white dark:bg-[#0f111a]" : ""}`}
-      ref={container}
     >
-      <div className="tradingview-widget-container__widget h-full w-full"></div>
+      <div
+        id="tradingview_chart"
+        className="tradingview-widget-container__widget h-full w-full"
+        ref={container}
+      ></div>
       <button
         onClick={() => setIsFullScreen(!isFullScreen)}
-        className={`absolute top-4 right-20 z-10 p-2 rounded-lg transition-all ${isLight
-            ? "bg-white/80 hover:bg-white text-gray-700 shadow-sm border border-gray-200"
-            : "bg-black/50 hover:bg-black/80 text-gray-200 border border-white/10"
+        className={`absolute ${isMobile ? 'bottom-4 right-4' : 'top-4 right-4'} z-[20] flex items-center gap-2 px-3 py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
+          ? "bg-white/90 hover:bg-white text-gray-800 shadow-lg border border-gray-200"
+          : "bg-[#1e222d]/90 hover:bg-[#2a2e39] text-gray-100 border border-white/10 shadow-2xl"
           }`}
-        title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+        title={isFullScreen ? "Exit Fullscreen" : "Fill Screen"}
       >
         {isFullScreen ? (
-          <Minimize2 className="w-5 h-5" />
+          <Minimize2 className="w-4 h-4" />
         ) : (
-          <Maximize2 className="w-5 h-5" />
+          <Maximize2 className="w-4 h-4" />
         )}
       </button>
+
+      {isFullScreen && isMobile && (
+        <button
+          onClick={() => setForceLandscape(!forceLandscape)}
+          className={`absolute bottom-4 left-4 z-[20] flex items-center gap-2 px-3 py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
+            ? "bg-white/90 hover:bg-white text-gray-800 shadow-lg border border-gray-200"
+            : "bg-[#1e222d]/90 hover:bg-[#2a2e39] text-gray-100 border border-white/10 shadow-2xl"
+            }`}
+          title="Force Landscape"
+        >
+          <RotateCcw className={`w-4 h-4 transition-transform ${forceLandscape ? 'rotate-90' : ''}`} />
+          <span>{forceLandscape ? "Portrait" : "Landscape"}</span>
+        </button>
+      )}
     </div>
   );
 
   if (isFullScreen) {
     return ReactDOM.createPortal(
-      <div className="fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] w-screen h-screen overflow-hidden animate-in fade-in duration-300">
-        {WidgetContent}
+      <div
+        className={`fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] w-screen h-screen overflow-hidden animate-in fade-in duration-300 ${forceLandscape ? 'flex items-center justify-center p-0 md:p-0' : ''}`}
+      >
+        <div
+          className={`w-full h-full transition-all duration-500 ease-in-out ${forceLandscape ? 'landscape-mobile-view' : ''}`}
+          style={forceLandscape ? {
+            width: '100vh',
+            height: '100vw',
+            transform: 'rotate(90deg)',
+            transformOrigin: 'center center'
+          } : {}}
+        >
+          {WidgetContent}
+        </div>
       </div>,
       document.body,
     );

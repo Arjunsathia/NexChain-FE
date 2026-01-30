@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bitcoin, Circle, TrendingUp, TrendingDown } from "lucide-react";
+import useMediaQuery from "@/hooks/useMediaQuery";
+
+const priceFormatFull = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const priceFormatSmall = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 4,
+  maximumFractionDigits: 4,
+});
+
+const format = (p) => (p < 1 ? priceFormatSmall.format(p) : priceFormatFull.format(p));
 
 // --- SVG Icons ---
 const CoinLogo = ({ symbol, className }) => {
@@ -145,26 +162,14 @@ const desktopCoins = [
 ];
 
 const MarketNetworkVisual = ({ livePrices }) => {
+  // --- Responsive Logic ---
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
   // --- Helpers ---
   const getPrice = (id) =>
     livePrices && livePrices[id] ? livePrices[id].price : 0;
   const getChange = (id) =>
     livePrices && livePrices[id] ? livePrices[id].change : 0;
-  const format = (p) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: p < 1 ? 4 : 2,
-    }).format(p);
-
-  // --- Responsive Logic ---
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // --- Mobile View ---
   if (isMobile) {
@@ -295,7 +300,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
       >
         <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#728AD5]/20 to-transparent animate-pulse" />
         <Bitcoin className="w-24 h-24 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] relative z-10" />
-        <div className="absolute -inset-4 border-2 border-[#728AD5]/30 rounded-full border-t-transparent animate-spin-slow" />
+        <div className="absolute -inset-4 border-2 border-[#728AD5]/30 rounded-full border-t-transparent animate-[spin_10s_linear_infinite]" />
         <div className="absolute -inset-8 border border-[#728AD5]/10 rounded-full border-b-transparent animate-[spin_8s_linear_infinite_reverse]" />
       </motion.div>
 
@@ -329,10 +334,12 @@ const MarketNetworkVisual = ({ livePrices }) => {
                shadow-[0_4px_30px_rgba(0,0,0,0.1)]
                hover:bg-slate-900/50
                ${coin.theme.border}
-               ${coin.theme.shadow}
-               hover:-translate-y-1
-               overflow-hidden
-            `}
+                ${coin.theme.shadow}
+                hover:-translate-y-1
+                overflow-hidden
+                will-change-transform
+             `}
+            style={{ transform: "translateZ(0)" }}
           >
             {/* Inner Sheen Effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />

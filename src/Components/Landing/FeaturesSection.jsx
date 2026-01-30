@@ -1,5 +1,5 @@
-import React, { useState, useEffect, forwardRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { BarChart3, ShieldCheck, Zap, Layout } from "lucide-react";
 
 // --- Feature Data ---
