@@ -8,7 +8,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   const isLight = useThemeCheck();
   const container = useRef();
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 767px)");
+  const isMobile = useMediaQuery("(max-width: 1024px)");
   const [forceLandscape, setForceLandscape] = useState(false);
 
   const widgetOptions = useMemo(() => {
@@ -86,9 +86,9 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       ></div>
       <button
         onClick={() => setIsFullScreen(!isFullScreen)}
-        className={`absolute ${isMobile ? 'bottom-4 right-4' : 'top-4 right-4'} z-[20] flex items-center gap-2 px-3 py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
-          ? "bg-white/90 hover:bg-white text-gray-800 shadow-lg border border-gray-200"
-          : "bg-[#1e222d]/90 hover:bg-[#2a2e39] text-gray-100 border border-white/10 shadow-2xl"
+        className={`absolute ${isMobile ? 'top-[44px] right-1.5' : 'top-4 right-4'} z-[100] flex items-center gap-2 px-2.5 py-2.5 md:px-3 md:py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
+          ? "bg-white/95 hover:bg-white text-gray-800 shadow-xl border border-gray-200"
+          : "bg-[#1e222d]/95 hover:bg-[#2a2e39] text-gray-100 border border-white/20 shadow-2xl"
           }`}
         title={isFullScreen ? "Exit Fullscreen" : "Fill Screen"}
       >
@@ -102,14 +102,14 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
       {isFullScreen && isMobile && (
         <button
           onClick={() => setForceLandscape(!forceLandscape)}
-          className={`absolute bottom-4 left-4 z-[20] flex items-center gap-2 px-3 py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
-            ? "bg-white/90 hover:bg-white text-gray-800 shadow-lg border border-gray-200"
-            : "bg-[#1e222d]/90 hover:bg-[#2a2e39] text-gray-100 border border-white/10 shadow-2xl"
+          className={`absolute bottom-6 left-6 z-[100] flex items-center gap-2 px-3 py-3 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
+            ? "bg-white/95 hover:bg-white text-gray-800 shadow-xl border border-gray-200"
+            : "bg-[#1e222d]/95 hover:bg-[#2a2e39] text-gray-100 border border-white/20 shadow-2xl"
             }`}
           title="Force Landscape"
         >
-          <RotateCcw className={`w-4 h-4 transition-transform ${forceLandscape ? 'rotate-90' : ''}`} />
-          <span>{forceLandscape ? "Portrait" : "Landscape"}</span>
+          <RotateCcw className={`w-5 h-5 transition-transform ${forceLandscape ? 'rotate-90' : ''}`} />
+          <span className="font-bold">{forceLandscape ? "Portrait" : "Landscape"}</span>
         </button>
       )}
     </div>
@@ -137,7 +137,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   }
 
   return (
-    <div className="relative w-full h-full min-h-[500px]">{WidgetContent}</div>
+    <div className="relative w-full h-full min-h-[350px] md:min-h-[500px]">{WidgetContent}</div>
   );
 }
 
