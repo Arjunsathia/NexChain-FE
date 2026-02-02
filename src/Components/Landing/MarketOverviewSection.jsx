@@ -8,7 +8,7 @@ const MarketOverviewSection = forwardRef(
     return (
       <motion.section
         ref={ref}
-        className="py-12 md:py-16 pb-0 md:pb-0 relative bg-transparent z-10 -mt-12"
+        className="py-8 md:py-12 pb-0 md:pb-0 relative bg-transparent z-10 -mt-12"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}

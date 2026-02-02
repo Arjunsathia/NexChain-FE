@@ -191,7 +191,7 @@ const CTASection = React.memo(({ sectionVariants, navigate }) => {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none bg-slate-900/40 border border-white/10 text-white placeholder-slate-500 focus:border-[#4fcdda]/50 focus:bg-slate-900/60 transition-all"
+                  className="w-full pl-4 pr-12 py-3 rounded-xl text-sm outline-none bg-slate-900/40 border border-white/10 text-white placeholder-slate-500 focus:border-[#4fcdda]/50 focus:bg-slate-900/60 transition-all"
                 />
                 <button className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-[#4fcdda] text-white hover:bg-[#364abe] transition-colors shadow-lg shadow-cyan-500/20">
                   <FaArrowRight size={10} />
@@ -231,6 +231,7 @@ const CTASection = React.memo(({ sectionVariants, navigate }) => {
     </motion.section>
   );
 });
+
 
 CTASection.displayName = "CTASection";
 

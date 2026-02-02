@@ -152,7 +152,7 @@ const TraderReviewCard = ({ testimonial }) => {
   );
 };
 
-const TestimonialGrid = () => {
+const Testimonials = () => {
   return (
     <section className="py-0 relative overflow-visible font-manrope bg-transparent">
       {/* REMOVED: Background Ambience div */}
@@ -190,4 +190,4 @@ const TestimonialGrid = () => {
   );
 };
 
-export default TestimonialGrid;
+export default Testimonials;

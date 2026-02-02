@@ -148,9 +148,12 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
           className={`flex items-center gap-4 p-4 rounded-xl mb-6 ${TC.bgCard}`}
         >
           <img
-            src={coin.image}
+            src={typeof coin.image === 'string' ? coin.image : (coin.image?.small || coin.image?.large || coin.image?.thumb)}
             alt={coin.symbol}
-            className="w-10 h-10 rounded-full"
+            className="w-10 h-10 rounded-full object-cover shadow-sm bg-white/10"
+            onError={(e) => {
+              e.target.src = `https://ui-avatars.com/api/?name=${coin.symbol || 'C'}&background=random`;
+            }}
           />
           <div>
             <div className="flex items-center gap-2">

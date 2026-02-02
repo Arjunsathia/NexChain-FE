@@ -141,7 +141,7 @@ const portfolioSlice = createSlice({
       .addCase(addPurchase.fulfilled, (state, action) => {
         const newPurchase = action.payload.purchase;
         if (newPurchase) {
-          state.purchasedCoins.push({
+          const formatted = {
             id: newPurchase._id,
             coinId: newPurchase.coinId,
             coinName: newPurchase.coinName,
@@ -154,31 +154,41 @@ const portfolioSlice = createSlice({
             purchaseDate: newPurchase.purchaseDate,
             remainingInvestment: newPurchase.totalCost,
             totalQuantity: newPurchase.quantity,
-          });
+          };
+
+          const existingIndex = state.purchasedCoins.findIndex(
+            (c) => c.coinId === formatted.coinId
+          );
+
+          if (existingIndex !== -1) {
+            // Update existing (Merged purchase)
+            state.purchasedCoins[existingIndex] = formatted;
+          } else {
+            // Add new
+            state.purchasedCoins.push(formatted);
+          }
         }
       })
       .addCase(sellCoins.fulfilled, (state, action) => {
         const { deletedPurchases, updatedPurchases } = action.payload;
-        
-        // Remove deleted coins
-        if (deletedPurchases && deletedPurchases.length > 0) {
+
+        // deletedPurchases is now an array of IDs
+        if (Array.isArray(deletedPurchases) && deletedPurchases.length > 0) {
           state.purchasedCoins = state.purchasedCoins.filter(
-            (coin) => !deletedPurchases.includes(coin.id)
+            (coin) => !deletedPurchases.includes(coin.id) && !deletedPurchases.includes(coin._id)
           );
         }
 
-        // Update modified coins
-        if (updatedPurchases && updatedPurchases.length > 0) {
+        // updatedPurchases is now an array of full objects
+        if (Array.isArray(updatedPurchases) && updatedPurchases.length > 0) {
           state.purchasedCoins = state.purchasedCoins.map((coin) => {
-            const updated = updatedPurchases.find((u) => u._id === coin.id);
+            const updated = updatedPurchases.find((u) => u._id === coin.id || u._id === coin._id);
             if (updated) {
               return {
                 ...coin,
                 quantity: updated.quantity,
                 totalCost: updated.totalCost,
-                remainingInvestment: updated.totalCost, // Assuming reset on update? Or check logic. 
-                // Usually sell reduces quantity and totalCost proportionally or specifically. 
-                // Backend executeSell updates these fields.
+                remainingInvestment: updated.totalCost,
                 totalQuantity: updated.quantity,
               };
             }

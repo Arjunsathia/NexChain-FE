@@ -37,43 +37,42 @@ function CoinStats({ coin, livePrice, formatCurrency, TC, isLight }) {
 
   return (
     <div
-      className="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in"
+      className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 fade-in"
       style={{ animationDelay: "0.2s" }}
     >
       {stats.map((stat, i) => (
         <div
           key={i}
-          className={`rounded-lg md:rounded-2xl p-3 md:p-4 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
+          className={`rounded-xl md:rounded-2xl p-3 md:p-4 transition-all duration-300 shadow-sm md:shadow-md hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 ${TC.bgCard}`}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1.5 md:mb-2">
             <div
-              className={`p-2 rounded-lg ${
-                stat.color === "cyan"
+              className={`p-1.5 md:p-2 rounded-lg ${stat.color === "cyan"
+                ? isLight
+                  ? "bg-cyan-50 text-cyan-600"
+                  : "bg-cyan-500/10 text-cyan-400"
+                : stat.color === "purple"
                   ? isLight
-                    ? "bg-cyan-50 text-cyan-600"
-                    : "bg-cyan-500/10 text-cyan-400"
-                  : stat.color === "purple"
+                    ? "bg-purple-50 text-purple-600"
+                    : "bg-purple-500/10 text-purple-400"
+                  : stat.color === "green"
                     ? isLight
-                      ? "bg-purple-50 text-purple-600"
-                      : "bg-purple-500/10 text-purple-400"
-                    : stat.color === "green"
-                      ? isLight
-                        ? "bg-green-50 text-green-600"
-                        : "bg-green-500/10 text-green-400"
-                      : isLight
-                        ? "bg-red-50 text-red-600"
-                        : "bg-red-500/10 text-red-400"
-              }`}
+                      ? "bg-green-50 text-green-600"
+                      : "bg-green-500/10 text-green-400"
+                    : isLight
+                      ? "bg-red-50 text-red-600"
+                      : "bg-red-500/10 text-red-400"
+                }`}
             >
-              <stat.icon className="text-lg" />
+              <stat.icon className="text-xs md:text-lg" />
             </div>
           </div>
           <p
-            className={`text-sm sm:text-lg md:text-xl font-bold truncate ${TC.textPrimary}`}
+            className={`text-sm md:text-xl font-bold truncate ${TC.textPrimary}`}
           >
             {stat.value}
           </p>
-          <p className={`text-xs mt-1 ${TC.textSecondary}`}>{stat.label}</p>
+          <p className={`text-[10px] md:text-xs mt-0.5 md:mt-1 font-medium ${TC.textSecondary}`}>{stat.label}</p>
         </div>
       ))}
     </div>

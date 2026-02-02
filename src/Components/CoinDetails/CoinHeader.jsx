@@ -22,25 +22,25 @@ function CoinHeader({
 }) {
   return (
     <div
-      className={`sticky top-2 z-40 max-w-7xl mx-auto rounded-xl mb-6 ${TC.bgHeader} transition-colors duration-300`}
+      className={`sticky top-[68px] lg:top-4 z-40 max-w-7xl mx-auto rounded-xl mb-4 md:mb-6 ${TC.bgHeader} shadow-lg md:shadow-none transition-all duration-300`}
     >
-      <div className="px-4 lg:px-6 py-4">
+      <div className="px-3 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img
               src={coin.image?.large}
               alt={coin.name}
-              className="w-10 h-10 md:w-14 md:h-14 rounded-full shadow-md"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-md"
             />
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-lg md:text-2xl font-bold leading-none">
+              <div className="flex items-center gap-2 md:gap-3">
+                <h1 className="text-base md:text-2xl font-bold leading-none truncate max-w-[120px] md:max-w-none">
                   {coin.name}
                 </h1>
                 <span
-                  className={`text-xs md:text-sm uppercase px-2 py-1 rounded-lg ${isLight
-                      ? "bg-cyan-100 text-cyan-700"
-                      : "bg-cyan-500/20 text-cyan-400"
+                  className={`text-[10px] md:text-sm uppercase px-1.5 py-0.5 rounded-lg ${isLight
+                    ? "bg-cyan-100 text-cyan-700"
+                    : "bg-cyan-500/20 text-cyan-400"
                     }`}
                 >
                   {coin.symbol}
@@ -48,9 +48,9 @@ function CoinHeader({
                 <button
                   onClick={toggleWatchlist}
                   disabled={loadingWatchlist}
-                  className={`text-lg md:text-xl transition-transform ${loadingWatchlist
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:scale-110"
+                  className={`text-base md:text-xl transition-transform ${loadingWatchlist
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-110"
                     } ${isInWatchlist ? "text-yellow-400" : "text-gray-400"}`}
                 >
                   {isInWatchlist ? <FaStar /> : <FaRegStar />}
@@ -64,8 +64,8 @@ function CoinHeader({
                   userHoldings.quantity > 0) && (
                   <div
                     className={`text-xs font-medium mt-1.5 px-2 py-0.5 rounded-md inline-block ${isLight
-                        ? "bg-green-100 text-green-700"
-                        : "bg-green-500/20 text-green-400"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-green-500/20 text-green-400"
                       }`}
                   >
                     Holding:{" "}
@@ -103,10 +103,10 @@ function CoinHeader({
 
             <button
               onClick={handleTrade}
-              className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all inline-flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-md active:scale-95 transition-all inline-flex items-center gap-2"
             >
-              <FaExchangeAlt />
-              Trade
+              <FaExchangeAlt className="text-xs md:text-sm" />
+              <span>Trade</span>
             </button>
           </div>
         </div>

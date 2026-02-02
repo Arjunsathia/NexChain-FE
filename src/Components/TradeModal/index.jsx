@@ -833,6 +833,7 @@ function TradeModal({
                             calculateTotal={calculateTotal}
                             isBuyOperation={isBuyOperation}
                             handleSubmit={handleSubmit}
+                            coin={coin}
                             isSubmitting={isSubmitting || isTradeSuccess}
                             orderType={orderType}
                             setOrderType={setOrderType}

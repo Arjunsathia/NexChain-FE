@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import HeroGlobe from "./HeroGlobe";
 import PremiumScrollIndicator from "./ScrollIndicator";
 
-const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
+const HeroSection = ({ navigate, isLoggedIn, scrollToFeatures }) => {
   const ref = useRef(null);
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
@@ -140,8 +140,7 @@ const HeroSection = ({ navigate, isLoggedIn, TC, scrollToFeatures }) => {
         </motion.div>
       </div>
 
-      { }
-      <PremiumScrollIndicator onClick={scrollToFeatures} TC={TC} />
+      <PremiumScrollIndicator onClick={scrollToFeatures} />
     </section>
   );
 };

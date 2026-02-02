@@ -78,10 +78,10 @@ function InfoCards() {
     },
     {
       title: "Portfolio Value",
-      value: portfolioStats.currentValue,
+      value: portfolioStats.currentValue + (balance || 0),
       icon: FaChartLine,
       format: "currency",
-      description: "Investment Value",
+      description: "Total Net Worth",
       trend: portfolioStats.profitLossPercentage,
       trendValue: portfolioStats.profitLoss,
       color: "from-purple-500 to-violet-400",

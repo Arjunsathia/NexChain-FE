@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FaUsers, FaCoins, FaChartLine, FaStar, FaTimes } from "react-icons/fa";
+import { FaUsers, FaCoins, FaChartLine, FaStar, FaTimes, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 import UserLineChart from "@/Components/Admin/Dashboard/LineChart";
 import StatCard from "@/Components/Admin/Dashboard/StatCard";
@@ -456,182 +456,205 @@ const AdminDashboard = () => {
       />
 
       {/* Trades Modal */}
-      {createPortal(
-        isTradesModalOpen && (
-          <div className="fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div
-              className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl ${TC.bgCard} shadow-2xl flex flex-col border ${isLight ? "border-gray-100" : "border-gray-800"} animate-in zoom-in duration-300`}
-            >
-              <div className="p-5 sm:p-6 border-b border-gray-200/10 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
-                <div>
-                  <h2 className={`text-xl font-bold ${TC.textPrimary}`}>
-                    Today&apos;s Transactions
-                  </h2>
-                  <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-                    Live platform trading activity
+      {isTradesModalOpen && createPortal(
+        <div className="fixed inset-0 z-[2005] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div
+            className={`w-full max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-hidden rounded-2xl sm:rounded-3xl ${TC.bgCard} shadow-2xl flex flex-col border ${isLight ? "border-gray-100" : "border-gray-800"} animate-in zoom-in duration-300`}
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-6 border-b border-gray-200/10 flex justify-between items-center bg-gradient-to-r from-blue-500/5 to-cyan-500/5 backdrop-blur-md">
+              <div className="min-w-0">
+                <h2 className={`text-lg sm:text-2xl font-bold tracking-tight ${TC.textPrimary} truncate`}>
+                  Today&apos;s Transactions
+                </h2>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className={`text-[10px] sm:text-xs font-medium ${TC.textSecondary}`}>
+                    Live platform activity
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsTradesModalOpen(false)}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${isLight ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500" : "bg-white/5 text-gray-400 hover:bg-red-500/20 hover:text-white"}`}
-                >
-                  <FaTimes />
-                </button>
               </div>
+              <button
+                onClick={() => setIsTradesModalOpen(false)}
+                className={`p-2 sm:p-2.5 rounded-xl transition-all duration-300 flex-shrink-0 ${isLight ? "bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500" : "bg-white/5 text-gray-400 hover:bg-red-500/20 hover:text-white"}`}
+              >
+                <FaTimes className="text-sm sm:text-base" />
+              </button>
+            </div>
 
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-                {isModalLoading ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className={`text-sm font-medium ${TC.textSecondary} animate-pulse`}>Fetching transactions...</p>
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar scroll-smooth">
+              {isModalLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin shadow-lg shadow-blue-500/10"></div>
+                  <p className={`text-xs sm:text-sm font-bold ${TC.textSecondary} animate-pulse tracking-wide`}>
+                    FETCHING TRANSACTIONS...
+                  </p>
+                </div>
+              ) : todayTransactions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 sm:py-20 gap-4 text-center px-4">
+                  <div className={`p-4 sm:p-6 rounded-3xl ${isLight ? "bg-gray-50" : "bg-gray-800/40"} border border-dashed ${isLight ? "border-gray-200" : "border-gray-700"}`}>
+                    <FaChartLine className={`text-4xl sm:text-5xl ${TC.textTertiary} opacity-30`} />
                   </div>
-                ) : todayTransactions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-                    <div className={`p-4 rounded-full ${isLight ? "bg-gray-50" : "bg-gray-800/50"}`}>
-                      <FaChartLine className={`text-3xl ${TC.textTertiary}`} />
-                    </div>
-                    <div>
-                      <p className={`text-base font-bold ${TC.textPrimary}`}>No trades today</p>
-                      <p className={`text-sm ${TC.textSecondary}`}>Platform activity will appear here.</p>
-                    </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${TC.textPrimary}`}>No trades today</h3>
+                    <p className={`text-xs sm:text-sm ${TC.textSecondary} max-w-[200px] mx-auto`}>
+                      Platform activity logs will appear here as orders execute.
+                    </p>
                   </div>
-                ) : (
-                  <>
-                    {/* Desktop Table View */}
-                    <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
+                </div>
+              ) : (
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr
+                          className={`border-b border-gray-200/10 text-[10px] font-black uppercase tracking-[0.15em] ${TC.textSecondary}`}
+                        >
+                          <th className="pb-4 pl-4">Time</th>
+                          <th className="pb-4">User</th>
+                          <th className="pb-4">Type</th>
+                          <th className="pb-4">Asset</th>
+                          <th className="pb-4 text-right">Amount</th>
+                          <th className="pb-4 text-right pr-4">Value (USD)</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-100" : "divide-white/5"}`}
+                      >
+                        {todayTransactions.map((tx) => (
                           <tr
-                            className={`border-b border-gray-200/10 text-xs font-bold uppercase tracking-widest ${TC.textSecondary}`}
+                            key={tx._id}
+                            className={`group transition-all duration-300 ${isLight ? "hover:bg-blue-50/30" : "hover:bg-white/5"}`}
                           >
-                            <th className="pb-4 pl-4">Time</th>
-                            <th className="pb-4">User</th>
-                            <th className="pb-4">Type</th>
-                            <th className="pb-4">Asset</th>
-                            <th className="pb-4 text-right">Amount</th>
-                            <th className="pb-4 text-right pr-4">Value (USD)</th>
-                          </tr>
-                        </thead>
-                        <tbody
-                          className={`text-sm ${TC.textPrimary} divide-y ${isLight ? "divide-gray-200" : "divide-gray-700/50"}`}
-                        >
-                          {todayTransactions.map((tx) => (
-                            <tr
-                              key={tx._id}
-                              className={`group transition-colors ${isLight ? "hover:bg-gray-50" : "hover:bg-white/5"}`}
-                            >
-                              <td className="py-4 pl-4 whitespace-nowrap text-xs font-medium">
-                                {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </td>
-                              <td className="py-4">
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold truncate max-w-[150px]">{tx.userName}</span>
-                                  <span className={`text-[10px] ${TC.textSecondary} truncate max-w-[150px]`}>
-                                    {tx.userEmail}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="py-4">
-                                <span
-                                  className={`px-2 py-1 rounded-lg text-[10px] font-black tracking-tight ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
-                                >
-                                  {tx.type.toUpperCase()}
+                            <td className="py-4 pl-4 whitespace-nowrap text-xs font-mono font-medium opacity-70">
+                              {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="py-4">
+                              <div className="flex flex-col min-w-0 pr-4">
+                                <span className="font-bold text-sm truncate">{tx.userName}</span>
+                                <span className={`text-[10px] ${TC.textSecondary} truncate opacity-70`}>
+                                  {tx.userEmail}
                                 </span>
-                              </td>
-                              <td className="py-4">
-                                <div className="flex items-center gap-2">
-                                  {tx.image && (
-                                    <div className="p-0.5 rounded-lg bg-white/10 shadow-sm border border-white/5">
-                                      <img
-                                        src={tx.image}
-                                        alt=""
-                                        className="w-6 h-6 rounded-md object-contain"
-                                      />
-                                    </div>
-                                  )}
-                                  <span className="font-bold tracking-tight">{tx.coinSymbol?.toUpperCase()}</span>
-                                </div>
-                              </td>
-                              <td className="py-4 text-right font-bold font-mono text-xs">
-                                {Number(tx.quantity).toFixed(4)}
-                              </td>
-                              <td className="py-4 text-right pr-4 font-black">
-                                $
-                                {Number(tx.totalValue).toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                              </div>
+                            </td>
+                            <td className="py-4">
+                              <span
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide inline-flex items-center gap-1.5 ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
+                              >
+                                <span className={`w-1 h-1 rounded-full ${tx.type === "buy" ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                {tx.type.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="py-4">
+                              <div className="flex items-center gap-3">
+                                {tx.image && (
+                                  <div className={`p-1 rounded-lg ${isLight ? "bg-gray-100/50" : "bg-white/5"} border border-white/5 shadow-sm`}>
+                                    <img
+                                      src={tx.image}
+                                      alt=""
+                                      className="w-7 h-7 rounded-md object-contain"
+                                    />
+                                  </div>
+                                )}
+                                <span className="font-black tracking-tight text-xs uppercase">{tx.coinSymbol}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 text-right font-mono text-xs font-bold">
+                              {Number(tx.quantity).toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                            </td>
+                            <td className="py-4 text-right pr-4 font-black text-sm">
+                              <span className="text-[10px] font-bold mr-0.5 opacity-50">$</span>
+                              {Number(tx.totalValue).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                    {/* Mobile Card View */}
-                    <div className="md:hidden flex flex-col gap-3">
-                      {todayTransactions.map((tx) => (
-                        <div
-                          key={tx._id}
-                          className={`p-4 rounded-xl border ${isLight ? 'bg-gray-50/50 border-gray-100' : 'bg-white/5 border-gray-800'} flex flex-col gap-3`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
+                  {/* Mobile Card View */}
+                  <div className="md:hidden flex flex-col gap-4">
+                    {todayTransactions.map((tx) => (
+                      <div
+                        key={tx._id}
+                        className={`group p-4 rounded-2xl border transition-all duration-300 ${isLight ? 'bg-white border-gray-100 hover:border-blue-200' : 'bg-white/5 border-gray-800 hover:border-gray-700'} flex flex-col gap-4 relative overflow-hidden`}
+                      >
+                        {/* Accent line for transaction type */}
+                        <div className={`absolute top-0 left-0 bottom-0 w-1 ${tx.type === "buy" ? "bg-emerald-500" : "bg-rose-500"} opacity-30`} />
+
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`relative flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center p-1 border shadow-inner ${isLight ? "bg-gray-50 border-gray-100" : "bg-gray-800/50 border-gray-700"}`}>
                               {tx.image ? (
                                 <img
                                   src={tx.image}
                                   alt=""
-                                  className="w-10 h-10 rounded-full bg-white/5 p-1"
+                                  className="w-full h-full object-contain"
                                 />
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                                  <FaCoins className="text-gray-400" />
-                                </div>
+                                <FaCoins className="text-gray-500 text-lg" />
                               )}
-                              <div>
-                                <h3 className={`font-bold text-sm ${TC.textPrimary}`}>
-                                  {tx.userName}
-                                </h3>
-                                <p className={`text-[10px] ${TC.textSecondary} truncate max-w-[120px]`}>
-                                  {tx.userEmail}
-                                </p>
+                              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 ${tx.type === "buy" ? "bg-emerald-500" : "bg-rose-500"}`}>
+                                {tx.type === "buy" ? <FaArrowUp className="text-white text-[6px]" /> : <FaArrowDown className="text-white text-[6px]" />}
                               </div>
                             </div>
-                            <div className="flex flex-col items-end">
-                              <span className={`text-xs font-bold ${TC.textPrimary}`}>
-                                {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              <span
-                                className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
-                              >
-                                {tx.type}
-                              </span>
+                            <div className="min-w-0">
+                              <h3 className={`font-black text-sm ${TC.textPrimary} truncate`}>
+                                {tx.userName}
+                              </h3>
+                              <p className={`text-[10px] ${TC.textSecondary} truncate font-medium opacity-70`}>
+                                {tx.userEmail}
+                              </p>
                             </div>
                           </div>
-
-                          <div className={`grid grid-cols-2 gap-4 pt-3 border-t ${isLight ? 'border-gray-200' : 'border-gray-700/50'}`}>
-                            <div>
-                              <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Asset</p>
-                              <p className={`text-sm font-bold ${TC.textPrimary} mt-0.5`}>
-                                {Number(tx.quantity).toFixed(4)} {tx.coinSymbol?.toUpperCase()}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-[10px] uppercase font-bold ${TC.textSecondary}`}>Value</p>
-                              <p className={`text-sm font-black ${TC.textPrimary} mt-0.5`}>
-                                ${Number(tx.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                              </p>
-                            </div>
+                          <div className="flex flex-col items-end flex-shrink-0">
+                            <span className={`text-[11px] font-mono font-bold ${TC.textSecondary}`}>
+                              {new Date(tx.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span
+                              className={`mt-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${tx.type === "buy" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}
+                            >
+                              {tx.type}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+
+                        <div className={`grid grid-cols-2 gap-4 p-3 rounded-xl ${isLight ? 'bg-gray-50/50' : 'bg-black/20'} border ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
+                          <div className="min-w-0">
+                            <p className={`text-[9px] uppercase font-black tracking-widest ${TC.textSecondary} opacity-50`}>Asset Info</p>
+                            <p className={`text-xs font-bold ${TC.textPrimary} mt-1 truncate`}>
+                              {Number(tx.quantity).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                              <span className="ml-1 text-[10px] text-blue-500 uppercase font-black">{tx.coinSymbol}</span>
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-[9px] uppercase font-black tracking-widest ${TC.textSecondary} opacity-50`}>Total Value</p>
+                            <p className={`text-sm font-black ${TC.textPrimary} mt-0.5`}>
+                              <span className="text-[10px] font-bold mr-0.5 opacity-50">$</span>
+                              {Number(tx.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer (Optional but adds premium look) */}
+            <div className={`p-4 border-t ${isLight ? "bg-gray-50/50 border-gray-100" : "bg-white/5 border-gray-800"} flex justify-center`}>
+              <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${TC.textTertiary} opacity-60`}>
+                NEXCHAIN SYSTEM MONITORING
+              </p>
             </div>
           </div>
-        ),
+        </div>,
         document.body
       )}
     </>

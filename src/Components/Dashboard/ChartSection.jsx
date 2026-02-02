@@ -3,11 +3,13 @@ import ReactApexChart from "react-apexcharts";
 import { getMarketChart, getBinanceKlines } from "@/api/coinApis";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useMediaQuery from "@/hooks/useMediaQuery";
+import { FaExpand, FaCompress, FaTimes } from "react-icons/fa";
 
 const ChartSection = ({ coinId, disableAnimations = false }) => {
   const isLight = useThemeCheck();
   const isMobile = useMediaQuery("(max-width: 640px)");
   const [days, setDays] = useState(1);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [series, setSeries] = useState(() => {
     try {
       if (coinId) {
@@ -123,6 +125,20 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coinId, days]);
+
+  useEffect(() => {
+    if (isFullScreen) {
+      document.body.style.overflow = "hidden";
+      const handleEsc = (e) => {
+        if (e.key === "Escape") setIsFullScreen(false);
+      };
+      window.addEventListener("keydown", handleEsc);
+      return () => {
+        document.body.style.overflow = "auto";
+        window.removeEventListener("keydown", handleEsc);
+      };
+    }
+  }, [isFullScreen]);
 
   const options = useMemo(() => ({
     chart: {
@@ -242,11 +258,29 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
 
   return (
     <div
-      className={`p-3 sm:p-5 rounded-2xl ${isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card"
-        }`}
+      className={`
+        transition-all duration-300 ease-in-out
+        ${isFullScreen
+          ? "fixed inset-0 z-[9999] p-4 sm:p-8 flex flex-col h-screen"
+          : "p-3 sm:p-5 rounded-2xl"
+        }
+        ${isLight
+          ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100"
+          : "bg-gray-900/95 backdrop-blur-xl border border-gray-700/50"
+        }
+        glass-card
+      `}
     >
+      {isFullScreen && (
+        <button
+          onClick={() => setIsFullScreen(false)}
+          className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 z-50"
+          title="Exit Fullscreen (Esc)"
+        >
+          <FaTimes size={16} />
+        </button>
+      )}
+
       <div className="flex flex-row justify-between items-center mb-3 sm:mb-4 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-1 h-4 sm:h-5 bg-blue-500 rounded-full flex-shrink-0" />
@@ -274,10 +308,25 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
               {tf.label}
             </button>
           ))}
+          {!isFullScreen && !isMobile && (
+            <button
+              onClick={() => setIsFullScreen(true)}
+              className={`
+                p-1.5 sm:p-2 rounded-lg text-[10px] sm:text-xs transition-all duration-200 ml-1
+                ${isLight
+                  ? "text-gray-400 hover:text-blue-500 hover:bg-blue-50"
+                  : "text-gray-500 hover:text-cyan-400 hover:bg-white/5"
+                }
+              `}
+              title="Full Screen View"
+            >
+              <FaExpand />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="w-full h-[220px] sm:h-[400px] lg:h-[500px] relative">
+      <div className={`w-full relative ${isFullScreen ? "mt-4 flex-1" : "h-[220px] sm:h-[400px] lg:h-[500px]"}`}>
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-[2px] z-50 rounded-xl transition-all duration-300">
             <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin shadow-lg"></div>

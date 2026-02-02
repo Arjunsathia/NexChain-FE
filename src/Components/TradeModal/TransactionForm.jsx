@@ -29,6 +29,7 @@ const TransactionForm = React.memo(
     stopPrice,
     setStopPrice,
     currentPrice,
+    coin,
   }) => {
     const isLight = useThemeCheck();
     const isMobileOrTablet = useMediaQuery("(max-width: 1024px)");
@@ -308,8 +309,19 @@ const TransactionForm = React.memo(
                 Receive
               </span>
               <div className="flex items-center gap-1.5 justify-end">
-                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-[8px] text-white font-bold shadow-sm">
-                  {symbol ? symbol[0] : "C"}
+                <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center shadow-sm">
+                  <img
+                    src={typeof coin?.image === 'string' ? coin.image : (coin?.image?.small || coin?.image?.large || coin?.image?.thumb)}
+                    alt={symbol}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="hidden w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 items-center justify-center text-[8px] text-white font-bold">
+                    {symbol ? symbol[0] : "C"}
+                  </div>
                 </div>
                 <span className="text-xs font-semibold text-gray-500">
                   {symbol}

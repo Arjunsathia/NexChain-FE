@@ -2,16 +2,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import TestimonialCarousel from "./Testimonials";
 
-const TestimonialsSection = ({ TC, sectionVariants, isMobile }) => {
+const TestimonialsSection = ({ sectionVariants, isMobile }) => {
   return (
     <motion.section
-      className="py-10 md:py-16 relative bg-transparent z-10 -mt-0"
+      className="py-6 md:py-10 relative bg-transparent z-10 -mt-0"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={sectionVariants}
     >
-      { }
       <div className="relative z-10">
         <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 text-white font-manrope">
@@ -25,7 +24,7 @@ const TestimonialsSection = ({ TC, sectionVariants, isMobile }) => {
             infrastructure.
           </p>
         </div>
-        <TestimonialCarousel TC={TC} isMobile={isMobile} />
+        <TestimonialCarousel isMobile={isMobile} />
       </div>
     </motion.section>
   );

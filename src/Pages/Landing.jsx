@@ -32,7 +32,7 @@ const SectionWrapper = ({ children, className, id }) => {
       id={id}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.2, margin: "0px 0px -100px 0px" }}
+      viewport={{ once: true, amount: 0.1, margin: "0px 0px -100px 0px" }}
       variants={sectionVariants}
       className={`relative w-full ${className}`}
     >
@@ -117,37 +117,34 @@ export default function Landing() {
         <MemoizedHeroSection
           navigate={navigate}
           isLoggedIn={isLoggedIn}
-          TC={TC}
           scrollToFeatures={scrollToFeatures}
         />
       </div>
 
-      <SectionWrapper id="features-section" className="z-10 py-16 md:py-20">
+      <SectionWrapper id="features-section" className="z-10 py-12 md:py-16">
         <React.Suspense
           fallback={
-            <div className="h-screen w-full flex items-center justify-center text-slate-500">
+            <div className="h-[600px] w-full flex items-center justify-center text-slate-500">
               Loading Features...
             </div>
           }
         >
-          <MemoizedFeaturesSection TC={TC} sectionVariants={sectionVariants} />
+          <MemoizedFeaturesSection sectionVariants={sectionVariants} />
         </React.Suspense>
       </SectionWrapper>
 
-      <SectionWrapper id="market-section" className="z-20 py-12 md:py-16">
-        <React.Suspense fallback={<div className="h-96 w-full" />}>
+      <SectionWrapper id="market-section" className="z-20 py-8 md:py-12">
+        <React.Suspense fallback={<div className="h-[800px] w-full" />}>
           <MemoizedMarketOverviewSection
-            TC={TC}
             sectionVariants={sectionVariants}
             livePrices={livePrices}
           />
         </React.Suspense>
       </SectionWrapper>
 
-      <SectionWrapper id="testimonials-section" className="z-30 py-12 md:py-16">
-        <React.Suspense fallback={<div className="h-96 w-full" />}>
+      <SectionWrapper id="testimonials-section" className="z-30 py-8 md:py-12">
+        <React.Suspense fallback={<div className="h-[500px] w-full" />}>
           <MemoizedTestimonialsSection
-            TC={TC}
             sectionVariants={sectionVariants}
             isMobile={isMobile}
           />
@@ -155,9 +152,8 @@ export default function Landing() {
       </SectionWrapper>
 
       <SectionWrapper id="contact-section" className="z-30 pb-20">
-        <React.Suspense fallback={<div className="h-64 w-full" />}>
+        <React.Suspense fallback={<div className="h-[400px] w-full" />}>
           <MemoizedCTASection
-            TC={TC}
             sectionVariants={sectionVariants}
             navigate={navigate}
           />

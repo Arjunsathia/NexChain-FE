@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Bitcoin, Circle, TrendingUp, TrendingDown } from "lucide-react";
 import useMediaQuery from "@/hooks/useMediaQuery";
@@ -161,82 +161,161 @@ const desktopCoins = [
   },
 ];
 
-const MarketNetworkVisual = ({ livePrices }) => {
-  // --- Responsive Logic ---
+const CoinCard = memo(({ coin, index, price, change }) => {
+  return (
+    <motion.div
+      key={coin.id}
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.2 + index * 0.1 }}
+      className={`absolute ${coin.pos} z-30`}
+    >
+      <motion.div
+        animate={{ y: coin.float.y }}
+        transition={{
+          duration: 5 + index,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: index * 0.5,
+        }}
+        whileHover={{ scale: 1.05, zIndex: 100 }}
+        className={`
+           group relative
+           bg-slate-900/40 backdrop-blur-md
+           border border-white/10
+           p-5 rounded-[24px]
+           min-w-[180px]
+           cursor-pointer
+           transition-all duration-300 ease-out
+           shadow-[0_4px_30px_rgba(0,0,0,0.1)]
+           hover:bg-slate-900/60
+           ${coin.theme.border}
+            ${coin.theme.shadow}
+            hover:-translate-y-1
+            overflow-hidden
+            will-change-transform
+         `}
+        style={{ transform: "translateZ(0)" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              className={`
+                    w-10 h-10 rounded-full flex items-center justify-center 
+                    bg-white/5 border border-white/10 
+                    group-hover:${coin.theme.bg} group-hover:text-white
+                    transition-colors duration-300
+                    ${coin.theme.text}
+                `}
+            >
+              <CoinLogo
+                symbol={coin.symbol}
+                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+              />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white leading-none">
+                {coin.name}
+              </div>
+              <div className="text-[10px] font-medium text-slate-400 mt-0.5">
+                {coin.symbol}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-xl font-bold text-white tracking-tight">
+            {format(price)}
+          </div>
+
+          <div
+            className={`mt-1 text-xs font-mono flex items-center gap-1 font-bold ${change >= 0 ? "text-green-400" : "text-red-400"}`}
+          >
+            {change >= 0 ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
+            {change}%
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+});
+
+const MarketNetworkVisual = memo(({ livePrices }) => {
   const isMobile = useMediaQuery("(max-width: 767px)");
 
-  // --- Helpers ---
-  const getPrice = (id) =>
-    livePrices && livePrices[id] ? livePrices[id].price : 0;
-  const getChange = (id) =>
-    livePrices && livePrices[id] ? livePrices[id].change : 0;
-
-  // --- Mobile View ---
   if (isMobile) {
     return (
       <div className="w-full px-4 py-8 font-manrope">
         <div className="grid grid-cols-2 gap-3">
-          {desktopCoins.slice(0, 6).map((coin, i) => (
-            <motion.div
-              key={coin.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={`
-                 bg-slate-900/40 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-lg flex flex-col gap-2
-                 ${coin.theme.border.replace("hover:", "")} 
-              `}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center border border-white/10 bg-white/5 ${coin.theme.text}`}
-                >
-                  <CoinLogo symbol={coin.symbol} className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-white leading-none truncate capitalize">
-                    {coin.id}
+          {desktopCoins.slice(0, 6).map((coin, i) => {
+            const price = livePrices?.[coin.id]?.price ?? 0;
+            const change = livePrices?.[coin.id]?.change ?? 0;
+            return (
+              <motion.div
+                key={coin.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`
+                   bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-lg flex flex-col gap-2
+                   ${coin.theme.border.replace("hover:", "")} 
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center border border-white/10 bg-white/5 ${coin.theme.text}`}
+                  >
+                    <CoinLogo symbol={coin.symbol} className="w-4 h-4" />
                   </div>
-                  <div className="text-[10px] font-medium text-slate-400 mt-0.5 uppercase">
-                    {coin.symbol}
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-white leading-none truncate capitalize">
+                      {coin.id}
+                    </div>
+                    <div className="text-[10px] font-medium text-slate-400 mt-0.5 uppercase">
+                      {coin.symbol}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-white tracking-tight">
-                  {format(getPrice(coin.id))}
+                <div>
+                  <div className="text-sm font-bold text-white tracking-tight">
+                    {format(price)}
+                  </div>
+                  <div
+                    className={`text-[10px] font-mono flex items-center gap-1 font-bold ${change >= 0 ? "text-green-400" : "text-red-400"}`}
+                  >
+                    {change >= 0 ? (
+                      <TrendingUp className="w-3 h-3" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3" />
+                    )}{" "}
+                    {change}%
+                  </div>
                 </div>
-                <div
-                  className={`text-[10px] font-mono flex items-center gap-1 font-bold ${getChange(coin.id) >= 0 ? "text-green-400" : "text-red-400"}`}
-                >
-                  {getChange(coin.id) >= 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}{" "}
-                  {getChange(coin.id)}%
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     );
   }
 
-  // --- Desktop Render ---
   return (
     <div className="relative w-full h-[800px] flex items-center justify-center perspective-1000 overflow-visible font-manrope hidden md:flex">
-      {/* 1. Ambient Background Glows */}
-      <div className="absolute inset-0 bg-[#728AD5]/5 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-        <div className="w-[600px] h-[600px] border border-[#728AD5]/10 rounded-full animate-[spin_60s_linear_infinite]" />
-        <div className="absolute w-[400px] h-[400px] border border-[#728AD5]/20 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-        <div className="absolute w-[800px] h-[800px] border border-[#728AD5]/5 rounded-full border-dashed animate-[spin_100s_linear_infinite]" />
+      {/* 1. Ambient Background Glows - Reduced opacity and blur for performance */}
+      <div className="absolute inset-0 bg-[#728AD5]/5 blur-[80px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+        <div className="w-[600px] h-[600px] border border-[#728AD5]/10 rounded-full animate-[spin_100s_linear_infinite]" />
+        <div className="absolute w-[400px] h-[400px] border border-[#728AD5]/20 rounded-full animate-[spin_80s_linear_infinite_reverse]" />
       </div>
 
-      {/* 2. Data Flow Lines (SVG) */}
+      {/* 2. Data Flow Lines (SVG) - Optimized: Removed expensive filters and simplified */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
         <defs>
           <linearGradient
@@ -251,7 +330,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
             <stop offset="100%" stopColor="rgba(114, 138, 213, 0)" />
           </linearGradient>
           <filter id="glowLine">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
@@ -296,7 +375,7 @@ const MarketNetworkVisual = ({ livePrices }) => {
         whileInView={{ scale: 1, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1 }}
-        className="relative z-20 w-48 h-48 bg-[#0f172a] rounded-full flex items-center justify-center border-4 border-[#728AD5]/20 shadow-[0_0_80px_rgba(114,138,213,0.4)]"
+        className="relative z-20 w-48 h-48 bg-[#0f172a] rounded-full flex items-center justify-center border-4 border-[#728AD5]/20 shadow-[0_0_60px_rgba(114,138,213,0.3)]"
       >
         <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#728AD5]/20 to-transparent animate-pulse" />
         <Bitcoin className="w-24 h-24 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] relative z-10" />
@@ -304,93 +383,22 @@ const MarketNetworkVisual = ({ livePrices }) => {
         <div className="absolute -inset-8 border border-[#728AD5]/10 rounded-full border-b-transparent animate-[spin_8s_linear_infinite_reverse]" />
       </motion.div>
 
-      {/* 4. Satellite Cards (Premium Transparent Look) */}
-      {desktopCoins.map((coin, index) => (
-        <motion.div
-          key={coin.id}
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 + index * 0.1 }}
-          className={`absolute ${coin.pos} z-30`}
-        >
-          <motion.div
-            animate={{ y: coin.float.y }}
-            transition={{
-              duration: 4 + index,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: index * 0.5,
-            }}
-            whileHover={{ scale: 1.05, zIndex: 100 }}
-            className={`
-               group relative
-               bg-slate-900/20 backdrop-blur-xl
-               border border-white/10
-               p-5 rounded-[24px]
-               min-w-[180px]
-               cursor-pointer
-               transition-all duration-300 ease-out
-               shadow-[0_4px_30px_rgba(0,0,0,0.1)]
-               hover:bg-slate-900/50
-               ${coin.theme.border}
-                ${coin.theme.shadow}
-                hover:-translate-y-1
-                overflow-hidden
-                will-change-transform
-             `}
-            style={{ transform: "translateZ(0)" }}
-          >
-            {/* Inner Sheen Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-            {/* Content Container */}
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-2">
-                <div
-                  className={`
-                        w-10 h-10 rounded-full flex items-center justify-center 
-                        bg-white/5 border border-white/10 
-                        group-hover:${coin.theme.bg} group-hover:text-white
-                        transition-colors duration-300
-                        ${coin.theme.text}
-                    `}
-                >
-                  <CoinLogo
-                    symbol={coin.symbol}
-                    className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white leading-none">
-                    {coin.name}
-                  </div>
-                  <div className="text-[10px] font-medium text-slate-400 mt-0.5">
-                    {coin.symbol}
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-xl font-bold text-white tracking-tight">
-                {format(getPrice(coin.id))}
-              </div>
-
-              <div
-                className={`mt-1 text-xs font-mono flex items-center gap-1 font-bold ${getChange(coin.id) >= 0 ? "text-green-400" : "text-red-400"}`}
-              >
-                {getChange(coin.id) >= 0 ? (
-                  <TrendingUp className="w-3 h-3" />
-                ) : (
-                  <TrendingDown className="w-3 h-3" />
-                )}
-                {getChange(coin.id)}%
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      ))}
+      {/* 4. Satellite Cards (Memoized for performance) */}
+      {desktopCoins.map((coin, index) => {
+        const price = livePrices?.[coin.id]?.price ?? 0;
+        const change = livePrices?.[coin.id]?.change ?? 0;
+        return (
+          <CoinCard
+            key={coin.id}
+            coin={coin}
+            index={index}
+            price={price}
+            change={change}
+          />
+        );
+      })}
     </div>
   );
-};
+});
 
 export default MarketNetworkVisual;

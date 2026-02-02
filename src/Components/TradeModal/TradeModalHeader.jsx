@@ -20,9 +20,12 @@ const TradeModalHeader = React.memo(
           {/* Coin Icon - Compact */}
           <div className="relative">
             <img
-              src={coin.image}
+              src={typeof coin.image === 'string' ? coin.image : (coin.image?.small || coin.image?.large || coin.image?.thumb)}
               alt={coinName}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shadow-sm bg-white/10"
+              onError={(e) => {
+                e.target.src = `https://ui-avatars.com/api/?name=${symbol || 'C'}&background=random`;
+              }}
             />
           </div>
 

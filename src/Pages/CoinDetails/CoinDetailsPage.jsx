@@ -440,7 +440,7 @@ function CoinDetailsPage() {
   return (
     <>
       <div
-        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 transition-opacity duration-500 ${isMounted ? "opacity-100" : "opacity-0"
+        className={`min-h-screen ${TC.textPrimary} p-3 md:p-6 transition-opacity duration-500 ${isMounted ? "opacity-100" : "opacity-0"
           }`}
       >
         { }

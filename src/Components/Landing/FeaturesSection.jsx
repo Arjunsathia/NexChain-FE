@@ -35,30 +35,17 @@ const featuresList = [
 ];
 
 // --- Animated Wave Component ---
-const WaveConnection = ({ activeIndex }) => {
-  const [phase, setPhase] = useState(0);
-
-  useEffect(() => {
-    let frameId;
-    const animate = () => {
-      setPhase((prev) => (prev + 0.05) % (Math.PI * 2));
-      frameId = requestAnimationFrame(animate);
-    };
-    animate();
-    return () => cancelAnimationFrame(frameId);
-  }, []);
-
-  const count = featuresList.length;
+const WavePath = React.memo(({ index, isActive, phase }) => {
   const ITEM_HEIGHT = 120;
   const GAP = 24;
-  const TOTAL_HEIGHT = count * ITEM_HEIGHT + (count - 1) * GAP;
+  const TOTAL_HEIGHT = 4 * ITEM_HEIGHT + 3 * GAP;
   const CENTER_Y = TOTAL_HEIGHT / 2;
 
-  const generatePath = (index, isActive) => {
+  const generatePath = () => {
     const startY = index * (ITEM_HEIGHT + GAP) + ITEM_HEIGHT / 2;
     const endY = CENTER_Y;
     const width = 100;
-    const segments = 50;
+    const segments = isActive ? 30 : 2; // Much fewer segments for non-active paths
     const points = [];
 
     for (let i = 0; i <= segments; i++) {
@@ -69,11 +56,11 @@ const WaveConnection = ({ activeIndex }) => {
       let waveY = 0;
       if (isActive) {
         const envelope = Math.sin(t * Math.PI);
-        const amplitude = 10;
+        const amplitude = 8;
         const frequency = (Math.PI * 4) / width;
         waveY = amplitude * envelope * Math.sin(x * frequency - phase * 4);
       }
-      points.push(`${x},${baseY + waveY}`);
+      points.push(`${x.toFixed(1)},${(baseY + waveY).toFixed(1)}`);
     }
     return (
       `M ${points[0]} ` +
@@ -83,6 +70,36 @@ const WaveConnection = ({ activeIndex }) => {
         .join(" ")
     );
   };
+
+  return (
+    <path
+      d={generatePath()}
+      fill="none"
+      stroke={isActive ? "url(#waveGradient)" : "rgba(255, 255, 255, 0.05)"}
+      strokeWidth={isActive ? 3 : 1}
+      className="transition-all duration-500 ease-out"
+      vectorEffect="non-scaling-stroke"
+    />
+  );
+});
+
+const WaveConnection = ({ activeIndex }) => {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    let frameId;
+    const animate = () => {
+      setPhase((prev) => (prev + 0.06) % (Math.PI * 2));
+      frameId = requestAnimationFrame(animate);
+    };
+    animate();
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const ITEM_HEIGHT = 120;
+  const GAP = 24;
+  const count = featuresList.length;
+  const TOTAL_HEIGHT = count * ITEM_HEIGHT + (count - 1) * GAP;
 
   return (
     <svg
@@ -96,31 +113,15 @@ const WaveConnection = ({ activeIndex }) => {
           <stop offset="50%" stopColor="#4fcdda" stopOpacity="1" />
           <stop offset="100%" stopColor="#364abe" stopOpacity="0.1" />
         </linearGradient>
-        <filter id="waveGlow">
-          <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      {featuresList.map((_, index) => {
-        const isSelected = activeIndex === index;
-        return (
-          <path
-            key={index}
-            d={generatePath(index, isSelected)}
-            fill="none"
-            stroke={
-              isSelected ? "url(#waveGradient)" : "rgba(255, 255, 255, 0.05)"
-            }
-            strokeWidth={isSelected ? 3 : 1}
-            className="transition-all duration-500 ease-out"
-            filter={isSelected ? "url(#waveGlow)" : undefined}
-            vectorEffect="non-scaling-stroke"
-          />
-        );
-      })}
+      {featuresList.map((_, index) => (
+        <WavePath
+          key={index}
+          index={index}
+          isActive={activeIndex === index}
+          phase={phase}
+        />
+      ))}
     </svg>
   );
 };
@@ -131,9 +132,8 @@ const FeaturesSection = forwardRef((props, ref) => {
 
   return (
     <section
-      id="features-section"
       ref={ref}
-      className="py-20 md:py-32 relative overflow-hidden bg-transparent z-10 font-manrope"
+      className="py-12 md:py-16 relative overflow-hidden bg-transparent z-10 font-manrope"
     >
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(79,205,218,0.03),transparent_60%)] pointer-events-none" />
