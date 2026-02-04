@@ -144,8 +144,9 @@ const Users = () => {
         return Array.isArray(usersData)
           ? usersData.sort((a, b) => {
             // 1. Admins always on top
-            if (a.role === "admin" && b.role !== "admin") return -1;
-            if (a.role !== "admin" && b.role === "admin") return 1;
+            const isAdmin = (u) => u.role === "admin" || u.role === "superadmin";
+            if (isAdmin(a) && !isAdmin(b)) return -1;
+            if (!isAdmin(a) && isAdmin(b)) return 1;
 
             // 2. Then sort alphabetically by name
             return (a.name || "").localeCompare(b.name || "");
@@ -224,7 +225,12 @@ const Users = () => {
     const matchesSearch =
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === "all" || user.role === filterRole;
+
+    // Updated Role Matching: 'admin' filter includes both admin and superadmin
+    const isAdminRole = user.role === "admin" || user.role === "superadmin";
+    const matchesRole =
+      filterRole === "all" ||
+      (filterRole === "admin" ? isAdminRole : user.role === filterRole);
 
     // Filter by archived status based on toggle
     // If showArchived is true, show ONLY deleted users
@@ -469,9 +475,10 @@ const Users = () => {
           </h4>
           <div className="flex gap-1">
             {/* Removed Ban Icon */}
-            {user.role === "admin" && (
-              <div className="p-1 rounded-md bg-blue-500/10">
-                <Shield className="w-3 h-3 text-blue-500" />
+            {/* Admin/SuperAdmin Badge Icon */}
+            {(user.role === "admin" || user.role === "superadmin") && (
+              <div className={`p-1 rounded-md ${user.role === "superadmin" ? "bg-purple-500/10" : "bg-blue-500/10"}`}>
+                <Shield className={`w-3 h-3 ${user.role === "superadmin" ? "text-purple-500" : "text-blue-500"}`} title={user.role === "superadmin" ? "Super Admin" : "Admin"} />
               </div>
             )}
             {user.isDeleted && (
