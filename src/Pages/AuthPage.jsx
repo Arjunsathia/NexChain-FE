@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/Components/ui/input.jsx";
@@ -134,6 +134,54 @@ const AuthPage = () => {
       setActiveTab("login");
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!emailForOtp) return toast.error("Please enter your email");
+
+    setLoading(true);
+    try {
+      const res = await postForm("/auth/forgot-password", { email: emailForOtp });
+      toast.success(res.message);
+      setActiveTab("login");
+      setShowOtpInput(false); // reusing state logic or add new state
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Request failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // State for forgot password view
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  // Resend OTP Cooldown Logic
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendOTP = async () => {
+    if (resendCooldown > 0 || !emailForOtp) return;
+
+    try {
+      setLoading(true);
+      const res = await postForm("/auth/resend-otp", { email: emailForOtp });
+      toast.success(res.message);
+      setResendCooldown(60); // 60 seconds cooldown
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Resend failed");
     } finally {
       setLoading(false);
     }
@@ -295,6 +343,50 @@ const AuthPage = () => {
                   >
                     Cancel
                   </button>
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      disabled={resendCooldown > 0 || loading}
+                      onClick={handleResendOTP}
+                      className="text-xs text-cyan-500 font-medium hover:text-cyan-400 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {resendCooldown > 0
+                        ? `Resend code in ${resendCooldown}s`
+                        : "Resend Code"
+                      }
+                    </button>
+                  </div>
+                </motion.form>
+              ) : showForgotPassword ? (
+                <motion.form
+                  key="forgot"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  onSubmit={handleForgotPassword}
+                  className="space-y-4"
+                >
+                  <Input
+                    value={emailForOtp}
+                    onChange={(e) => setEmailForOtp(e.target.value)}
+                    className="h-11 bg-white/[0.03] border-white/10 rounded-xl px-4 text-sm"
+                    placeholder="Enter your email"
+                    type="email"
+                    required
+                  />
+                  <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {loading ? "Sending Link..." : "Send Reset Link"}
+                      <Rocket className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="w-full text-center text-[10px] text-slate-500 hover:text-cyan-400"
+                  >
+                    Back to Login
+                  </button>
                 </motion.form>
               ) : activeTab === "login" ? (
                 <motion.form
@@ -340,6 +432,17 @@ const AuthPage = () => {
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-[11px] text-slate-500 hover:text-cyan-400 transition-colors"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
                   <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       {loading ? "Signing in..." : "Sign In"}
@@ -451,7 +554,7 @@ const AuthPage = () => {
             </AnimatePresence>
 
             {/* Elegant Tab Switcher */}
-            {!showOtpInput && (
+            {!showOtpInput && !showForgotPassword && (
               <div className="mt-6 text-center">
                 <p className="text-slate-500 text-xs">
                   {activeTab === "login"

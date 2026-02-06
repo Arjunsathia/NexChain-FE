@@ -15,6 +15,14 @@ import LearningHub from "@/Pages/LearningHub";
 import NewsPage from "@/Pages/NewsPage";
 import Landing from "../Pages/Landing";
 import AuthPages from "../Pages/AuthPage";
+import ResetPassword from "../Pages/ResetPassword"; // or lazy load if preferred, but direct is fine for small app
+// using lazy to be consistent:
+// const ResetPassword = lazy(() => import("@/Pages/ResetPassword"));
+// Actually, let's stick to import if it's not huge, or lazy. 
+// Existing AuthPages is imported directly. ResetPassword is small.
+// Let's use lazy for consistency with others if I can, but verify import path.
+// The file is src/Pages/ResetPassword.jsx created in step 171.
+
 
 const CoinDetailsPage = lazy(
   () => import("@/Pages/CoinDetails/CoinDetailsPage"),
@@ -56,6 +64,7 @@ export default function AppRoutes() {
           </Route>
           <Route element={<AuthRoute />}>
             <Route path="/auth" element={<AuthPages />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
         </Route>
 

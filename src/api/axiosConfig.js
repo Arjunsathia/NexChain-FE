@@ -1,5 +1,6 @@
 import axios from "axios";
 import { TwoFactorEvent } from "../utils/twoFactorEvent";
+import toast from "react-hot-toast";
 
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
@@ -130,7 +131,12 @@ api.interceptors.response.use(
       }
     }
 
-    // Silence 401 and 429 errors from cluttering console
+    // Customize 429 handling
+    if (error.response?.status === 429) {
+      toast.error("Too many requests. Please slow down.");
+    }
+
+    // Silence 401 and 429 errors from cluttering console logs if handled
     if (error.response?.status !== 401 && error.response?.status !== 429) {
       console.error(
         "API Error:",
