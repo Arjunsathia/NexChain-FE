@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from "react";
+import React, { memo } from "react";
 import { motion } from "framer-motion";
 import { Bitcoin, Circle, TrendingUp, TrendingDown } from "lucide-react";
 import useMediaQuery from "@/hooks/useMediaQuery";
@@ -400,5 +400,8 @@ const MarketNetworkVisual = memo(({ livePrices }) => {
     </div>
   );
 });
+
+MarketNetworkVisual.displayName = "MarketNetworkVisual";
+CoinCard.displayName = "CoinCard";
 
 export default MarketNetworkVisual;

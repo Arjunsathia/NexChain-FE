@@ -73,7 +73,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         containerElement.innerHTML = "";
       }
     };
-  }, [symbol, widgetOptions, isFullScreen, forceLandscape]);
+  }, [symbol, widgetOptions, isFullScreen, forceLandscape, isMobile]);
 
   const WidgetContent = (
     <div

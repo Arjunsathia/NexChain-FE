@@ -1,0 +1,25 @@
+﻿
+> nexchain@0.0.0 lint
+> eslint .
+
+
+C:\Users\ragne\Downloads\NexChain\NexChain-FE\src\Components\CoinDetails\TradingViewWidget.jsx
+  76:6  warning  React Hook useEffect has a missing dependency: 'isMobile'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\ragne\Downloads\NexChain\NexChain-FE\src\Components\Common\ErrorBoundary.jsx
+  47:14  error  'process' is not defined  no-undef
+
+C:\Users\ragne\Downloads\NexChain\NexChain-FE\src\Components\Landing\FeaturesSection.jsx
+   1:38  error  'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+   2:35  error  'useInView' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  38:18  error  Component definition is missing display name                                      react/display-name
+
+C:\Users\ragne\Downloads\NexChain\NexChain-FE\src\Components\Landing\MarketNetworkVisual.jsx
+    1:17  error  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+    1:27  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+    1:38  error  'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+  164:18  error  Component definition is missing display name                                      react/display-name
+  249:29  error  Component definition is missing display name                                      react/display-name
+
+Γ£û 10 problems (9 errors, 1 warning)
+

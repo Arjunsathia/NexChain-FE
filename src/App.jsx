@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./Routes/AppRoutes";
 import { Provider } from "react-redux";
@@ -21,13 +20,12 @@ function App() {
   });
 
   useEffect(() => {
+    // If not visited, we might want to show a quick intro or just load.
+    // Ideally, we wait for user auth check + critical data.
+    // For now, let's make it instant or just wait for small delay/animation if needed.
     if (isLoading) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-        sessionStorage.setItem("hasVisited", "true");
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      setIsLoading(false);
+      sessionStorage.setItem("hasVisited", "true");
     }
   }, [isLoading]);
 

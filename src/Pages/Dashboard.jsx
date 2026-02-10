@@ -12,6 +12,7 @@ import TopCoins from "@/Components/Dashboard/TopCoins";
 import UserProfileCard from "@/Components/Dashboard/UserProfileCard";
 import PortfolioCard from "@/Components/Dashboard/PortfolioCard";
 import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
+import LeaderboardWidget from "@/Components/Dashboard/LeaderboardWidget";
 import DashboardSkeleton from "@/Components/Dashboard/DashboardSkeleton";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useMediaQuery from "@/hooks/useMediaQuery";
@@ -162,6 +163,7 @@ export default function Dashboard() {
             </h2>
             <div className="space-y-4">
               <NewsPanel />
+              <LeaderboardWidget />
               <LearningHub />
             </div>
           </div>
@@ -210,6 +212,9 @@ export default function Dashboard() {
           </div>
 
           <div>
+            <div className="mb-6">
+              <LeaderboardWidget />
+            </div>
             <NewsPanel />
           </div>
         </div>
@@ -217,3 +222,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
