@@ -138,7 +138,9 @@ export const BinanceTickerProvider = ({ children }) => {
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (ws.current) {
         ws.current.onclose = null;
-        ws.current.close();
+        if (ws.current.readyState === WebSocket.OPEN) {
+          ws.current.close();
+        }
       }
     };
   }, []);

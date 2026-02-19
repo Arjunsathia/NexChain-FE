@@ -128,7 +128,7 @@ export const getTopLosers = async () => {
     const response = await coinGecko.get("/coins/markets", {
       params: {
         vs_currency: "usd",
-        order: "market_cap_desc", // Still fetch top 100 by market cap to avoid garbage coins
+        order: "market_cap_desc",
         per_page: 100,
         page: 1,
         sparkline: false,
@@ -231,6 +231,8 @@ const idToSymbol = {
   fantom: "FTMUSDT",
 };
 
+import axios from "axios";
+
 export const getBinanceKlines = async (coinId, days = 1) => {
   const symbol = idToSymbol[coinId];
   if (!symbol) return null;
@@ -256,7 +258,9 @@ export const getBinanceKlines = async (coinId, days = 1) => {
   }
 
   try {
-    const response = await api.get(`https://api.binance.com/api/v3/klines`, {
+    // Use the Vite proxy path '/api/binance' which maps to 'https://api.binance.com'
+    // We use a clean axios instance (or just axios) to avoid the default API base URL
+    const response = await axios.get(`/api/binance/api/v3/klines`, {
       params: { symbol, interval, limit },
     });
 
@@ -269,6 +273,7 @@ export const getBinanceKlines = async (coinId, days = 1) => {
     return null;
   }
 };
+
 
 // Admin Helpers
 export const freezeCoin = async (coinData) => {

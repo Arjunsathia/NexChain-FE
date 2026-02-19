@@ -5,12 +5,12 @@ import toast from "react-hot-toast";
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
   if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
-  
+
   // Dynamic fallback for local development (supports mobile testing via IP)
   if (typeof window !== 'undefined') {
     return `${window.location.protocol}//${window.location.hostname}:5000/api`;
   }
-  
+
   return "http://localhost:5000/api";
 };
 
@@ -30,9 +30,9 @@ coinGecko.interceptors.response.use(
   (response) => {
     const contentType = response.headers["content-type"];
     if (contentType && !contentType.includes("application/json")) {
-      console.warn(
-        "⚠️ API Warning: Received non-JSON response from CoinGecko proxy (likely HTML fallback). Blocking.",
-      );
+      // console.warn(
+      //   "⚠️ API Warning: Received non-JSON response from CoinGecko proxy (likely HTML fallback). Blocking.",
+      // );
       return Promise.reject(
         new Error("Invalid API response format (expected JSON)"),
       );
@@ -74,11 +74,11 @@ api.interceptors.response.use(
   (response) => {
     const contentType = response?.headers?.["content-type"];
     if (contentType && !contentType.includes("application/json") && !contentType.includes("multipart/form-data")) {
-       // Check if response is string and looks like HTML
-       if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
-          console.warn("API Error: Received HTML instead of JSON. Check your API_BASE_URL.");
-          return Promise.reject(new Error("Invalid API response: Received HTML (Check API URL)"));
-       }
+      // Check if response is string and looks like HTML
+      if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
+        // console.warn("API Error: Received HTML instead of JSON. Check your API_BASE_URL.");
+        return Promise.reject(new Error("Invalid API response: Received HTML (Check API URL)"));
+      }
     }
     return response;
   },
@@ -138,11 +138,10 @@ api.interceptors.response.use(
 
     // Silence 401 and 429 errors from cluttering console logs if handled
     if (error.response?.status !== 401 && error.response?.status !== 429) {
-      console.error(
-        "API Error:",
-        error.response?.status,
-        error.response?.data || error.message,
-      );
+      // Silence 401 and 429 errors from cluttering console logs if handled
+      if (error.response?.status !== 401 && error.response?.status !== 429) {
+        // Intentionally silent
+      }
     }
 
     return Promise.reject(error);

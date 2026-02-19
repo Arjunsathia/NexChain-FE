@@ -6,6 +6,9 @@ import { fileURLToPath } from "url";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -18,6 +21,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/coingecko/, ''),
       },
+      '/api/binance': {
+        target: 'https://api.binance.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/binance/, ''),
+      },
     },
   },
   build: {
@@ -28,12 +36,12 @@ export default defineConfig({
           "vendor-apexcharts": ["apexcharts", "react-apexcharts"],
           "vendor-recharts": ["recharts"],
           "vendor-ui": [
-            "framer-motion", 
+            "framer-motion",
             "react-loading-skeleton",
           ],
           "vendor-utils": [
-             "axios", 
-             "@tanstack/react-query",
+            "axios",
+            "@tanstack/react-query",
           ],
           "vendor-icons": ["react-icons", "lucide-react"],
         },

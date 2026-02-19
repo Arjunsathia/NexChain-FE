@@ -18,16 +18,19 @@ export const useLivePortfolio = () => {
     return purchasedCoins.map((purchasedCoin) => {
       const liveCoin = Array.isArray(liveCoins)
         ? liveCoins.find(
-            (coin) =>
-              coin.id === purchasedCoin.coinId ||
-              coin.id === purchasedCoin.coin_id,
-          )
+          (coin) =>
+            coin.id === purchasedCoin.coinId ||
+            coin.id === purchasedCoin.coin_id,
+        )
         : null;
 
       if (!liveCoin) {
-        console.warn(
-          `No live data found for coin: ${purchasedCoin.coinName || purchasedCoin.coin_name}`,
-        );
+        // Only warn if we actually have live data loaded, otherwise it's just initial load
+        if (liveCoins.length > 0) {
+          // console.warn(
+          //   `No live data found for coin: ${purchasedCoin.coinName || purchasedCoin.coin_name}`,
+          // );
+        }
         return {
           ...purchasedCoin,
           currentPrice:
@@ -114,8 +117,8 @@ export const useLivePortfolio = () => {
       profitLossPercentage:
         coin.remainingInvestment > 0
           ? ((coin.totalCurrentValue - coin.remainingInvestment) /
-              coin.remainingInvestment) *
-            100
+            coin.remainingInvestment) *
+          100
           : 0,
     }));
   }, [livePortfolio]);

@@ -30,7 +30,7 @@ export const useSocket = () => {
     const connect = () => {
       // Clear any existing cleanup/reconnect timers
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      
+
       // Close existing if any (redundancy)
       if (socketRef.current) {
         socketRef.current.onclose = null;
@@ -38,6 +38,8 @@ export const useSocket = () => {
       }
 
       const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      if (!token) return;
+
       // Add token to connection URL for backend verification
       const ws = new WebSocket(`${SOCKET_URL}?token=${token}`);
       socketRef.current = ws;
@@ -51,51 +53,51 @@ export const useSocket = () => {
           const { type, data } = JSON.parse(event.data);
 
           if (type === "ORDER_FILLED") {
-            
-              toast.success(`${data.type.toUpperCase()} ${data.symbol.toUpperCase()} Order Filled`, {
-                duration: 4000,
-                position: "top-right",
-              });
 
-              // Call the most recent versions of the refresh functions
-              refreshFns.current.refreshBalance();
-              refreshFns.current.refreshPortfolio();
+            toast.success(`${data.type.toUpperCase()} ${data.symbol.toUpperCase()} Order Filled`, {
+              duration: 4000,
+              position: "top-right",
+            });
 
-              // Trigger global refresh for notifications and open orders
-              window.dispatchEvent(new CustomEvent("refreshNotifications"));
-              window.dispatchEvent(new CustomEvent("refreshOrders"));
+            // Call the most recent versions of the refresh functions
+            refreshFns.current.refreshBalance();
+            refreshFns.current.refreshPortfolio();
+
+            // Trigger global refresh for notifications and open orders
+            window.dispatchEvent(new CustomEvent("refreshNotifications"));
+            window.dispatchEvent(new CustomEvent("refreshOrders"));
           } else if (type === "ORDER_TRIGGERED") {
-              
-              toast(`Triggered: ${data.symbol.toUpperCase()} - Limit order active at $${data.limit_price.toLocaleString()}`, {
-                duration: 6000,
-                position: "top-right",
-                icon: '🔔'
-              });
 
-              // Refresh portfolio to show "Triggered" badge
-              refreshFns.current.refreshPortfolio();
-              
-              // Trigger global refresh for notifications and open orders
-              window.dispatchEvent(new CustomEvent("refreshNotifications"));
-              window.dispatchEvent(new CustomEvent("refreshOrders"));
+            toast(`Triggered: ${data.symbol.toUpperCase()} - Limit order active at $${data.limit_price.toLocaleString()}`, {
+              duration: 6000,
+              position: "top-right",
+              icon: '🔔'
+            });
+
+            // Refresh portfolio to show "Triggered" badge
+            refreshFns.current.refreshPortfolio();
+
+            // Trigger global refresh for notifications and open orders
+            window.dispatchEvent(new CustomEvent("refreshNotifications"));
+            window.dispatchEvent(new CustomEvent("refreshOrders"));
           } else if (type === "ALERT_TRIGGERED") {
-                 toast.success(`🚀 Price Alert Hit!\n${data.message}`, {
-                     duration: 8000,
-                     position: "top-right",
-                     style: {
-                         background: '#fff',
-                         color: '#333',
-                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                         padding: '12px 16px',
-                         borderRadius: '12px'
-                     }
-                 });
-                 
-                 // Trigger global refresh for notifications
-                 window.dispatchEvent(new CustomEvent("refreshNotifications"));
+            toast.success(`🚀 Price Alert Hit!\n${data.message}`, {
+              duration: 8000,
+              position: "top-right",
+              style: {
+                background: '#fff',
+                color: '#333',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                padding: '12px 16px',
+                borderRadius: '12px'
+              }
+            });
+
+            // Trigger global refresh for notifications
+            window.dispatchEvent(new CustomEvent("refreshNotifications"));
           }
         } catch (error) {
-          console.error("❌ [Real-time] Error parsing message:", error);
+          // console.error("❌ [Real-time] Error parsing message:", error);
         }
       };
 
@@ -104,7 +106,7 @@ export const useSocket = () => {
       };
 
       ws.onerror = (err) => {
-        console.error("⚠️ [Real-time] Socket error:", err);
+        // console.error("⚠️ [Real-time] Socket error:", err);
         ws.close();
       };
     };

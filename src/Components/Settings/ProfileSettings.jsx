@@ -88,9 +88,12 @@ const ProfileSettings = ({ TC, isLight }) => {
 
     try {
       setIsUploading(true);
-      const croppedBlob = await getCroppedImgBlob(imageSrc, croppedAreaPixels);
-      const file = new File([croppedBlob], "profile_image.jpg", {
-        type: "image/jpeg",
+      const croppedBlob = await getCroppedImgBlob(imageSrc, croppedAreaPixels, 0, { horizontal: false, vertical: false }, 'image/png');
+      if (!croppedBlob) {
+        throw new Error("Failed to create image blob");
+      }
+      const file = new File([croppedBlob], "profile_image.png", {
+        type: "image/png",
       });
 
       await uploadImage(file);
@@ -462,16 +465,28 @@ const ProfileSettings = ({ TC, isLight }) => {
                 </button>
               </div>
 
-              <div className="relative h-64 sm:h-80 bg-black">
+              <div className="relative h-64 sm:h-80 bg-[#1a1a1a] flex items-center justify-center overflow-hidden">
+                {/* Checkerboard Pattern for Transparency */}
+                <div
+                  className="absolute inset-0 opacity-20 pointer-events-none"
+                  style={{
+                    backgroundImage: `linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%)`,
+                    backgroundSize: '20px 20px',
+                    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+                  }}
+                />
                 <Cropper
                   image={imageSrc}
                   crop={crop}
                   zoom={zoom}
                   aspect={1}
+                  cropShape="round"
                   onCropChange={setCrop}
                   onCropComplete={onCropComplete}
                   onZoomChange={setZoom}
-                  showGrid={true}
+                  showGrid={false}
+                  restrictPosition={false}
+                  objectFit="auto-cover"
                 />
               </div>
 
@@ -498,8 +513,8 @@ const ProfileSettings = ({ TC, isLight }) => {
                       setImageSrc(null);
                     }}
                     className={`flex-1 py-3 rounded-xl font-bold transition-colors ${isDark
-                        ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     Cancel

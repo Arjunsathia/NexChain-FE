@@ -20,9 +20,6 @@ function App() {
   });
 
   useEffect(() => {
-    // If not visited, we might want to show a quick intro or just load.
-    // Ideally, we wait for user auth check + critical data.
-    // For now, let's make it instant or just wait for small delay/animation if needed.
     if (isLoading) {
       setIsLoading(false);
       sessionStorage.setItem("hasVisited", "true");

@@ -3,7 +3,10 @@ const createImage = (url) =>
     const image = new Image()
     image.addEventListener('load', () => resolve(image))
     image.addEventListener('error', (error) => reject(error))
-    image.setAttribute('crossOrigin', 'anonymous') 
+    // Only set crossOrigin if not a data URL to avoid tainting issues
+    if (!url.startsWith('data:')) {
+      image.setAttribute('crossOrigin', 'anonymous')
+    }
     image.src = url
   })
 
@@ -22,7 +25,7 @@ function rotateSize(width, height, rotation) {
   }
 }
 
-export const getCroppedImgBlob = async (imageSrc, pixelCrop, rotation = 0, flip = { horizontal: false, vertical: false }) => {
+export const getCroppedImgBlob = async (imageSrc, pixelCrop, rotation = 0, flip = { horizontal: false, vertical: false }, mimeType = 'image/png') => {
   const image = await createImage(imageSrc)
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')
@@ -33,37 +36,63 @@ export const getCroppedImgBlob = async (imageSrc, pixelCrop, rotation = 0, flip 
 
   const rotRad = getRadianAngle(rotation)
 
+  // Calculate bounding box of the rotated image
   const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
     image.width,
     image.height,
     rotation
   )
 
-  canvas.width = bBoxWidth
-  canvas.height = bBoxHeight
+  // Safe integer parsing helper
+  const safeInt = (val) => {
+    const num = Math.round(val);
+    return !Number.isFinite(num) ? 0 : num;
+  };
 
-  ctx.translate(bBoxWidth / 2, bBoxHeight / 2)
-  ctx.rotate(rotRad)
-  ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1)
-  ctx.translate(-image.width / 2, -image.height / 2)
+  // Set canvas size to the bounding box size
+  const safeBBoxWidth = Math.max(1, safeInt(bBoxWidth));
+  const safeBBoxHeight = Math.max(1, safeInt(bBoxHeight));
 
-  ctx.drawImage(image, 0, 0)
+  canvas.width = safeBBoxWidth;
+  canvas.height = safeBBoxHeight;
 
-  const data = ctx.getImageData(
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height
-  )
+  // Center the image in the canvas
+  ctx.translate(safeBBoxWidth / 2, safeBBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1);
+  ctx.translate(-image.width / 2, -image.height / 2);
 
-  canvas.width = pixelCrop.width
-  canvas.height = pixelCrop.height
+  ctx.drawImage(image, 0, 0);
 
+  // Validate crop data
+  let cropX = safeInt(pixelCrop.x);
+  let cropY = safeInt(pixelCrop.y);
+  let cropWidth = safeInt(pixelCrop.width);
+  let cropHeight = safeInt(pixelCrop.height);
+
+  // Fallback if crop dimensions are invalid (0 or infinite)
+  // This prevents returning a 1x1 pixel image if the cropper hasn't initialized correctly
+  if (cropWidth <= 0 || cropHeight <= 0) {
+    cropX = 0;
+    cropY = 0;
+    cropWidth = safeBBoxWidth;
+    cropHeight = safeBBoxHeight;
+  }
+
+  // Extract the cropped image data
+  const data = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+
+  // Resize canvas to the cropped size
+  canvas.width = cropWidth;
+  canvas.height = cropHeight;
+
+  // Put the cropped image data back onto the resized canvas
   ctx.putImageData(data, 0, 0)
 
+  // Return as Blob
   return new Promise((resolve) => {
     canvas.toBlob((file) => {
       resolve(file)
-    }, 'image/jpeg')
+    }, mimeType)
   })
 }

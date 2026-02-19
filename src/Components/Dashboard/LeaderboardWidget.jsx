@@ -5,7 +5,7 @@ import { FaCrown, FaTrophy, FaMedal } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import api from "@/api/axiosConfig";
+import api, { SERVER_URL } from "@/api/axiosConfig";
 import { useSelector } from "react-redux";
 
 const LeaderboardWidget = () => {
@@ -41,6 +41,11 @@ const LeaderboardWidget = () => {
         }),
         [isLight]
     );
+
+    const getAvatar = (u) => {
+        if (!u || !u.image) return `https://api.dicebear.com/7.x/avataaars/svg?seed=${u?.name || "User"}`;
+        return u.image.startsWith("http") ? u.image : `${SERVER_URL}/uploads/${u.image}`;
+    };
 
     const top3 = users.slice(0, 3);
     const rest = users.slice(3, 10);
@@ -91,7 +96,7 @@ const LeaderboardWidget = () => {
                                 <div className="relative mb-3 transition-transform duration-300 group-hover:scale-105">
                                     <div className="absolute inset-0 bg-gray-300 rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
                                     <img
-                                        src={top3[1].image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${top3[1].name}`}
+                                        src={getAvatar(top3[1])}
                                         className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-gray-300 shadow-xl object-cover relative z-10"
                                         alt={top3[1].name}
                                     />
@@ -120,7 +125,7 @@ const LeaderboardWidget = () => {
                                 <div className="relative mb-3 transition-transform duration-300 group-hover:scale-110">
                                     <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
                                     <img
-                                        src={top3[0].image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${top3[0].name}`}
+                                        src={getAvatar(top3[0])}
                                         className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-yellow-400 shadow-2xl object-cover relative z-10 ring-2 ring-yellow-400/50 ring-offset-2 ring-offset-transparent"
                                         alt={top3[0].name}
                                     />
@@ -146,7 +151,7 @@ const LeaderboardWidget = () => {
                                 <div className="relative mb-3 transition-transform duration-300 group-hover:scale-105">
                                     <div className="absolute inset-0 bg-orange-400 rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
                                     <img
-                                        src={top3[2].image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${top3[2].name}`}
+                                        src={getAvatar(top3[2])}
                                         className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-orange-300 shadow-xl object-cover relative z-10"
                                         alt={top3[2].name}
                                     />
@@ -189,7 +194,7 @@ const LeaderboardWidget = () => {
                                                 {rank}
                                             </div>
                                             <img
-                                                src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
+                                                src={getAvatar(user)}
                                                 className="w-10 h-10 rounded-full object-cover shadow-sm bg-gray-100 ring-2 ring-transparent group-hover:ring-blue-400/30 transition-all"
                                                 alt={user.name}
                                             />
