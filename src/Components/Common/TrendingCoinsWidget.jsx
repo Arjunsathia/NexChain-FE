@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -162,7 +163,7 @@ function TrendingCoinsWidget({
             return (
               <div
                 key={coin.id}
-                onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+                {...pressable(() => navigate(`/coin/coin-details/${coin.id}`))}
                 style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
                 className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
               >

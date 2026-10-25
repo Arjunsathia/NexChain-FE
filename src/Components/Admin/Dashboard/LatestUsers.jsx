@@ -1,8 +1,8 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React from "react";
 import { FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-import { SERVER_URL } from "@/api/axiosConfig";
 
 function LatestUsers({ users, isLoading, TC }) {
   const navigate = useNavigate();
@@ -53,9 +53,7 @@ function LatestUsers({ users, isLoading, TC }) {
                     {user.image ? (
                       <img
                         src={
-                          user.image.startsWith("http")
-                            ? user.image
-                            : `${SERVER_URL}/uploads/${user.image}`
+                          getAvatarUrl(user.image)
                         }
                         alt={user.name}
                         className="w-full h-full object-cover"

@@ -3,7 +3,7 @@ import { fetchUser, setUser, setAccessToken } from "@/redux/slices/userSlice";
 import { useCallback } from "react";
 
 const useUserContext = () => {
-  const { user, accessToken, loading, error } = useSelector(
+  const { user, accessToken, status, loading, error } = useSelector(
     (state) => state.user,
   );
   const dispatch = useDispatch();
@@ -20,6 +20,8 @@ const useUserContext = () => {
   return {
     user,
     accessToken,
+    status,
+    isAuthenticated: status === "authenticated",
     loading,
     error,
     fetchUsers,

@@ -16,7 +16,7 @@ export default defineConfig([
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
     ],
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '19.1' } },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

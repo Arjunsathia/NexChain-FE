@@ -1,25 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
-import { jwtDecode } from "jwt-decode";
 
 
-const getUserId = () => {
-  const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      return decoded.id;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-};
+// The logged-in user's id comes from the session in the store
+const getUserId = (getState) => getState().user?.user?.id;
 
 export const fetchPurchasedCoins = createAsyncThunk(
   "portfolio/fetchPurchasedCoins",
-  async (_, { rejectWithValue }) => {
-    const userId = getUserId();
+  async (_, { getState, rejectWithValue }) => {
+    const userId = getUserId(getState);
     if (!userId) return [];
 
     try {
@@ -53,8 +42,8 @@ export const fetchPurchasedCoins = createAsyncThunk(
 
 export const fetchTransactionHistory = createAsyncThunk(
   "portfolio/fetchTransactionHistory",
-  async (_, { rejectWithValue }) => {
-    const userId = getUserId();
+  async (_, { getState, rejectWithValue }) => {
+    const userId = getUserId(getState);
     if (!userId) return [];
     try {
       const response = await getData(`/purchases/transactions/${userId}`);
@@ -71,8 +60,8 @@ export const fetchTransactionHistory = createAsyncThunk(
 
 export const addPurchase = createAsyncThunk(
   "portfolio/addPurchase",
-  async (purchaseData, { rejectWithValue, dispatch }) => {
-    const userId = getUserId();
+  async (purchaseData, { getState, rejectWithValue, dispatch }) => {
+    const userId = getUserId(getState);
     if (!userId) return rejectWithValue("User not authenticated");
 
     try {
@@ -92,8 +81,8 @@ export const addPurchase = createAsyncThunk(
 
 export const sellCoins = createAsyncThunk(
   "portfolio/sellCoins",
-  async (sellData, { rejectWithValue, dispatch }) => {
-    const userId = getUserId();
+  async (sellData, { getState, rejectWithValue, dispatch }) => {
+    const userId = getUserId(getState);
     if (!userId) return rejectWithValue("User not authenticated");
 
     try {

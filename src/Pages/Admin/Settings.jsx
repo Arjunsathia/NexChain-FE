@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import React, { useState, useMemo, useEffect } from "react";
 import { FaCog, FaShieldAlt, FaBell, FaKey, FaSave } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -11,7 +12,7 @@ import useThemeCheck from "@/hooks/useThemeCheck";
 const AdminSettings = () => {
   const isLight = useThemeCheck();
   const [activeTab, setActiveTab] = useState("general");
-  const [isSaving, setIsSaving] = useState(false);
+  const isSaving = false;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,12 +73,12 @@ const AdminSettings = () => {
     rateLimitEnabled: true,
   });
 
+  // There is no settings API yet; platform configuration lives in the server's
+  // environment variables. Only the 2FA section below talks to the server.
   const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      alert("Settings saved successfully!");
-    }, 1500);
+    toast("Saving platform settings isn't available yet. They're configured on the server.", {
+      icon: "ℹ️",
+    });
   };
 
   return (
@@ -111,7 +112,7 @@ const AdminSettings = () => {
             </>
           ) : (
             <>
-              <FaSave /> Save Changes
+              <FaSave /> Save Changes (coming soon)
             </>
           )}
         </button>

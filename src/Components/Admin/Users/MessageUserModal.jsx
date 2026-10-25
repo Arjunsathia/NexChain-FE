@@ -65,6 +65,7 @@ const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
             Contact User
           </h3>
           <button
+            aria-label="Close"
             onClick={onClose}
             className={`p-2 rounded-full transition-colors ${isLight ? "hover:bg-gray-100 text-gray-500" : "hover:bg-white/10 text-gray-400"}`}
           >

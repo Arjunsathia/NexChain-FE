@@ -19,6 +19,11 @@ const NotificationSettings = ({ TC, isLight }) => {
       >
         <FaBell className="text-cyan-500" /> Notification Preferences
       </h2>
+      {/* No preferences API yet: be clear that these toggles aren't saved */}
+      <p className={`text-xs -mt-4 ${TC.textSecondary}`}>
+        Coming soon: these preferences aren&apos;t saved yet. Price alerts and order
+        notifications are always delivered.
+      </p>
 
       <div className="grid gap-4">
         {[

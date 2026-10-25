@@ -1,4 +1,5 @@
-import React, { useState, useEffect, forwardRef } from "react";
+import { pressable } from "@/utils/a11y";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, ShieldCheck, Zap, Layout } from "lucide-react";
 
@@ -35,75 +36,84 @@ const featuresList = [
 ];
 
 // --- Animated Wave Component ---
-const WavePath = React.memo(({ index, isActive, phase }) => {
-  const ITEM_HEIGHT = 120;
-  const GAP = 24;
-  const TOTAL_HEIGHT = 4 * ITEM_HEIGHT + 3 * GAP;
-  const CENTER_Y = TOTAL_HEIGHT / 2;
+const ITEM_HEIGHT = 120;
+const GAP = 24;
+const TOTAL_HEIGHT = 4 * ITEM_HEIGHT + 3 * GAP;
+const CENTER_Y = TOTAL_HEIGHT / 2;
 
-  const generatePath = () => {
-    const startY = index * (ITEM_HEIGHT + GAP) + ITEM_HEIGHT / 2;
-    const endY = CENTER_Y;
-    const width = 100;
-    const segments = isActive ? 30 : 2; // Much fewer segments for non-active paths
-    const points = [];
+const buildPath = (index, isActive, phase) => {
+  const startY = index * (ITEM_HEIGHT + GAP) + ITEM_HEIGHT / 2;
+  const width = 100;
+  const segments = isActive ? 30 : 2; // inactive paths are static curves
+  const points = [];
 
-    for (let i = 0; i <= segments; i++) {
-      const t = i / segments;
-      const x = t * width;
-      const ease = t * t * (3 - 2 * t);
-      const baseY = startY + (endY - startY) * ease;
-      let waveY = 0;
-      if (isActive) {
-        const envelope = Math.sin(t * Math.PI);
-        const amplitude = 8;
-        const frequency = (Math.PI * 4) / width;
-        waveY = amplitude * envelope * Math.sin(x * frequency - phase * 4);
-      }
-      points.push(`${x.toFixed(1)},${(baseY + waveY).toFixed(1)}`);
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const x = t * width;
+    const ease = t * t * (3 - 2 * t);
+    const baseY = startY + (CENTER_Y - startY) * ease;
+    let waveY = 0;
+    if (isActive) {
+      const envelope = Math.sin(t * Math.PI);
+      waveY = 8 * envelope * Math.sin(x * ((Math.PI * 4) / width) - phase * 4);
     }
-    return (
-      `M ${points[0]} ` +
-      points
-        .slice(1)
-        .map((p) => `L ${p}`)
-        .join(" ")
-    );
-  };
+    points.push(`${x.toFixed(1)},${(baseY + waveY).toFixed(1)}`);
+  }
+  return `M ${points[0]} ` + points.slice(1).map((p) => `L ${p}`).join(" ");
+};
 
-  return (
+const WavePath = React.memo(
+  forwardRef(({ index, isActive }, ref) => (
     <path
-      d={generatePath()}
+      ref={ref}
+      d={buildPath(index, isActive, 0)}
       fill="none"
       stroke={isActive ? "url(#waveGradient)" : "rgba(255, 255, 255, 0.05)"}
       strokeWidth={isActive ? 3 : 1}
       className="transition-all duration-500 ease-out"
       vectorEffect="non-scaling-stroke"
     />
-  );
-});
+  )),
+);
 WavePath.displayName = "WavePath";
 
+// The active wave is animated by writing its `d` attribute directly each frame,
+// so React doesn't re-render 60 times a second. The loop only runs while the
+// section is on screen and is skipped for users who prefer reduced motion.
 const WaveConnection = ({ activeIndex }) => {
-  const [phase, setPhase] = useState(0);
+  const svgRef = useRef(null);
+  const pathRefs = useRef([]);
 
   useEffect(() => {
-    let frameId;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frameId = null;
+    let phase = 0;
     const animate = () => {
-      setPhase((prev) => (prev + 0.06) % (Math.PI * 2));
+      phase = (phase + 0.06) % (Math.PI * 2);
+      pathRefs.current[activeIndex]?.setAttribute("d", buildPath(activeIndex, true, phase));
       frameId = requestAnimationFrame(animate);
     };
-    animate();
-    return () => cancelAnimationFrame(frameId);
-  }, []);
+    const stop = () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = null;
+    };
 
-  const ITEM_HEIGHT = 120;
-  const GAP = 24;
-  const count = featuresList.length;
-  const TOTAL_HEIGHT = count * ITEM_HEIGHT + (count - 1) * GAP;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !frameId) animate();
+      if (!entry.isIntersecting) stop();
+    });
+    if (svgRef.current) observer.observe(svgRef.current);
+
+    return () => {
+      observer.disconnect();
+      stop();
+    };
+  }, [activeIndex]);
 
   return (
     <svg
+      ref={svgRef}
       className="w-full h-full overflow-visible"
       viewBox={`0 0 100 ${TOTAL_HEIGHT}`}
       preserveAspectRatio="none"
@@ -118,9 +128,9 @@ const WaveConnection = ({ activeIndex }) => {
       {featuresList.map((_, index) => (
         <WavePath
           key={index}
+          ref={(el) => (pathRefs.current[index] = el)}
           index={index}
           isActive={activeIndex === index}
-          phase={phase}
         />
       ))}
     </svg>
@@ -164,7 +174,7 @@ const FeaturesSection = forwardRef((props, ref) => {
               return (
                 <div
                   key={feature.id}
-                  onClick={() => setActiveFeature(index)}
+                  {...pressable(() => setActiveFeature(index))}
                   className={`
                        group relative p-6 min-h-[100px] h-auto rounded-3xl cursor-pointer transition-all duration-300
                        overflow-hidden flex items-center

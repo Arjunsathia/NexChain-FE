@@ -103,6 +103,7 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification }) => {
                                         </div>
                                     </div>
                                     <button
+                                        aria-label="Close"
                                         onClick={onClose}
                                         className={`p-2 rounded-xl transition-all active:scale-90 ${isDark
                                             ? "text-gray-400 hover:bg-white/5 hover:text-white"

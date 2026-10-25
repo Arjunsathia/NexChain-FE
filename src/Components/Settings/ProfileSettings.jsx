@@ -1,3 +1,5 @@
+import { pressable } from "@/utils/a11y";
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -17,7 +19,7 @@ import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { getCroppedImgBlob } from "@/utils/canvasUtils";
 
-import api, { SERVER_URL } from "@/api/axiosConfig";
+import api, { setMemoryToken } from "@/api/axiosConfig";
 // import { Link } from 'react-router-dom'; // Unused
 
 const ProfileSettings = ({ TC, isLight }) => {
@@ -168,6 +170,8 @@ const ProfileSettings = ({ TC, isLight }) => {
       const response = await api.put(`/users/${user.id}`, updateData);
       const data = response.data;
 
+      // A password change revokes old sessions; the response carries new tokens
+      if (data.accessToken) setMemoryToken(data.accessToken);
       if (data.user) {
         toast.success("Profile updated successfully");
         updateUser(data.user);
@@ -198,7 +202,7 @@ const ProfileSettings = ({ TC, isLight }) => {
         >
           <div
             className="relative group cursor-pointer shrink-0"
-            onClick={() => !isUploading && fileInputRef.current.click()}
+            {...pressable(() => !isUploading && fileInputRef.current.click())}
           >
             <input
               type="file"
@@ -213,9 +217,7 @@ const ProfileSettings = ({ TC, isLight }) => {
               {user?.image ? (
                 <img
                   src={
-                    user.image.startsWith("http")
-                      ? user.image
-                      : `${SERVER_URL}/uploads/${user.image}`
+                    getAvatarUrl(user.image)
                   }
                   alt="Profile"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

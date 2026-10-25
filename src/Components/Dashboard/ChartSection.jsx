@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useMemo } from "react";
-import ReactApexChart from "react-apexcharts";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { getMarketChart, getBinanceKlines } from "@/api/coinApis";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useMediaQuery from "@/hooks/useMediaQuery";
@@ -79,7 +87,8 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
         try {
           const { timestamp, data } = JSON.parse(cached);
           if (now - timestamp < 3 * 60 * 1000) { // 3 min cache for precision
-            if (series.length === 0) setData(data);
+            // Always apply: the series on screen may be another timeframe's
+            setData(data);
             return;
           }
         } catch {
@@ -123,7 +132,6 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coinId, days]);
 
   useEffect(() => {
@@ -140,113 +148,31 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
     }
   }, [isFullScreen]);
 
-  const options = useMemo(() => ({
-    chart: {
-      type: "area",
-      height: 350,
-      zoom: { enabled: false },
-      toolbar: { show: false },
-      background: "transparent",
-      animations: { enabled: !disableAnimations },
-      sparkline: { enabled: false },
-    },
-    colors: ["#00E396"],
-    stroke: {
-      curve: "smooth",
-      width: isMobile ? 1.5 : 2,
-    },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
-        stops: [0, 90, 100],
-      },
-    },
-    dataLabels: { enabled: false },
-    grid: {
-      show: true,
-      borderColor: isLight ? "#e0e0e0" : "#2e2e2e",
-      strokeDashArray: 4,
-      padding: {
-        top: 10,
-        right: isMobile ? 5 : 20,
-        bottom: 0,
-        left: isMobile ? 10 : 20
-      },
-      xaxis: {
-        lines: { show: false }
-      },
-      yaxis: {
-        lines: { show: true }
-      }
-    },
-    xaxis: {
-      type: "datetime",
-      labels: {
-        style: {
-          colors: isLight ? "#64748b" : "#94a3b8",
-          fontSize: isMobile ? '10px' : '12px',
-          fontWeight: 500
-        },
-        datetimeFormatter: {
-          year: "yyyy",
-          month: "MMM 'yy",
-          day: "dd MMM",
-          hour: "hh:mm tt",
-        },
-        datetimeUTC: false,
-        offsetY: 0,
-      },
-      tooltip: {
-        enabled: false,
-      },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      crosshairs: {
-        show: true,
-        stroke: {
-          color: '#3b82f6',
-          width: 1,
-          dashArray: 3,
-        },
-      },
-    },
-    yaxis: {
-      opposite: false,
-      labels: {
-        style: {
-          colors: isLight ? "#64748b" : "#94a3b8",
-          fontSize: isMobile ? '10px' : '11px',
-          fontWeight: 600
-        },
-        formatter: (value) => {
-          if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
-          return `$${value.toLocaleString()}`;
-        },
-        offsetX: isMobile ? -5 : 0,
-      },
-      tickAmount: isMobile ? 4 : 6,
-    },
-    theme: {
-      mode: isLight ? "light" : "dark",
-    },
-    tooltip: {
-      theme: isLight ? "light" : "dark",
-      shared: true,
-      intersect: false,
-      x: {
-        format: "dd MMM yyyy, hh:mm tt",
-      },
-      y: {
-        formatter: (v) => `$${v?.toLocaleString()}`
-      },
-      style: {
-        fontSize: '12px',
-      }
-    },
-  }), [isLight, isMobile, disableAnimations]);
+  const chartData = useMemo(
+    () => (series[0]?.data || []).map(([t, price]) => ({ t, price })),
+    [series],
+  );
+
+  const axisColor = isLight ? "#64748b" : "#94a3b8";
+  const formatTick = useMemo(() => {
+    const opts =
+      days <= 1
+        ? { hour: "2-digit", minute: "2-digit" }
+        : days <= 90
+          ? { day: "2-digit", month: "short" }
+          : { month: "short", year: "2-digit" };
+    const fmt = new Intl.DateTimeFormat(undefined, opts);
+    return (t) => fmt.format(t);
+  }, [days]);
+  const formatPrice = (value) =>
+    value >= 1000 ? `$${(value / 1000).toFixed(1)}k` : `$${value.toLocaleString()}`;
+  const tooltipDate = new Intl.DateTimeFormat(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   const timeframes = [
     { label: "24H", value: 1 },
@@ -333,12 +259,65 @@ const ChartSection = ({ coinId, disableAnimations = false }) => {
           </div>
         )}
 
-        <ReactApexChart
-          options={options}
-          series={series}
-          type="area"
-          height="100%"
-        />
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={chartData}
+            margin={{ top: 10, right: isMobile ? 5 : 20, bottom: 0, left: isMobile ? 0 : 10 }}
+          >
+            <defs>
+              <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#00E396" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="#00E396" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              vertical={false}
+              stroke={isLight ? "#e0e0e0" : "#2e2e2e"}
+              strokeDasharray="4 4"
+            />
+            <XAxis
+              dataKey="t"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              tickFormatter={formatTick}
+              tick={{ fill: axisColor, fontSize: isMobile ? 10 : 12, fontWeight: 500 }}
+              axisLine={false}
+              tickLine={false}
+              minTickGap={40}
+            />
+            <YAxis
+              domain={["auto", "auto"]}
+              tickFormatter={formatPrice}
+              tick={{ fill: axisColor, fontSize: isMobile ? 10 : 11, fontWeight: 600 }}
+              axisLine={false}
+              tickLine={false}
+              tickCount={isMobile ? 4 : 6}
+              width={isMobile ? 48 : 64}
+            />
+            <Tooltip
+              cursor={{ stroke: "#3b82f6", strokeWidth: 1, strokeDasharray: "3 3" }}
+              contentStyle={{
+                background: isLight ? "#ffffff" : "#111827",
+                border: `1px solid ${isLight ? "#e5e7eb" : "#374151"}`,
+                borderRadius: 8,
+                fontSize: 12,
+              }}
+              labelStyle={{ color: axisColor }}
+              labelFormatter={(t) => tooltipDate.format(t)}
+              formatter={(v) => [`$${Number(v).toLocaleString()}`, "Price"]}
+            />
+            <Area
+              type="monotone"
+              dataKey="price"
+              stroke="#00E396"
+              strokeWidth={isMobile ? 1.5 : 2}
+              fill="url(#priceFill)"
+              isAnimationActive={!disableAnimations}
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import useUserContext from "@/hooks/useUserContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
-import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { useLivePrice } from "@/hooks/useBinanceTicker";
 
 import TradeModalHeader from "./TradeModalHeader";
 import TradeModalTabs from "./TradeModalTabs";
@@ -35,7 +35,11 @@ function TradeModal({
     const [coinAmount, setCoinAmount] = useState("");
     const [slippage, setSlippage] = useState(1.0);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const livePrices = useBinanceTicker();
+    // Only this coin's updates re-render the modal
+    const liveCoinData = useLivePrice(
+        coin?.id || coin?.coinId,
+        coin?.symbol || coin?.coinSymbol,
+    );
     const [currentPrice, setCurrentPrice] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const [isHoldingsView, setIsHoldingsView] = useState(false);
@@ -241,10 +245,7 @@ function TradeModal({
     // Dedicated effect for live price updates to avoid form resets
     useEffect(() => {
         if (show && coin) {
-            const coinId = coin.id || coin.coinId;
-            const liveData = livePrices[coinId];
-
-            const price = liveData?.current_price ||
+            const price = liveCoinData?.current_price ||
                 coin.current_price ||
                 coin.currentPrice ||
                 coin.coinPriceUSD ||
@@ -261,7 +262,7 @@ function TradeModal({
                 }
             }
         }
-    }, [coin, show, currentPrice, orderType, livePrices]);
+    }, [coin, show, currentPrice, orderType, liveCoinData]);
 
     const handleUsdAmountChange = (e) => {
         const value = e.target.value;
@@ -790,7 +791,7 @@ function TradeModal({
                     coinName={coin.coinName || coin.name}
                     symbol={symbol}
                     currentPrice={currentPrice}
-                    priceChange={livePrices[coin.id || coin.coinId]?.price_change_percentage_24h || coin.price_change_percentage_24h || 0}
+                    priceChange={liveCoinData?.price_change_percentage_24h ?? coin.price_change_percentage_24h ?? 0}
                     isLight={isLight}
                     handleClose={handleClose}
                 />

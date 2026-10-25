@@ -1,27 +1,13 @@
 import { useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode";
-import { useCallback } from "react";
 
+// The role comes from the server session, never from a client-side token decode
 const useRoleContext = () => {
-  const { user } = useSelector((state) => state.user);
+  const role = useSelector((state) => state.user.user?.role);
 
-  let role = user?.role;
-
-  if (!role) {
-    const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        role = decoded.role;
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  const fetchRole = useCallback(() => {}, []);
-
-  return { role, fetchRole };
+  return {
+    role,
+    isAdmin: role === "admin" || role === "superadmin",
+  };
 };
 
 export default useRoleContext;

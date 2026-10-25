@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
@@ -202,7 +203,7 @@ function Watchlist() {
                 key={coin.id}
                 className={`flex items-center justify-between p-2 rounded-xl transition-all duration-200 cursor-pointer group/item ${TC.bgItemHover}`}
                 style={{ animationDelay: `${0.1 * index}s` }}
-                onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+                {...pressable(() => navigate(`/coin/coin-details/${coin.id}`))}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <img

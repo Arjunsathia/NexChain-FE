@@ -15,7 +15,8 @@ import {
 import { postForm, setMemoryToken } from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import useUserContext from "@/hooks/useUserContext";
+import { useDispatch } from "react-redux";
+import { setSession } from "@/redux/slices/userSlice";
 
 const initialRegisterKeys = {
   name: "",
@@ -24,18 +25,20 @@ const initialRegisterKeys = {
   user_name: "",
   password: "",
   confirm_password: "",
-  role: "user",
 };
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { setToken, updateUser } = useUserContext();
+  const dispatch = useDispatch();
 
   // Auth State
   const [activeTab, setActiveTab] = useState("login");
   const [loginData, setLoginData] = useState({ user_name: "", password: "" });
   const [registerData, setRegisterData] = useState(initialRegisterKeys);
   const [otpCode, setOtpCode] = useState("");
+  // Set when the server asks for an authenticator code: { method, googleAccessToken? }
+  const [twoFactor, setTwoFactor] = useState(null);
+  const [totpCode, setTotpCode] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [emailForOtp, setEmailForOtp] = useState("");
 
@@ -43,28 +46,38 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // The access token stays in memory; the refresh cookie restores it on reload
+  const completeLogin = (res) => {
+    setMemoryToken(res.accessToken);
+    dispatch(setSession({ user: res.user, accessToken: res.accessToken }));
+    setTwoFactor(null);
+    setTotpCode("");
+    navigate("/dashboard");
+  };
+
+  const askForCode = (challenge, message) => {
+    setTwoFactor(challenge);
+    setTotpCode("");
+    setActiveTab("login");
+    toast(message || "Enter the code from your authenticator app", { icon: "🔐" });
+  };
+
+  const submitGoogle = async (googleAccessToken, totp) => {
+    const res = await postForm("/auth/google", { googleAccessToken, totp });
+    if (res.require2FA) {
+      askForCode({ method: "google", googleAccessToken }, res.message);
+    } else if (res.accessToken) {
+      completeLogin(res);
+    }
+  };
+
   // Google Login Hook
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       toast.loading("Authenticating with Google...", { id: "google-auth" });
       try {
-        // Send Access Token to Backend
-        const res = await postForm("/auth/google", {
-          googleAccessToken: tokenResponse.access_token,
-        });
-
-        if (res.accessToken) {
-          setToken(res.accessToken);
-          setMemoryToken(res.accessToken);
-          localStorage.setItem("NEXCHAIN_USER_TOKEN", res.accessToken);
-          if (res?.user) {
-            updateUser(res.user);
-            localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
-          }
-
-
-          navigate("/dashboard");
-        }
+        await submitGoogle(tokenResponse.access_token);
+        toast.dismiss("google-auth");
       } catch (err) {
         console.error("Google Login Error", err);
         toast.error(err.response?.data?.message || "Google Login failed", {
@@ -80,20 +93,19 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (twoFactor?.method === "google") {
+        await submitGoogle(twoFactor.googleAccessToken, totpCode);
+        return;
+      }
       const res = await postForm("/auth/login", {
         email: loginData.user_name,
         password: loginData.password,
+        ...(twoFactor ? { totp: totpCode } : {}),
       });
-      if (res.accessToken) {
-        setToken(res.accessToken);
-        setMemoryToken(res.accessToken);
-        localStorage.setItem("NEXCHAIN_USER_TOKEN", res.accessToken);
-        if (res?.user) {
-          updateUser(res.user);
-          localStorage.setItem("NEXCHAIN_USER", JSON.stringify(res?.user));
-        }
-
-        navigate("/dashboard");
+      if (res.require2FA) {
+        askForCode({ method: "password" }, res.message);
+      } else if (res.accessToken) {
+        completeLogin(res);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid credentials");
@@ -409,7 +421,7 @@ const AuthPage = () => {
                       className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 focus:bg-white/[0.06] transition-all px-4 text-sm"
                       placeholder="Email Address"
                       autoComplete="username"
-                      required
+                      required={twoFactor?.method !== "google"}
                     />
                   </div>
                   <div className="relative space-y-1">
@@ -422,7 +434,7 @@ const AuthPage = () => {
                       className="h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-cyan-500/50 px-4 pr-10 text-sm"
                       placeholder="Password"
                       autoComplete="current-password"
-                      required
+                      required={twoFactor?.method !== "google"}
                     />
                     <button
                       type="button"
@@ -432,6 +444,25 @@ const AuthPage = () => {
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+
+                  {twoFactor && (
+                    <div className="space-y-1">
+                      <Input
+                        value={totpCode}
+                        onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        className="h-11 bg-white/[0.03] border-cyan-500/40 rounded-xl focus:border-cyan-500/70 px-4 text-sm tracking-[0.4em] text-center"
+                        placeholder="6-digit authenticator code"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        aria-label="Authenticator code"
+                        autoFocus
+                        required
+                      />
+                      <p className="text-[11px] text-slate-500">
+                        Two-factor authentication is on for this account.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex justify-end">
                     <button
@@ -445,7 +476,7 @@ const AuthPage = () => {
 
                   <Button className="group relative w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 text-sm">
                     <span className="relative z-10 flex items-center justify-center gap-2">
-                      {loading ? "Signing in..." : "Sign In"}
+                      {loading ? "Signing in..." : twoFactor ? "Verify & Sign In" : "Sign In"}
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />

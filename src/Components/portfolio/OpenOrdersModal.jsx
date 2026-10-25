@@ -13,11 +13,11 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
         try {
             const res = await api.put(`/orders/cancel/${orderId}`);
             if (res.data.success) {
-                toast.success("Order cancelled");
+                toast.success(res.data.message || "Order cancelled");
                 onRefresh();
             }
-        } catch {
-            toast.error("Failed to cancel");
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to cancel");
         }
     };
 
@@ -47,6 +47,7 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                             </div>
                         </div>
                         <button
+                            aria-label="Close"
                             onClick={onClose}
                             className={`p-2 rounded-xl hover:bg-gray-100/10 transition-colors ${TC.textSecondary}`}
                         >
@@ -147,16 +148,20 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                     </td>
                                                     <td className="py-4 text-right pr-2">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setEditingOrder(order);
-                                                                    setIsEditModalOpen(true);
-                                                                }}
-                                                                className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
-                                                                title="Edit"
-                                                            >
-                                                                <FaEdit size={14} />
-                                                            </button>
+                                                            {/* OCO legs share one reservation, so they can only be cancelled */}
+                                                            {!order.oco_group_id && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingOrder(order);
+                                                                        setIsEditModalOpen(true);
+                                                                    }}
+                                                                    className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
+                                                                    title="Edit"
+                                                                    aria-label="Edit order"
+                                                                >
+                                                                    <FaEdit size={14} />
+                                                                </button>
+                                                            )}
                                                             <button
                                                                 onClick={() => handleCancel(order._id)}
                                                                 className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-300"
@@ -236,15 +241,17 @@ const OpenOrdersModal = ({ isOpen, onClose, orders, livePrices, onRefresh, TC, i
                                                     <span className={`text-sm font-mono font-bold ${TC.textPrimary}`}>{order.quantity}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingOrder(order);
-                                                            setIsEditModalOpen(true);
-                                                        }}
-                                                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-500 font-bold text-xs"
-                                                    >
-                                                        <FaEdit size={12} /> Edit
-                                                    </button>
+                                                    {!order.oco_group_id && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingOrder(order);
+                                                                setIsEditModalOpen(true);
+                                                            }}
+                                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-500 font-bold text-xs"
+                                                        >
+                                                            <FaEdit size={12} /> Edit
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleCancel(order._id)}
                                                         className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500"

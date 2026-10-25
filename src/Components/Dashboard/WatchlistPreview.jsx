@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
@@ -12,34 +13,7 @@ function WatchlistPreview({ disableAnimations = false }) {
   const isLight = useThemeCheck();
   const { user, accessToken } = useUserContext();
 
-  // Determine User ID (Context or direct token decode for instant cache key availability)
-  const getInstantUserId = () => {
-    if (user?.id) return user.id;
-    // Fallback: Try decoding token for instant render
-    try {
-      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-      if (token) {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const jsonPayload = decodeURIComponent(
-          window
-            .atob(base64)
-            .split("")
-            .map(function (c) {
-              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-            })
-            .join(""),
-        );
-        const decoded = JSON.parse(jsonPayload);
-        return decoded.id;
-      }
-    } catch {
-      // ignore
-    }
-    return null;
-  };
-
-  const effectiveUserId = getInstantUserId();
+  const effectiveUserId = user?.id || null;
 
   const [watchlistData, setWatchlistData] = useState(() => {
     if (!effectiveUserId) return [];
@@ -216,7 +190,7 @@ function WatchlistPreview({ disableAnimations = false }) {
           mergedCoins.map((coin, index) => (
             <div
               key={coin.id}
-              onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+              {...pressable(() => navigate(`/coin/coin-details/${coin.id}`))}
               style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
               className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
             >

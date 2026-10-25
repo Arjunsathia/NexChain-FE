@@ -1,3 +1,6 @@
+import { pressable } from "@/utils/a11y";
+import { getAvatarUrl } from "@/utils/avatar";
+import { useSelector } from "react-redux";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -25,13 +28,12 @@ import {
 import MessageUserModal from "@/Components/Admin/Users/MessageUserModal";
 import UserStatDetailModal from "@/Components/Admin/Users/UserStatDetailModal";
 import ActionConfirmModal from "@/Components/Admin/Users/ActionConfirmModal";
+import KycReviewPanel from "@/Components/Admin/Users/KycReviewPanel";
 import { getData, updateById } from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import { SERVER_URL } from "@/api/axiosConfig";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { jwtDecode } from "jwt-decode";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useTransitionDelay from "@/hooks/useTransitionDelay";
@@ -56,31 +58,8 @@ const Users = () => {
     markVisited(location.pathname);
   }, [location.pathname, markVisited]);
 
-  // Current User Role State
-  const [currentUserRole, setCurrentUserRole] = useState(null);
-
-  useEffect(() => {
-    // 1. Try to get token from localStorage with the key used in AuthPage
-    let token =
-      localStorage.getItem("NEXCHAIN_USER_TOKEN") ||
-      localStorage.getItem("token");
-
-    // 2. Fallback: Try reading from cookie if localStorage failed (e.g. strict cookie auth)
-    if (!token) {
-      const match = document.cookie.match(new RegExp("(^| )token=([^;]+)"));
-      if (match) token = match[2];
-    }
-
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        // Ensure role defaults to 'user' if missing in payload
-        setCurrentUserRole(decoded.role || "user");
-      } catch (e) {
-        console.error("Token decode error", e);
-      }
-    }
-  }, []);
+  // Current admin's role comes from the session
+  const currentUserRole = useSelector((state) => state.user.user?.role) || null;
 
   // Detailed User Data State
   const [userDetails, setUserDetails] = useState({
@@ -285,7 +264,7 @@ const Users = () => {
           : [];
       });
       // Also invalidate to be sure
-      queryClient.invalidateQueries(["adminUsers"]);
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
 
       if (
         selectedUser &&
@@ -409,7 +388,7 @@ const Users = () => {
 
   const UserListItem = React.memo(({ user, index, shouldAnimate, isSelected, onClick, isLight, TC }) => (
     <div
-      onClick={() => onClick(user)}
+      {...pressable(() => onClick(user))}
       style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
       className={`
         group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
@@ -446,9 +425,7 @@ const Users = () => {
             {user.image ? (
               <img
                 src={
-                  user.image.startsWith("http")
-                    ? user.image
-                    : `${SERVER_URL}/uploads/${user.image}`
+                  getAvatarUrl(user.image)
                 }
                 alt={user.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -638,6 +615,9 @@ const Users = () => {
           setShowMessageModal={setShowMessageModal}
           isLight={isLight}
           onToggleFreeze={handleToggleFreeze}
+          onKycDecision={(kycStatus) =>
+            setUserDetails((prev) => ({ ...prev, kycStatus }))
+          }
         />
 
         <ActionConfirmModal
@@ -690,6 +670,7 @@ const UserDetailPane = ({
   openActionModal,
   setShowMessageModal,
   onToggleFreeze,
+  onKycDecision,
 }) => {
   // Simple media query hook
   const [isDesktop, setIsDesktop] = useState(
@@ -700,8 +681,8 @@ const UserDetailPane = ({
 
   const canArchive = useMemo(() => {
     if (!selectedUser) return false;
-    // Hard Stop for Primary Super Admin
-    if (selectedUser.email === "nexchainsystem@gmail.com") return false;
+    // Super Admins can't be changed by anyone else (enforced by the server too)
+    if (selectedUser.role === "superadmin") return false;
 
     if (currentUserRole === "superadmin") return true;
     if (currentUserRole === "admin" && selectedUser.role === "user")
@@ -711,7 +692,7 @@ const UserDetailPane = ({
 
   const canFreeze = useMemo(() => {
     if (!selectedUser) return false;
-    if (selectedUser.email === "nexchainsystem@gmail.com") return false;
+    if (selectedUser.role === "superadmin") return false;
     if (currentUserRole === "superadmin") return true;
     if (currentUserRole === "admin" && selectedUser.role === "user")
       return true;
@@ -722,8 +703,8 @@ const UserDetailPane = ({
     if (!selectedUser) return null;
     const targetRole = selectedUser.role;
 
-    // Hard Stop for Primary Super Admin
-    if (selectedUser.email === "nexchainsystem@gmail.com") return null;
+    // Super Admins can't be changed by anyone else (enforced by the server too)
+    if (selectedUser.role === "superadmin") return null;
 
     // IF ACTOR IS SUPER ADMIN
     if (currentUserRole === "superadmin") {
@@ -834,9 +815,7 @@ const UserDetailPane = ({
                   {selectedUser.image ? (
                     <img
                       src={
-                        selectedUser.image.startsWith("http")
-                          ? selectedUser.image
-                          : `${SERVER_URL}/uploads/${selectedUser.image}`
+                        getAvatarUrl(selectedUser.image)
                       }
                       className="w-full h-full object-cover"
                     />
@@ -947,7 +926,7 @@ const UserDetailPane = ({
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {/* Stats cards logic same as before... */}
                       <div
-                        onClick={() => setExpandedStat("joined")}
+                        {...pressable(() => setExpandedStat("joined"))}
                         className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
                       >
                         <div
@@ -975,7 +954,7 @@ const UserDetailPane = ({
                       </div>
 
                       <div
-                        onClick={() => setExpandedStat("balance")}
+                        {...pressable(() => setExpandedStat("balance"))}
                         className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
                       >
                         <div
@@ -1009,7 +988,7 @@ const UserDetailPane = ({
                       </div>
 
                       <div
-                        onClick={() => setExpandedStat("assets")}
+                        {...pressable(() => setExpandedStat("assets"))}
                         className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
                       >
                         <div
@@ -1043,7 +1022,7 @@ const UserDetailPane = ({
                       </div>
 
                       <div
-                        onClick={() => setExpandedStat("status")}
+                        {...pressable(() => setExpandedStat("status"))}
                         className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
                       >
                         <div
@@ -1198,86 +1177,12 @@ const UserDetailPane = ({
                   </div>
                 )}
                 {activeTab === "docs" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {userDetails.kycData?.documentImage ? (
-                      <div className="col-span-2">
-                        <div
-                          className={`p-4 rounded-xl border ${TC.bgCard} ${TC.border} mb-4`}
-                        >
-                          <h3 className={`font-bold mb-2 ${TC.textPrimary}`}>
-                            KYC Status:{" "}
-                            <span
-                              className={`${userDetails.kycStatus === "verified" ? "text-green-500" : "text-yellow-500"} uppercase`}
-                            >
-                              {userDetails.kycStatus}
-                            </span>
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <p className={`text-xs ${TC.textSecondary}`}>
-                                Full Name
-                              </p>
-                              <p
-                                className={`text-sm font-medium ${TC.textPrimary}`}
-                              >
-                                {userDetails.kycData.fullName}
-                              </p>
-                            </div>
-                            <div>
-                              <p className={`text-xs ${TC.textSecondary}`}>
-                                ID Type
-                              </p>
-                              <p
-                                className={`text-sm font-medium ${TC.textPrimary}`}
-                              >
-                                {userDetails.kycData.idType}
-                              </p>
-                            </div>
-                            <div>
-                              <p className={`text-xs ${TC.textSecondary}`}>
-                                ID Number
-                              </p>
-                              <p
-                                className={`text-sm font-medium ${TC.textPrimary}`}
-                              >
-                                {userDetails.kycData.idNumber}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className={`rounded-xl border border-dashed overflow-hidden ${isLight ? "border-gray-200" : "border-gray-800"}`}
-                        >
-                          <img
-                            src={
-                              userDetails.kycData.documentImage.startsWith(
-                                "http",
-                              )
-                                ? userDetails.kycData.documentImage
-                                : `${SERVER_URL}/uploads/${userDetails.kycData.documentImage}`
-                            }
-                            alt="KYC Document"
-                            className="w-full h-auto object-contain max-h-[500px]"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className={`h-40 col-span-2 rounded-xl border-2 border-dashed flex items-center justify-center ${isLight ? "border-gray-200" : "border-gray-800"}`}
-                        >
-                          <div className="text-center">
-                            <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                            <p
-                              className={`text-xs font-bold ${TC.textSecondary}`}
-                            >
-                              No KYC Documents Submitted
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <KycReviewPanel
+                    userId={selectedUser.id}
+                    TC={TC}
+                    isLight={isLight}
+                    onDecision={onKycDecision}
+                  />
                 )}
               </div>
             </div>

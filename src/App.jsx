@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./Routes/AppRoutes";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
-import { AnimatePresence } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AlertChecker from "./Components/Common/AlertChecker";
-import Preloader from "./Components/Common/Preloader";
-import DataLoader from "./Components/Common/DataLoader";
 import SocketManager from "./Components/Common/SocketManager";
-import Admin2FAModal from "./Components/Admin/Security/Admin2FAModal";
+import SessionManager from "./Components/Common/SessionManager";
+// Loaded after first paint: neither is needed to render the first page
+const Admin2FAModal = lazy(() => import("./Components/Admin/Security/Admin2FAModal"));
+const FirstVisitSplash = lazy(() => import("./Components/Common/FirstVisitSplash"));
 import { initTheme } from "@/utils/theme-manager";
 
 initTheme();
@@ -43,13 +42,12 @@ function App() {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <DataLoader />
+        <SessionManager />
         <SocketManager />
-        <Admin2FAModal />
-        <AnimatePresence mode="wait">
-          {isLoading && <Preloader key="preloader" />}
-        </AnimatePresence>
-        <AlertChecker />
+        <Suspense fallback={null}>
+          <Admin2FAModal />
+          <FirstVisitSplash show={isLoading} />
+        </Suspense>
         <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground">
             <AppRoutes />

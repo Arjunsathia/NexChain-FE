@@ -26,6 +26,7 @@ const PreferenceSettings = ({ TC, isLight }) => {
             </p>
           </div>
           <button
+            aria-label="Toggle theme"
             onClick={toggleTheme}
             className={`p-3 rounded-xl transition-all border shadow-sm
                 ${

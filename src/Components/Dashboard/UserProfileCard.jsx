@@ -1,9 +1,9 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React from "react";
 import { useSelector } from "react-redux";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
 import { FaUserCircle, FaCheckCircle, FaWallet } from "react-icons/fa";
-import { SERVER_URL } from "@/api/axiosConfig";
 
 export default function UserProfileCard() {
   const isLight = useThemeCheck();
@@ -39,9 +39,7 @@ export default function UserProfileCard() {
             {user?.image ? (
               <img
                 src={
-                  user.image.startsWith("http")
-                    ? user.image
-                    : `${SERVER_URL}/uploads/${user.image}`
+                  getAvatarUrl(user.image)
                 }
                 alt="Profile"
                 className="w-full h-full object-cover"

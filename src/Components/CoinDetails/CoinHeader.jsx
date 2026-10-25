@@ -46,6 +46,7 @@ function CoinHeader({
                   {coin.symbol}
                 </span>
                 <button
+                  aria-label="Toggle watchlist"
                   onClick={toggleWatchlist}
                   disabled={loadingWatchlist}
                   className={`text-base md:text-xl transition-transform ${loadingWatchlist

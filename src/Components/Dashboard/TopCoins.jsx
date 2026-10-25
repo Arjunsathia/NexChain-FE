@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useCallback, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -142,7 +143,7 @@ const BentoCoinCard = React.memo(
 
     return (
       <div
-        onClick={() => onSelect(coin.id)}
+        {...pressable(() => onSelect(coin.id))}
         className={`
           relative cursor-pointer rounded-xl p-2 sm:p-3 h-24 sm:h-28 flex flex-col justify-between transition-all duration-200
           ${isSelected ? TC.selectedState : `${TC.bgBase} ${TC.hoverEffect}`}

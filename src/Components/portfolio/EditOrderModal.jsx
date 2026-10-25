@@ -93,7 +93,7 @@ const EditOrderModal = ({ isOpen, onClose, order, onOrderUpdated }) => {
                         <FaEdit className="text-blue-500" />
                         Edit Order ({order.coin_symbol.toUpperCase()})
                     </h2>
-                    <button onClick={onClose} className={`${isLight ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-white'} transition-colors`}>
+                    <button aria-label="Close" onClick={onClose} className={`${isLight ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-white'} transition-colors`}>
                         <FaTimes size={18} />
                     </button>
                 </div>

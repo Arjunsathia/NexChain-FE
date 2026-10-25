@@ -10,6 +10,8 @@ import api from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
 import toast from "react-hot-toast";
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
 const KYCVerification = ({ TC, isLight }) => {
   const { user } = useUserContext();
   const isDark = !isLight;
@@ -22,6 +24,9 @@ const KYCVerification = ({ TC, isLight }) => {
     idNumber: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [documentFile, setDocumentFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -29,6 +34,7 @@ const KYCVerification = ({ TC, isLight }) => {
         const res = await api.get(`/kyc/status/${user.id}`);
         if (res.data.success) {
           setStatus(res.data.kycStatus);
+          setRejectionReason(res.data.kycData?.rejectionReason || "");
         }
       } catch (error) {
         console.error("Failed to fetch KYC status", error);
@@ -36,10 +42,32 @@ const KYCVerification = ({ TC, isLight }) => {
       }
     };
 
-    if (user) {
+    if (user?.id) {
       fetchStatus();
     }
-  }, [user]);
+  }, [user?.id]);
+
+  // Image preview for the chosen file (PDFs just show their name)
+  useEffect(() => {
+    if (!documentFile || !documentFile.type.startsWith("image/")) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(documentFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [documentFile]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error("File is too large (max 5 MB)");
+      e.target.value = "";
+      return;
+    }
+    setDocumentFile(file);
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,13 +75,16 @@ const KYCVerification = ({ TC, isLight }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!documentFile) {
+      toast.error("Please attach a photo or scan of your ID document");
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const res = await api.post("/kyc/submit", {
-        user_id: user.id,
-        ...formData,
-        documentImage: "mock_image_url",
-      });
+      const body = new FormData();
+      Object.entries(formData).forEach(([key, value]) => body.append(key, value));
+      body.append("document", documentFile);
+      const res = await api.post("/kyc/submit", body);
       if (res.data.success) {
         toast.success("KYC Submitted Successfully!");
         setStatus("pending");
@@ -133,7 +164,9 @@ const KYCVerification = ({ TC, isLight }) => {
               <div>
                 <p className="font-bold text-sm">Verification Rejected</p>
                 <p className="text-xs opacity-90">
-                  Please check your details and try again.
+                  {rejectionReason
+                    ? `Reason: ${rejectionReason}. Please correct it and submit again.`
+                    : "Please check your details and try again."}
                 </p>
               </div>
             </div>
@@ -226,19 +259,33 @@ const KYCVerification = ({ TC, isLight }) => {
             </div>
           </div>
 
-          <div
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer group ${isDark ? "border-gray-700 hover:border-cyan-500/50 hover:bg-gray-800" : "border-gray-300 hover:border-cyan-500 hover:bg-gray-50"}`}
+          <label
+            className={`block border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer group focus-within:border-cyan-500 ${isDark ? "border-gray-700 hover:border-cyan-500/50 hover:bg-gray-800" : "border-gray-300 hover:border-cyan-500 hover:bg-gray-50"}`}
           >
-            <FaUpload
-              className={`text-3xl mx-auto mb-3 transition-colors ${isDark ? "text-gray-600 group-hover:text-cyan-500" : "text-gray-400 group-hover:text-cyan-500"}`}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              onChange={handleFileChange}
+              className="sr-only"
             />
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Selected ID document"
+                className="mx-auto mb-3 max-h-48 rounded-lg object-contain"
+              />
+            ) : (
+              <FaUpload
+                className={`text-3xl mx-auto mb-3 transition-colors ${isDark ? "text-gray-600 group-hover:text-cyan-500" : "text-gray-400 group-hover:text-cyan-500"}`}
+              />
+            )}
             <p className={`text-sm font-medium ${TC.textPrimary}`}>
-              Click to upload ID Document
+              {documentFile ? documentFile.name : "Click to upload ID Document"}
             </p>
             <p className={`text-xs mt-1 ${TC.textSecondary}`}>
-              (Mock Upload - No file needed)
+              JPG, PNG, WebP or PDF, up to 5 MB. Only reviewers can see it.
             </p>
-          </div>
+          </label>
 
           <div className="flex justify-end pt-4">
             <button

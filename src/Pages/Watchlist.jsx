@@ -6,6 +6,8 @@ import React, {
   useRef,
 } from "react";
 import { deleteWatchList, getData } from "@/api/axiosConfig";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { trackCoin } from "@/lib/tickerStore";
 import useUserContext from "@/hooks/useUserContext";
 import useCoinContext from "@/hooks/useCoinContext";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
@@ -44,10 +46,7 @@ const Watchlist = () => {
     markVisited(location.pathname);
   }, [location.pathname, markVisited]);
 
-  const userFromLocalStorage = JSON.parse(
-    localStorage.getItem("NEXCHAIN_USER"),
-  );
-  const userId = user?.id || userFromLocalStorage?.id;
+  const userId = user?.id;
 
   const [watchlistData, setWatchlistData] = useState(() => {
     try {
@@ -66,7 +65,8 @@ const Watchlist = () => {
     return [];
   });
 
-  const [livePrices, setLivePrices] = useState({});
+  // Shared live ticker (one socket for the whole app)
+  const livePrices = useBinanceTicker();
   // Defer heavy connections until after page transition
   const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
 
@@ -94,7 +94,6 @@ const Watchlist = () => {
     setAlertModal({ show: true, coin });
   };
 
-  const ws = useRef(null);
   const livePricesRef = useRef({});
   const itemsPerPage = 10;
 
@@ -165,62 +164,10 @@ const Watchlist = () => {
       .filter(Boolean);
   }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
 
+  // Stream every watchlisted coin, including ones outside the core list
   useEffect(() => {
-    if (watchlistData.length === 0 || !isReady) return;
-
-    const symbolMap = {
-      bitcoin: "btcusdt",
-      ethereum: "ethusdt",
-      binancecoin: "bnbusdt",
-      ripple: "xrpusdt",
-      cardano: "adausdt",
-      solana: "solusdt",
-      dogecoin: "dogeusdt",
-      polkadot: "dotusdt",
-      "matic-network": "maticusdt",
-      litecoin: "ltcusdt",
-      chainlink: "linkusdt",
-    };
-
-    const symbols = watchlistData
-      .map((coin) =>
-        symbolMap[coin.id] ? `${symbolMap[coin.id]}@ticker` : null,
-      )
-      .filter(Boolean);
-
-    if (symbols.length === 0) return;
-
-    try {
-      ws.current = new WebSocket(
-        `wss://stream.binance.com:9443/stream?streams=${symbols.join("/")}`,
-      );
-
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.stream && message.data) {
-          const symbol = message.stream.replace("@ticker", "");
-          const coinId = Object.keys(symbolMap).find(
-            (key) => symbolMap[key] === symbol,
-          );
-
-          if (coinId) {
-            setLivePrices((prev) => ({
-              ...prev,
-              [coinId]: {
-                current_price: parseFloat(message.data.c),
-                price_change_percentage_24h: parseFloat(message.data.P),
-              },
-            }));
-          }
-        }
-      };
-    } catch (error) {
-      console.error("WebSocket setup failed:", error);
-    }
-
-    return () => {
-      if (ws.current) ws.current.close();
-    };
+    if (!isReady) return;
+    watchlistData.forEach((coin) => trackCoin(coin.id, coin.symbol));
   }, [watchlistData, isReady]);
 
   const filteredCoins = useMemo(() => {

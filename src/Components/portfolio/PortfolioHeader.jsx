@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import React, { useMemo } from "react";
 import {
   FaWallet,
@@ -212,7 +213,7 @@ const PortfolioHeader = ({
 
       {/* Open Orders Card */}
       <div
-        onClick={onOpenOrdersClick}
+        {...pressable(onOpenOrdersClick)}
         className={`
         rounded-xl p-4 md:p-5 transition-all duration-300 ease-in-out 
         will-change-transform shadow-md hover:shadow-lg

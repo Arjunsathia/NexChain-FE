@@ -18,6 +18,7 @@ const CoinListModal = ({ title, coins, onClose, TC, formatCurrency }) => {
             <p className={`text-xs ${TC.textSecondary} mt-0.5`}>Current market top performers</p>
           </div>
           <button
+            aria-label="Close"
             onClick={onClose}
             className={`p-2.5 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 ${TC.textSecondary}`}
           >

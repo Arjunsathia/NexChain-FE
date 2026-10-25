@@ -23,7 +23,9 @@ export const useOpenOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000);
+    // Fills and triggers arrive over the socket ("refreshOrders"); polling is
+    // only a slow fallback in case the socket is down.
+    const interval = setInterval(fetchOrders, 60000);
 
     window.addEventListener("refreshOrders", fetchOrders);
     return () => {

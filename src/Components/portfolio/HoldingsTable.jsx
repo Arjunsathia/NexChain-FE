@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import React, { useState, useMemo } from "react";
 import {
   FaExchangeAlt,
@@ -300,7 +301,7 @@ const HoldingsTable = ({
               style={
                 disableAnimations ? {} : { animationDelay: `${index * 0.05}s` }
               }
-              onClick={() => onTrade(coin)}
+              {...pressable(() => onTrade(coin))}
             >
               <div className="flex justify-between items-start mb-4 relative z-10">
                 <div className="flex items-center gap-3">

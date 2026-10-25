@@ -67,6 +67,7 @@ const TradeModalHeader = React.memo(
 
         {/* Close Button - Tiny */}
         <button
+          aria-label="Close"
           onClick={handleClose}
           className={`
           p-1.5 rounded-full transition-colors bg-white/10 hover:bg-white/20

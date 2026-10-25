@@ -73,10 +73,24 @@ const QuantumNebulaBackground = React.memo(() => {
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Pause while the tab is hidden; draw one static frame for reduced motion
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const onVisibility = () => {
+      cancelAnimationFrame(animationRef.current);
+      if (!document.hidden && !reduceMotion) animate();
+    };
+
+    if (reduceMotion) {
+      animate();
+      cancelAnimationFrame(animationRef.current);
+    } else {
+      animate();
+      document.addEventListener("visibilitychange", onVisibility);
+    }
 
     return () => {
       window.removeEventListener("resize", setCanvasSize);
+      document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(animationRef.current);
     };
   }, []);

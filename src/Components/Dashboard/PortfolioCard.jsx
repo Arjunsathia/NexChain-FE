@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useMemo, useState } from "react";
@@ -144,7 +145,7 @@ function PortfolioCard({ disableAnimations = false }) {
           allCoins.map((coin, i) => (
             <div
               key={coin.coinId || i}
-              onClick={() => navigate("/portfolio")}
+              {...pressable(() => navigate("/portfolio"))}
               style={shouldAnimate ? { animationDelay: `${i * 0.1}s` } : {}}
               className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
             >

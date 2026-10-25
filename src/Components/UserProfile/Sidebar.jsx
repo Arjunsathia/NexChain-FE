@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
@@ -20,7 +21,6 @@ import useWalletContext from "@/hooks/useWalletContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 
 import useThemeCheck from "@/hooks/useThemeCheck";
-import { SERVER_URL } from "@/api/axiosConfig";
 import { createPortal } from "react-dom";
 import FeedbackModal from "../Common/FeedbackModal";
 
@@ -226,9 +226,7 @@ function Sidebar({ onLogout, isLogoutLoading }) {
                 {user?.image ? (
                   <img
                     src={
-                      user.image.startsWith("http")
-                        ? user.image
-                        : `${SERVER_URL}/uploads/${user.image}`
+                      getAvatarUrl(user.image)
                     }
                     alt="Profile"
                     className="w-full h-full object-cover"

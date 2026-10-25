@@ -3,26 +3,22 @@ import { lazy, Suspense } from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRoute from "./AuthRoute";
 import PublicRoute from "./PublicRoute";
-import MainLayout from "@/Components/layout/MainLayout";
-import PublicLayout from "@/Components/layout/PublicLayout";
-import AnimatedLayout from "@/Components/layout/AnimatedLayout";
+import AdminRoute from "./AdminRoute";
 
-import Dashboard from "../Pages/Dashboard";
-import CryptoList from "../Pages/CryptoList";
-import PortfolioPage from "@/Pages/PortfolioPage";
-import Watchlist from "@/Pages/Watchlist";
-import LearningHub from "@/Pages/LearningHub";
-import NewsPage from "@/Pages/NewsPage";
-import Landing from "../Pages/Landing";
-import AuthPages from "../Pages/AuthPage";
-import ResetPassword from "../Pages/ResetPassword"; // or lazy load if preferred, but direct is fine for small app
-// using lazy to be consistent:
-// const ResetPassword = lazy(() => import("@/Pages/ResetPassword"));
-// Actually, let's stick to import if it's not huge, or lazy. 
-// Existing AuthPages is imported directly. ResetPassword is small.
-// Let's use lazy for consistency with others if I can, but verify import path.
-// The file is src/Pages/ResetPassword.jsx created in step 171.
-
+const MainLayout = lazy(() => import("@/Components/layout/MainLayout"));
+const PublicLayout = lazy(() => import("@/Components/layout/PublicLayout"));
+const AnimatedLayout = lazy(() => import("@/Components/layout/AnimatedLayout"));
+// Every page is its own chunk, so the landing page doesn't download the dashboard
+const Dashboard = lazy(() => import("@/Pages/Dashboard"));
+const CryptoList = lazy(() => import("@/Pages/CryptoList"));
+const PortfolioPage = lazy(() => import("@/Pages/PortfolioPage"));
+const Watchlist = lazy(() => import("@/Pages/Watchlist"));
+const LearningHub = lazy(() => import("@/Pages/LearningHub"));
+const NewsPage = lazy(() => import("@/Pages/NewsPage"));
+const Landing = lazy(() => import("@/Pages/Landing"));
+const AuthPages = lazy(() => import("@/Pages/AuthPage"));
+const ResetPassword = lazy(() => import("@/Pages/ResetPassword"));
+const NotFound = lazy(() => import("@/Pages/NotFound"));
 
 const CoinDetailsPage = lazy(
   () => import("@/Pages/CoinDetails/CoinDetailsPage"),
@@ -77,7 +73,6 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
-        { }
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -88,6 +83,7 @@ export default function AppRoutes() {
             <Route path="/news" element={<NewsPage />} />
 
             <Route path="/coin" element={<CoinPageOutlet />}>
+              <Route index element={<Navigate to="/cryptolist" replace />} />
               <Route
                 path="coin-details/:coinId"
                 element={<CoinDetailsPage />}
@@ -100,19 +96,23 @@ export default function AppRoutes() {
 
               <Route path="/user/insights" element={<UserMarketInsights />} />
             </Route>
-            <Route path="/admin" element={<Admin />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<Users />} />
-              <Route
-                path="cryptocurrencies"
-                element={<AdminCryptocurrencies />}
-              />
-              <Route path="feedback" element={<AdminFeedback />} />
-              <Route path="settings" element={<AdminSettings />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<Admin />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<Users />} />
+                <Route
+                  path="cryptocurrencies"
+                  element={<AdminCryptocurrencies />}
+                />
+                <Route path="feedback" element={<AdminFeedback />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
             </Route>
           </Route>
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

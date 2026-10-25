@@ -58,6 +58,7 @@ const SupportCategory = ({
 const FAQItem = ({ question, answer, isOpen, onClick, TC }) => (
   <div className={`border-b last:border-0 ${TC.borderColor}`}>
     <button
+      aria-label="Toggle details"
       onClick={onClick}
       className="w-full py-4 flex items-center justify-between gap-4 text-left focus:outline-none group"
     >
@@ -123,18 +124,18 @@ const LiveChatWindow = ({ TC, isLight }) => {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
-    // Simulate bot typing/reply
+    // Live chat isn't staffed yet: say so instead of promising an agent
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
-          text: "Thanks for reaching out! A support agent will join this chat shortly to assist you further.",
+          text: "Live chat isn't staffed yet. Please use the Email Support form and we'll reply to you by email.",
           isBot: true,
           time: new Date(),
         },
       ]);
-    }, 1500);
+    }, 600);
   };
 
   return (
@@ -152,12 +153,9 @@ const LiveChatWindow = ({ TC, isLight }) => {
             Live Chat Support
           </h2>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-gray-400"></span>
             <p className={`text-xs ${TC.textSecondary}`}>
-              Online • Typical reply: 2m
+              Coming soon • Use Email Support for now
             </p>
           </div>
         </div>
@@ -202,6 +200,7 @@ const LiveChatWindow = ({ TC, isLight }) => {
           onChange={(e) => setInput(e.target.value)}
         />
         <button
+          aria-label="Send message"
           type="submit"
           disabled={!input.trim()}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

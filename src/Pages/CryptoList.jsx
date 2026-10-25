@@ -1,5 +1,7 @@
+import { formatCompact } from "@/utils/format";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import useThemeCheck from "@/hooks/useThemeCheck";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import SparklineGraph from "../Components/Crypto/SparklineGraph";
@@ -21,6 +23,7 @@ import {
 
 function CryptoList() {
   const isLight = useThemeCheck();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const location = useLocation();
   const { isVisited } = useVisitedRoutes();
 
@@ -163,12 +166,7 @@ function CryptoList() {
     return value < 0 ? TC.bgPillNegative : TC.bgPillPositive;
   };
 
-  const formatCompactNumber = (number) => {
-    return new Intl.NumberFormat("en-US", {
-      notation: "compact",
-      maximumFractionDigits: 2,
-    }).format(number);
-  };
+  const formatCompactNumber = (number) => formatCompact(number, 2);
 
   return (
     <div className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6`}>
@@ -335,8 +333,9 @@ function CryptoList() {
 
 
 
-          {/* Mobile Tabs for Market Widgets */}
-          <div className="md:hidden flex flex-col h-full">
+          {/* Only one layout is mounted: the hidden copy used to fetch and re-render too */}
+          {!isDesktop && (
+          <div className="flex flex-col h-full">
             <div className={`p-1 rounded-xl flex gap-1 mb-4 ${isLight ? "bg-gray-100 shadow-sm" : "bg-gray-800/80 shadow-md"}`}>
               {["trending", "gainers", "losers"].map((tab) => (
                 <button
@@ -366,19 +365,23 @@ function CryptoList() {
               {isReady && mobileTab === "losers" && <TopLosers />}
             </div>
           </div>
+          )}
 
-          {/* Desktop Grid Items (Hidden on Mobile) */}
-          <div className={`hidden md:flex flex-col h-full`}>
-            {isReady && <TrendingCoinsWidget limit={5} showViewAll={false} />}
-          </div>
+          {isDesktop && (
+            <>
+              <div className="flex flex-col h-full">
+                {isReady && <TrendingCoinsWidget limit={5} showViewAll={false} />}
+              </div>
 
-          <div className={`hidden md:flex flex-col h-full`}>
-            {isReady && <TopGainers />}
-          </div>
+              <div className="flex flex-col h-full">
+                {isReady && <TopGainers />}
+              </div>
 
-          <div className={`hidden md:flex flex-col h-full`}>
-            {isReady && <TopLosers />}
-          </div>
+              <div className="flex flex-col h-full">
+                {isReady && <TopLosers />}
+              </div>
+            </>
+          )}
         </div>
 
         <div>

@@ -1,6 +1,6 @@
 import React from "react";
 
-import GeminiIcon from "../../assets/landing imag/image (2) 1.svg";
+import GeminiIcon from "../../assets/Img/hero-core.webp";
 
 const HeroGlobe = () => {
   return (

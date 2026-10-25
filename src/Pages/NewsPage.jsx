@@ -1,3 +1,5 @@
+import { formatTimeAgo } from "@/utils/format";
+import { safeUrl } from "@/utils/safeUrl";
 import React, { useEffect, useState, useMemo } from "react";
 import { getData } from "@/api/axiosConfig";
 import useThemeCheck from "@/hooks/useThemeCheck";
@@ -57,17 +59,6 @@ export default function NewsPage() {
         fetchNews();
     }, []);
 
-    const formatTimeAgo = (timestamp) => {
-        if (!timestamp) return "";
-        const now = Date.now();
-        const diff = now - timestamp * 1000;
-        const minutes = Math.floor(diff / 60000);
-
-        if (minutes < 60) return `${minutes} min ago`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
-        return `${Math.floor(hours / 24)}d ago`;
-    };
 
     useEffect(() => {
         let result = news;
@@ -208,7 +199,7 @@ export default function NewsPage() {
                         {filteredNews.map((item) => (
                             <a
                                 key={item.id}
-                                href={item.link}
+                                href={safeUrl(item.link)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`

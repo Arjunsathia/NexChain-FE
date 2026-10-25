@@ -1,3 +1,4 @@
+import { formatUSD, formatCompact } from "@/utils/format";
 import React, { useState, useEffect, useMemo } from "react";
 import { FaSync } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -193,21 +194,8 @@ const UserMarketInsights = () => {
     }
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCompactNumber = (number) => {
-    return new Intl.NumberFormat("en-US", {
-      notation: "compact",
-      maximumFractionDigits: 2,
-    }).format(number);
-  };
+  const formatCurrency = (value) => formatUSD(value, { minimumFractionDigits: 0 });
+  const formatCompactNumber = (number) => formatCompact(number, 2);
 
   const filteredData = marketData.filter(
     (coin) =>

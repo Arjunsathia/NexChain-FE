@@ -10,7 +10,6 @@ import ErrorBoundary from "./Components/Common/ErrorBoundary";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { VisitedRoutesProvider } from "./context/VisitedRoutesContext";
-import { BinanceTickerProvider } from "./context/BinanceTickerContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,7 +19,6 @@ createRoot(document.getElementById("root")).render(
           import.meta.env.VITE_GOOGLE_CLIENT_ID || "PLACEHOLDER_CLIENT_ID"
         }
       >
-        <BinanceTickerProvider>
           <VisitedRoutesProvider>
             <App />
             <Toaster
@@ -51,7 +49,6 @@ createRoot(document.getElementById("root")).render(
               }}
             />
           </VisitedRoutesProvider>
-        </BinanceTickerProvider>
       </GoogleOAuthProvider>
     </ErrorBoundary>
   </StrictMode>,

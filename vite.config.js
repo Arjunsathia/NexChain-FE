@@ -7,7 +7,9 @@ import { fileURLToPath } from "url";
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   esbuild: {
-    drop: ['console', 'debugger'],
+    // Strip debug logging but keep console.error/warn so production failures are visible
+    pure: ["console.log", "console.debug", "console.info"],
+    drop: ["debugger"],
   },
   resolve: {
     alias: {
@@ -20,12 +22,7 @@ export default defineConfig({
         target: 'https://api.coingecko.com/api/v3',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/coingecko/, ''),
-      },
-      '/api/binance': {
-        target: 'https://api.binance.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/binance/, ''),
-      },
+      }
     },
   },
   build: {
@@ -33,12 +30,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-apexcharts": ["apexcharts", "react-apexcharts"],
-          "vendor-recharts": ["recharts"],
-          "vendor-ui": [
-            "framer-motion",
-            "react-loading-skeleton",
-          ],
+          // Chart libraries are left to load with the pages that use them
           "vendor-utils": [
             "axios",
             "@tanstack/react-query",
@@ -48,5 +40,10 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000,
+  },
+  test: {
+    environment: "jsdom",
+    include: ["src/**/*.test.{js,jsx}"],
+    restoreMocks: true,
   },
 });

@@ -2,11 +2,19 @@
 export const TwoFactorEvent = {
   listeners: [],
 
-  // Trigger the modal and return a promise
+  pending: null,
+
+  // Trigger the modal and return a promise. Concurrent requests share one
+  // prompt, so a second 2FA challenge can't orphan the first one's promise.
   request(data) {
-    return new Promise((resolve, reject) => {
-      this.notify({ ...data, resolve, reject });
-    });
+    if (!this.pending) {
+      this.pending = new Promise((resolve, reject) => {
+        this.notify({ ...data, resolve, reject });
+      }).finally(() => {
+        this.pending = null;
+      });
+    }
+    return this.pending;
   },
 
   subscribe(listener) {

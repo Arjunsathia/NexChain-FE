@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -5,7 +6,7 @@ import { FaCrown, FaTrophy, FaMedal } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import api, { SERVER_URL } from "@/api/axiosConfig";
+import api from "@/api/axiosConfig";
 import { useSelector } from "react-redux";
 
 const LeaderboardWidget = () => {
@@ -44,7 +45,7 @@ const LeaderboardWidget = () => {
 
     const getAvatar = (u) => {
         if (!u || !u.image) return `https://api.dicebear.com/7.x/avataaars/svg?seed=${u?.name || "User"}`;
-        return u.image.startsWith("http") ? u.image : `${SERVER_URL}/uploads/${u.image}`;
+        return getAvatarUrl(u.image);
     };
 
     const top3 = users.slice(0, 3);
@@ -107,7 +108,7 @@ const LeaderboardWidget = () => {
                                 <div className={`w-20 sm:w-24 flex flex-col items-center justify-end rounded-t-2xl pt-4 pb-3 h-28 sm:h-36 relative overflow-hidden backdrop-blur-md transition-colors ${TC.podiumBase} group-hover:bg-gray-400/10`}>
                                     <div className="absolute top-0 inset-x-0 h-[100px] bg-gradient-to-b from-gray-400/20 to-transparent pointer-events-none" />
                                     <span className={`text-xs font-bold ${TC.textPrimary} mb-0.5 truncate max-w-full px-2`}>{top3[1].user_name}</span>
-                                    <span className={`text-[10px] font-mono font-medium ${TC.textSecondary}`}>${(top3[1].virtualBalance / 1000).toFixed(1)}k</span>
+                                    <span className={`text-[10px] font-mono font-medium ${TC.textSecondary}`}>${((top3[1].equity ?? top3[1].virtualBalance) / 1000).toFixed(1)}k</span>
                                 </div>
                             </motion.div>
                         )}
@@ -137,7 +138,7 @@ const LeaderboardWidget = () => {
                                 <div className={`w-24 sm:w-28 flex flex-col items-center justify-end rounded-t-2xl pt-4 pb-4 h-36 sm:h-48 relative overflow-hidden backdrop-blur-md shadow-2xl shadow-yellow-500/10 transition-colors ${TC.podiumBase} group-hover:bg-yellow-400/10`}>
                                     <div className="absolute top-0 inset-x-0 h-[120px] bg-gradient-to-b from-yellow-400/20 to-transparent pointer-events-none" />
                                     <span className={`text-sm font-black ${TC.textPrimary} mb-0.5 truncate max-w-full px-2`}>{top3[0].user_name}</span>
-                                    <span className="text-xs font-mono font-bold text-yellow-500">${(top3[0].virtualBalance / 1000).toFixed(1)}k</span>
+                                    <span className="text-xs font-mono font-bold text-yellow-500">${((top3[0].equity ?? top3[0].virtualBalance) / 1000).toFixed(1)}k</span>
                                 </div>
                             </motion.div>
                         )}
@@ -162,7 +163,7 @@ const LeaderboardWidget = () => {
                                 <div className={`w-20 sm:w-24 flex flex-col items-center justify-end rounded-t-2xl pt-4 pb-3 h-24 sm:h-32 relative overflow-hidden backdrop-blur-md transition-colors ${TC.podiumBase} group-hover:bg-orange-400/10`}>
                                     <div className="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-orange-400/20 to-transparent pointer-events-none" />
                                     <span className={`text-xs font-bold ${TC.textPrimary} mb-0.5 truncate max-w-full px-2`}>{top3[2].user_name}</span>
-                                    <span className={`text-[10px] font-mono font-medium ${TC.textSecondary}`}>${(top3[2].virtualBalance / 1000).toFixed(1)}k</span>
+                                    <span className={`text-[10px] font-mono font-medium ${TC.textSecondary}`}>${((top3[2].equity ?? top3[2].virtualBalance) / 1000).toFixed(1)}k</span>
                                 </div>
                             </motion.div>
                         )}
@@ -208,7 +209,7 @@ const LeaderboardWidget = () => {
                                         </div>
                                         <div className="flex flex-col items-end">
                                             <div className={`font-mono text-sm font-bold ${isLight ? "text-slate-700" : "text-white group-hover:text-cyan-400 transition-colors"}`}>
-                                                ${user.virtualBalance?.toLocaleString()}
+                                                ${(user.equity ?? user.virtualBalance)?.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                             </div>
                                             {/* Optional Mini Graph or Change Indicator could go here */}
                                         </div>

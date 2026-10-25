@@ -15,7 +15,8 @@ import TradeModal from "@/Components/TradeModal";
 import useCoinContext from "@/hooks/useCoinContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { useLivePrice } from "@/hooks/useBinanceTicker";
+import { getBinancePair } from "@/utils/coinRegistry";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
@@ -58,8 +59,7 @@ function CoinDetailsPage() {
   const [widgetsReady, setWidgetsReady] = useState(() => isVisited(location.pathname));
 
   // Use centralized live ticker feed
-  const livePrices = useBinanceTicker();
-  const livePriceData = livePrices[coinId];
+  const livePriceData = useLivePrice(coinId, passedCoin?.symbol);
 
   const livePrice = useMemo(() => {
     if (!livePriceData) return null;
@@ -213,25 +213,10 @@ function CoinDetailsPage() {
     return null;
   }, [coin, passedCoin, liveCoin]);
 
-  const coinSymbol = useMemo(() => {
-    const symbolMap = {
-      bitcoin: "btcusdt",
-      ethereum: "ethusdt",
-      binancecoin: "bnbusdt",
-      ripple: "xrpusdt",
-      cardano: "adausdt",
-      solana: "solusdt",
-      dogecoin: "dogeusdt",
-      polkadot: "dotusdt",
-      "matic-network": "maticusdt",
-      litecoin: "ltcusdt",
-      chainlink: "linkusdt",
-    };
-    return (
-      symbolMap[coinId] ||
-      (displayCoin?.symbol ? `${displayCoin.symbol}usdt`.toLowerCase() : null)
-    );
-  }, [coinId, displayCoin]);
+  const coinSymbol = useMemo(
+    () => getBinancePair(coinId, displayCoin?.symbol),
+    [coinId, displayCoin],
+  );
 
   // Ticker Logic Removed - Now handled by useBinanceTicker hook
 

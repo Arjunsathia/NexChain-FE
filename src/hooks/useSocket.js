@@ -3,8 +3,9 @@ import { toast } from "react-hot-toast";
 import useUserContext from "./useUserContext";
 import useWalletContext from "./useWalletContext";
 import { usePurchasedCoins } from "./usePurchasedCoins";
+import { BACKEND_WS_URL, getAccessToken, refreshSession } from "@/api/axiosConfig";
 
-const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000";
+const SOCKET_URL = BACKEND_WS_URL;
 
 export const useSocket = () => {
   const { user } = useUserContext();
@@ -37,15 +38,15 @@ export const useSocket = () => {
         socketRef.current.close();
       }
 
-      const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
+      const token = getAccessToken();
       if (!token) return;
 
-      // Add token to connection URL for backend verification
-      const ws = new WebSocket(`${SOCKET_URL}?token=${token}`);
+      // The token goes in the first message, not the URL (URLs end up in logs)
+      const ws = new WebSocket(SOCKET_URL);
       socketRef.current = ws;
 
       ws.onopen = () => {
-        // Connection established
+        ws.send(JSON.stringify({ type: "AUTH", token }));
       };
 
       ws.onmessage = (event) => {
@@ -96,17 +97,25 @@ export const useSocket = () => {
             // Trigger global refresh for notifications
             window.dispatchEvent(new CustomEvent("refreshNotifications"));
           }
-        } catch (error) {
-          // console.error("❌ [Real-time] Error parsing message:", error);
+        } catch {
+          // ignore malformed messages
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = async (event) => {
+        // 4401: token expired or revoked. Refresh once; if that fails the
+        // session-expired handler signs the user out and this effect unmounts.
+        if (event.code === 4401) {
+          try {
+            await refreshSession();
+          } catch {
+            return;
+          }
+        }
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       };
 
-      ws.onerror = (err) => {
-        // console.error("⚠️ [Real-time] Socket error:", err);
+      ws.onerror = () => {
         ws.close();
       };
     };

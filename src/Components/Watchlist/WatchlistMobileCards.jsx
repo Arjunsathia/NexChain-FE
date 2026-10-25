@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import React, { useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { FaBell } from "react-icons/fa";
@@ -29,7 +30,7 @@ const WatchlistMobileCards = ({
       {coins.map((coin) => (
         <div
           key={coin.id}
-          onClick={() => handleCoinClick(coin)}
+          {...pressable(() => handleCoinClick(coin))}
           className={`rounded-xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group relative overflow-hidden shadow-md ${TC.bgCard}`}
         >
           <div className="flex items-center justify-between mb-3 relative z-10">

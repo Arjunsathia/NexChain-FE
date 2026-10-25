@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import useUserContext from "@/hooks/useUserContext";
 
 const SecuritySettings = ({ TC, isLight }) => {
-  const { user } = useUserContext();
+  const { user, updateUser } = useUserContext();
   const isDark = !isLight;
   const [security, setSecurity] = useState({
     twoFactor: user?.twoFactorEnabled || false,
@@ -24,13 +24,13 @@ const SecuritySettings = ({ TC, isLight }) => {
   const handleEnable2FA = async () => {
     setLoading(true);
     try {
-      const res = await api.post("/2fa/setup", { user_id: user.id });
+      const res = await api.post("/2fa/setup");
       if (res.data.success) {
         setQrCode(res.data.qrCode);
         setShowSetup(true);
       }
-    } catch {
-      toast.error("Failed to start 2FA setup");
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to start 2FA setup");
     } finally {
       setLoading(false);
     }
@@ -39,13 +39,11 @@ const SecuritySettings = ({ TC, isLight }) => {
   const handleVerify2FA = async () => {
     setLoading(true);
     try {
-      const res = await api.post("/2fa/verify", {
-        user_id: user.id,
-        token: otp,
-      });
+      const res = await api.post("/2fa/verify", { token: otp });
       if (res.data.success) {
         toast.success("2FA Enabled Successfully");
         setSecurity({ ...security, twoFactor: true });
+        updateUser({ twoFactorEnabled: true });
         setShowSetup(false);
         setOtp("");
       }
@@ -57,22 +55,21 @@ const SecuritySettings = ({ TC, isLight }) => {
   };
 
   const handleDisable2FA = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to disable 2FA? This will reduce your account security.",
-      )
-    )
-      return;
+    const code = window.prompt(
+      "Enter the 6-digit code from your authenticator app to turn off 2FA:",
+    );
+    if (!code) return;
 
     setLoading(true);
     try {
-      const res = await api.post("/2fa/disable", { user_id: user.id });
+      const res = await api.post("/2fa/disable", { token: code.trim() });
       if (res.data.success) {
         toast.success("2FA Disabled");
         setSecurity({ ...security, twoFactor: false });
+        updateUser({ twoFactorEnabled: false });
       }
-    } catch {
-      toast.error("Failed to disable 2FA");
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to disable 2FA");
     } finally {
       setLoading(false);
     }

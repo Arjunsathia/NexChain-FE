@@ -1,24 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getData, postForm } from "@/api/axiosConfig";
-import { jwtDecode } from "jwt-decode";
 
-const getUserId = () => {
-  const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      return decoded.id;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-};
+// The logged-in user's id comes from the session in the store
+const getUserId = (getState) => getState().user?.user?.id;
 
 export const refreshBalance = createAsyncThunk(
   "wallet/refreshBalance",
-  async (_, { rejectWithValue }) => {
-    const userId = getUserId();
+  async (_, { getState, rejectWithValue }) => {
+    const userId = getUserId(getState);
     if (!userId) return rejectWithValue("No user ID");
 
     try {
@@ -36,8 +25,8 @@ export const refreshBalance = createAsyncThunk(
 
 export const resetBalance = createAsyncThunk(
   "wallet/resetBalance",
-  async (_, { rejectWithValue }) => {
-    const userId = getUserId();
+  async (_, { getState, rejectWithValue }) => {
+    const userId = getUserId(getState);
     if (!userId) return rejectWithValue("No user ID");
 
     try {
@@ -50,7 +39,7 @@ export const resetBalance = createAsyncThunk(
         return rejectWithValue(res.error);
       }
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.error || error.message);
     }
   },
 );

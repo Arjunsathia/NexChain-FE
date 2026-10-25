@@ -8,12 +8,16 @@ import React, {
   useMemo,
 } from "react";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa";
+import useBinanceStream from "@/hooks/useBinanceStream";
 
-const TradeHistory = memo(({ symbol = "btcusdt" }) => {
+const FLUSH_MS = 250;
+const STATUS_LABELS = { live: "Live", connecting: "Connecting", reconnecting: "Reconnecting", unavailable: "Unavailable" };
+
+const TradeHistory = memo(({ symbol }) => {
   const isLight = useThemeCheck();
   const [trades, setTrades] = useState([]);
-  const ws = useRef(null);
   const tradesRef = useRef([]);
+  const dirtyRef = useRef(false);
 
   const TC = useMemo(
     () => ({
@@ -47,42 +51,34 @@ const TradeHistory = memo(({ symbol = "btcusdt" }) => {
     [isLight],
   );
 
+  const status = useBinanceStream(symbol ? `${symbol.toLowerCase()}@trade` : null, (trade) => {
+    if (!trade.t) return;
+    const newTrade = {
+      id: trade.t,
+      price: parseFloat(trade.p),
+      volume: parseFloat(trade.q),
+      time: new Date(trade.T).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      }),
+      isBuyerMaker: trade.m,
+    };
+    tradesRef.current = [newTrade, ...tradesRef.current].slice(0, 30);
+    dirtyRef.current = true;
+  });
+
+  // Reset when switching coins; busy pairs trade many times a second, so render in batches
   useEffect(() => {
-    const connectWebSocket = () => {
-      const wsUrl = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`;
-      ws.current = new WebSocket(wsUrl);
-
-      ws.current.onmessage = (event) => {
-        const trade = JSON.parse(event.data);
-        const newTrade = {
-          id: trade.t,
-          price: parseFloat(trade.p),
-          volume: parseFloat(trade.q),
-          time: new Date(trade.T).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          }),
-          isBuyerMaker: trade.m,
-        };
-
-        tradesRef.current = [newTrade, ...tradesRef.current].slice(0, 30);
-        setTrades([...tradesRef.current]);
-      };
-
-      ws.current.onerror = (error) => {
-        console.error("TradeHistory WebSocket error:", error);
-      };
-    };
-
-    connectWebSocket();
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
+    tradesRef.current = [];
+    setTrades([]);
+    const timer = setInterval(() => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      setTrades(tradesRef.current);
+    }, FLUSH_MS);
+    return () => clearInterval(timer);
   }, [symbol]);
 
   const renderTrade = useCallback(
@@ -132,10 +128,13 @@ const TradeHistory = memo(({ symbol = "btcusdt" }) => {
             Trade History
           </h3>
           <div
-            className={`flex items-center gap-2 text-xs px-2 py-0.5 rounded-full ${TC.bgLive}`}
+            className={`flex items-center gap-2 text-xs px-2 py-0.5 rounded-full ${status === "live" ? TC.bgLive : isLight ? "bg-gray-100 text-gray-500" : "bg-white/5 text-gray-400"}`}
+            role="status"
           >
-            <div className={`w-1.5 h-1.5 rounded-full ${TC.textLiveDot}`}></div>
-            <span className="font-semibold">Live</span>
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${status === "live" ? TC.textLiveDot : "bg-gray-400"}`}
+            ></div>
+            <span className="font-semibold">{STATUS_LABELS[status]}</span>
           </div>
         </div>
 

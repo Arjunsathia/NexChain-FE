@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useMemo } from "react";
 import useCoinContext from "@/hooks/useCoinContext";
@@ -92,7 +93,7 @@ function Highlights() {
           {topGainers.map((coin, index) => (
             <div
               key={coin?.id ?? coin?.symbol ?? index}
-              onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+              {...pressable(() => navigate(`/coin/coin-details/${coin.id}`))}
               className={`flex items-center justify-between p-2 rounded-xl transition-all duration-200 cursor-pointer group/item ${TC.bgItemHover}`}
               style={{ animationDelay: `${0.1 * index}s` }}
             >

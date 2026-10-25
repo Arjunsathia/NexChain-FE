@@ -136,6 +136,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
             </p>
           </div>
           <button
+            aria-label="Close"
             onClick={onClose}
             className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${TC.textSecondary}`}
           >

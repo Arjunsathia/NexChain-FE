@@ -1,5 +1,6 @@
+import { pressable } from "@/utils/a11y";
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -23,19 +24,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
 import NotificationModal from "@/Components/Common/NotificationModal";
-import { logout } from "@/redux/slices/userSlice";
-import api, { SERVER_URL } from "@/api/axiosConfig";
+import useLogout from "@/hooks/useLogout";
+import api from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
 import useThemeCheck from "@/hooks/useThemeCheck";
-import SiteLogo from "../../assets/Img/logo.png";
-import SiteLogoLight from "../../assets/Img/logo-2.png";
+import SiteLogo from "../../assets/Img/logo.webp";
+import SiteLogoLight from "../../assets/Img/logo-2.webp";
 import ConfirmDialog from "@/Components/Common/ConfirmDialog";
 
 function NavbarComponent() {
   const { toggleTheme } = useTheme();
   const isLight = useThemeCheck();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const signOut = useLogout();
   const location = useLocation();
   const { user } = useUserContext();
   const { role } = useRoleContext();
@@ -99,15 +100,10 @@ function NavbarComponent() {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const handleMobileLogout = () => {
-    if (user?.id) {
-      dispatch(logout());
-      navigate("/auth");
-      setIsMobileMenuOpen(false);
-      setShowLogoutConfirm(false);
-    } else {
-      navigate("/auth");
-    }
+  const handleMobileLogout = async () => {
+    setIsMobileMenuOpen(false);
+    setShowLogoutConfirm(false);
+    await signOut();
   };
 
   // Lock scroll when mobile menu is open
@@ -249,7 +245,7 @@ function NavbarComponent() {
         <div className={`lg:hidden w-full h-[60px] px-6 flex items-center justify-between ${TC.mobileHeader}`}>
           <div className="flex items-center gap-3">
             <MobileToggle />
-            <div onClick={() => handleNavClick("/")} className="cursor-pointer">
+            <div {...pressable(() => handleNavClick("/"))} className="cursor-pointer">
               <img
                 src={isLight ? SiteLogoLight : SiteLogo}
                 alt="NexChain"
@@ -291,7 +287,7 @@ function NavbarComponent() {
             className={`relative z-20 rounded-full ${TC.capsule} h-[52px] flex items-center px-4 gap-3 sm:gap-4`}
           >
             <div
-              onClick={() => handleNavClick("/")}
+              {...pressable(() => handleNavClick("/"))}
               className="flex items-center justify-center h-full group cursor-pointer"
             >
               <img
@@ -384,9 +380,7 @@ function NavbarComponent() {
               {user?.image ? (
                 <img
                   src={
-                    user.image.startsWith("http")
-                      ? user.image
-                      : `${SERVER_URL}/uploads/${user.image}`
+                    getAvatarUrl(user.image)
                   }
                   alt="Profile"
                   className="w-full h-full object-cover"
@@ -456,10 +450,10 @@ function NavbarComponent() {
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     {user?.id ? (
                       <div
-                        onClick={() => {
+                        {...pressable(() => {
                           navigate(`/user-profile/${user.id}`);
                           setIsMobileMenuOpen(false);
-                        }}
+                        })}
                         className="flex items-center gap-3 cursor-pointer group flex-1 min-w-0"
                       >
                         <div className="relative flex-shrink-0">
@@ -467,9 +461,7 @@ function NavbarComponent() {
                             {user?.image ? (
                               <img
                                 src={
-                                  user.image.startsWith("http")
-                                    ? user.image
-                                    : `${SERVER_URL}/uploads/${user.image}`
+                                  getAvatarUrl(user.image)
                                 }
                                 alt="Profile"
                                 className="w-full h-full object-cover"

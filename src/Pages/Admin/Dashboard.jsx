@@ -1,3 +1,4 @@
+import { formatUSD, formatCompact } from "@/utils/format";
 import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ import StatCard from "@/Components/Admin/Dashboard/StatCard";
 import RecentReports from "@/Components/Admin/Dashboard/RecentReports";
 import LatestUsers from "@/Components/Admin/Dashboard/LatestUsers";
 import PlatformHealth from "@/Components/Admin/Dashboard/PlatformHealth";
+import useCoinContext from "@/hooks/useCoinContext";
 import QuickActions from "@/Components/Admin/Dashboard/QuickActions";
 import { getData, default as api } from "@/api/axiosConfig";
 import MarketCoinDetailsModal from "@/Components/Admin/MarketInsights/MarketCoinDetailsModal";
@@ -18,17 +20,12 @@ import useTransitionDelay from "@/hooks/useTransitionDelay";
 import { useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
-const formatCurrency = (val) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    val,
-  );
-const formatCompactNumber = (number) =>
-  new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(number);
+const formatCurrency = (val) => formatUSD(val);
+const formatCompactNumber = (number) => formatCompact(number, 1);
 
 const AdminDashboard = () => {
+  // CoinGecko market list loaded by DataLoader
+  const { coins: marketCoins = [] } = useCoinContext();
   const navigate = useNavigate();
   const isLight = useThemeCheck();
   const { isVisited, markVisited } = useVisitedRoutes();
@@ -121,18 +118,6 @@ const AdminDashboard = () => {
     refetchInterval: 30000,
   });
 
-  // Fetch recent platform activity
-  const { isLoading: isActivityLoading } = useQuery({
-    queryKey: ["adminActivity"],
-    queryFn: async () => {
-      const res = await getData("/activity");
-      return res?.data ?? res ?? [];
-    },
-    staleTime: 30000,
-    refetchInterval: 30000,
-    retry: false,
-  });
-
   // Fetch trending coin data
   const { data: trendingCoinData, isLoading: isTrendingLoading } = useQuery({
     queryKey: ["adminTrending"],
@@ -152,29 +137,23 @@ const AdminDashboard = () => {
     queryKey: ["adminPlatformStats"],
     queryFn: async () => {
       const res = await api.get("/purchases/platform-stats");
-      return res.data.success
-        ? { tradesToday: res.data.stats.tradesToday }
-        : { tradesToday: 0 };
+      return res.data.success ? res.data.stats : { tradesToday: 0 };
     },
     staleTime: 30000,
     refetchInterval: 30000,
   });
 
   const adminStats = useMemo(() => {
-    const totalUsers = users.length;
-    const totalCoins = 150;
-    const trending = trendingCoinData || {
-      symbol: "BTC",
-      price_change_percentage_24h: 2.45,
-    };
-
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return {
-      totalUsers,
-      totalCoins,
+      totalUsers: users.length,
+      newUsersThisWeek: users.filter((u) => new Date(u.createdAt || 0).getTime() > weekAgo).length,
+      totalCoins: marketCoins.length,
       tradesToday: platformStats.tradesToday,
-      trendingCoin: trending,
+      activeTradersToday: platformStats.activeTradersToday,
+      trendingCoin: trendingCoinData || null,
     };
-  }, [users, trendingCoinData, platformStats]);
+  }, [users, trendingCoinData, platformStats, marketCoins.length]);
 
   const latestUsers = useMemo(() => {
     return [...users]
@@ -281,8 +260,7 @@ const AdminDashboard = () => {
           >
             {(!isReady ||
               isUsersLoading ||
-              isStatsLoading ||
-              isActivityLoading) && (
+              isStatsLoading) && (
                 <div
                   className={`flex items-center text-xs font-medium backdrop-blur-sm px-4 py-2 rounded-full border shadow-sm ${isLight ? "bg-white/50 border-gray-100 text-gray-500" : "bg-gray-800/50 border-gray-700 text-gray-400"}`}
                 >
@@ -306,16 +284,17 @@ const AdminDashboard = () => {
                 value: adminStats.totalUsers,
                 icon: FaUsers,
                 color: "from-blue-500 to-cyan-400",
-                badge: "+12%",
+                badge: adminStats.newUsersThisWeek
+                  ? `+${adminStats.newUsersThisWeek} this week`
+                  : undefined,
                 onClick: () => navigate("/admin/users"),
                 isLoading: isUsersLoading,
               },
               {
-                label: "Active Coins",
+                label: "Tracked Coins",
                 value: adminStats.totalCoins,
                 icon: FaCoins,
                 color: "from-purple-500 to-pink-400",
-                badge: "+5 new",
                 onClick: () => navigate("/admin/cryptocurrencies"),
                 isLoading: false,
               },
@@ -324,7 +303,10 @@ const AdminDashboard = () => {
                 value: adminStats.tradesToday || 0,
                 icon: FaChartLine,
                 color: "from-green-500 to-emerald-400",
-                badge: "+8.2%",
+                badge:
+                  adminStats.activeTradersToday != null
+                    ? `${adminStats.activeTradersToday} traders`
+                    : undefined,
                 onClick: handleTradeCardClick,
                 isLoading: isStatsLoading,
               },
@@ -417,7 +399,7 @@ const AdminDashboard = () => {
 
             {/* Side Actions */}
             <div className="flex flex-col gap-4 lg:gap-6">
-              <PlatformHealth isLoading={false} TC={TC} />
+              <PlatformHealth TC={TC} />
               <QuickActions
                 isLoading={false}
                 handleQuickAction={handleQuickAction}

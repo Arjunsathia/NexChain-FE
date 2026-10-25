@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import React, { useState } from "react";
 import { FaExchangeAlt, FaBell } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
@@ -76,7 +77,7 @@ const WatchlistTable = ({
             {coins.map((coin, index) => (
               <tr
                 key={coin.id}
-                onClick={() => handleCoinClick(coin)}
+                {...pressable(() => handleCoinClick(coin))}
                 className={`transition-all duration-200 cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgHover || (isLight ? "hover:bg-gray-50" : "hover:bg-white/5")}`}
                 style={
                   shouldAnimate

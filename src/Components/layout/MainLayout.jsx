@@ -1,11 +1,11 @@
 import Navbar from "./Navbar";
 
-import { useOutlet, useNavigate, useLocation } from "react-router-dom";
+import { useOutlet, useLocation } from "react-router-dom";
 import { useEffect, Suspense } from "react";
 import useUserContext from "@/hooks/useUserContext";
-import useRoleContext from "@/hooks/useRoleContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatbotWidget from "@/Components/Common/ChatbotWidget";
+import DataLoader from "@/Components/Common/DataLoader";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 const LayoutLoader = () => (
@@ -16,24 +16,16 @@ const LayoutLoader = () => (
 
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
-  const { fetchRole } = useRoleContext();
   const { markVisited } = useVisitedRoutes();
 
   const location = useLocation();
   // Capture the current outlet element (frozen route)
   const element = useOutlet();
 
-  const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
-  const navigate = useNavigate();
-
+  // ProtectedRoute guarantees a session here; refresh the full profile once
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/auth");
-    } else {
-      fetchUsers();
-      fetchRole();
-    }
-  }, [fetchUsers, isLoggedIn, navigate, fetchRole]);
+    fetchUsers();
+  }, [fetchUsers]);
 
   // Mark current route as visited
   useEffect(() => {
@@ -67,7 +59,8 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen w-full flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
-      { }
+      {/* Market data and portfolio polling run only for signed-in pages */}
+      <DataLoader />
       <div
         className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light pointer-events-none"
         style={{

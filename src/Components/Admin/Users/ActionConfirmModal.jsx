@@ -92,6 +92,7 @@ const ActionConfirmModal = ({
                 {icon}
               </div>
               <button
+                aria-label="Close"
                 onClick={onClose}
                 className={`p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 ${TC.textSecondary}`}
               >

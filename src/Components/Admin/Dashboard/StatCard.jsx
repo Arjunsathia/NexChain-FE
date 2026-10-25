@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import React from "react";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 
@@ -21,7 +22,7 @@ function StatCard({
 
   return (
     <div
-      onClick={onClick}
+      {...pressable(onClick)}
       className={`
         relative overflow-hidden cursor-pointer group
         ${TC.bgStatsCard} rounded-2xl p-3 sm:p-4 transition-all duration-300

@@ -7,13 +7,16 @@ import React, {
   useRef,
   memo,
 } from "react";
+import useBinanceStream from "@/hooks/useBinanceStream";
 
-const OrderBook = memo(({ symbol = "btcusdt" }) => {
+const FLUSH_MS = 250; // the stream sends up to 10 updates/s; render at most 4
+
+const OrderBook = memo(({ symbol }) => {
   const isLight = useThemeCheck();
   const [orderBook, setOrderBook] = useState({ bids: [], asks: [] });
   const [activeTab, setActiveTab] = useState("all");
-  const ws = useRef(null);
   const maxVolumeRef = useRef(0);
+  const latestRef = useRef(null);
   const TC = useMemo(
     () => ({
       textPrimary: isLight ? "text-gray-900" : "text-white",
@@ -51,42 +54,29 @@ const OrderBook = memo(({ symbol = "btcusdt" }) => {
     [isLight],
   );
 
+  const status = useBinanceStream(symbol ? `${symbol.toLowerCase()}@depth20@100ms` : null, (data) => {
+    if (data.bids && data.asks) latestRef.current = data;
+  });
+
+  // Reset when switching coins, then render the latest snapshot on a timer
   useEffect(() => {
-    const connectWebSocket = () => {
-      const wsUrl = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@depth20@100ms`;
-      ws.current = new WebSocket(wsUrl);
-
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.bids && data.asks) {
-          const newBids = data.bids.slice(0, 10).map(([price, volume]) => ({
-            price: parseFloat(price),
-            volume: parseFloat(volume),
-          }));
-          const newAsks = data.asks.slice(0, 10).map(([price, volume]) => ({
-            price: parseFloat(price),
-            volume: parseFloat(volume),
-          }));
-
-          const allVolumes = [...newBids, ...newAsks].map((o) => o.volume);
-          maxVolumeRef.current = Math.max(...allVolumes);
-
-          setOrderBook({ bids: newBids, asks: newAsks });
-        }
-      };
-
-      ws.current.onerror = (error) => {
-        console.error("OrderBook WebSocket error:", error);
-      };
-    };
-
-    connectWebSocket();
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
+    latestRef.current = null;
+    setOrderBook({ bids: [], asks: [] });
+    const timer = setInterval(() => {
+      const data = latestRef.current;
+      if (!data) return;
+      latestRef.current = null;
+      const toLevels = (levels) =>
+        levels.slice(0, 10).map(([price, volume]) => ({
+          price: parseFloat(price),
+          volume: parseFloat(volume),
+        }));
+      const bids = toLevels(data.bids);
+      const asks = toLevels(data.asks);
+      maxVolumeRef.current = Math.max(0, ...bids.map((o) => o.volume), ...asks.map((o) => o.volume));
+      setOrderBook({ bids, asks });
+    }, FLUSH_MS);
+    return () => clearInterval(timer);
   }, [symbol]);
 
   const renderOrderRow = useCallback(
@@ -141,6 +131,11 @@ const OrderBook = memo(({ symbol = "btcusdt" }) => {
         <div className="flex items-center justify-between mb-2">
           <h3 className={`text-base font-bold ${TC.headerGradient}`}>
             Order Book
+            {status !== "live" && (
+              <span className={`ml-2 text-[10px] font-semibold ${TC.textTertiary}`} role="status">
+                {status === "unavailable" ? "Not available for this coin" : "Connecting…"}
+              </span>
+            )}
           </h3>
           <div className={`flex gap-1 rounded-lg p-0.5 ${TC.bgTabBar}`}>
             <button

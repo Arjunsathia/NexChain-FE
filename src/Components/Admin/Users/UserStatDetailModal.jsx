@@ -263,6 +263,7 @@ const UserStatDetailModal = ({
             {getTitle()}
           </h3>
           <button
+            aria-label="Close"
             onClick={onClose}
             className={`p-1.5 sm:p-2 rounded-full transition-colors ${isLight ? "hover:bg-gray-100 text-gray-500" : "hover:bg-white/10 text-gray-400"}`}
           >

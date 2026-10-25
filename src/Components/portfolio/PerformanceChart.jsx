@@ -12,6 +12,8 @@ import {
 import { FaArrowUp, FaArrowDown, FaChartLine } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useSelector } from "react-redux";
+import api from "@/api/axiosConfig";
 
 const PerformanceChart = ({
   isLight,
@@ -100,96 +102,61 @@ const PerformanceChart = ({
     tooltipDataRef.current = currentMetrics;
   }, [currentMetrics]);
 
-  // Generate chart data only on TimeRange change to prevent "wiggling" on every price tick
-  useEffect(() => {
-    const { totalInvestment, profitLoss } = currentMetrics;
+  // Real history: hourly snapshots recorded by the server (daily points for
+  // ranges over a day), ending with a live point. Refetched when the range
+  // changes or holdings change, not on every price tick.
+  const [historySince, setHistorySince] = useState(null);
+  const userId = useSelector((state) => state.user.user?.id);
+  const hasHoldings = currentMetrics.totalInvestment > 0;
 
-    // If no investment, we can't generate a meaningful chart yet
-    if (totalInvestment <= 0) {
-      if (chartData.length > 0) setChartData([]); // Clear if reset
+  useEffect(() => {
+    if (!userId || !hasHoldings) {
+      setChartData([]);
       return;
     }
-
+    let active = true;
     const isIntraday = timeRange === "1d";
-    const points = isIntraday ? 24 : (timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90);
-
-    // Use a stable snapshot for the "Current" end of the graph 
-    const startingValue = totalInvestment;
-    const currentValue = startingValue + profitLoss;
-
-    const newData = [];
-
-    // We want to simulate a path from (Start = Current - TotalP_L) to (End = Current)
-    // The "change per point" average needed is TotalP_L / points.
-    const averageChangePerPoint = profitLoss / points;
-
-    let runningValue = currentValue;
-
-    for (let i = 0; i < points; i++) {
-      const date = new Date();
-      if (isIntraday) {
-        date.setHours(date.getHours() - i);
-      } else {
-        date.setDate(date.getDate() - i);
-      }
-
-      // Point 0 (Today/Now) is exactly the current value
-      let pointValue = runningValue;
-
-      // For previous points, subtract the average change + some noise
-      if (i > 0) {
-        // Noise factor: Random deviation, slightly higher for Intraday to show volatility
-        const volatilityBase = isIntraday ? 0.05 : 0.01;
-        const noiseFactor = (Math.random() - 0.5) * (Math.abs(averageChangePerPoint) * 2 || startingValue * volatilityBase);
-        const stepChange = averageChangePerPoint + noiseFactor;
-        runningValue -= stepChange;
-        pointValue = runningValue;
-      }
-
-      // Ensure value doesn't drop below 0 realistically
-      pointValue = Math.max(pointValue, 0);
-
-      const pointProfitLoss = pointValue - startingValue;
-      const pointProfitLossPercentage = startingValue > 0 ? (pointProfitLoss / startingValue) * 100 : 0;
-
-      let dateLabel = "";
-      if (isIntraday) {
-        // For 1d, show Time (e.g. 14:00)
-        dateLabel = date.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
-      } else {
-        // For others, show Date (e.g. 12 Jan)
-        dateLabel = date.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-      }
-
-      // "Today" logic needs adjustment for Intraday ("Now" vs "1h ago")
-      let dayLabel = null;
-      if (i === 0) dayLabel = isIntraday ? "Now" : "Today";
-      else if (i === 1 && !isIntraday) dayLabel = "Yesterday";
-
-      newData.unshift({
-        date: dateLabel,
-        value: Math.round(pointValue * 100) / 100,
-        profitLoss: pointProfitLoss,
-        profitLossPercentage: pointProfitLossPercentage,
-        investment: startingValue,
-        day: dayLabel,
-        // Store full date obj for uniqueness if needed, but string dateLabel is usually enough for XAxis
-        fullDate: date
-      });
-    }
-
-    setChartData(newData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange, currentMetrics.totalInvestment]); // Only regenerate on TimeRange or if Investment State changes (0 -> >0) since chart shape is simulated.
+    api
+      .get(`/purchases/performance/${userId}`, { params: { range: timeRange } })
+      .then(({ data }) => {
+        if (!active) return;
+        setHistorySince(data.historySince ? new Date(data.historySince) : null);
+        setChartData(
+          (data.points || []).map((p) => {
+            const date = new Date(p.at);
+            const profitLoss = p.holdingsValue - p.invested;
+            return {
+              date: p.live
+                ? isIntraday ? "Now" : "Today"
+                : isIntraday
+                  ? date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+                  : date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+              value: Math.round(p.holdingsValue * 100) / 100,
+              profitLoss,
+              profitLossPercentage: p.invested > 0 ? (profitLoss / p.invested) * 100 : 0,
+              investment: p.invested,
+              day: p.live ? (isIntraday ? "Now" : "Today") : null,
+              fullDate: date,
+            };
+          }),
+        );
+      })
+      .catch(() => active && setChartData([]));
+    return () => {
+      active = false;
+    };
+  }, [userId, timeRange, hasHoldings, groupedHoldings?.length]);
 
   const periodReturns = useMemo(() => {
     if (chartData.length < 2)
       return { "1d": 0, "7d": 0, "30d": 0, "90d": 0, current: 0 };
 
-    const firstValue = chartData[0].investment;
-    const lastValue = chartData[chartData.length - 1].value;
+    // Change in unrealized P/L across the range, relative to the current cost
+    // basis, so buying more coins mid-range doesn't count as a gain
+    const first = chartData[0];
+    const last = chartData[chartData.length - 1];
     const totalReturn =
-      firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
+      last.investment > 0 ? ((last.profitLoss - first.profitLoss) / last.investment) * 100 : 0;
 
     const periodReturn = totalReturn;
 
@@ -246,6 +213,11 @@ const PerformanceChart = ({
         TC={TC}
         disableAnimations={disableAnimations}
       />
+      {historySince && (
+        <p className={`px-4 pb-3 text-[11px] ${TC.textSecondary}`}>
+          Tracking since {historySince.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+        </p>
+      )}
     </div>
   );
 };
@@ -447,10 +419,14 @@ const Chart = React.memo(({ chartData, isPositive, tooltipDataRef, TC, disableAn
     return () => clearTimeout(timer);
   }, [chartData?.length, disableAnimations]);
 
-  if (!chartData || chartData.length === 0) {
+  if (!chartData || chartData.length < 2) {
     return (
-      <div className="flex-1 min-h-[250px] flex items-center justify-center text-gray-400">
-        <p className="text-sm">No performance data available</p>
+      <div className="flex-1 min-h-[250px] flex items-center justify-center text-gray-400 px-6 text-center">
+        <p className="text-sm">
+          {chartData?.length
+            ? "Your performance history is recorded every hour. Check back soon to see the chart."
+            : "No performance data yet. Buy a coin to start tracking performance."}
+        </p>
       </div>
     );
   }

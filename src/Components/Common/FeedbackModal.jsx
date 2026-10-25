@@ -123,6 +123,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
                                         Send Feedback
                                     </h3>
                                     <button
+                                        aria-label="Close"
                                         onClick={handleClose}
                                         className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 ${TC.textTertiary}`}
                                     >

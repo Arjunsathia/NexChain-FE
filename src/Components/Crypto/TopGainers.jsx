@@ -1,3 +1,4 @@
+import { pressable } from "@/utils/a11y";
 import { getTopGainers } from "@/api/coinApis";
 import React, { useEffect, useState, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -149,9 +150,8 @@ function TopGainers({ disableAnimations = false }) {
             return (
               <div
                 key={coin.id}
-                onClick={() =>
-                  navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })
-                }
+                {...pressable(() =>
+                  navigate(`/coin/coin-details/${coin.id}`, { state: { coin } }))}
                 style={shouldAnimate ? { animationDelay: `${index * 0.1}s` } : {}}
                 className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
               >

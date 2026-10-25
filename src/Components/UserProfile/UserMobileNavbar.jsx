@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, Link } from "react-router-dom";
@@ -21,7 +22,6 @@ import useUserContext from "@/hooks/useUserContext";
 import useWalletContext from "@/hooks/useWalletContext";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { useWatchlist } from "@/hooks/useWatchlist";
-import { SERVER_URL } from "@/api/axiosConfig";
 
 function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
   const isLight = useThemeCheck();
@@ -172,7 +172,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                 <div className="flex items-center gap-3 pb-4 border-b border-dashed dark:border-gray-800 mb-2">
                   <div className={`w-10 h-10 rounded-full border-2 ${isLight ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
                     {user?.image ? (
-                      <img src={user.image.startsWith("http") ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="User" className="w-full h-full object-cover" />
+                      <img src={getAvatarUrl(user.image)} alt="User" className="w-full h-full object-cover" />
                     ) : (
                       <div className={`w-full h-full flex items-center justify-center ${isLight ? "bg-gray-100" : "bg-gray-800"}`}><FaUser /></div>
                     )}
@@ -181,7 +181,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
                     <h3 className={`font-bold ${TC.textPrimary}`}>{user?.name || "User"}</h3>
                     <p className={`text-xs ${TC.textSecondary}`}>Personal Account</p>
                   </div>
-                  <button onClick={onToggle} className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <button aria-label="Close" onClick={onToggle} className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
                     <FaTimes />
                   </button>
                 </div>
@@ -222,6 +222,7 @@ function UserMobileNavbar({ isOpen, onToggle, onLogout, isLogoutLoading }) {
 
                 {/* Logout Action */}
                 <button
+                  aria-label="Log out"
                   onClick={onLogout}
                   disabled={isLogoutLoading}
                   className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/20 active:scale-95 transition-all"

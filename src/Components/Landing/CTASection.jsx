@@ -8,7 +8,7 @@ import {
   FaTelegramPlane,
   FaArrowRight,
 } from "react-icons/fa";
-import SiteLogo from "../../assets/Img/logo.png";
+import SiteLogo from "../../assets/Img/logo.webp";
 
 const CTASection = React.memo(({ sectionVariants, navigate }) => {
   const footerLinks = useMemo(

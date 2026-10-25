@@ -1,4 +1,26 @@
 @import "tailwindcss";
+/* animate-in / fade-in / slide-in-from-* utilities used across the app */
+@import "tw-animate-css";
+
+/* Dark mode follows the app's theme toggle (.dark on <html>), not the OS setting */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom animations (ported from the old tailwind.config.js, which Tailwind 4 ignores) */
+@theme {
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce-short: bounce-short 0.6s ease-in-out;
+  --animate-bounce-slow: bounce 3s infinite;
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes bounce-short {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+}
 
 /* 
 ================================================================

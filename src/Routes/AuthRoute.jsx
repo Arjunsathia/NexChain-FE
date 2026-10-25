@@ -1,6 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
+import SessionLoader from "./SessionGate";
+import useSessionStatus from "@/hooks/useSessionStatus";
 
 export default function AuthRoute() {
-  const isLoggedIn = !!localStorage.getItem("NEXCHAIN_USER_TOKEN");
-  return isLoggedIn ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  const { status, checking } = useSessionStatus();
+  if (checking) return <SessionLoader />;
+  return status === "authenticated" ? <Navigate to="/dashboard" replace /> : <Outlet />;
 }

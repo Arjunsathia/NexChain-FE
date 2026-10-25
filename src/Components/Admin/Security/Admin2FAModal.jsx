@@ -100,6 +100,7 @@ const Admin2FAModal = () => {
                     </p>
                   </div>
                   <button
+                    aria-label="Close"
                     onClick={handleClose}
                     className="ml-auto text-gray-400 hover:text-gray-500"
                   >

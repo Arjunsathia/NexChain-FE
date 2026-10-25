@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -50,14 +52,10 @@ const MemoizedCTASection = React.memo(CTASection);
 export default function Landing() {
   useLandingLenis();
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [livePrices, setLivePrices] = useState({});
+  const isLoggedIn = useSelector((state) => state.user.status === "authenticated");
+  // Real Binance prices (the shared ticker connects while this page is open)
+  const livePrices = useBinanceTicker();
   const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("NEXCHAIN_USER_TOKEN");
-    setIsLoggedIn(!!token);
-  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -66,38 +64,6 @@ export default function Landing() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  useEffect(() => {
-    const initialPrices = {
-      bitcoin: { price: 43250.0, change: 2.4 },
-      ethereum: { price: 2280.5, change: 1.8 },
-      cardano: { price: 0.52, change: -0.5 },
-      dogecoin: { price: 0.08, change: 4.2 },
-      solana: { price: 98.4, change: 5.1 },
-      ripple: { price: 0.58, change: -1.2 },
-      polkadot: { price: 7.2, change: 0.8 },
-    };
-    setLivePrices(initialPrices);
-
-    const interval = setInterval(() => {
-      setLivePrices((prev) => {
-        const newPrices = { ...prev };
-        let hasChanges = false;
-
-        Object.keys(newPrices).forEach((key) => {
-          if (Math.random() > 0.3) return;
-          hasChanges = true;
-          const change = (Math.random() - 0.5) * (newPrices[key].price * 0.002);
-          newPrices[key].price += change;
-          newPrices[key].change += (Math.random() - 0.5) * 0.1;
-          newPrices[key].change = parseFloat(newPrices[key].change.toFixed(2));
-        });
-
-        return hasChanges ? newPrices : prev;
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const scrollToFeatures = useCallback(() => {
     const element = document.getElementById("features-section");

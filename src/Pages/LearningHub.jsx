@@ -94,7 +94,7 @@ function LearningHub() {
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   // Instant load if visited, otherwise simulate loading
-  const [loading, setLoading] = useState(!hasVisited);
+  const loading = false; // course data is local; nothing to wait for
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -102,12 +102,6 @@ function LearningHub() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (hasVisited) return;
-    // Simulate data fetching delay matching other pages
-    const timer = setTimeout(() => setLoading(false), 350);
-    return () => clearTimeout(timer);
-  }, [hasVisited]);
 
   // Premium Styling Config
   const TC = useMemo(
@@ -169,8 +163,14 @@ function LearningHub() {
               </p>
 
               <div className="flex items-center gap-4">
-                <button className="px-6 md:px-8 py-3 md:py-3.5 bg-white text-slate-900 rounded-full font-bold text-xs md:text-sm hover:bg-cyan-50 transition-colors flex items-center gap-2">
-                  <FaPlay size={12} /> Start Lesson 1
+                {/* Lessons aren't built yet; don't present a button that does nothing */}
+                <button
+                  type="button"
+                  disabled
+                  title="Lessons are coming soon"
+                  className="px-6 md:px-8 py-3 md:py-3.5 bg-white/80 text-slate-900 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 cursor-not-allowed opacity-80"
+                >
+                  <FaPlay size={12} /> Lessons coming soon
                 </button>
                 <span className="text-slate-400 text-xs md:text-sm font-medium">
                   12 Lessons • 2h 15m

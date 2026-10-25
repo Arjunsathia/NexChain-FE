@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "@/redux/slices/userSlice";
 import { refreshBalance } from "@/redux/slices/walletSlice";
 import {
   fetchPurchasedCoins,
@@ -13,7 +12,6 @@ const DataLoader = () => {
   const { user, accessToken } = useSelector((state) => state.user);
 
   useEffect(() => {
-    dispatch(fetchUser());
     dispatch(fetchCoins());
 
     const interval = setInterval(() => {

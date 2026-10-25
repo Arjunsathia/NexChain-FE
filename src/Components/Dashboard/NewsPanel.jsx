@@ -1,3 +1,5 @@
+import { formatTimeAgo } from "@/utils/format";
+import { safeUrl } from "@/utils/safeUrl";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useMemo, useState, useEffect } from "react";
 import { FaNewspaper, FaClock, FaFire } from "react-icons/fa";
@@ -18,7 +20,7 @@ export default function NewsPanel() {
     const fetchNews = async () => {
       try {
         setLoading(true);
-        // GET /news -> calls http://localhost:5000/api/news
+        // GET /news -> calls ${VITE_API_BASE_URL}/news
         const data = await getData("/news");
 
         // Data is likely an array directly if backend returns res.json(response.data.Data) which is an array
@@ -45,18 +47,6 @@ export default function NewsPanel() {
     fetchNews();
   }, []);
 
-  const formatTimeAgo = (timestamp) => {
-    if (!timestamp) return "";
-    const now = Date.now();
-    // API returns unix timestamp in seconds, convert to ms
-    const diff = now - (timestamp * 1000);
-    const minutes = Math.floor(diff / 60000);
-
-    if (minutes < 60) return `${minutes} min ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-  };
 
   const navigate = useNavigate();
 
@@ -120,7 +110,7 @@ export default function NewsPanel() {
           newsData.slice(0, 5).map((news, index) => (
             <a
               key={news.id}
-              href={news.link}
+              href={safeUrl(news.link)}
               target="_blank"
               rel="noopener noreferrer"
               className={`

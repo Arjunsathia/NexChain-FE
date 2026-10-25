@@ -1,3 +1,4 @@
+import { formatUSD } from "@/utils/format";
 import React, { useState, useMemo, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { toast } from "react-hot-toast";
@@ -57,7 +58,7 @@ const AdminCryptocurrencies = () => {
       }
 
       // Update local cache
-      queryClient.invalidateQueries(["adminCoins"]);
+      queryClient.invalidateQueries({ queryKey: ["adminCoins"] });
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Failed to update coin status");
@@ -117,14 +118,7 @@ const AdminCryptocurrencies = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
+  const formatCurrency = (value) => formatUSD(value);
 
   const formatLargeNumber = (num) => {
     if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";

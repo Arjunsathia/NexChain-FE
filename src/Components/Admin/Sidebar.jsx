@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion"; // Added framer-motion
@@ -15,7 +16,7 @@ import {
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
-import api, { SERVER_URL } from "@/api/axiosConfig";
+import api from "@/api/axiosConfig";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
 function Sidebar() {
@@ -156,9 +157,7 @@ function Sidebar() {
                 {user?.image ? (
                   <img
                     src={
-                      user.image.startsWith("http")
-                        ? user.image
-                        : `${SERVER_URL}/uploads/${user.image}`
+                      getAvatarUrl(user.image)
                     }
                     alt="Profile"
                     className="w-full h-full object-cover"

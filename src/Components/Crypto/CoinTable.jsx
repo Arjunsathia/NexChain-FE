@@ -1,7 +1,9 @@
+import { pressable } from "@/utils/a11y";
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { FaStar, FaRegStar, FaSearch, FaExchangeAlt, FaBell } from "react-icons/fa";
 import useCoinContext from "@/hooks/useCoinContext";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import useUserContext from "@/hooks/useUserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
@@ -81,9 +83,8 @@ const CoinRow = React.memo(
 
     return (
       <tr
-        onClick={() =>
-          navigate(`/coin/coin-details/${coin.id}`, { state: { coin } })
-        }
+        {...pressable(() =>
+          navigate(`/coin/coin-details/${coin.id}`, { state: { coin } }))}
         className={`cursor-pointer transition-all duration-200 group ${disableAnimations ? "" : "fade-in"} ${TC.bgHover}`}
         style={
           disableAnimations ? {} : { animationDelay: `${0.6 + index * 0.05}s` }
@@ -340,6 +341,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
   }, [fetchWatchlist]);
 
   const liveData = useBinanceTicker();
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   const toggleWishlist = useCallback(
     async (coinId, coinData) => {
@@ -576,14 +578,16 @@ function CoinTable({ onTrade, disableAnimations = false }) {
             </div>
           )}
         </div>
+        {/* One layout at a time; both used to render and re-render every tick */}
+        {!isLargeScreen && (
         <div className="lg:hidden">
           {paginatedCoins.length > 0 ? (
             <div className="space-y-3">
               {paginatedCoins.map((coin, index) => {
                 const liveCoinData = liveData[coin.id];
-                const displayPrice = liveCoinData?.price || coin.current_price;
+                const displayPrice = liveCoinData?.price ?? coin.current_price;
                 const displayChange =
-                  liveCoinData?.change || coin.price_change_percentage_24h;
+                  liveCoinData?.change ?? coin.price_change_percentage_24h;
                 const isPositive =
                   liveCoinData?.isPositive !== undefined
                     ? liveCoinData.isPositive
@@ -592,11 +596,10 @@ function CoinTable({ onTrade, disableAnimations = false }) {
                 return (
                   <div
                     key={coin.id}
-                    onClick={() =>
+                    {...pressable(() =>
                       navigate(`/coin/coin-details/${coin.id}`, {
                         state: { coin },
-                      })
-                    }
+                      }))}
                     className={`p-4 rounded-xl border ${isLight
                       ? "bg-gray-50 border-gray-200 shadow-sm hover:bg-gray-50"
                       : "bg-gray-800/20 border-gray-700/50 hover:bg-gray-800/40"
@@ -730,6 +733,8 @@ function CoinTable({ onTrade, disableAnimations = false }) {
             </div>
           )}
         </div>
+        )}
+        {isLargeScreen && (
         <div
           className={`hidden lg:block ${shouldAnimate ? "fade-in" : ""}`}
           style={shouldAnimate ? { animationDelay: "0.4s" } : {}}
@@ -836,6 +841,7 @@ function CoinTable({ onTrade, disableAnimations = false }) {
             )}
           </div>
         </div>
+        )}
         {totalPages > 1 && (
           <div
             className={`flex flex-col items-center gap-4 pt-6 pb-6 ${shouldAnimate ? "fade-in" : ""} ${TC.textTertiary}`}

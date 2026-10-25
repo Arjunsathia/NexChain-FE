@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import React, {
   useState,
   useEffect,
@@ -17,6 +18,7 @@ import TransactionHistory from "@/Components/portfolio/TransactionHistory";
 import OpenOrdersModal from "@/Components/portfolio/OpenOrdersModal";
 import { useOpenOrders } from "@/hooks/useOpenOrders";
 import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { trackCoin } from "@/lib/tickerStore";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import { useLocation } from "react-router-dom";
 import { FaChartLine, FaLayerGroup } from "react-icons/fa";
@@ -30,8 +32,7 @@ const PortfolioPage = () => {
   const { purchasedCoins } = usePurchasedCoins();
 
   // Get User ID for Caching
-  const userStr = localStorage.getItem("NEXCHAIN_USER");
-  const userId = userStr ? JSON.parse(userStr).id : "guest";
+  const userId = useSelector((state) => state.user.user?.id) || "guest";
 
   // Cache State
   const [cachedHoldings] = useState(() => {
@@ -100,7 +101,10 @@ const PortfolioPage = () => {
     [isLight],
   );
 
-  // Ticker logic removed - Now centralized in useBinanceTicker hook
+  // Stream live prices for holdings outside the core coin list too
+  useEffect(() => {
+    (groupedHoldings || []).forEach((c) => trackCoin(c.coinId, c.coinSymbol));
+  }, [groupedHoldings]);
 
   const mergedHoldings = useMemo(() => {
     if (!groupedHoldings) return [];

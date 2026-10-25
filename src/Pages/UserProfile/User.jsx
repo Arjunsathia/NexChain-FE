@@ -1,9 +1,9 @@
 import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useEffect, Suspense } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "@/Components/UserProfile/Sidebar";
 import UserMobileNavbar from "@/Components/UserProfile/UserMobileNavbar";
-import { logout } from "@/api/axiosConfig";
+import useLogout from "@/hooks/useLogout";
 
 const UserLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -12,7 +12,6 @@ const UserLoader = () => (
 );
 
 export default function User() {
-  const navigate = useNavigate();
 
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,17 +32,13 @@ export default function User() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [isMobileMenuOpen]);
 
+  const signOut = useLogout();
   const handleLogout = async () => {
+    setIsLogoutLoading(true);
     try {
-      setIsLogoutLoading(true);
-      await logout();
-    } catch (error) {
-      console.error("Error While Logout", error);
+      await signOut();
     } finally {
-      localStorage.removeItem("NEXCHAIN_USER_TOKEN");
-      localStorage.removeItem("NEXCHAIN_USER");
       setIsLogoutLoading(false);
-      navigate("/auth");
     }
   };
 

@@ -366,6 +366,7 @@ const ChatbotWidget = () => {
                   `}
                   />
                   <button
+                    aria-label="Send message"
                     onClick={handleSendMessage}
                     disabled={!inputValue.trim() || isTyping}
                     className={`

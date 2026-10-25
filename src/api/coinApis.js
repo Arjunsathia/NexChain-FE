@@ -1,3 +1,5 @@
+import axios from "axios";
+import { getBinancePair } from "@/utils/coinRegistry";
 import api, { coinGecko } from "./axiosConfig";
 
 // Cache for blacklisted/frozen coins to minimize API overhead
@@ -88,33 +90,51 @@ export const getTrendingCoinMarketData = async (idsArray) => {
   }
 };
 
+// Gainers and losers both rank the same top-100 list: fetch it once a minute
+// and share it (including between simultaneous callers).
+const TOP_MARKETS_TTL = 60 * 1000;
+let topMarkets = { at: 0, promise: null };
+
+const getTopMarkets = () => {
+  if (!topMarkets.promise || Date.now() - topMarkets.at > TOP_MARKETS_TTL) {
+    topMarkets = {
+      at: Date.now(),
+      promise: coinGecko
+        .get("/coins/markets", {
+          params: {
+            vs_currency: "usd",
+            order: "market_cap_desc",
+            per_page: 100,
+            page: 1,
+            sparkline: false,
+            price_change_percentage: "24h",
+          },
+        })
+        .then((res) => (Array.isArray(res.data) ? res.data : []))
+        .catch((error) => {
+          topMarkets = { at: 0, promise: null }; // retry on next call
+          throw error;
+        }),
+    };
+  }
+  return topMarkets.promise;
+};
+
+const rankByChange = async (direction) => {
+  await ensureFrozenCache();
+  const data = (await getTopMarkets()).filter((c) => !frozenCoinsCache.includes(c.id));
+  return [...data]
+    .sort((a, b) =>
+      direction === "desc"
+        ? b.price_change_percentage_24h - a.price_change_percentage_24h
+        : a.price_change_percentage_24h - b.price_change_percentage_24h,
+    )
+    .slice(0, 5);
+};
+
 export const getTopGainers = async () => {
   try {
-    await ensureFrozenCache();
-
-    const response = await coinGecko.get("/coins/markets", {
-      params: {
-        vs_currency: "usd",
-        order: "market_cap_desc",
-        per_page: 100,
-        page: 1,
-        sparkline: false,
-        price_change_percentage: "24h",
-      },
-    });
-
-    let data = response.data;
-    if (Array.isArray(data)) {
-      // Filter frozen
-      data = data.filter((c) => !frozenCoinsCache.includes(c.id));
-
-      // Sort and slice
-      const sorted = data.sort(
-        (a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h,
-      );
-      return sorted.slice(0, 5);
-    }
-    return [];
+    return await rankByChange("desc");
   } catch (error) {
     console.error("Error fetching top gainers:", error.message);
     throw error;
@@ -123,37 +143,13 @@ export const getTopGainers = async () => {
 
 export const getTopLosers = async () => {
   try {
-    await ensureFrozenCache();
-
-    const response = await coinGecko.get("/coins/markets", {
-      params: {
-        vs_currency: "usd",
-        order: "market_cap_desc",
-        per_page: 100,
-        page: 1,
-        sparkline: false,
-        price_change_percentage: "24h",
-      },
-    });
-
-    let data = response.data;
-    if (Array.isArray(data)) {
-      // Filter frozen
-      data = data.filter((c) => !frozenCoinsCache.includes(c.id));
-
-      // Sort ascending for losers
-      const sorted = data.sort(
-        (a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h,
-      );
-
-      return sorted.slice(0, 5);
-    }
-    return [];
+    return await rankByChange("asc");
   } catch (error) {
     console.error("Error fetching top losers:", error.message);
     throw error;
   }
 };
+
 
 export const getCoinById = async (id) => {
   try {
@@ -198,44 +194,15 @@ export const getMarketChart = async (id, days = 7) => {
 
 // --- Binance Data Extensions (Real-time Precision) ---
 
-const idToSymbol = {
-  bitcoin: "BTCUSDT",
-  ethereum: "ETHUSDT",
-  binancecoin: "BNBUSDT",
-  ripple: "XRPUSDT",
-  cardano: "ADAUSDT",
-  solana: "SOLUSDT",
-  dogecoin: "DOGEUSDT",
-  polkadot: "DOTUSDT",
-  "matic-network": "MATICUSDT",
-  litecoin: "LTCUSDT",
-  chainlink: "LINKUSDT",
-  stellar: "XLMUSDT",
-  cosmos: "ATOMUSDT",
-  monero: "XMRUSDT",
-  "ethereum-classic": "ETCUSDT",
-  "bitcoin-cash": "BCHUSDT",
-  filecoin: "FILUSDT",
-  theta: "THETAUSDT",
-  vechain: "VETUSDT",
-  tron: "TRXUSDT",
-  avalanche: "AVAXUSDT",
-  shiba: "SHIBUSDT",
-  toncoin: "TONUSDT",
-  "usd-coin": "USDCUSDT",
-  tether: "USDTUSDT",
-  arbitrum: "ARBUSDT",
-  optimism: "OPUSDT",
-  near: "NEARUSDT",
-  aptos: "APTUSDT",
-  fantom: "FTMUSDT",
-};
+// Binance's public market-data host allows browser (CORS) requests, so this
+// works in production too; the old /api/binance path only existed in `vite dev`.
+const BINANCE_REST_URL =
+  import.meta.env.VITE_BINANCE_REST_URL || "https://data-api.binance.vision";
 
-import axios from "axios";
-
-export const getBinanceKlines = async (coinId, days = 1) => {
-  const symbol = idToSymbol[coinId];
-  if (!symbol) return null;
+export const getBinanceKlines = async (coinId, days = 1, coinSymbol) => {
+  const pair = getBinancePair(coinId, coinSymbol);
+  if (!pair) return null;
+  const symbol = pair.toUpperCase();
 
   let interval = "1h";
   let limit = 500;
@@ -258,13 +225,13 @@ export const getBinanceKlines = async (coinId, days = 1) => {
   }
 
   try {
-    // Use the Vite proxy path '/api/binance' which maps to 'https://api.binance.com'
-    // We use a clean axios instance (or just axios) to avoid the default API base URL
-    const response = await axios.get(`/api/binance/api/v3/klines`, {
+    // Plain axios: this is a third-party host, not our API
+    const response = await axios.get(`${BINANCE_REST_URL}/api/v3/klines`, {
       params: { symbol, interval, limit },
+      timeout: 8000,
     });
 
-    // Format for ApexCharts: [timestamp, price]
+    // [timestamp, close price]
     // Binance kline index 0 is open time, index 4 is close price
     const prices = response.data.map((k) => [k[0], parseFloat(k[4])]);
     return { prices };

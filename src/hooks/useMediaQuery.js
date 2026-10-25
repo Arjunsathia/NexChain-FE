@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 
+const getMatch = (query) =>
+  typeof window !== "undefined" && window.matchMedia ? window.matchMedia(query).matches : false;
+
+// Reads the real value on the first render, so layouts don't flash the wrong variant
 const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => getMatch(query));
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
+    setMatches(media.matches);
     const listener = () => setMatches(media.matches);
     media.addEventListener("change", listener);
     return () => media.removeEventListener("change", listener);
-  }, [matches, query]);
+  }, [query]);
 
   return matches;
 };

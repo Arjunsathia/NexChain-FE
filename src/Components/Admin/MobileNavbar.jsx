@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "@/utils/avatar";
 import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
@@ -15,7 +16,7 @@ import { HiMenuAlt3 } from "react-icons/hi"; // Modern menu icon
 
 import useThemeCheck from "@/hooks/useThemeCheck";
 import useUserContext from "@/hooks/useUserContext";
-import api, { SERVER_URL } from "@/api/axiosConfig";
+import api from "@/api/axiosConfig";
 
 function MobileNavbar({ isOpen, onToggle }) {
   const isLight = useThemeCheck();
@@ -153,7 +154,7 @@ function MobileNavbar({ isOpen, onToggle }) {
                 <div className="flex items-center gap-3 pb-4 border-b border-dashed dark:border-gray-800 mb-2">
                   <div className={`w-10 h-10 rounded-full border-2 ${isLight ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
                     {user?.image ? (
-                      <img src={user.image.startsWith("http") ? user.image : `${SERVER_URL}/uploads/${user.image}`} alt="Admin" className="w-full h-full object-cover" />
+                      <img src={getAvatarUrl(user.image)} alt="Admin" className="w-full h-full object-cover" />
                     ) : (
                       <div className={`w-full h-full flex items-center justify-center ${isLight ? "bg-gray-100" : "bg-gray-800"}`}><FaUser /></div>
                     )}
@@ -162,7 +163,7 @@ function MobileNavbar({ isOpen, onToggle }) {
                     <h3 className={`font-bold ${TC.textPrimary}`}>{user?.name || "Admin"}</h3>
                     <p className={`text-xs ${TC.textSecondary}`}>Administrator Account</p>
                   </div>
-                  <button onClick={onToggle} className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <button aria-label="Close" onClick={onToggle} className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
                     <FaTimes />
                   </button>
                 </div>

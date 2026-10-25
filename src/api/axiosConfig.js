@@ -4,14 +4,13 @@ import toast from "react-hot-toast";
 
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
-  if (import.meta.env.VITE_BASE_URL) return import.meta.env.VITE_BASE_URL;
 
   // Dynamic fallback for local development (supports mobile testing via IP)
   if (typeof window !== 'undefined') {
-    return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+    return `${window.location.protocol}//${window.location.hostname}:4001/api`;
   }
 
-  return "http://localhost:5000/api";
+  return "http://localhost:4001/api";
 };
 
 const API_BASE_URL = getBaseUrl();
@@ -20,7 +19,14 @@ const COINGECKO_BASE_URL = import.meta.env.DEV
   ? "/api/coingecko"
   : "https://api.coingecko.com/api/v3";
 
-export const SERVER_URL = API_BASE_URL.replace("/api", "");
+// Strip only the trailing /api so hosts like api.example.com stay intact
+export const SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
+export const BACKEND_WS_URL =
+  import.meta.env.VITE_WS_URL || SERVER_URL.replace(/^http/, "ws");
+
+export const BINANCE_WS_URL =
+  import.meta.env.VITE_BINANCE_WS_URL || "wss://stream.binance.com:9443";
 
 export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,
@@ -49,26 +55,49 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// The access token lives only in memory (never localStorage, where any script
+// could read it). The httpOnly refresh cookie restores it after a reload.
 let memoryToken = null;
 
 export const setMemoryToken = (token) => {
   memoryToken = token;
 };
 
+export const getAccessToken = () => memoryToken;
+
+export const SESSION_EXPIRED_EVENT = "nexchain:session-expired";
+
+// One refresh at a time: concurrent 401s all wait for the same request
+let refreshPromise = null;
+
+/** @returns {Promise<{ accessToken: string, user: object }>} */
+export const refreshSession = () => {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+      .then((res) => {
+        setMemoryToken(res.data.accessToken);
+        return res.data;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
 api.interceptors.request.use(
   (config) => {
-    try {
-      const token = memoryToken || localStorage.getItem("NEXCHAIN_USER_TOKEN");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error("Error getting token from localStorage:", error);
+    if (memoryToken) {
+      config.headers.Authorization = `Bearer ${memoryToken}`;
     }
     return config;
   },
   (error) => Promise.reject(error),
 );
+
+// A wrong password also returns 401; those must not trigger a refresh
+const isAuthEndpoint = (url = "") => /\/auth\/(login|register|refresh|google|logout)/.test(url);
 
 api.interceptors.response.use(
   (response) => {
@@ -107,41 +136,29 @@ api.interceptors.response.use(
       }
     }
 
-    // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Expired access token: refresh once, then replay the request
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest.url)
+    ) {
       originalRequest._retry = true;
 
       try {
-        // Try to refresh the token
-        const response = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
-        const { accessToken } = response.data;
-
-        if (accessToken) {
-          setMemoryToken(accessToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
-        }
+        const { accessToken } = await refreshSession();
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest);
       } catch {
-        // Refresh failed, silent fail or warn
-        // console.warn("Session expired or invalid refresh token");
+        // The session is over: let the app sign out and send the user to /auth
+        setMemoryToken(null);
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       }
     }
 
     // Customize 429 handling
     if (error.response?.status === 429) {
       toast.error("Too many requests. Please slow down.");
-    }
-
-    // Silence 401 and 429 errors from cluttering console logs if handled
-    if (error.response?.status !== 401 && error.response?.status !== 429) {
-      // Silence 401 and 429 errors from cluttering console logs if handled
-      if (error.response?.status !== 401 && error.response?.status !== 429) {
-        // Intentionally silent
-      }
     }
 
     return Promise.reject(error);
@@ -174,7 +191,11 @@ export const deleteById = async (url, id) => {
 };
 
 export const logout = async () => {
-  await api.post("/auth/logout");
+  try {
+    await api.post("/auth/logout");
+  } finally {
+    setMemoryToken(null);
+  }
 };
 
 export const deleteWatchList = async (url, params) => {
