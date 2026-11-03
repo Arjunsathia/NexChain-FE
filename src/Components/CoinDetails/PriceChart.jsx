@@ -325,11 +325,9 @@ export default function PriceChart({ coinId, symbol }) {
     const onKey = (e) => e.key === "Escape" && setFullscreen(false);
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    window.lenis?.stop();
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
-      window.lenis?.start();
     };
   }, [fullscreen]);
 

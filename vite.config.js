@@ -35,7 +35,7 @@ export default defineConfig({
             "axios",
             "@tanstack/react-query",
           ],
-          "vendor-icons": ["react-icons", "lucide-react"],
+          "vendor-icons": ["lucide-react"],
         },
       },
     },

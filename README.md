@@ -41,7 +41,7 @@ The API must be running too (`npm run dev` in `NexChain-backend`), with `CLIENT_
 - **Live prices:** use `useLivePrice(coinId)` for one coin (re-renders only when that coin changes) or `useBinanceTicker()` for all. Both share one socket (`src/lib/tickerStore.js`) that opens only while something is subscribed. Coin id → Binance pair mapping lives in `src/utils/coinRegistry.js`.
 - **Pages are lazy-loaded** (`src/Routes/AppRoutes.jsx`). Keep heavy libraries out of `App.jsx` and the layouts so the first load stays small.
 - **Theme:** `dark:` classes follow the app's toggle (the `.dark` class), configured in `src/index.css`. There is no `tailwind.config.js` in Tailwind 4.
-- **Shared helpers:** `utils/format.js` (currency, compact numbers, relative time), `utils/avatar.js`, `utils/a11y.js` (`pressable()` for clickable rows), `utils/safeUrl.js` (third-party links).
+- **Shared helpers:** `utils/format.js` (currency, compact numbers, relative time), `utils/avatar.js`, `utils/safeUrl.js` (third-party links).
 
 ## Deploying (Vercel)
 

@@ -62,8 +62,7 @@ export default function MainLayout() {
 
   // Start each page at the top
   useEffect(() => {
-    if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }, [location.pathname]);
 
   const pageKey = sectionKey(location.pathname);
