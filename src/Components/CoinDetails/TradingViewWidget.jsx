@@ -77,7 +77,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
 
   const WidgetContent = (
     <div
-      className={`tradingview-widget-container h-full w-full relative ${isFullScreen ? "bg-white dark:bg-[#0f111a]" : ""}`}
+      className={`tradingview-widget-container h-full w-full relative ${isFullScreen ? "bg-surface" : ""}`}
     >
       <div
         id="tradingview_chart"
@@ -85,12 +85,11 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
         ref={container}
       ></div>
       <button
+        type="button"
         onClick={() => setIsFullScreen(!isFullScreen)}
-        className={`absolute ${isMobile ? 'top-[44px] right-1.5' : 'top-4 right-4'} z-[100] flex items-center gap-2 px-2.5 py-2.5 md:px-3 md:py-2 rounded-xl transition-all font-medium text-xs backdrop-blur-md ${isLight
-          ? "bg-white/95 hover:bg-white text-gray-800 shadow-xl border border-gray-200"
-          : "bg-[#1e222d]/95 hover:bg-[#2a2e39] text-gray-100 border border-white/20 shadow-2xl"
-          }`}
-        title={isFullScreen ? "Exit Fullscreen" : "Fill Screen"}
+        className={`absolute ${isMobile ? "top-[44px]" : "top-[5px]"} right-1.5 z-[100] grid size-8 place-items-center rounded-lg border border-line bg-surface text-fg-muted shadow-card transition-colors hover:bg-surface-hover hover:text-fg`}
+        aria-label={isFullScreen ? "Exit full screen" : "Full screen"}
+        title={isFullScreen ? "Exit full screen" : "Full screen"}
       >
         {isFullScreen ? (
           <Minimize2 className="w-4 h-4" />
@@ -105,7 +104,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
   if (isFullScreen) {
     return ReactDOM.createPortal(
       <div
-        className="fixed inset-0 z-[99999] bg-white dark:bg-[#0f111a] overflow-hidden animate-in fade-in duration-300"
+        className="fixed inset-0 z-[99999] bg-surface overflow-hidden animate-in fade-in duration-300"
       >
         <div
           className="relative transition-all duration-300 ease-in-out"
@@ -117,7 +116,7 @@ function TradingViewWidget({ symbol = "BTCUSD" }) {
             position: 'absolute',
             left: '50%',
             top: '50%',
-            background: isLight ? '#fff' : '#0f111a'
+            background: "var(--surface)"
           } : {
             width: '100%',
             height: '100%'

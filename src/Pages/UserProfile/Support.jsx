@@ -1,644 +1,334 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import useThemeCheck from "@/hooks/useThemeCheck";
+import React, { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
-  FaSearch,
-  FaHeadset,
-  FaQuestionCircle,
-  FaTicketAlt,
-  FaChevronDown,
-  FaEnvelope,
-  FaShieldAlt,
-  FaCreditCard,
-  FaUserCog,
-  FaCode,
-  FaPaperPlane,
-  FaPaperclip,
-  FaCheckCircle,
-} from "react-icons/fa";
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  ChevronDown,
+  FileText,
+  HelpCircle,
+  MessageSquareText,
+  Paperclip,
+  SearchX,
+  Settings,
+  X,
+} from "lucide-react";
+import api from "@/api/axiosConfig";
+import useUserContext from "@/hooks/useUserContext";
+import { Card, CardHeader, EmptyState } from "@/Components/ui/card";
+import { Segmented } from "@/Components/ui/segmented";
+import { SearchInput } from "@/Components/ui/table";
+import { Field } from "@/Components/Settings/SettingsSection";
+import { inputClass, primaryButton, secondaryButton } from "@/Components/Settings/settingsStyles";
+import { FAQS, FAQ_TOPICS } from "@/content/supportFaqs";
+import { cn } from "@/utils/utils";
 
-const SupportCategory = ({
-  icon: Icon,
-  title,
-  description,
-  TC,
-  color,
-  onClick,
-}) => (
-  <motion.button
-    whileHover={{ scale: 1.01 }}
-    whileTap={{ scale: 0.99 }}
-    onClick={onClick}
-    className={`${TC.bgCard} p-3 sm:p-5 rounded-2xl transition-all text-left w-full h-full group relative overflow-hidden`}
-  >
-    {/* Decorative Background Gradient */}
-    <div
-      className={`absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br ${color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`}
-    />
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_MESSAGE = 2000;
+const SUPPORT_TOPICS = ["Account", "Trading", "Identity", "Security", "Something's broken", "Other"];
+const FEEDBACK_TYPES = [
+  { value: "suggestion", label: "Idea" },
+  { value: "bug", label: "Bug" },
+  { value: "praise", label: "Praise" },
+  { value: "general", label: "Other" },
+];
 
-    <div
-      className={`p-2 sm:p-3 rounded-xl mb-3 sm:mb-4 w-fit bg-gradient-to-br ${color} shadow-lg shadow-black/5 relative z-10 group-hover:scale-110 transition-transform duration-300`}
-    >
-      <Icon className="text-base sm:text-xl text-white" />
-    </div>
-
-    <div className="relative z-10">
-      <h3
-        className={`font-bold text-sm sm:text-lg mb-1 sm:mb-2 ${TC.textPrimary} group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors`}
-      >
-        {title}
-      </h3>
-      <p className={`text-[10px] sm:text-sm leading-relaxed ${TC.textSecondary}`}>
-        {description}
-      </p>
-    </div>
-  </motion.button>
-);
-
-const FAQItem = ({ question, answer, isOpen, onClick, TC }) => (
-  <div className={`border-b last:border-0 ${TC.borderColor}`}>
-    <button
-      aria-label="Toggle details"
-      onClick={onClick}
-      className="w-full py-4 flex items-center justify-between gap-4 text-left focus:outline-none group"
-    >
-      <span
-        className={`font-semibold ${TC.textPrimary} group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors`}
-      >
-        {question}
-      </span>
-      <FaChevronDown
-        className={`${TC.textSecondary} transition-transform duration-300 ${isOpen ? "rotate-180 text-cyan-500" : ""}`}
-      />
-    </button>
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="overflow-hidden"
-        >
-          <p className={`pb-4 text-sm leading-relaxed ${TC.textSecondary}`}>
-            {answer}
-          </p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
-);
-
-const LiveChatWindow = ({ TC, isLight }) => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm your NexChain Assistant. How can I help you today?",
-      isBot: true,
-      time: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const messagesContainerRef = useRef(null);
-
-  const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop =
-        messagesContainerRef.current.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMsg = {
-      id: Date.now(),
-      text: input,
-      isBot: false,
-      time: new Date(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-
-    // Live chat isn't staffed yet: say so instead of promising an agent
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          text: "Live chat isn't staffed yet. Please use the Email Support form and we'll reply to you by email.",
-          isBot: true,
-          time: new Date(),
-        },
-      ]);
-    }, 600);
-  };
-
+/** One question that opens in place */
+function FaqItem({ item, open, onToggle }) {
   return (
-    <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl h-[600px] flex flex-col`}>
-      {/* Header */}
-      <div
-        className="mb-4 shrink-0 flex items-center gap-4 border-b pb-4 border-dashed"
-        style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
-      >
-        <div className="p-3 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 text-white shadow-lg shadow-green-500/20">
-          <FaHeadset className="text-xl" />
-        </div>
-        <div>
-          <h2 className={`text-lg font-bold ${TC.textPrimary}`}>
-            Live Chat Support
-          </h2>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-gray-400"></span>
-            <p className={`text-xs ${TC.textSecondary}`}>
-              Coming soon • Use Email Support for now
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Messages Area */}
-      <div
-        ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 custom-scrollbar"
-      >
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex flex-col ${msg.isBot ? "items-start" : "items-end"}`}
-          >
-            <div
-              className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.isBot
-                ? isLight
-                  ? "bg-gray-100 text-gray-800"
-                  : "bg-gray-700/50 text-white border border-white/5"
-                : "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/20"
-                }`}
-            >
-              {msg.text}
-            </div>
-            <span className={`text-[10px] mt-1 px-1 ${TC.textSecondary}`}>
-              {msg.time.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Input Area */}
-      <form onSubmit={handleSend} className="relative mt-auto shrink-0">
-        <input
-          className={`w-full ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl pl-4 pr-12 py-3.5 text-sm ${TC.textPrimary} outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 transition-all placeholder:text-gray-400`}
-          placeholder="Type your message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
+    <li>
+      <h3>
         <button
-          aria-label="Send message"
-          type="submit"
-          disabled={!input.trim()}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left text-sm font-medium text-fg transition-colors hover:bg-surface-hover"
         >
-          <FaPaperPlane />
+          {item.q}
+          <ChevronDown size={16} className={cn("shrink-0 text-fg-subtle transition-transform", open && "rotate-180")} />
         </button>
-      </form>
+      </h3>
+      {open && (
+        <div className="px-4 pb-4 text-sm leading-relaxed text-fg-muted">
+          <p>{item.a}</p>
+          {item.link && (
+            <Link to={item.link.to} className="mt-2 inline-flex items-center gap-1 font-medium text-brand hover:underline">
+              {item.link.label} <ArrowRight size={13} />
+            </Link>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+/** Sent confirmation shared by both forms */
+function Sent({ title, children, onReset }) {
+  return (
+    <div className="flex flex-col items-center px-6 py-10 text-center">
+      <span className="grid size-12 place-items-center rounded-full bg-up-soft text-up">
+        <CheckCircle2 size={22} />
+      </span>
+      <p className="mt-3 text-sm font-semibold text-fg">{title}</p>
+      <p className="mt-1 max-w-xs text-sm text-fg-muted">{children}</p>
+      <button type="button" onClick={onReset} className={cn(secondaryButton, "mt-5")}>
+        Send another
+      </button>
     </div>
   );
-};
+}
 
-import { postForm } from "../../api/axiosConfig";
-import { toast } from "react-hot-toast";
-
-const TicketForm = ({ TC, isLight }) => {
+/** Emails the support inbox; an admin replies to the account's address */
+function SupportForm({ email }) {
+  const [topic, setTopic] = useState(SUPPORT_TOPICS[0]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("idle"); // idle, success, error
-  const [file, setFile] = useState(null); // Attachments
+  const [file, setFile] = useState(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const fileRef = useRef(null);
 
-  const handleSubmit = async (e) => {
+  const pickFile = (e) => {
+    const chosen = e.target.files?.[0];
+    e.target.value = "";
+    if (!chosen) return;
+    if (chosen.size > MAX_FILE_BYTES) return toast.error("Attachments can be up to 5 MB");
+    setFile(chosen);
+  };
+
+  const submit = async (e) => {
     e.preventDefault();
-    if (!subject.trim() || !message.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setLoading(true);
-    setStatus("idle");
-
+    setSending(true);
     try {
-      // Use FormData to send file + JSON data
-      const formData = new FormData();
-      formData.append("subject", subject);
-      formData.append("message", message);
-      if (file) {
-        formData.append("attachment", file);
-      }
-
-      await postForm("/users/contact-support", formData);
-      setStatus("success");
+      const data = new FormData();
+      data.append("subject", `[${topic}] ${subject.trim()}`);
+      data.append("message", message.trim());
+      if (file) data.append("attachment", file);
+      await api.post("/users/contact-support", data);
+      setSent(true);
       setSubject("");
       setMessage("");
       setFile(null);
-      toast.success("Support mail sent successfully!");
     } catch (error) {
-      setStatus("error");
-      toast.error(error.response?.data?.error || "Failed to send mail");
+      toast.error(error.response?.data?.error || "Couldn't send your message. Please try again.");
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const removeFile = () => {
-    setFile(null);
-  };
-
-  if (status === "success") {
+  if (sent) {
     return (
-      <div className={`${TC.bgCard} p-8 rounded-2xl h-[600px] flex flex-col items-center justify-center text-center relative overflow-hidden`}>
-        {/* Confetti Background Effect (Simplified with CSS/divs) */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-10">
-          <div className={`absolute top-10 left-10 w-4 h-4 rounded-full ${isLight ? "bg-blue-500" : "bg-cyan-400"} animate-bounce`} style={{ animationDuration: '2s' }}></div>
-          <div className={`absolute bottom-20 right-20 w-3 h-3 rounded-full ${isLight ? "bg-green-500" : "bg-emerald-400"} animate-bounce`} style={{ animationDuration: '3s' }}></div>
-          <div className={`absolute top-1/2 left-1/2 w-2 h-2 rounded-full ${isLight ? "bg-purple-500" : "bg-pink-400"} animate-ping`} style={{ animationDuration: '1.5s' }}></div>
-        </div>
-
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl ${isLight ? "bg-green-100/50" : "bg-green-500/10"}`}
-        >
-          <FaCheckCircle className="text-5xl text-green-500" />
-        </motion.div>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className={`text-3xl font-bold ${TC.textPrimary} mb-3`}
-        >
-          Mail Sent!
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className={`text-base ${TC.textSecondary} max-w-sm mb-10 leading-relaxed`}
-        >
-          Our support team has received your request. We&apos;ve sent a confirmation email to <b>nexchainsystem@gmail.com</b>. We&apos;ll get back to you shortly!
-        </motion.p>
-
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          onClick={() => setStatus("idle")}
-          className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white text-sm shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
-        >
-          Send Another Message
-        </motion.button>
-      </div>
+      <Sent title="Message sent" onReset={() => setSent(false)}>
+        An admin will reply to <span className="font-medium text-fg">{email}</span>.
+      </Sent>
     );
   }
 
   return (
-    <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl h-[600px] flex flex-col`}>
-      <div
-        className="mb-6 shrink-0 flex items-center gap-4 border-b pb-4 border-dashed"
-        style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
-      >
-        <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-500/20">
-          <FaTicketAlt className="text-xl" />
-        </div>
-        <div>
-          <h2 className={`text-lg font-bold ${TC.textPrimary}`}>
-            Send an Email
-          </h2>
-          <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-            Complex issue? Attachment size limit: 5MB
-          </p>
-        </div>
+    <form onSubmit={submit} className="space-y-4 px-4 pb-4">
+      <Field id="support-topic" label="Topic">
+        <select id="support-topic" value={topic} onChange={(e) => setTopic(e.target.value)} className={inputClass}>
+          {SUPPORT_TOPICS.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
+        </select>
+      </Field>
+      <Field id="support-subject" label="Subject">
+        <input
+          id="support-subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          maxLength={120}
+          required
+          placeholder="A short summary"
+          className={inputClass}
+        />
+      </Field>
+      <Field id="support-message" label="Message" hint={`${message.length} / ${MAX_MESSAGE}`}>
+        <textarea
+          id="support-message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          maxLength={MAX_MESSAGE}
+          required
+          rows={6}
+          placeholder="What happened, and what did you expect? Include the coin or page if it's relevant."
+          className={cn(inputClass, "h-auto resize-y py-2.5 leading-relaxed")}
+        />
+      </Field>
+
+      <div>
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={pickFile} className="sr-only" tabIndex={-1} />
+        {file ? (
+          <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2/60 px-3 py-2 text-sm">
+            <FileText size={16} className="shrink-0 text-fg-subtle" />
+            <span className="min-w-0 flex-1 truncate text-fg">{file.name}</span>
+            <span className="tabular shrink-0 text-xs text-fg-subtle">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
+            <button type="button" onClick={() => setFile(null)} aria-label="Remove attachment" className="grid size-6 place-items-center rounded text-fg-subtle hover:text-down">
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted hover:text-brand">
+            <Paperclip size={15} /> Attach a screenshot or PDF
+            <span className="font-normal text-fg-subtle">(up to 5 MB)</span>
+          </button>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
-        <div>
-          <label
-            className={`block text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} mb-1.5`}
-          >
-            Subject & Attachment
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              className={`w-full ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl px-4 py-3 text-sm ${TC.textPrimary} outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-gray-400`}
-              placeholder="Brief description of issue"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              disabled={loading}
-            />
-
-            {/* Simple/Compact Attachment Button */}
-            <div className="relative shrink-0">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={handleFileChange}
-                accept="image/*,.pdf"
-                disabled={loading}
-              />
-              <label
-                htmlFor="file-upload"
-                className={`h-full w-12 flex items-center justify-center cursor-pointer ${isLight ? "bg-gray-50 border-gray-200 hover:bg-gray-100" : "bg-black/20 border-white/10 hover:bg-white/5"} border rounded-xl transition-all ${file ? "border-green-500/50 text-green-500 bg-green-500/10" : TC.textSecondary}`}
-                title={file ? file.name : "Attach File"}
-              >
-                <FaPaperclip className={file ? "text-green-500" : ""} />
-              </label>
-            </div>
-          </div>
-          {file && (
-            <div className="mt-2 text-xs flex items-center justify-between text-green-500 bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20">
-              <span className="truncate max-w-[200px]">{file.name}</span>
-              <button type="button" onClick={removeFile} className="hover:text-green-400 font-bold ml-2">✕</button>
-            </div>
-          )}
-        </div>
-        <div className="flex-1">
-          <label
-            className={`block text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} mb-1.5`}
-          >
-            Message
-          </label>
-          <textarea
-            className={`w-full h-[calc(100%-25px)] ${isLight ? "bg-gray-50 border-gray-200" : "bg-black/20 border-white/10"} border rounded-xl px-4 py-3 text-sm ${TC.textPrimary} outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all resize-none placeholder:text-gray-400`}
-            placeholder="Tell us what happened..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            disabled={loading}
-          ></textarea>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || !subject || !message}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white text-sm shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all shrink-0 disabled:opacity-70 disabled:grayscale disabled:scale-100 flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Sending Mail...
-            </>
-          ) : (
-            "Send Mail"
-          )}
-        </button>
-      </form>
-    </div>
+      <button type="submit" disabled={sending || !subject.trim() || !message.trim()} className={cn(primaryButton, "w-full")}>
+        {sending ? "Sending…" : "Send message"}
+      </button>
+    </form>
   );
-};
+}
 
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
-import { useLocation } from "react-router-dom";
+/** Product feedback; lands in the admin Feedback inbox */
+function FeedbackForm({ email }) {
+  const [type, setType] = useState("suggestion");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-export default function Support() {
-  const isLight = useThemeCheck();
-  const [activeSection, setActiveSection] = useState("ticket"); // 'ticket' or 'chat'
-  const [searchQuery, setSearchQuery] = useState("");
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
-  const location = useLocation();
-  const { isVisited } = useVisitedRoutes();
-  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
+  const submit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      await api.post("/feedback", { type, message: message.trim(), userEmail: email });
+      setSent(true);
+      setMessage("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Couldn't send your feedback. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
 
-  useEffect(() => {
-    if (isMounted) return;
-    //  Short delay to trigger the fade-in animation nicely after mount
-    const timer = setTimeout(() => setIsMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, [isMounted]);
-
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
-      borderColor: isLight ? "border-gray-100" : "border-gray-800",
-
-      bgCard: isLight
-        ? "bg-white/80 backdrop-blur-xl shadow-md border border-white/40"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      inputBg: isLight
-        ? "bg-white shadow-sm border-none focus:ring-2 focus:ring-blue-500/20"
-        : "bg-gray-800/50 border-none shadow-inner focus:shadow-cyan-500/10",
-    }),
-    [isLight],
-  );
-
-  const categories = [
-    {
-      icon: FaUserCog,
-      title: "Account & Login",
-      description: "Issues with 2FA, password reset, or profile settings.",
-      color: "from-blue-500 to-cyan-400",
-    },
-    {
-      icon: FaCreditCard,
-      title: "Payments & Billing",
-      description: "Deposit/Withdrawal failures, transaction history, or fees.",
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      icon: FaShieldAlt,
-      title: "Security & Fraud",
-      description: "Report suspicious activity or lock your account instantly.",
-      color: "from-red-500 to-orange-500",
-    },
-    {
-      icon: FaCode,
-      title: "API & Technical",
-      description: "Integration help, API keys, and connection issues.",
-      color: "from-amber-500 to-yellow-500",
-    },
-  ];
-
-  const faqs = [
-    {
-      q: "How do I verify my identity (KYC)?",
-      a: "Go to Settings > Verification. Upload your ID document and a selfie. Verification typically takes 5-10 minutes.",
-    },
-    {
-      q: "My deposit hasn't arrived yet.",
-      a: "Crypto deposits require network confirmations. Bitcoin takes ~1 hour, while others like Solana are faster. Check the status in your Transaction History.",
-    },
-    {
-      q: "How can I reset my 2FA?",
-      a: "If you lost your authenticator app, please contact support with your backup codes or identity proof to initiate a reset.",
-    },
-    {
-      q: "Are there withdrawal limits?",
-      a: "Yes, unverified accounts are limited to $2,000/day. Verified accounts can withdraw up to $100,000/day.",
-    },
-  ];
+  if (sent) {
+    return (
+      <Sent title="Thanks for the feedback" onReset={() => setSent(false)}>
+        The team reads every note. We&apos;ll be in touch if we need more detail.
+      </Sent>
+    );
+  }
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 space-y-6">
-      <div
-        className={`transition-all duration-300 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-          }`}
-      >
-        {/* Header Section Matches Dashboard */}
-        <header className="mb-6 py-2 px-2 text-center sm:text-left">
-          <h1
-            className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
-          >
-            Support Center
-          </h1>
-          <p className={`text-sm font-medium ${TC.textSecondary}`}>
-            Get assistance with your account, transactions, and technical
-            issues.
-          </p>
-        </header>
+    <form onSubmit={submit} className="space-y-4 px-4 pb-4">
+      <div>
+        <p id="feedback-type" className="mb-1.5 text-sm font-medium text-fg">
+          Type
+        </p>
+        <Segmented label="Feedback type" options={FEEDBACK_TYPES} value={type} onChange={setType} className="w-full [&>button]:flex-1" />
+      </div>
+      <Field id="feedback-message" label="Your feedback" hint={`${message.length} / ${MAX_MESSAGE}`}>
+        <textarea
+          id="feedback-message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          maxLength={MAX_MESSAGE}
+          required
+          rows={7}
+          placeholder={type === "bug" ? "What went wrong, and on which page?" : "Tell us what you think."}
+          className={cn(inputClass, "h-auto resize-y py-2.5 leading-relaxed")}
+        />
+      </Field>
+      <button type="submit" disabled={sending || !message.trim()} className={cn(primaryButton, "w-full")}>
+        {sending ? "Sending…" : "Send feedback"}
+      </button>
+    </form>
+  );
+}
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <FaSearch
-            className={`absolute left-5 top-1/2 -translate-y-1/2 ${TC.textSecondary}`}
-          />
-          <input
-            type="text"
-            placeholder="Search for questions or topics..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={`
-            w-full pl-12 pr-6 py-4 rounded-2xl text-base outline-none transition-all border
-            ${TC.bgCard} ${TC.textPrimary} focus:shadow-md
-          `}
-          />
-        </div>
+const CONTACT_MODES = [
+  { value: "support", label: "Get help" },
+  { value: "feedback", label: "Send feedback" },
+];
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {categories.map((cat, idx) => (
-            <SupportCategory
-              key={idx}
-              {...cat}
-              TC={TC}
-              onClick={() => setActiveSection("ticket")}
+/** Help centre: searchable answers, then a way to reach a person */
+export default function Support() {
+  const { user } = useUserContext();
+  const [query, setQuery] = useState("");
+  const [topic, setTopic] = useState("all");
+  const [openQ, setOpenQ] = useState(null);
+  const [mode, setMode] = useState("support");
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return FAQS.filter((f) => (topic === "all" || f.topic === topic) && (!q || `${f.q} ${f.a}`.toLowerCase().includes(q)));
+  }, [query, topic]);
+
+  return (
+    <div className="space-y-4 lg:space-y-5">
+      <header>
+        <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Help &amp; support</h1>
+        <p className="mt-0.5 text-sm text-fg-subtle">Find a quick answer, or send a message and an admin will reply by email.</p>
+      </header>
+
+      <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
+        <Card className="min-w-0 xl:col-span-7">
+          <CardHeader icon={HelpCircle} title="Common questions" subtitle={`${results.length} of ${FAQS.length} answers`} />
+          <div className="space-y-3 px-4 pb-3">
+            <SearchInput value={query} onChange={setQuery} placeholder="Search answers" className="w-full" />
+            <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 no-scrollbar" role="group" aria-label="Filter by topic">
+              {FAQ_TOPICS.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setTopic(t.value)}
+                  aria-pressed={topic === t.value}
+                  className={cn(
+                    "shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    topic === t.value ? "border-brand bg-brand-soft text-brand" : "border-line text-fg-muted hover:bg-surface-hover hover:text-fg",
+                  )}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {results.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title="No answers match"
+              description="Try different words, or send us a message and we'll help directly."
+              className="border-t border-line"
             />
-          ))}
-        </div>
+          ) : (
+            <ul className="divide-y divide-line border-t border-line">
+              {results.map((item) => (
+                <FaqItem key={item.q} item={item} open={openQ === item.q} onToggle={() => setOpenQ(openQ === item.q ? null : item.q)} />
+              ))}
+            </ul>
+          )}
+        </Card>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column: FAQ & Contact */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* FAQ Section */}
-            <div className={`${TC.bgCard} p-4 sm:p-6 rounded-2xl`}>
-              <h2
-                className={`text-xl font-bold mb-4 flex items-center gap-2 ${TC.textPrimary}`}
-              >
-                <FaQuestionCircle className="text-cyan-500" /> Frequently Asked
-                Questions
-              </h2>
-              <div className="space-y-1">
-                {faqs.map((item, idx) => (
-                  <FAQItem
-                    key={idx}
-                    question={item.q}
-                    answer={item.a}
-                    isOpen={openFaqIndex === idx}
-                    onClick={() =>
-                      setOpenFaqIndex(openFaqIndex === idx ? null : idx)
-                    }
-                    TC={TC}
-                  />
-                ))}
-              </div>
+        <div className="min-w-0 space-y-4 lg:space-y-5 xl:sticky xl:top-[calc(var(--topbar-h)+24px)] xl:col-span-5">
+          <Card>
+            <CardHeader icon={MessageSquareText} title="Contact us" subtitle={mode === "support" ? "Replies go to your account email" : "Ideas, bugs and praise go to the team"} />
+            <div className="px-4 pb-4">
+              <Segmented label="Contact type" options={CONTACT_MODES} value={mode} onChange={setMode} size="md" className="w-full [&>button]:flex-1" />
             </div>
+            {mode === "support" ? <SupportForm email={user?.email} /> : <FeedbackForm email={user?.email} />}
+          </Card>
 
-            {/* Quick Contact */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => setActiveSection("ticket")}
-                className={`w-full ${TC.bgCard} text-left p-4 sm:p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-blue-500/20 transition-all ${activeSection === "ticket" ? "ring-2 ring-blue-500/50" : ""}`}
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform shadow-sm">
-                  <FaEnvelope />
-                </div>
-                <div>
-                  <h4
-                    className={`font-bold text-sm ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}
-                  >
-                    Email Support
-                  </h4>
-                  <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-                    support@nexchain.com
-                  </p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveSection("chat")}
-                className={`w-full ${TC.bgCard} text-left p-4 sm:p-5 rounded-2xl flex items-center gap-4 group cursor-pointer border border-transparent hover:border-green-500/20 transition-all ${activeSection === "chat" ? "ring-2 ring-green-500/50" : ""}`}
-              >
-                <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform shadow-sm">
-                  <FaHeadset />
-                </div>
-                <div>
-                  <h4
-                    className={`font-bold text-sm ${TC.textPrimary} group-hover:text-green-500 transition-colors`}
-                  >
-                    Live Chat
-                  </h4>
-                  <p className={`text-xs ${TC.textSecondary} mt-0.5`}>
-                    Available 24/7
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: Ticket Form OR Live Chat */}
-          <div className="lg:col-span-1 h-full">
-            <AnimatePresence mode="wait">
-              {activeSection === "chat" ? (
-                <motion.div
-                  key="chat"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full w-full"
-                >
-                  <LiveChatWindow TC={TC} isLight={isLight} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="ticket"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full w-full"
-                >
-                  <TicketForm TC={TC} isLight={isLight} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <Card as="nav" aria-label="More help" className="divide-y divide-line">
+            {[
+              { to: "/learning", icon: BookOpen, title: "Learning hub", text: "Guides on trading, charts and staying safe" },
+              { to: "/user/settings?tab=security", icon: Settings, title: "Account security", text: "Password, two-factor and active sessions" },
+            ].map(({ to, icon: Icon, title, text }) => (
+              <Link key={to} to={to} className="flex items-center gap-3 px-4 py-3 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-surface-hover">
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-muted">
+                  <Icon size={16} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-medium text-fg">{title}</span>
+                  <span className="block truncate text-xs text-fg-subtle">{text}</span>
+                </span>
+                <ArrowRight size={15} className="shrink-0 text-fg-subtle" />
+              </Link>
+            ))}
+          </Card>
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ const CryptoList = lazy(() => import("@/Pages/CryptoList"));
 const PortfolioPage = lazy(() => import("@/Pages/PortfolioPage"));
 const Watchlist = lazy(() => import("@/Pages/Watchlist"));
 const LearningHub = lazy(() => import("@/Pages/LearningHub"));
+const LearnArticle = lazy(() => import("@/Pages/LearnArticle"));
 const NewsPage = lazy(() => import("@/Pages/NewsPage"));
 const Landing = lazy(() => import("@/Pages/Landing"));
 const AuthPages = lazy(() => import("@/Pages/AuthPage"));
@@ -29,9 +30,6 @@ const UserDashboard = lazy(() => import("@/Pages/UserProfile/UserDashboard"));
 const UserSettings = lazy(() => import("@/Pages/UserProfile/Settings"));
 const UserSupport = lazy(() => import("@/Pages/UserProfile/Support"));
 
-const UserMarketInsights = lazy(
-  () => import("@/Pages/UserProfile/MarketInsights"),
-);
 
 const Admin = lazy(() => import("@/Pages/Admin/Admin"));
 const AdminDashboard = lazy(() => import("@/Pages/Admin/Dashboard"));
@@ -46,7 +44,7 @@ const AdminSettings = lazy(() => import("@/Pages/Admin/Settings"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+    <div className="w-10 h-10 border-4 border-brand/20 border-t-brand rounded-full animate-spin"></div>
   </div>
 );
 
@@ -69,6 +67,7 @@ export default function AppRoutes() {
         <Route element={<PublicRoute />}>
           <Route element={<PublicLayout />}>
             <Route path="/public-learning" element={<LearningHub />} />
+            <Route path="/public-learning/:slug" element={<LearnArticle />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
           </Route>
         </Route>
@@ -80,6 +79,7 @@ export default function AppRoutes() {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/learning" element={<LearningHub />} />
+            <Route path="/learning/:slug" element={<LearnArticle />} />
             <Route path="/news" element={<NewsPage />} />
 
             <Route path="/coin" element={<CoinPageOutlet />}>
@@ -94,7 +94,8 @@ export default function AppRoutes() {
               <Route path="/user/settings" element={<UserSettings />} />
               <Route path="/user/support" element={<UserSupport />} />
 
-              <Route path="/user/insights" element={<UserMarketInsights />} />
+              {/* Market insights moved into Markets */}
+              <Route path="/user/insights" element={<Navigate to="/cryptolist?view=insights" replace />} />
             </Route>
             <Route element={<AdminRoute />}>
               <Route path="/admin" element={<Admin />}>

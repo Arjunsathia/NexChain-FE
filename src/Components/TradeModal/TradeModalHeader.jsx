@@ -1,85 +1,33 @@
 import React from "react";
-import { FaTimes, FaMoneyBillWave } from "react-icons/fa";
+import { X } from "lucide-react";
+import { ModalTitle } from "@/Components/ui/modal";
+import { CoinAvatar } from "@/Components/ui/coin-avatar";
+import { Delta } from "@/Components/ui/delta";
+import { FlashPrice } from "@/Components/Crypto/LiveCoinRow";
 
-const TradeModalHeader = React.memo(
-  ({
-    coin,
-    coinName,
-    symbol,
-    currentPrice,
-    priceChange,
-    isLight,
-    handleClose,
-  }) => {
-    const isPositive = priceChange >= 0;
-    return (
-      <div
-        className={`relative flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 transition-colors duration-300 ${isLight ? "bg-white border-b border-gray-100" : "bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-b border-white/5"}`}
-      >
-        <div className="flex items-center gap-3">
-          {/* Coin Icon - Compact */}
-          <div className="relative">
-            <img
-              src={typeof coin.image === 'string' ? coin.image : (coin.image?.small || coin.image?.large || coin.image?.thumb)}
-              alt={coinName}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shadow-sm bg-white/10"
-              onError={(e) => {
-                e.target.src = `https://ui-avatars.com/api/?name=${symbol || 'C'}&background=random`;
-              }}
-            />
-          </div>
-
-          {/* Text Info - Inline */}
-          <div className="flex flex-col">
-            <div className="flex items-baseline gap-2">
-              <h2
-                className={`text-base font-bold leading-none ${isLight ? "text-gray-900" : "text-white"}`}
-              >
-                {coinName}
-              </h2>
-              <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isLight ? "bg-gray-200 text-gray-400" : "bg-white/10 text-gray-500"}`}
-              >
-                {symbol}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <div
-                className={`text-sm font-mono font-bold leading-none ${isLight ? "text-gray-900" : "text-white"}`}
-              >
-                $
-                {currentPrice.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}
-              </div>
-              <span
-                className={`text-[10px] font-bold px-1 rounded-sm ${isPositive
-                  ? "bg-green-500/10 text-green-500"
-                  : "bg-red-500/10 text-red-500"
-                  }`}
-              >
-                {isPositive ? "+" : ""}
-                {priceChange.toFixed(2)}%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Close Button - Tiny */}
-        <button
-          aria-label="Close"
-          onClick={handleClose}
-          className={`
-          p-1.5 rounded-full transition-colors bg-white/10 hover:bg-white/20
-          ${isLight ? "hover:bg-gray-100 text-gray-400 bg-transparent" : "text-white"}
-        `}
-        >
-          <FaTimes className="text-sm" />
-        </button>
+/** Coin, live price and 24h change, with the close button */
+const TradeModalHeader = React.memo(({ image, coinName, symbol, currentPrice, priceChange, onClose }) => (
+  <div className="flex items-center gap-3 border-b border-line px-5 py-4">
+    <CoinAvatar src={image} symbol={symbol} size={36} />
+    <div className="min-w-0 flex-1">
+      <ModalTitle className="truncate text-sm font-semibold text-fg">
+        {coinName} <span className="font-normal text-fg-subtle">{symbol}/USD</span>
+      </ModalTitle>
+      <div className="flex items-center gap-2">
+        <FlashPrice value={currentPrice} className="text-lg font-semibold text-fg" />
+        <Delta value={priceChange} pill />
       </div>
-    );
-  },
-);
+    </div>
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label="Close"
+      className="grid size-8 shrink-0 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+    >
+      <X size={18} />
+    </button>
+  </div>
+));
 
 TradeModalHeader.displayName = "TradeModalHeader";
 

@@ -66,6 +66,7 @@ export const setMemoryToken = (token) => {
 export const getAccessToken = () => memoryToken;
 
 export const SESSION_EXPIRED_EVENT = "nexchain:session-expired";
+export const RATE_LIMIT_TOAST = "rate-limit";
 
 // One refresh at a time: concurrent 401s all wait for the same request
 let refreshPromise = null;
@@ -156,9 +157,10 @@ api.interceptors.response.use(
       }
     }
 
-    // Customize 429 handling
+    // Generic rate-limit notice; callers with a specific message reuse this id
+    // to replace it (e.g. the account-reset cooldown)
     if (error.response?.status === 429) {
-      toast.error("Too many requests. Please slow down.");
+      toast.error("Too many requests. Please slow down.", { id: RATE_LIMIT_TOAST });
     }
 
     return Promise.reject(error);

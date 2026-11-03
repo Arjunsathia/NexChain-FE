@@ -1,319 +1,295 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FaSync } from "react-icons/fa";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { ChevronRight, Inbox, MessageSquare, SearchX } from "lucide-react";
 import { getData, updateById, deleteById } from "@/api/axiosConfig";
-import FeedbackStats from "@/Components/Admin/Feedback/FeedbackStats";
-import FeedbackFilters from "@/Components/Admin/Feedback/FeedbackFilters";
-import FeedbackTable from "@/Components/Admin/Feedback/FeedbackTable";
-import FeedbackDetailsModal from "@/Components/Admin/Feedback/FeedbackDetailsModal";
-import FeedbackDeleteModal from "@/Components/Admin/Feedback/FeedbackDeleteModal";
+import useSortedRows from "@/hooks/useSortedRows";
+import useMediaQuery from "@/hooks/useMediaQuery";
+import { formatTimeAgo } from "@/utils/format";
+import { Card, EmptyState } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
+import { Segmented } from "@/Components/ui/segmented";
+import { Skeleton, SkeletonRows } from "@/Components/ui/skeleton";
+import { Pagination, SearchInput, SortHeader } from "@/Components/ui/table";
+import FeedbackSheet from "@/Components/Admin/Feedback/FeedbackSheet";
 
-import useThemeCheck from "@/hooks/useThemeCheck";
+const PAGE_SIZE = 20;
+const STATUS_META = {
+  new: { label: "New", tone: "brand" },
+  "in-progress": { label: "In progress", tone: "warn" },
+  resolved: { label: "Resolved", tone: "up" },
+  closed: { label: "Closed", tone: "neutral" },
+};
+const TYPE_LABELS = { bug: "Bug", suggestion: "Suggestion", praise: "Praise", general: "General" };
+const PRIORITY_TONES = { critical: "down", high: "warn", medium: "neutral", low: "neutral" };
+const PRIORITY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
 
-import useTransitionDelay from "@/hooks/useTransitionDelay";
-import { useLocation } from "react-router-dom";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
-
-const AdminFeedback = () => {
-  const isLight = useThemeCheck();
-  const location = useLocation();
-  const { isVisited, markVisited } = useVisitedRoutes();
-  const isReady = useTransitionDelay(350, isVisited(location.pathname));
-  const [isFirstVisit] = useState(!isVisited(location.pathname));
-
-  useEffect(() => {
-    markVisited(location.pathname);
-  }, [location.pathname, markVisited]);
-
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
-
-      // Glassmorphism Cards - Synced with Admin Sidebar exact styling
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      // Stat Cards - Match sidebar styling with hover effect
-      bgStatsCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card hover:bg-white/80 hover:shadow-lg"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 hover:bg-gray-800/80",
-
-      bgItem: isLight
-        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-        : "bg-transparent hover:bg-white/5 isolation-isolate",
-
-      bgInput: isLight
-        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
-        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
-
-      btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
-      btnSecondary: isLight
-        ? "bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20"
-        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20",
-      btnDanger:
-        "bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all duration-300 active:scale-95 text-sm font-bold",
-
-      tableHead: isLight
-        ? "bg-gray-100/80 text-gray-600"
-        : "bg-white/5 text-gray-400",
-      tableRow: isLight
-        ? "hover:bg-gray-50 transition-colors"
-        : "hover:bg-white/5 transition-colors",
-
-      modalOverlay: "bg-black/40 backdrop-blur-sm",
-      modalContent: isLight
-        ? "bg-white"
-        : "bg-[#0B0E11] border border-gray-800 glass-card",
-
-      headerGradient: "from-blue-600 to-cyan-500",
-    }),
-    [isLight],
-  );
-
-  const [feedbacks, setFeedbacks] = useState([]);
-
-  // Granular Loading States
-  const [isFeedbacksLoading, setIsFeedbacksLoading] = useState(true);
-  const [isStatsLoading, setIsStatsLoading] = useState(true);
-
-  const [stats, setStats] = useState({});
-  const [filters, setFilters] = useState({
-    status: "",
-    type: "",
-    priority: "",
-    search: "",
-  });
-  const [selectedFeedback, setSelectedFeedback] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [feedbackToDelete, setFeedbackToDelete] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [editNotes, setEditNotes] = useState("");
-
-  useEffect(() => {
-    fetchFeedbacks();
-    fetchStats();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchFeedbacks = async () => {
-    try {
-      if (feedbacks.length === 0) setIsFeedbacksLoading(true);
-      const data = await getData("/feedback");
-      if (data && data.success) {
-        setFeedbacks(data.data || []);
-      } else {
-        throw new Error("Invalid response format");
-      }
-    } catch (error) {
-      console.error("❌ Error fetching feedbacks:", error);
-      setFeedbacks([]);
-    } finally {
-      setIsFeedbacksLoading(false);
-    }
-  };
-
-  const fetchStats = useCallback(async () => {
-    try {
-      if (!stats.total) setIsStatsLoading(true);
-      const data = await getData("/feedback/stats");
-      if (data && data.success) {
-        setStats(data.data || {});
-      }
-    } catch (error) {
-      console.error("❌ Error fetching stats:", error);
-
-      const localStats = {
-        total: feedbacks.length,
-        today: feedbacks.filter((fb) => {
-          const feedbackDate = new Date(fb.createdAt);
-          const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-          return feedbackDate >= twentyFourHoursAgo;
-        }).length,
-        new: feedbacks.filter((f) => f.status === "new").length,
-        inProgress: feedbacks.filter((f) => f.status === "in-progress").length,
-        resolved: feedbacks.filter((f) => f.status === "resolved").length,
-      };
-      setStats(localStats);
-    } finally {
-      setIsStatsLoading(false);
-    }
-  }, [feedbacks, stats.total]);
-
-  const updateFeedbackStatus = async (id, status) => {
-    try {
-      const data = await updateById("/feedback", id, { status });
-      if (data.success) {
-        setFeedbacks((prev) =>
-          prev.map((fb) => (fb._id === id ? { ...fb, status } : fb)),
-        );
-        fetchStats();
-      }
-    } catch (error) {
-      console.error("❌ Error updating feedback status:", error);
-      alert("Error updating feedback status. Please try again.");
-    }
-  };
-
-  const updateFeedbackNotes = async (id, adminNotes) => {
-    try {
-      const data = await updateById("/feedback", id, { adminNotes });
-      if (data.success) {
-        setFeedbacks((prev) =>
-          prev.map((fb) => (fb._id === id ? { ...fb, adminNotes } : fb)),
-        );
-        setShowModal(false);
-        alert("✅ Notes updated successfully!");
-      }
-    } catch (error) {
-      console.error("❌ Error updating notes:", error);
-      alert("❌ Error updating notes. Please try again.");
-    }
-  };
-
-  const confirmDelete = (feedback) => {
-    setFeedbackToDelete(feedback);
-    setShowDeleteModal(true);
-  };
-
-  const deleteFeedback = async () => {
-    if (!feedbackToDelete) return;
-    try {
-      setDeleteLoading(true);
-      const data = await deleteById("/feedback", feedbackToDelete._id);
-      if (data.success) {
-        setFeedbacks((prev) =>
-          prev.filter((fb) => fb._id !== feedbackToDelete._id),
-        );
-        fetchStats();
-        setShowDeleteModal(false);
-        setFeedbackToDelete(null);
-      }
-    } catch (error) {
-      console.error("❌ Error deleting feedback:", error);
-      alert("❌ Error deleting feedback. Please try again.");
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const filteredFeedbacks = feedbacks.filter((feedback) => {
-    const matchesSearch =
-      !filters.search ||
-      feedback.message.toLowerCase().includes(filters.search.toLowerCase()) ||
-      (feedback.userEmail &&
-        feedback.userEmail
-          .toLowerCase()
-          .includes(filters.search.toLowerCase()));
-    const matchesStatus = !filters.status || feedback.status === filters.status;
-    const matchesType = !filters.type || feedback.type === filters.type;
-    const matchesPriority =
-      !filters.priority || feedback.priority === filters.priority;
-    return matchesSearch && matchesStatus && matchesType && matchesPriority;
-  });
-
-  return (
-    <>
-      <div
-        className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} ${isFirstVisit ? "fade-in" : ""}`}
-        style={isFirstVisit ? { animationDelay: "0.1s" } : {}}
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4 mb-2">
-          <div className="w-full sm:w-auto text-center sm:text-left">
-            <h1
-              className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
-            >
-              Feedback{" "}
-              <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                & Reports
-              </span>
-            </h1>
-            <p className={`text-sm font-medium ${TC.textSecondary}`}>
-              Manage user feedback and reports
-            </p>
-          </div>
-        
-        </div>
-
-        <div
-          className={isFirstVisit ? "fade-in" : ""}
-          style={isFirstVisit ? { animationDelay: "0.2s" } : {}}
-        >
-          {isStatsLoading || !isReady ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`${TC.bgStatsCard || TC.bgCard} h-32 rounded-2xl animate-pulse bg-opacity-50`}
-                />
-              ))}
-            </div>
-          ) : (
-            <FeedbackStats stats={stats} TC={TC} />
-          )}
-
-          <FeedbackFilters
-            filters={filters}
-            setFilters={setFilters}
-            TC={TC}
-            isLight={isLight}
-          />
-
-          {isFeedbacksLoading || !isReady ? (
-            <div className={`${TC.bgCard} rounded-2xl overflow-hidden p-4`}>
-              <div className="space-y-4">
-                <div
-                  className={`h-10 w-full ${TC.tableHead} rounded animate-pulse`}
-                />
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-16 w-full ${TC.bgItem} rounded-xl animate-pulse`}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <FeedbackTable
-              filteredFeedbacks={filteredFeedbacks}
-              TC={TC}
-              isLight={isLight}
-              updateFeedbackStatus={updateFeedbackStatus}
-              setSelectedFeedback={setSelectedFeedback}
-              setEditNotes={setEditNotes}
-              setShowModal={setShowModal}
-              confirmDelete={confirmDelete}
-            />
-          )}
-        </div>
-      </div>
-
-      {showModal && (
-        <FeedbackDetailsModal
-          selectedFeedback={selectedFeedback}
-          setShowModal={setShowModal}
-          TC={TC}
-          isLight={isLight}
-          editNotes={editNotes}
-          setEditNotes={setEditNotes}
-          updateFeedbackNotes={updateFeedbackNotes}
-        />
-      )}
-
-      <FeedbackDeleteModal
-        showDeleteModal={showDeleteModal}
-        setShowDeleteModal={setShowDeleteModal}
-        TC={TC}
-        isLight={isLight}
-        deleteFeedback={deleteFeedback}
-        deleteLoading={deleteLoading}
-      />
-    </>
-  );
+const SORT_COLUMNS = {
+  date: (f) => new Date(f.createdAt).getTime(),
+  priority: (f) => PRIORITY_RANK[f.priority],
+  type: (f) => f.type,
 };
 
-export default AdminFeedback;
+const STATUS_FILTERS = [
+  { value: "open", label: "Open" },
+  { value: "new", label: "New" },
+  { value: "in-progress", label: "In progress" },
+  { value: "resolved", label: "Resolved" },
+  { value: "closed", label: "Closed" },
+  { value: "all", label: "All" },
+];
+const TYPE_FILTERS = [
+  { value: "all", label: "All types" },
+  { value: "bug", label: "Bugs" },
+  { value: "suggestion", label: "Suggestions" },
+  { value: "praise", label: "Praise" },
+  { value: "general", label: "General" },
+];
+
+const ago = (v) => formatTimeAgo(new Date(v).getTime() / 1000);
+
+/** Admin: user feedback and bug reports, triaged by status */
+export default function AdminFeedback() {
+  const queryClient = useQueryClient();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [status, setStatus] = useState("open");
+  const [type, setType] = useState("all");
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [selectedId, setSelectedId] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const { data: items = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ["adminFeedback"],
+    queryFn: async () => {
+      const res = await getData("/feedback");
+      if (!res?.success) throw new Error("Unable to load feedback");
+      return res.data || [];
+    },
+    staleTime: 30_000,
+  });
+
+  // Counts from the loaded list, so they always match what the filters show
+  const counts = useMemo(() => {
+    const c = { open: 0, new: 0, "in-progress": 0, resolved: 0, closed: 0, today: 0 };
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    items.forEach((f) => {
+      c[f.status] = (c[f.status] || 0) + 1;
+      if (f.status === "new" || f.status === "in-progress") c.open += 1;
+      if (new Date(f.createdAt).getTime() > dayAgo) c.today += 1;
+    });
+    return c;
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter(
+      (f) =>
+        (status === "all" || (status === "open" ? f.status === "new" || f.status === "in-progress" : f.status === status)) &&
+        (type === "all" || f.type === type) &&
+        (!q || f.message?.toLowerCase().includes(q) || f.userEmail?.toLowerCase().includes(q)),
+    );
+  }, [items, status, type, query]);
+
+  const { sorted, sort, toggleSort } = useSortedRows(filtered, SORT_COLUMNS, { key: "date", dir: "desc" }, ["priority", "type"]);
+  useEffect(() => setPage(1), [status, type, query, sort]);
+  const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const selected = items.find((f) => f._id === selectedId);
+  const lastSelected = useRef(null);
+  if (selected) lastSelected.current = selected;
+
+  const patch = (id, changes) =>
+    queryClient.setQueryData(["adminFeedback"], (old = []) => old.map((f) => (f._id === id ? { ...f, ...changes } : f)));
+
+  const changeStatus = async (item, next) => {
+    if (item.status === next) return;
+    const previous = item.status;
+    patch(item._id, { status: next });
+    try {
+      await updateById("/feedback", item._id, { status: next });
+      toast.success(`Marked as ${STATUS_META[next].label.toLowerCase()}`);
+      queryClient.invalidateQueries({ queryKey: ["adminReports"] });
+    } catch {
+      patch(item._id, { status: previous });
+      toast.error("Couldn't update the status");
+    }
+  };
+
+  const saveNotes = async (item, adminNotes) => {
+    setSaving(true);
+    try {
+      await updateById("/feedback", item._id, { adminNotes });
+      patch(item._id, { adminNotes });
+      toast.success("Notes saved");
+    } catch {
+      toast.error("Couldn't save the notes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (item) => {
+    try {
+      await deleteById("/feedback", item._id);
+      setSelectedId(null);
+      queryClient.setQueryData(["adminFeedback"], (old = []) => old.filter((f) => f._id !== item._id));
+      queryClient.invalidateQueries({ queryKey: ["adminReports"] });
+      toast.success("Feedback deleted");
+    } catch {
+      toast.error("Couldn't delete the feedback");
+    }
+  };
+
+  const statusOptions = STATUS_FILTERS.map((s) => ({
+    ...s,
+    label: s.value === "all" ? `All ${items.length || ""}` : `${s.label} ${counts[s.value] || ""}`,
+  }));
+  const header = (label, key, extra) => <SortHeader label={label} sortKey={key} sort={sort} onSort={toggleSort} align="left" {...extra} />;
+
+  return (
+    <div className="space-y-4 lg:space-y-5">
+      <header>
+        <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Feedback</h1>
+        <p className="mt-0.5 text-sm text-fg-subtle">Bug reports and suggestions from users. Open items are new or in progress.</p>
+      </header>
+
+      <Card className="grid grid-cols-2 divide-line md:grid-cols-4 md:divide-x [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-line md:[&>*:nth-child(n+3)]:border-t-0">
+        {[
+          ["Open", counts.open, "open"],
+          ["New", counts.new, "new"],
+          ["Received in 24h", counts.today, null],
+          ["Resolved", counts.resolved, "resolved"],
+        ].map(([label, value, target]) => (
+          <button
+            key={label}
+            type="button"
+            disabled={!target}
+            onClick={() => target && setStatus(target)}
+            className="px-4 py-3.5 text-left transition-colors enabled:hover:bg-surface-hover"
+          >
+            <p className="text-xs text-fg-subtle">{label}</p>
+            {isLoading ? <Skeleton className="mt-1.5 h-5 w-10" /> : <p className="tabular mt-1 text-lg font-semibold text-fg">{value}</p>}
+          </button>
+        ))}
+      </Card>
+
+      <Card>
+        <div className="flex flex-col gap-3 border-b border-line p-3 sm:p-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <Segmented label="Status" options={statusOptions} value={status} onChange={setStatus} className="max-w-full overflow-x-auto no-scrollbar [&>button]:whitespace-nowrap" />
+            <label className="sr-only" htmlFor="feedback-type">
+              Type
+            </label>
+            <select
+              id="feedback-type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="h-9 rounded-lg border border-line bg-surface-2 px-3 text-sm text-fg outline-none focus:border-brand"
+            >
+              {TYPE_FILTERS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search message or email" className="xl:w-64" />
+        </div>
+
+        {isLoading ? (
+          <SkeletonRows rows={5} />
+        ) : isError ? (
+          <EmptyState
+            icon={MessageSquare}
+            title="Couldn't load feedback"
+            description="Check the API connection and try again."
+            className="py-14"
+            action={
+              <button type="button" onClick={() => refetch()} className="mt-2 text-sm font-semibold text-brand hover:underline">
+                Retry
+              </button>
+            }
+          />
+        ) : items.length === 0 ? (
+          <EmptyState icon={Inbox} title="No feedback yet" description="When users send feedback or report a bug, it appears here." className="py-16" />
+        ) : visible.length === 0 ? (
+          <EmptyState icon={SearchX} title={status === "open" ? "Nothing open" : "No feedback matches"} description={status === "open" ? "Every item has been resolved or closed." : "Try another filter or search."} className="py-14" />
+        ) : isDesktop ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] border-collapse">
+              <thead className="border-b border-line bg-surface-2/60">
+                <tr>
+                  <th className="py-2.5 pl-4 pr-3 text-left text-xs font-medium text-fg-subtle">Message</th>
+                  {header("Type", "type")}
+                  {header("Priority", "priority")}
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-fg-subtle">Status</th>
+                  {header("Received", "date")}
+                  <th className="w-px" />
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((f) => (
+                  <tr key={f._id} onClick={() => setSelectedId(f._id)} className="cursor-pointer border-b border-line last:border-0 hover:bg-surface-hover">
+                    <td className="max-w-0 py-3 pl-4 pr-3">
+                      <p className="line-clamp-2 text-sm text-fg">{f.message}</p>
+                      <p className="mt-0.5 truncate text-xs text-fg-subtle">{f.userEmail || "Anonymous"}</p>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-fg-muted">{TYPE_LABELS[f.type] || f.type}</td>
+                    <td className="px-3 py-3">
+                      <Badge tone={PRIORITY_TONES[f.priority]} className="capitalize">
+                        {f.priority}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-3">
+                      <Badge tone={STATUS_META[f.status]?.tone} dot>
+                        {STATUS_META[f.status]?.label || f.status}
+                      </Badge>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-fg-muted">{ago(f.createdAt)}</td>
+                    <td className="py-3 pl-2 pr-4 text-fg-subtle">
+                      <ChevronRight size={16} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <ul className="divide-y divide-line">
+            {visible.map((f) => (
+              <li key={f._id}>
+                <button type="button" onClick={() => setSelectedId(f._id)} className="w-full px-4 py-3 text-left">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge tone={STATUS_META[f.status]?.tone} dot>
+                      {STATUS_META[f.status]?.label}
+                    </Badge>
+                    <Badge tone={PRIORITY_TONES[f.priority]} className="capitalize">
+                      {f.priority}
+                    </Badge>
+                    <span className="ml-auto text-xs text-fg-subtle">{ago(f.createdAt)}</span>
+                  </div>
+                  <p className="mt-1.5 line-clamp-2 text-sm text-fg">{f.message}</p>
+                  <p className="mt-0.5 text-xs text-fg-subtle">
+                    {TYPE_LABELS[f.type]} · {f.userEmail || "Anonymous"}
+                  </p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={sorted.length} onPage={setPage} />
+      </Card>
+
+      <FeedbackSheet
+        item={selected || lastSelected.current}
+        open={!!selected}
+        onClose={() => setSelectedId(null)}
+        onStatus={changeStatus}
+        onSaveNotes={saveNotes}
+        onDelete={remove}
+        saving={saving}
+      />
+    </div>
+  );
+}

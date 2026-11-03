@@ -1,546 +1,173 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
-import { useParams, useLocation } from "react-router-dom";
-import { getCoinById } from "@/api/coinApis";
-import { postForm, getData, deleteWatchList } from "@/api/axiosConfig";
+import React, { useCallback, useMemo, useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, SearchX } from "lucide-react";
 import toast from "react-hot-toast";
+import { getCoinById } from "@/api/coinApis";
 import useUserContext from "@/hooks/useUserContext";
-import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import TradeModal from "@/Components/TradeModal";
 import useCoinContext from "@/hooks/useCoinContext";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import useWatchlistToggle from "@/hooks/useWatchlistToggle";
+import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useLivePrice } from "@/hooks/useBinanceTicker";
 import { getBinancePair } from "@/utils/coinRegistry";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import { toCoinInfo } from "@/utils/coinDetails";
+import { Card, EmptyState } from "@/Components/ui/card";
+import { Skeleton } from "@/Components/ui/skeleton";
+import TradeModal from "@/Components/TradeModal";
+import PriceAlertModal from "@/Components/Common/PriceAlertModal";
+import CoinHero from "@/Components/CoinDetails/CoinHero";
+import PriceChart from "@/Components/CoinDetails/PriceChart";
+import { AboutCard, MarketActivityCard, MarketStatsCard, PositionCard } from "@/Components/CoinDetails/CoinPanels";
 
-import TradingViewWidget from "@/Components/CoinDetails/TradingViewWidget";
-import OrderBook from "@/Components/CoinDetails/OrderBook";
-import TradeHistory from "@/Components/CoinDetails/TradeHistory";
-import CoinHeader from "@/Components/CoinDetails/CoinHeader";
-import CoinStats from "@/Components/CoinDetails/CoinStats";
-import AdditionalStats from "@/Components/CoinDetails/AdditionalStats";
-import QuickLinks from "@/Components/CoinDetails/QuickLinks";
+const PageSkeleton = () => (
+  <div className="space-y-4 lg:space-y-5" aria-busy="true">
+    <Skeleton className="h-[188px] w-full rounded-xl" />
+    <div className="grid grid-cols-1 gap-4 lg:gap-5 xl:grid-cols-12">
+      <Skeleton className="h-[540px] rounded-xl xl:col-span-8" />
+      <Skeleton className="h-[540px] rounded-xl xl:col-span-4" />
+    </div>
+  </div>
+);
 
+/**
+ * One coin: live price and actions, a line/candlestick chart, the Binance
+ * order book and trades, market stats, your position and the project profile.
+ */
 function CoinDetailsPage() {
-  const isLight = useThemeCheck();
   const { coinId } = useParams();
   const location = useLocation();
-  const passedCoin = location.state?.coin;
-
   const { user } = useUserContext();
+  const { coins, coinsLoading } = useCoinContext();
   const { purchasedCoins } = usePurchasedCoins();
-  const { coins: liveCoins } = useCoinContext();
+  const { groupedHoldings } = useLivePortfolio();
+  const { ids: watchedIds, toggle: toggleWatch } = useWatchlistToggle();
 
-  const liveCoin = useMemo(() => {
-    if (!Array.isArray(liveCoins)) return null;
-    return liveCoins.find((c) => c.id === coinId);
-  }, [liveCoins, coinId]);
+  // The markets row renders the page instantly; the full document fills in the rest
+  const marketRow = useMemo(() => {
+    const fromList = Array.isArray(coins) ? coins.find((c) => c.id === coinId) : null;
+    const passed = location.state?.coin;
+    return fromList || (passed?.id === coinId && passed.current_price != null ? passed : null);
+  }, [coins, coinId, location.state]);
 
-  const userHoldings = useMemo(() => {
-    if (!coinId || !purchasedCoins || !Array.isArray(purchasedCoins))
-      return null;
-    return purchasedCoins.find((holding) => holding.coinId === coinId);
-  }, [coinId, purchasedCoins]);
-
-  const [loading, setLoading] = useState(!liveCoin && !passedCoin);
-  const [coin, setCoin] = useState(null);
-
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
-  const { isVisited } = useVisitedRoutes();
-  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
-  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
-  const [widgetsReady, setWidgetsReady] = useState(() => isVisited(location.pathname));
-
-  // Use centralized live ticker feed
-  const livePriceData = useLivePrice(coinId, passedCoin?.symbol);
-
-  const livePrice = useMemo(() => {
-    if (!livePriceData) return null;
-    return {
-      price: livePriceData.price,
-      change24h: livePriceData.change,
-      high24h: livePriceData.high_24h,
-      low24h: livePriceData.low_24h,
-      volume24h: livePriceData.quoteVolume || (livePriceData.volume * livePriceData.price),
-      isPositive: livePriceData.isPositive,
-    };
-  }, [livePriceData]);
-
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      // Glassmorphism Cards - Synced with Dashboard Quality
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      bgHeader: isLight
-        ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-700/50 isolation-isolate prevent-seam",
-
-      bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
-
-      skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-
-      btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold",
-
-      textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
-      textNegative: isLight ? "text-rose-600" : "text-rose-400",
-    }),
-    [isLight],
-  );
-
-  useEffect(() => {
-    if (isReady) {
-      setIsMounted(true);
-      setWidgetsReady(true);
-      return;
-    }
-    const timer = setTimeout(() => setIsMounted(true), 10);
-    const widgetTimer = setTimeout(() => {
-      setWidgetsReady(true);
-      setIsReady(true);
-    }, 350);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(widgetTimer);
-    };
-  }, [isReady]);
-
-  const displayCoin = useMemo(() => {
-    if (coin) return coin;
-
-    if (passedCoin) {
-      const existingMarket = passedCoin.market_data || {};
-      const flatData = passedCoin;
-
-      return {
-        ...passedCoin,
-        image:
-          typeof passedCoin.image === "string"
-            ? {
-              large: passedCoin.image,
-              small: passedCoin.image,
-              thumb: passedCoin.image,
-            }
-            : passedCoin.image || {},
-        market_data: {
-          current_price: {
-            usd:
-              existingMarket.current_price?.usd || flatData.current_price || 0,
-          },
-          price_change_percentage_24h:
-            existingMarket.price_change_percentage_24h ||
-            flatData.price_change_percentage_24h ||
-            0,
-          market_cap: {
-            usd: existingMarket.market_cap?.usd || flatData.market_cap || 0,
-          },
-          total_volume: {
-            usd: existingMarket.total_volume?.usd || flatData.total_volume || 0,
-          },
-          high_24h: {
-            usd: existingMarket.high_24h?.usd || flatData.high_24h || 0,
-          },
-          low_24h: {
-            usd: existingMarket.low_24h?.usd || flatData.low_24h || 0,
-          },
-          price_change_24h:
-            existingMarket.price_change_24h || flatData.price_change_24h || 0,
-
-          ath: { usd: existingMarket.ath?.usd || flatData.ath || 0 },
-          atl: { usd: existingMarket.atl?.usd || flatData.atl || 0 },
-          ath_date: {
-            usd: existingMarket.ath_date?.usd || flatData.ath_date || null,
-          },
-          atl_date: {
-            usd: existingMarket.atl_date?.usd || flatData.atl_date || null,
-          },
-          circulating_supply:
-            existingMarket.circulating_supply ||
-            flatData.circulating_supply ||
-            0,
-          total_supply:
-            existingMarket.total_supply || flatData.total_supply || 0,
-          max_supply: existingMarket.max_supply || flatData.max_supply || 0,
-        },
-      };
-    }
-
-    if (liveCoin) {
-      return {
-        ...liveCoin,
-        name: liveCoin.name,
-        symbol: liveCoin.symbol,
-        image:
-          typeof liveCoin.image === "string"
-            ? {
-              large: liveCoin.image,
-              small: liveCoin.image,
-              thumb: liveCoin.image,
-            }
-            : liveCoin.image || {},
-        market_data: {
-          current_price: { usd: liveCoin.current_price || 0 },
-          price_change_percentage_24h:
-            liveCoin.price_change_percentage_24h || 0,
-          market_cap: { usd: liveCoin.market_cap || 0 },
-          total_volume: { usd: liveCoin.total_volume || 0 },
-          high_24h: { usd: liveCoin.high_24h || 0 },
-          low_24h: { usd: liveCoin.low_24h || 0 },
-
-          ath: { usd: 0 },
-          atl: { usd: 0 },
-          ath_date: { usd: null },
-          atl_date: { usd: null },
-          circulating_supply: 0,
-          total_supply: 0,
-          max_supply: 0,
-        },
-      };
-    }
-    return null;
-  }, [coin, passedCoin, liveCoin]);
-
-  const coinSymbol = useMemo(
-    () => getBinancePair(coinId, displayCoin?.symbol),
-    [coinId, displayCoin],
-  );
-
-  // Ticker Logic Removed - Now handled by useBinanceTicker hook
-
-  const checkWatchlistStatus = useCallback(async () => {
-    if (!user?.id || !coinId) return;
-
-    try {
-      const res = await getData("/watchlist", { user_id: user.id });
-
-      const list = Array.isArray(res) ? res : res?.data || res?.watchlist || [];
-      const watchlistIds = list.map((item) => item.id || item.coin_id);
-      setIsInWatchlist(watchlistIds.includes(coinId));
-    } catch (err) {
-      console.error("Failed to fetch watchlist status", err);
-    }
-  }, [user?.id, coinId]);
-
-  useEffect(() => {
-    checkWatchlistStatus();
-  }, [checkWatchlistStatus]);
-
-  const fetchCoin = useCallback(async () => {
-    if (!liveCoin) setLoading(true);
-
-    try {
-      const res = await getCoinById(coinId);
-      setCoin(res?.data ?? res);
-    } catch (err) {
-      console.error("Error fetching coin", err);
-      if (!liveCoin) setCoin(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [coinId, liveCoin]);
-
-  useEffect(() => {
-    if (!coinId) return;
-    if (isReady) {
-      fetchCoin();
-      return;
-    }
-    const timer = setTimeout(() => {
-      fetchCoin();
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [fetchCoin, coinId, isReady]);
-
-  const [tradeModal, setTradeModal] = useState({
-    show: false,
-    coin: null,
-    type: "buy",
+  const { data: full, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["coin", coinId],
+    queryFn: () => getCoinById(coinId),
+    enabled: !!coinId,
+    staleTime: 5 * 60_000,
+    retry: 1,
   });
 
-  const handleTrade = useCallback(() => {
-    if (!user) {
-      toast.error("Please login to trade");
-      return;
-    }
+  const info = useMemo(() => toCoinInfo(full, marketRow), [full, marketRow]);
+  const live = useLivePrice(coinId, info?.symbol);
+  const pair = getBinancePair(coinId, info?.symbol);
 
-    const tradeCoin = displayCoin || liveCoin;
+  const price = live?.current_price ?? info?.price;
+  const change24h = live?.price_change_percentage_24h ?? info?.change24h;
+  const high24h = live?.high_24h ?? info?.high24h;
+  const low24h = live?.low_24h ?? info?.low24h;
+  const volume = live?.total_volume ?? info?.volume;
 
-    if (!tradeCoin) return;
+  const holding = useMemo(() => groupedHoldings.find((h) => h.coinId === coinId && h.totalQuantity > 0), [groupedHoldings, coinId]);
 
-    setTradeModal({ show: true, coin: tradeCoin, type: "buy" });
-  }, [displayCoin, user, liveCoin]);
+  // Modals keep their coin while animating out
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const tradeCoin = useMemo(() => (info ? { ...info.marketCoin, current_price: price ?? info.marketCoin.current_price } : null), [info, price]);
 
-  const toggleWatchlist = useCallback(async () => {
-    if (!user?.id) {
-      toast.error("Please login to manage watchlist");
-      return;
-    }
+  const openTrade = useCallback(() => {
+    if (!user) return toast.error("Please sign in to trade");
+    setTradeOpen(true);
+  }, [user]);
+  const onToggleWatch = useCallback(() => tradeCoin && toggleWatch(tradeCoin), [toggleWatch, tradeCoin]);
 
-    if (!displayCoin) return;
-
-    const wasInWatchlist = isInWatchlist;
-
-    setIsInWatchlist(!wasInWatchlist);
-
-    if (wasInWatchlist) {
-      toast.success("Removed from watchlist");
-    } else {
-      toast.success("Added to watchlist");
-    }
-
-    const coinData = displayCoin;
-    const currentP =
-      livePrice?.price ||
-      coinData.market_data?.current_price?.usd ||
-      coinData.current_price;
-
-    const postData = {
-      user_id: user.id,
-      id: coinData.id,
-      image: coinData.image?.large || coinData.image?.small || coinData.image,
-      symbol: coinData.symbol,
-      name: coinData.name,
-      current_price: currentP,
-      price_change_percentage_24h:
-        livePrice?.change24h ||
-        coinData.market_data?.price_change_percentage_24h ||
-        coinData.price_change_percentage_24h,
-      market_cap: coinData.market_data?.market_cap?.usd || coinData.market_cap,
-      total_volume:
-        livePrice?.volume24h ||
-        coinData.market_data?.total_volume?.usd ||
-        coinData.total_volume,
-      sparkline_in_7d: { price: [] },
-    };
-
-    setLoadingWatchlist(true);
-    try {
-      if (wasInWatchlist) {
-        await deleteWatchList("/watchlist/remove", {
-          id: coinId,
-          user_id: user.id,
-        });
-      } else {
-        await postForm("/watchlist/add", postData);
-      }
-      await checkWatchlistStatus();
-    } catch (err) {
-      console.error("Watchlist operation failed:", err);
-      setIsInWatchlist(wasInWatchlist);
-      toast.error("Operation failed");
-    } finally {
-      setLoadingWatchlist(false);
-    }
-  }, [
-    isInWatchlist,
-    user?.id,
-    displayCoin,
-    coinId,
-    livePrice,
-    checkWatchlistStatus,
-  ]);
-
-  const formatCurrency = useCallback((value) => {
-    if (value === null || value === undefined || isNaN(Number(value)))
-      return "$0";
-    const num = Number(value);
+  if (!info) {
+    const paused = isError && /unavailable/i.test(error?.message);
+    const notFound = error?.response?.status === 404;
     return (
-      "$" +
-      num.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: num < 1 ? 6 : 2,
-      })
-    );
-  }, []);
-
-  const formatNumber = useCallback((value) => {
-    if (value === null || value === undefined || isNaN(Number(value)))
-      return "0";
-    return Number(value).toLocaleString("en-US");
-  }, []);
-
-  if (loading && !displayCoin) {
-    return (
-      <div
-        className={`min-h-screen ${TC.textPrimary} transition-opacity duration-300 ${isMounted ? "opacity-100" : "opacity-0"
-          }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8 space-y-6">
-          { }
-          <div className={`rounded-2xl ${TC.bgCard} p-6 h-[200px]`}>
-            <Skeleton
-              height="100%"
-              baseColor={TC.skeletonBase}
-              highlightColor={TC.skeletonHighlight}
-              borderRadius="1rem"
+      <div className="mx-auto max-w-[1600px] px-3 py-4 sm:p-0">
+        {isLoading || isFetching || coinsLoading ? (
+          <PageSkeleton />
+        ) : (
+          <Card>
+            <EmptyState
+              icon={SearchX}
+              title={paused ? "This coin is unavailable" : notFound ? "Coin not found" : "Couldn't load this coin"}
+              description={
+                paused
+                  ? "An admin has paused this coin. You can still sell it from your portfolio."
+                  : notFound
+                    ? "There's no coin at this address. Check the link or find it in Markets."
+                    : "The market-data provider is busy right now. Try again in a moment."
+              }
+              action={
+                <div className="mt-2 flex gap-2">
+                  {!paused && !notFound && (
+                    <button
+                      type="button"
+                      onClick={() => refetch()}
+                      className="rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
+                    >
+                      Try again
+                    </button>
+                  )}
+                  <Link to="/cryptolist" className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg">
+                    Back to Markets
+                  </Link>
+                </div>
+              }
+              className="py-16"
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div
-              className={`col-span-2 rounded-2xl ${TC.bgCard} h-[500px] p-6`}
-            >
-              <Skeleton
-                height="100%"
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-              />
-            </div>
-            <div
-              className={`col-span-1 rounded-2xl ${TC.bgCard} h-[500px] p-6`}
-            >
-              <Skeleton
-                height="100%"
-                baseColor={TC.skeletonBase}
-                highlightColor={TC.skeletonHighlight}
-              />
-            </div>
-          </div>
-        </div>
+          </Card>
+        )}
       </div>
     );
   }
 
-  const currentPrice =
-    livePrice?.price || displayCoin?.market_data?.current_price?.usd || 0;
-  const priceChange24h =
-    livePrice?.change24h ||
-    displayCoin?.market_data?.price_change_percentage_24h ||
-    0;
-  const isPositive = priceChange24h >= 0;
-
   return (
-    <>
-      <div
-        className={`min-h-screen ${TC.textPrimary} p-3 md:p-6 transition-opacity duration-500 ${isMounted ? "opacity-100" : "opacity-0"
-          }`}
-      >
-        { }
-        <CoinHeader
-          coin={displayCoin}
-          currentPrice={currentPrice}
-          priceChange24h={priceChange24h}
-          isPositive={isPositive}
-          isInWatchlist={isInWatchlist}
-          loadingWatchlist={loadingWatchlist}
-          toggleWatchlist={toggleWatchlist}
-          handleTrade={handleTrade}
-          isLight={isLight}
-          TC={TC}
-          userHoldings={userHoldings}
-        />
+    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-fg-subtle">
+        <Link to="/cryptolist" className="transition-colors hover:text-fg">
+          Markets
+        </Link>
+        <ChevronRight size={13} aria-hidden="true" />
+        <span className="font-medium text-fg" aria-current="page">
+          {info.name}
+        </span>
+      </nav>
 
-        <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          { }
-          <CoinStats
-            coin={displayCoin}
-            livePrice={livePrice}
-            formatCurrency={formatCurrency}
-            TC={TC}
-            isLight={isLight}
-          />
+      <CoinHero
+        info={info}
+        price={price}
+        change24h={change24h}
+        volume={volume}
+        holding={holding?.totalQuantity || 0}
+        watched={watchedIds.has(coinId)}
+        onToggleWatch={onToggleWatch}
+        onAlert={() => setAlertOpen(true)}
+        onTrade={openTrade}
+      />
 
-          { }
-          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
-            { }
-            <div className="contents lg:block lg:col-span-8 lg:space-y-6">
-              { }
-              <div
-                className={`order-1 rounded-lg md:rounded-2xl overflow-hidden fade-in h-[400px] md:h-[600px] ${TC.bgCard}`}
-                style={{ animationDelay: "0.1s" }}
-              >
-                {widgetsReady ? (
-                  <TradingViewWidget
-                    symbol={displayCoin?.symbol?.toUpperCase() + "USDT"}
-                    theme={isLight ? "light" : "dark"}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Skeleton
-                      height="100%"
-                      width="100%"
-                      baseColor={TC.skeletonBase}
-                      highlightColor={TC.skeletonHighlight}
-                    />
-                  </div>
-                )}
-              </div>
+      <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
+        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-8">
+          <PriceChart key={coinId} coinId={coinId} symbol={info.symbol} />
+          {full ? (
+            <AboutCard info={info} />
+          ) : isLoading ? (
+            <Skeleton className="h-[220px] w-full rounded-xl" />
+          ) : null}
+        </div>
 
-              { }
-              <AdditionalStats
-                coin={displayCoin}
-                formatNumber={formatNumber}
-                formatCurrency={formatCurrency}
-                TC={TC}
-                isLight={isLight}
-              />
-
-              { }
-              <QuickLinks coin={displayCoin} TC={TC} isLight={isLight} />
-            </div>
-
-            { }
-            <div className="contents lg:block lg:col-span-4 lg:space-y-6">
-              <div
-                className="fade-in order-2 h-[350px] md:h-[450px]"
-                style={{ animationDelay: "0.2s" }}
-              >
-                {widgetsReady ? (
-                  <OrderBook symbol={coinSymbol} />
-                ) : (
-                  <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
-                    <Skeleton
-                      count={10}
-                      baseColor={TC.skeletonBase}
-                      highlightColor={TC.skeletonHighlight}
-                    />
-                  </div>
-                )}
-              </div>
-              <div
-                className="fade-in order-3 h-[350px] md:h-[450px]"
-                style={{ animationDelay: "0.3s" }}
-              >
-                {widgetsReady ? (
-                  <TradeHistory symbol={coinSymbol} />
-                ) : (
-                  <div className={`w-full h-full rounded-2xl p-4 ${TC.bgCard}`}>
-                    <Skeleton
-                      count={10}
-                      baseColor={TC.skeletonBase}
-                      highlightColor={TC.skeletonHighlight}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-4">
+          {holding && <PositionCard holding={holding} price={price} symbol={info.symbol} />}
+          <MarketActivityCard key={coinId} pair={pair} symbol={info.symbol} />
+          <MarketStatsCard info={info} price={price} high24h={high24h} low24h={low24h} />
         </div>
       </div>
 
-      { }
-      { }
-      <TradeModal
-        show={tradeModal.show}
-        onClose={() => setTradeModal((prev) => ({ ...prev, show: false }))}
-        coin={tradeModal.coin || displayCoin}
-        type={tradeModal.type}
-        purchasedCoins={purchasedCoins}
-      />
-    </>
+      <TradeModal show={tradeOpen} onClose={() => setTradeOpen(false)} coin={tradeCoin} type="buy" purchasedCoins={purchasedCoins} />
+      <PriceAlertModal show={alertOpen} onClose={() => setAlertOpen(false)} coin={tradeCoin} />
+    </div>
   );
 }
 

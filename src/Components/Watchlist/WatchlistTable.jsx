@@ -1,241 +1,178 @@
-import { pressable } from "@/utils/a11y";
-import React, { useState } from "react";
-import { FaExchangeAlt, FaBell } from "react-icons/fa";
-import { MdDeleteForever } from "react-icons/md";
-import Sparkline from "./Sparkline";
-import { useLocation } from "react-router-dom";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import React, { memo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
+import { useLivePrice } from "@/hooks/useBinanceTicker";
+import { Delta } from "@/Components/ui/delta";
+import { CoinAvatar } from "@/Components/ui/coin-avatar";
+import { SortHeader } from "@/Components/ui/table";
+import { FlashPrice } from "@/Components/Crypto/LiveCoinRow";
+import { StarButton } from "@/Components/Crypto/CoinTable";
+import Sparkline from "@/Components/Crypto/Sparkline";
+import { formatCompact, formatUSD } from "@/utils/format";
 
-const WatchlistTable = ({
-  coins,
-  TC,
-  isLight,
-  handleCoinClick,
-  handleTrade,
-  setRemoveModal,
-  handleAlertClick,
-  disableAnimations = false,
-}) => {
-  const location = useLocation();
-  const { isVisited } = useVisitedRoutes();
-  const [shouldAnimate] = useState(
-    !disableAnimations && !isVisited(location.pathname),
+const usd = (v) => (Number.isFinite(v) ? `$${formatCompact(v, 2)}` : "–");
+const qtyFormat = (n) => Number(n).toLocaleString(undefined, { maximumFractionDigits: 6 });
+
+const COLUMNS = [
+  { key: "name", label: "Coin", align: "left" },
+  { key: "price", label: "Price" },
+  { key: "h24", label: "24h" },
+  { key: "d7", label: "7d", className: "hidden lg:table-cell" },
+  { key: "mcap", label: "Market cap", className: "hidden lg:table-cell" },
+  { key: null, label: "Last 7 days", className: "hidden xl:table-cell" },
+  { key: "holding", label: "Your holding" },
+  { key: null, label: "", className: "w-px" },
+];
+
+/** Value of the user's position at the live price */
+const Holding = ({ quantity, price, symbol }) =>
+  quantity > 0 ? (
+    <>
+      <span className="tabular block text-sm font-medium text-fg">{formatUSD(quantity * (price || 0))}</span>
+      <span className="tabular text-xs text-fg-subtle">
+        {qtyFormat(quantity)} {symbol}
+      </span>
+    </>
+  ) : (
+    <span className="text-xs text-fg-subtle">–</span>
   );
+
+/** Desktop row; re-renders only on this coin's price ticks */
+const Row = memo(({ coin, onRemove, onTrade, onAlert }) => {
+  const navigate = useNavigate();
+  const live = useLivePrice(coin.id, coin.symbol);
+  const price = live?.current_price ?? coin.current_price;
+  const change24 = live?.price_change_percentage_24h ?? coin.price_change_percentage_24h;
+  const symbol = coin.symbol?.toUpperCase();
 
   return (
-    <div
-      className={`hidden md:block p-1 rounded-xl ${shouldAnimate ? "fade-in" : ""} ${TC.bgCard}`}
-      style={shouldAnimate ? { animationDelay: "0.2s" } : {}}
+    <tr
+      onClick={() => navigate(`/coin/coin-details/${coin.id}`)}
+      className="cursor-pointer border-b border-line transition-colors last:border-0 hover:bg-surface-hover"
     >
-      {/* Dashboard Style Header */}
-      <div className="px-4 pt-3 flex items-center justify-between mb-2">
-        <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
-          <FaExchangeAlt className="text-blue-500" size={14} />
-          Market Watch
-        </h3>
-        {coins.length > 0 && (
-          <span
-            className={`text-[10px] ${TC.textSecondary} px-2 py-0.5 rounded-full border ${isLight ? "border-gray-200" : "border-gray-700"} font-bold uppercase tracking-wider`}
-          >
-            {coins.length} Assets
-          </span>
-        )}
-      </div>
-
-      <div
-        className={`overflow-hidden rounded-xl border ${isLight ? "border-gray-100" : "border-white/5"} shadow-lg mx-2 mb-2`}
-      >
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr
-              className={`${isLight ? "bg-gray-100/50" : "bg-white/5"} uppercase tracking-wider text-[10px] font-bold`}
+      <td className="py-3 pl-3 pr-4">
+        <div className="flex items-center gap-2">
+          <StarButton active symbol={symbol} onClick={() => onRemove(coin)} />
+          <CoinAvatar src={coin.image} symbol={coin.symbol} size={28} />
+          <div className="min-w-0">
+            <Link
+              to={`/coin/coin-details/${coin.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="block truncate text-sm font-semibold text-fg hover:text-brand"
             >
-              <th className={`py-4 px-6 ${TC.textSecondary}`}>Coin</th>
-              <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>
-                Price
-              </th>
-              <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>
-                24h Change
-              </th>
-              <th className={`py-4 px-6 text-right ${TC.textSecondary}`}>
-                Market Cap
-              </th>
-              <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>
-                7d Trend
-              </th>
-              <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>
-                Holdings
-              </th>
-              <th className={`py-4 px-6 text-center ${TC.textSecondary}`}>
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            className={`divide-y ${isLight ? "divide-gray-100" : "divide-white/5"}`}
-          >
-            {coins.map((coin, index) => (
-              <tr
-                key={coin.id}
-                {...pressable(() => handleCoinClick(coin))}
-                className={`transition-all duration-200 cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgHover || (isLight ? "hover:bg-gray-50" : "hover:bg-white/5")}`}
-                style={
-                  shouldAnimate
-                    ? { animationDelay: `${0.3 + index * 0.05}s` }
-                    : {}
-                }
-              >
-                { }
-                <td className="py-4 px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="relative group/bell">
-                      <img
-                        src={coin.image}
-                        alt={coin.name}
-                        className="w-10 h-10 rounded-full group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAlertClick(e, coin);
-                        }}
-                        className="absolute -top-1 -left-1 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-yellow-500"
-                      >
-                        <FaBell size={10} />
-                      </button>
-                    </div>
-                    <div className="min-w-0">
-                      <div
-                        className={`font-bold text-base truncate group-hover:text-cyan-400 transition-colors ${TC.textPrimary}`}
-                      >
-                        {coin.name}
-                      </div>
-                      <div
-                        className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-                      >
-                        {coin.symbol}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                { }
-                <td className={`py-4 px-6 text-right ${TC.textPrimary}`}>
-                  <div className="font-semibold text-base">
-                    $
-                    {coin.current_price?.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: coin.current_price < 1 ? 6 : 2,
-                    }) || "0"}
-                  </div>
-                </td>
-
-                { }
-                <td className="py-4 px-6 text-right">
-                  <div
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-sm ${(coin.price_change_percentage_24h || 0) >= 0
-                      ? `${isLight ? "bg-emerald-100" : "bg-emerald-500/20"} ${TC.textPositive}`
-                      : `${isLight ? "bg-rose-100" : "bg-red-500/20"} ${TC.textNegative}`
-                      }`}
-                  >
-                    <span className="text-xs">
-                      {(coin.price_change_percentage_24h || 0) >= 0 ? "↑" : "↓"}
-                    </span>
-                    {Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}
-                    %
-                  </div>
-                </td>
-
-                { }
-                <td
-                  className={`py-4 px-6 text-right font-medium ${TC.textSecondary}`}
-                >
-                  $
-                  {(coin.market_cap || 0) >= 1e12
-                    ? ((coin.market_cap || 0) / 1e12).toFixed(2) + "T"
-                    : (coin.market_cap || 0) >= 1e9
-                      ? ((coin.market_cap || 0) / 1e9).toFixed(2) + "B"
-                      : (coin.market_cap || 0) >= 1e6
-                        ? ((coin.market_cap || 0) / 1e6).toFixed(2) + "M"
-                        : (coin.market_cap || 0).toLocaleString("en-IN")}
-                </td>
-
-                { }
-                <td className="py-4 px-6">
-                  <div className="flex justify-center">
-                    <Sparkline
-                      data={coin.sparkline_in_7d?.price || []}
-                      width={120}
-                      height={40}
-                      positive={(coin.price_change_percentage_24h || 0) >= 0}
-                    />
-                  </div>
-                </td>
-
-                { }
-                <td className="py-4 px-6 text-center">
-                  {coin.userHolding ? (
-                    <div
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold ${isLight
-                        ? "bg-green-100 text-green-700"
-                        : "bg-green-500/20 text-green-400"
-                        }`}
-                    >
-                      {(
-                        coin.userHolding.totalQuantity ||
-                        coin.userHolding.quantity ||
-                        0
-                      ).toFixed(4)}{" "}
-                      {coin.symbol.toUpperCase()}
-                    </div>
-                  ) : (
-                    <span className={`text-sm ${TC.textSecondary}`}>—</span>
-                  )}
-                </td>
-
-                { }
-                <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => handleTrade(coin)}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-                    >
-                      <FaExchangeAlt className="text-xs" />
-                      Trade
-                    </button>
-                    <button
-                      onClick={() => setRemoveModal({ show: true, coin })}
-                      className={`p-2 rounded-xl border transition-all duration-200 ${isLight
-                        ? "bg-gray-100/50 text-red-600 hover:bg-red-600 hover:text-white border-gray-200"
-                        : "bg-white/5 text-red-400 hover:bg-red-600 hover:text-white border-white/5"
-                        }`}
-                    >
-                      <MdDeleteForever className="text-lg" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      { }
-      <div
-        className={`px-6 py-4 border-t ${isLight ? "bg-gray-50/50 border-gray-100" : "bg-white/5 border-white/5"}`}
-      >
-        <div
-          className={`flex justify-between items-center text-sm ${TC.textSecondary}`}
-        >
-          <span className="font-medium">Showing {coins.length} coins</span>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
-            <span className="font-medium">Live Market Data</span>
+              {coin.name || symbol}
+            </Link>
+            <span className="text-xs text-fg-subtle">{symbol}</span>
           </div>
         </div>
-      </div>
+      </td>
+      <td className="px-3 py-3 text-right">
+        <FlashPrice value={price} className="text-sm font-medium text-fg" />
+      </td>
+      <td className="px-3 py-3 text-right text-sm">
+        <Delta value={change24} />
+      </td>
+      <td className="hidden px-3 py-3 text-right text-sm lg:table-cell">
+        <Delta value={coin.price_change_percentage_7d_in_currency} />
+      </td>
+      <td className="tabular hidden px-3 py-3 text-right text-sm text-fg lg:table-cell">{usd(coin.market_cap)}</td>
+      <td className="hidden px-3 py-2 xl:table-cell">
+        <Sparkline data={coin.sparkline_in_7d?.price} className="ml-auto" />
+      </td>
+      <td className="px-3 py-3 text-right">
+        <Holding quantity={coin.holdingQuantity} price={price} symbol={symbol} />
+      </td>
+      <td className="py-3 pl-2 pr-4">
+        <div className="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAlert(coin);
+            }}
+            aria-label={`Set a price alert for ${symbol}`}
+            title="Price alert"
+            className="grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+          >
+            <Bell size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTrade(coin);
+            }}
+            className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-fg transition-colors hover:border-brand hover:bg-brand hover:text-brand-fg"
+          >
+            Trade
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+});
+Row.displayName = "WatchlistRow";
+
+/** Phone row: coin, holding, price and 24h change */
+const MobileRow = memo(({ coin, onRemove, onTrade }) => {
+  const navigate = useNavigate();
+  const live = useLivePrice(coin.id, coin.symbol);
+  const price = live?.current_price ?? coin.current_price;
+  const change24 = live?.price_change_percentage_24h ?? coin.price_change_percentage_24h;
+  const symbol = coin.symbol?.toUpperCase();
+
+  return (
+    <li className="flex items-center gap-2 py-2.5 pl-2 pr-3">
+      <StarButton active symbol={symbol} onClick={() => onRemove(coin)} />
+      <button type="button" onClick={() => navigate(`/coin/coin-details/${coin.id}`)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+        <CoinAvatar src={coin.image} symbol={coin.symbol} size={30} />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-fg">{symbol}</span>
+          <span className="tabular block truncate text-xs text-fg-subtle">
+            {coin.holdingQuantity > 0 ? `You hold ${formatUSD(coin.holdingQuantity * (price || 0))}` : coin.name}
+          </span>
+        </span>
+        <span className="text-right">
+          <FlashPrice value={price} className="block text-sm font-medium text-fg" />
+          <Delta value={change24} className="text-xs" />
+        </span>
+      </button>
+      <button type="button" onClick={() => onTrade(coin)} className="ml-1 rounded-md bg-brand-soft px-2.5 py-1.5 text-xs font-semibold text-brand">
+        Trade
+      </button>
+    </li>
+  );
+});
+MobileRow.displayName = "WatchlistMobileRow";
+
+function WatchlistTable({ coins, isDesktop, sort, onSort, onRemove, onTrade, onAlert }) {
+  if (!isDesktop) {
+    return (
+      <ul className="divide-y divide-line">
+        {coins.map((coin) => (
+          <MobileRow key={coin.id} coin={coin} onRemove={onRemove} onTrade={onTrade} />
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[680px] border-collapse">
+        <thead className="border-b border-line bg-surface-2/60">
+          <tr>
+            {COLUMNS.map((c, i) => (
+              <SortHeader key={c.key || i} label={c.label} sortKey={c.key} align={c.align} className={c.className} sort={sort} onSort={onSort} />
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {coins.map((coin) => (
+            <Row key={coin.id} coin={coin} onRemove={onRemove} onTrade={onTrade} onAlert={onAlert} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-};
+}
 
-export default WatchlistTable;
+export default memo(WatchlistTable);

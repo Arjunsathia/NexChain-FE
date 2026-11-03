@@ -1,461 +1,252 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-} from "react";
-import { deleteWatchList, getData } from "@/api/axiosConfig";
-import { useBinanceTicker } from "@/hooks/useBinanceTicker";
-import { trackCoin } from "@/lib/tickerStore";
-import useUserContext from "@/hooks/useUserContext";
-import useCoinContext from "@/hooks/useCoinContext";
-import PriceAlertModal from "@/Components/Common/PriceAlertModal";
-import useThemeCheck from "@/hooks/useThemeCheck";
-
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import TradeModal from "@/Components/TradeModal";
-import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import { Plus, Star, SearchX } from "lucide-react";
+import useCoinContext from "@/hooks/useCoinContext";
 import useMediaQuery from "@/hooks/useMediaQuery";
+import useWatchlistToggle from "@/hooks/useWatchlistToggle";
+import useSortedRows from "@/hooks/useSortedRows";
+import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { Card, EmptyState } from "@/Components/ui/card";
+import { Delta } from "@/Components/ui/delta";
+import { Skeleton, SkeletonRows } from "@/Components/ui/skeleton";
+import { CoinAvatar } from "@/Components/ui/coin-avatar";
+import { Pagination, SearchInput } from "@/Components/ui/table";
+import WatchlistTable from "@/Components/Watchlist/WatchlistTable";
+import AddCoinsModal from "@/Components/Watchlist/AddCoinsModal";
+import TradeModal from "@/Components/TradeModal";
+import PriceAlertModal from "@/Components/Common/PriceAlertModal";
+import { formatUSD } from "@/utils/format";
+import { isStablecoin } from "@/utils/coinRegistry";
 
-import WatchlistHeader from "../Components/Watchlist/WatchlistHeader";
-import WatchlistStats from "../Components/Watchlist/WatchlistStats";
-import WatchlistTable from "../Components/Watchlist/WatchlistTable";
-import WatchlistMobileCards from "../Components/Watchlist/WatchlistMobileCards";
-import WatchlistPagination from "../Components/Watchlist/WatchlistPagination";
-import RemoveConfirmationModal from "../Components/Watchlist/RemoveConfirmationModal";
+const PAGE_SIZE = 20;
 
-const Watchlist = () => {
-  const isLight = useThemeCheck();
-  const { user } = useUserContext();
-  const { coins: liveCoins } = useCoinContext();
-  const { purchasedCoins, refreshPurchasedCoins } = usePurchasedCoins();
-  const isMobile = useMediaQuery("(max-width: 639px)"); // Below Tailwind sm
-
-  const navigate = useNavigate();
-  const { isVisited, markVisited } = useVisitedRoutes();
-  const location = useLocation();
-  // Freeze validated state on mount
-  const [hasVisited] = useState(() => isVisited(location.pathname));
-
-  useEffect(() => {
-    markVisited(location.pathname);
-  }, [location.pathname, markVisited]);
-
-  const userId = user?.id;
-
-  const [watchlistData, setWatchlistData] = useState(() => {
-    try {
-      if (userId) {
-        const cached = localStorage.getItem(`user_watchlist_cache_${userId}`);
-        if (cached) {
-          const { data } = JSON.parse(cached);
-          // Optional: Check if cache is fresh (e.g., < 5 mins) if strictly needed,
-          // but for "instant" feel we usually just show it and update in background.
-          return data || [];
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return [];
-  });
-
-  // Shared live ticker (one socket for the whole app)
-  const livePrices = useBinanceTicker();
-  // Defer heavy connections until after page transition
-  const [isReady, setIsReady] = useState(() => isVisited(location.pathname));
-
-  useEffect(() => {
-    if (isReady) return;
-    const timer = setTimeout(() => setIsReady(true), 350);
-    return () => clearTimeout(timer);
-  }, [isReady]);
-
-  // If we have watchlist data, don't show initial full-screen loading
-  const [loading, setLoading] = useState(() => watchlistData.length === 0 && !isReady);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isMounted, setIsMounted] = useState(() => isVisited(location.pathname));
-  const [tradeModal, setTradeModal] = useState({
-    show: false,
-    coin: null,
-    type: "buy",
-  });
-  const [removeModal, setRemoveModal] = useState({ show: false, coin: null });
-  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
-
-  const handleAlertClick = (e, coin) => {
-    e.stopPropagation();
-    setAlertModal({ show: true, coin });
-  };
-
-  const livePricesRef = useRef({});
-  const itemsPerPage = 10;
-
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      // Glassmorphism Cards - Synced with Dashboard Quality
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      bgHeader: isLight
-        ? "bg-white/80 backdrop-blur-md shadow-sm border border-gray-100"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border-b border-gray-800 isolation-isolate prevent-seam",
-
-      bgHover: isLight ? "hover:bg-blue-50/50" : "hover:bg-white/5",
-
-      textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
-      textNegative: isLight ? "text-rose-600" : "text-rose-400",
-
-      btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
-
-      bgStatsCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-    }),
-    [isLight],
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    livePricesRef.current = livePrices;
-  }, [livePrices]);
-
-  const mergedCoins = useMemo(() => {
-    return watchlistData
-      .map((item) => {
-        const liveCoin = liveCoins.find((coin) => coin.id === item.id);
-        const livePriceData = livePrices[item.id];
-
-        const userHolding = purchasedCoins.find((pc) => pc.coinId === item.id);
-
-        const combinedCoin = {
-          ...item,
-          ...(liveCoin || {}),
-          ...(livePriceData || {}),
-          userHolding: userHolding || null,
-        };
-
-        if (livePriceData?.current_price) {
-          combinedCoin.current_price = livePriceData.current_price;
-          combinedCoin.price_change_percentage_24h =
-            livePriceData.price_change_percentage_24h;
-        }
-
-        return combinedCoin;
-      })
-      .filter(Boolean);
-  }, [watchlistData, liveCoins, livePrices, purchasedCoins]);
-
-  // Stream every watchlisted coin, including ones outside the core list
-  useEffect(() => {
-    if (!isReady) return;
-    watchlistData.forEach((coin) => trackCoin(coin.id, coin.symbol));
-  }, [watchlistData, isReady]);
-
-  const filteredCoins = useMemo(() => {
-    if (!searchTerm) return mergedCoins;
-    return mergedCoins.filter(
-      (coin) =>
-        coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        coin.symbol.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }, [mergedCoins, searchTerm]);
-
-  const { paginatedCoins, totalPages } = useMemo(() => {
-    const totalPages = Math.ceil(filteredCoins.length / itemsPerPage);
-    const paginatedCoins = filteredCoins.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage,
-    );
-    return { paginatedCoins, totalPages };
-  }, [filteredCoins, currentPage]);
-
-  const fetchData = useCallback(
-    async (shouldLoad = true) => {
-      if (!userId) return;
-
-      // If we don't have data, show skeleton
-      if (watchlistData.length === 0 && shouldLoad) setLoading(true);
-
-      try {
-        const res = await getData("/watchlist", { user_id: userId });
-        const newData = res || [];
-        setWatchlistData(newData);
-
-        // Update Cache
-        localStorage.setItem(
-          `user_watchlist_cache_${userId}`,
-          JSON.stringify({
-            data: newData,
-            timestamp: Date.now(),
-          })
-        );
-      } catch (err) {
-        console.error("Failed to fetch watchlist data", err);
-        if (watchlistData.length === 0) {
-          toast.error("Failed to fetch watchlist data");
-        }
-      } finally {
-        if (shouldLoad) setLoading(false);
-      }
-    },
-    [userId, watchlistData.length],
-  );
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleRemoveConfirm = useCallback(async () => {
-    if (!removeModal.coin || !userId) return;
-
-    const coinIdToRemove = removeModal.coin.id;
-    setWatchlistData((prev) =>
-      prev.filter((item) => item.id !== coinIdToRemove),
-    );
-    setRemoveModal({ show: false, coin: null });
-
-    try {
-      await deleteWatchList("/watchlist/remove", {
-        id: coinIdToRemove,
-        user_id: userId,
-      });
-      toast.success("Removed from watchlist!", {
-        style: {
-          background: "#DCFCE7",
-          color: "#166534",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          border: "none",
-        },
-        iconTheme: { primary: "#16A34A", secondary: "#FFFFFF" },
-      });
-
-      fetchData(false);
-    } catch (err) {
-      console.error("Failed to remove from watchlist:", err);
-      toast.error("Failed to remove coin", {
-        style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          borderRadius: "8px",
-          fontWeight: "600",
-          fontSize: "14px",
-          padding: "12px 16px",
-          border: "none",
-        },
-        iconTheme: { primary: "#DC2626", secondary: "#FFFFFF" },
-      });
-
-      fetchData(true);
-    }
-  }, [removeModal.coin, userId, fetchData]);
-
-  const handleTrade = useCallback((coin) => {
-    setTradeModal({ show: true, coin, type: "buy" });
-  }, []);
-
-  const handleTradeClose = useCallback(async () => {
-    setTradeModal({ show: false, coin: null, type: "buy" });
-    if (refreshPurchasedCoins) {
-      try {
-        await refreshPurchasedCoins();
-      } catch (error) {
-        console.error("Failed to refresh purchased coins:", error);
-      }
-    }
-  }, [refreshPurchasedCoins]);
-
-  const handleCoinClick = useCallback(
-    (coin) => {
-      navigate(`/coin/coin-details/${coin.id}`);
-    },
-    [navigate],
-  );
-
-  const stats = useMemo(() => {
-    const totalValue = mergedCoins.reduce((sum, coin) => {
-      const holding = coin.userHolding;
-      if (holding) {
-        const qty = holding.totalQuantity || holding.quantity || 0;
-        return sum + qty * (coin.current_price || 0);
-      }
-      return sum;
-    }, 0);
-
-    const gainers = mergedCoins.filter(
-      (c) => (c.price_change_percentage_24h || 0) > 0,
-    ).length;
-    const losers = mergedCoins.filter(
-      (c) => (c.price_change_percentage_24h || 0) < 0,
-    ).length;
-
-    return { total: mergedCoins.length, totalValue, gainers, losers };
-  }, [mergedCoins]);
-
-  return (
-    <>
-      <div
-        className={`min-h-screen ${TC.textPrimary} p-2 sm:p-4 lg:p-6 ${hasVisited ? "" : `transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}`}
-      >
-        <Outlet />
-
-        {/* Sticky Header */}
-        <WatchlistHeader
-          TC={TC}
-          isLight={isLight}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          disableAnimations={hasVisited}
-        />
-
-        <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-6 space-y-6">
-          <div
-            className={
-              hasVisited
-                ? ""
-                : `transition-all duration-300 ease-out delay-[100ms] ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`
-            }
-          >
-            <WatchlistStats
-              stats={stats}
-              TC={TC}
-              isLight={isLight}
-              disableAnimations={hasVisited}
-            />
-          </div>
-
-          <div
-            className={
-              hasVisited
-                ? ""
-                : `transition-all duration-300 ease-out delay-[150ms] ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`
-            }
-          >
-            {loading ? (
-              <div className={`rounded-2xl overflow-hidden ${TC.bgCard}`}>
-                <div className="p-8">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="mb-4">
-                      <Skeleton
-                        height={60}
-                        baseColor={TC.skeletonBase}
-                        highlightColor={TC.skeletonHighlight}
-                        borderRadius="0.5rem"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : paginatedCoins.length === 0 ? (
-              <div
-                className={`text-center py-16 rounded-2xl ${TC.bgCard} fade-in`}
-              >
-                <div className="text-6xl mb-4">⭐</div>
-                <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
-                  {searchTerm
-                    ? `No coins found matching "${searchTerm}"`
-                    : "Your watchlist is empty"}
-                </h3>
-                <p className={TC.textSecondary}>
-                  {!searchTerm &&
-                    "Add coins to your watchlist to track them here"}
-                </p>
-              </div>
-            ) : (
-              <>
-                {!isMobile ? (
-                  <WatchlistTable
-                    coins={paginatedCoins}
-                    TC={TC}
-                    isLight={isLight}
-                    handleCoinClick={handleCoinClick}
-                    handleTrade={handleTrade}
-                    setRemoveModal={setRemoveModal}
-                    handleAlertClick={handleAlertClick}
-                    disableAnimations={hasVisited}
-                  />
-                ) : (
-                  <WatchlistMobileCards
-                    coins={paginatedCoins}
-                    TC={TC}
-                    isLight={isLight}
-                    handleCoinClick={handleCoinClick}
-                    handleTrade={handleTrade}
-                    setRemoveModal={setRemoveModal}
-                    handleAlertClick={handleAlertClick}
-                    disableAnimations={hasVisited}
-                  />
-                )}
-              </>
-            )}
-          </div>
-
-          <div
-            className={
-              hasVisited
-                ? ""
-                : `transition-all duration-300 ease-out delay-[200ms] ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`
-            }
-          >
-            <WatchlistPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              setCurrentPage={setCurrentPage}
-              TC={TC}
-              isLight={isLight}
-              disableAnimations={hasVisited}
-            />
-          </div>
-        </div>
-      </div>
-
-      <PriceAlertModal
-        show={alertModal.show}
-        onClose={() => setAlertModal({ show: false, coin: null })}
-        coin={alertModal.coin}
-      />
-
-      <RemoveConfirmationModal
-        show={removeModal.show}
-        onClose={() => setRemoveModal({ show: false, coin: null })}
-        onConfirm={handleRemoveConfirm}
-        coin={removeModal.coin}
-        isLight={isLight}
-      />
-
-      <TradeModal
-        show={tradeModal.show}
-        onClose={handleTradeClose}
-        coin={tradeModal.coin}
-        userCoinData={watchlistData}
-        type={tradeModal.type}
-        purchasedCoins={purchasedCoins}
-      />
-    </>
-  );
+const SORT_COLUMNS = {
+  added: (c) => c.addedIndex,
+  name: (c) => c.name?.toLowerCase(),
+  price: (c) => c.current_price,
+  h24: (c) => c.price_change_percentage_24h,
+  d7: (c) => c.price_change_percentage_7d_in_currency,
+  mcap: (c) => c.market_cap,
+  holding: (c) => (c.holdingQuantity > 0 ? c.holdingQuantity * (c.current_price || 0) : null),
 };
 
-export default Watchlist;
+const Stat = ({ label, loading, children }) => (
+  <div className="min-w-0 px-4 py-3.5">
+    <p className="text-xs text-fg-subtle">{label}</p>
+    {loading ? <Skeleton className="mt-1.5 h-5 w-20" /> : <div className="mt-1 flex min-w-0 items-center gap-2">{children}</div>}
+  </div>
+);
+
+const Mover = ({ coin, change }) =>
+  coin ? (
+    <>
+      <CoinAvatar src={coin.image} symbol={coin.symbol} size={20} />
+      <span className="truncate text-base font-semibold text-fg">{coin.symbol?.toUpperCase()}</span>
+      <Delta value={change} className="text-xs" />
+    </>
+  ) : (
+    <span className="text-base font-semibold text-fg">–</span>
+  );
+
+/** Coins the user follows, with live prices and their position in each */
+export default function Watchlist() {
+  const { coins } = useCoinContext();
+  const { purchasedCoins } = usePurchasedCoins();
+  const { items, ids, toggle, loading, isError } = useWatchlistToggle();
+  const live = useBinanceTicker();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [addOpen, setAddOpen] = useState(false);
+  const [tradeCoin, setTradeCoin] = useState(null);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [alertCoin, setAlertCoin] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+
+  // Saved items plus the latest market data and the user's holding in each
+  const rows = useMemo(() => {
+    const market = new Map(coins.map((c) => [c.id, c]));
+    const held = new Map();
+    purchasedCoins.forEach((p) => {
+      const id = p.coin_id || p.coinId;
+      held.set(id, (held.get(id) || 0) + (p.totalQuantity ?? p.quantity ?? 0));
+    });
+    return items.map((item, index) => ({
+      ...item,
+      ...(market.get(item.id) || {}),
+      addedIndex: index,
+      holdingQuantity: held.get(item.id) || 0,
+    }));
+  }, [items, coins, purchasedCoins]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? rows.filter((c) => c.name?.toLowerCase().includes(q) || c.symbol?.toLowerCase().includes(q)) : rows;
+  }, [rows, query]);
+
+  const { sorted, sort, toggleSort } = useSortedRows(filtered, SORT_COLUMNS, { key: "added", dir: "desc" });
+  useEffect(() => setPage(1), [query, sort]);
+  const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Summary at live prices
+  const summary = useMemo(() => {
+    const withChange = rows
+      .map((c) => ({ coin: c, change: live[c.id]?.price_change_percentage_24h ?? c.price_change_percentage_24h }))
+      .filter((r) => Number.isFinite(r.change));
+    const byChange = [...withChange].sort((a, b) => b.change - a.change);
+    const avg = withChange.length ? withChange.reduce((s, r) => s + r.change, 0) / withChange.length : null;
+    const heldValue = rows.reduce(
+      (sum, c) => sum + c.holdingQuantity * (live[c.id]?.current_price ?? c.current_price ?? 0),
+      0,
+    );
+    return { avg, best: byChange[0], worst: byChange[byChange.length - 1], heldValue };
+  }, [rows, live]);
+
+  const remove = useCallback(
+    async (coin) => {
+      const ok = await toggle(coin, { silent: true });
+      if (!ok) return;
+      toast(
+        (t) => (
+          <span className="flex items-center gap-3">
+            {coin.symbol?.toUpperCase()} removed from watchlist
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                toggle(coin, { silent: true });
+              }}
+              className="font-bold text-brand"
+            >
+              Undo
+            </button>
+          </span>
+        ),
+        { id: `watch-${coin.id}`, duration: 5000 },
+      );
+    },
+    [toggle],
+  );
+
+  const openTrade = useCallback((coin) => {
+    setTradeCoin(coin);
+    setTradeOpen(true);
+  }, []);
+  const openAlert = useCallback((coin) => {
+    setAlertCoin(coin);
+    setAlertOpen(true);
+  }, []);
+
+  const suggestions = useMemo(() => coins.filter((c) => !isStablecoin(c) && !ids.has(c.id)).slice(0, 6), [coins, ids]);
+  const initialLoading = loading && items.length === 0;
+
+  return (
+    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Watchlist</h1>
+          <p className="mt-0.5 text-sm text-fg-subtle">
+            {items.length ? `${items.length} coin${items.length === 1 ? "" : "s"} you're following, at live prices.` : "Follow coins to track them in one place."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setAddOpen(true)}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover"
+        >
+          <Plus size={16} /> Add coins
+        </button>
+      </header>
+
+      {(initialLoading || items.length > 0) && (
+        <Card className="grid grid-cols-2 md:grid-cols-4 md:divide-x divide-line [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-line md:[&>*:nth-child(n+3)]:border-t-0">
+          <Stat label="Average 24h change" loading={initialLoading}>
+            <Delta value={summary.avg} className="text-base font-semibold" />
+          </Stat>
+          <Stat label="Best today" loading={initialLoading}>
+            <Mover coin={summary.best?.coin} change={summary.best?.change} />
+          </Stat>
+          <Stat label="Worst today" loading={initialLoading}>
+            <Mover coin={summary.worst?.coin} change={summary.worst?.change} />
+          </Stat>
+          <Stat label="Your holdings in these coins" loading={initialLoading}>
+            <span className="tabular text-base font-semibold text-fg">{formatUSD(summary.heldValue)}</span>
+          </Stat>
+        </Card>
+      )}
+
+      <Card>
+        {initialLoading ? (
+          <SkeletonRows rows={6} />
+        ) : isError && items.length === 0 ? (
+          <EmptyState icon={Star} title="Couldn't load your watchlist" description="Check your connection and refresh the page." className="py-14" />
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Star}
+            title="Your watchlist is empty"
+            description="Follow coins to see their live prices, 7-day trend and your position in one place."
+            className="py-12"
+            action={
+              <div className="mt-3 flex flex-col items-center gap-3">
+                {suggestions.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {suggestions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggle(c)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-line py-1 pl-1 pr-3 text-xs font-medium text-fg transition-colors hover:border-brand hover:text-brand"
+                      >
+                        <CoinAvatar src={c.image} symbol={c.symbol} size={20} />
+                        <Plus size={12} />
+                        {c.symbol?.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button type="button" onClick={() => setAddOpen(true)} className="text-xs font-semibold text-brand hover:underline">
+                  Browse all coins
+                </button>
+              </div>
+            }
+          />
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3 border-b border-line p-3 sm:p-4">
+              <SearchInput value={query} onChange={setQuery} placeholder="Filter your watchlist" className="w-full md:w-64" />
+              {sort.key !== "added" && (
+                <button
+                  type="button"
+                  onClick={() => toggleSort("added")}
+                  className="shrink-0 text-xs font-medium text-fg-muted hover:text-fg"
+                >
+                  Reset order
+                </button>
+              )}
+            </div>
+            {visible.length === 0 ? (
+              <EmptyState icon={SearchX} title="No coins match your filter" description="Try a different name or symbol." className="py-12" />
+            ) : (
+              <WatchlistTable
+                coins={visible}
+                isDesktop={isDesktop}
+                sort={sort}
+                onSort={toggleSort}
+                onRemove={remove}
+                onTrade={openTrade}
+                onAlert={openAlert}
+              />
+            )}
+            <Pagination page={page} pageSize={PAGE_SIZE} total={sorted.length} onPage={setPage} />
+          </>
+        )}
+      </Card>
+
+      <AddCoinsModal open={addOpen} onClose={() => setAddOpen(false)} watchedIds={ids} onToggle={toggle} />
+      <TradeModal show={tradeOpen} onClose={() => setTradeOpen(false)} coin={tradeCoin} type="buy" purchasedCoins={purchasedCoins} />
+      <PriceAlertModal show={alertOpen} onClose={() => setAlertOpen(false)} coin={alertCoin} />
+    </div>
+  );
+}

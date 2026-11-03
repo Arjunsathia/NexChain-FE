@@ -1,194 +1,98 @@
 import React, { useState } from "react";
-import ReactDOM from "react-dom";
-import { X, Send, Mail, MessageSquare } from "lucide-react";
-
+import { Send, Mail, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 import { postForm } from "@/api/axiosConfig";
+import { Modal, ModalHeader } from "@/Components/ui/modal";
+import { Segmented } from "@/Components/ui/segmented";
 
-const MessageUserModal = ({ isOpen, onClose, user, TC, isLight }) => {
-  const [messageType, setMessageType] = useState("email"); // 'email' or 'internal'
+const CHANNELS = [
+  { value: "email", label: "Email" },
+  { value: "internal", label: "In-app notification" },
+];
+
+const field =
+  "w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-brand";
+
+/** Email a user, or send them an in-app notification */
+const MessageUserModal = ({ isOpen, onClose, user }) => {
+  const [channel, setChannel] = useState("email");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  if (!isOpen || !user) return null;
-
-  const handleSend = async (e) => {
+  const send = async (e) => {
     e.preventDefault();
     if (!message.trim()) {
-      toast.error("Message content is required");
+      toast.error("Write a message first");
       return;
     }
-
+    setSending(true);
     try {
-      setLoading(true);
-
-      const payload = {
+      await postForm("/users/contact-user", {
         userId: user.id || user._id,
-        type: messageType,
-        subject: messageType === "email" ? subject : undefined,
+        type: channel,
+        subject: channel === "email" ? subject : undefined,
         message,
-      };
-
-      await postForm("/users/contact-user", payload);
-
-      toast.success(
-        `${messageType === "email" ? "Email" : "Message"} sent successfully to ${user.name}`,
-      );
-      onClose();
+      });
+      toast.success(`${channel === "email" ? "Email" : "Notification"} sent to ${user.name}`);
       setSubject("");
       setMessage("");
+      onClose();
     } catch (error) {
-      console.error("Failed to send message:", error);
-      // Error handling is already done in axiosConfig but we can show a specific toast if we want
-      // postForm throws, so we catch it here.
-      toast.error(error.response?.data?.error || "Failed to send message");
+      toast.error(error.response?.data?.error || "Failed to send the message");
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
-  return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div
-        className={`w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden ${TC.modalContent} animate-in zoom-in duration-300`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div
-          className={`px-6 py-4 border-b flex justify-between items-center ${isLight ? "border-gray-100" : "border-gray-800"}`}
-        >
-          <h3
-            className={`text-lg font-bold flex items-center gap-2 ${TC.textPrimary}`}
-          >
-            <Send className="w-5 h-5 text-blue-500" />
-            Contact User
-          </h3>
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            className={`p-2 rounded-full transition-colors ${isLight ? "hover:bg-gray-100 text-gray-500" : "hover:bg-white/10 text-gray-400"}`}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <form onSubmit={handleSend} className="p-6 space-y-4">
-          {/* User Info Preview */}
-          <div
-            className={`flex items-center gap-3 p-3 rounded-xl border ${isLight ? "bg-gray-50 border-gray-200" : "bg-white/5 border-white/10"}`}
-          >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
-              {user.name.charAt(0)}
-            </div>
+  return (
+    <Modal open={!!isOpen && !!user} onClose={onClose} label="Contact user">
+      {user && (
+        <form onSubmit={send}>
+          <ModalHeader title={`Message ${user.name}`} subtitle={user.email} onClose={onClose} />
+          <div className="space-y-4 px-5 pb-5">
+            <Segmented label="Channel" options={CHANNELS} value={channel} onChange={setChannel} className="w-full [&>button]:flex-1" />
+            <p className="-mt-1 flex items-center gap-1.5 text-xs text-fg-subtle">
+              {channel === "email" ? <Mail size={13} /> : <MessageSquare size={13} />}
+              {channel === "email" ? "Sent to the user's email address." : "Appears in the user's notifications inside NexChain."}
+            </p>
+            {channel === "email" && (
+              <div>
+                <label htmlFor="msg-subject" className="mb-1.5 block text-xs font-medium text-fg-muted">
+                  Subject
+                </label>
+                <input id="msg-subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" className={field} />
+              </div>
+            )}
             <div>
-              <p className={`text-sm font-bold ${TC.textPrimary}`}>
-                {user.name}
-              </p>
-              <p className={`text-xs ${TC.textSecondary}`}>{user.email}</p>
-            </div>
-          </div>
-
-          {/* Type Selection */}
-          <div className="flex bg-gray-100 dark:bg-black/20 p-1 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setMessageType("email")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${messageType === "email"
-                  ? "bg-white text-blue-600 shadow-sm dark:bg-gray-800 dark:text-blue-400"
-                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                }`}
-            >
-              <Mail className="w-4 h-4" /> Email
-            </button>
-            <button
-              type="button"
-              onClick={() => setMessageType("internal")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${messageType === "internal"
-                  ? "bg-white text-purple-600 shadow-sm dark:bg-gray-800 dark:text-purple-400"
-                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                }`}
-            >
-              <MessageSquare className="w-4 h-4" /> Internal Msg
-            </button>
-          </div>
-
-          {/* Subject (Only for Email) */}
-          {messageType === "email" && (
-            <div className="space-y-1">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}
-              >
-                Subject
+              <label htmlFor="msg-body" className="mb-1.5 block text-xs font-medium text-fg-muted">
+                Message
               </label>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Enter email subject..."
-                className={`w-full p-3 rounded-xl outline-none border transition-all text-sm ${isLight
-                    ? "bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-                    : "bg-gray-900/50 border-white/10 focus:border-blue-500 text-white"
-                  }`}
+              <textarea
+                id="msg-body"
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Write your message"
+                className={`${field} resize-none`}
               />
             </div>
-          )}
-
-          {/* Message Content */}
-          <div className="space-y-1">
-            <label
-              className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary}`}
-            >
-              Message
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Write your message here..."
-              rows={5}
-              className={`w-full p-3 rounded-xl outline-none border resize-none transition-all text-sm ${isLight
-                  ? "bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-                  : "bg-gray-900/50 border-white/10 focus:border-blue-500 text-white"
-                }`}
-            ></textarea>
-          </div>
-
-          {/* Footer Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-colors ${isLight
-                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  : "bg-white/5 text-gray-300 hover:bg-white/10"
-                }`}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-sm text-white shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${loading
-                  ? "bg-blue-600/50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
-                }`}
-            >
-              {loading ? (
-                <>Sending...</>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" /> Send{" "}
-                  {messageType === "email" ? "Email" : "Message"}
-                </>
-              )}
-            </button>
+            <div className="flex gap-2">
+              <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-line py-2.5 text-sm font-semibold text-fg hover:bg-surface-hover">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={sending}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+              >
+                <Send size={15} /> {sending ? "Sending…" : "Send"}
+              </button>
+            </div>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body,
+      )}
+    </Modal>
   );
 };
 

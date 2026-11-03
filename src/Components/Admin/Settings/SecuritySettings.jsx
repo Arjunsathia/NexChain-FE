@@ -1,196 +1,131 @@
 import React, { useState } from "react";
-import { FaShieldAlt, FaLock, FaQrcode, FaCheckCircle } from "react-icons/fa";
-import api from "../../../api/axiosConfig";
+import { ShieldCheck, QrCode } from "lucide-react";
 import { toast } from "react-hot-toast";
+import useUserContext from "@/hooks/useUserContext";
+import api from "@/api/axiosConfig";
+import { Card, CardHeader } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
 
-function SecuritySettings({ security, setSecurity, TC }) {
-  const [setupData, setSetupData] = useState(null);
-  const [otp, setOtp] = useState("");
+/** Authenticator-app 2FA for the signed-in admin (required for destructive admin actions) */
+export default function SecuritySettings() {
+  const { user, updateUser } = useUserContext();
+  const enabled = !!user?.twoFactorEnabled;
+  const [setup, setSetup] = useState(null); // { qrCode, secret }
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showSetup, setShowSetup] = useState(false);
 
-  const startSetup = async () => {
+  const start = async () => {
     setLoading(true);
     try {
       const res = await api.get("/auth/setup-totp");
-      setSetupData(res.data);
-      setShowSetup(true);
+      setSetup(res.data);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to start 2FA setup");
+      toast.error(err.response?.data?.message || "Couldn't start 2FA setup");
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyAndEnable = async () => {
-    if (otp.length !== 6) return toast.error("Enter 6-digit code");
+  const verify = async (e) => {
+    e.preventDefault();
+    if (code.length !== 6) {
+      toast.error("Enter the 6-digit code from your app");
+      return;
+    }
     setLoading(true);
     try {
-      await api.post("/auth/verify-totp", {
-        token: otp,
-        secret: setupData.secret,
-      });
-      toast.success("2FA Enabled Successfully!");
-      setSecurity({ ...security, twoFactor: true });
-      setShowSetup(false);
-      setSetupData(null);
-      setOtp("");
+      await api.post("/auth/verify-totp", { token: code, secret: setup.secret });
+      toast.success("Two-factor authentication is on");
+      updateUser({ twoFactorEnabled: true });
+      setSetup(null);
+      setCode("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid Code");
+      toast.error(err.response?.data?.message || "That code didn't match. Try the newest one.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div>
-        <h3
-          className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${TC.textPrimary}`}
-        >
-          Security Settings
-        </h3>
-
-        <div className={`flex flex-col p-4 rounded-xl ${TC.bgItem} gap-4 mb-4`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 bg-cyan-500/10 rounded-lg text-cyan-500">
-                <FaShieldAlt className="text-base sm:text-xl" />
+    <Card>
+      <CardHeader
+        icon={ShieldCheck}
+        title="Two-factor authentication"
+        subtitle="Required before destructive admin actions, such as deleting an account."
+        action={
+          enabled ? (
+            <Badge tone="up" dot>
+              On
+            </Badge>
+          ) : (
+            <Badge tone="warn" dot>
+              Off
+            </Badge>
+          )
+        }
+      />
+      <div className="px-4 pb-4">
+        {enabled ? (
+          <p className="text-sm text-fg-muted">
+            Your account asks for a code from your authenticator app when you sign in and before sensitive admin actions.
+          </p>
+        ) : !setup ? (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-fg-muted">
+              Use an authenticator app such as Google Authenticator, 1Password or Authy to protect admin access.
+            </p>
+            <button
+              type="button"
+              onClick={start}
+              disabled={loading}
+              className="shrink-0 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+            >
+              {loading ? "Starting…" : "Set up 2FA"}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={verify} className="flex flex-col gap-5 rounded-xl border border-line p-4 sm:flex-row">
+            <div className="shrink-0 self-start rounded-lg bg-white p-2">
+              <img src={setup.qrCode} alt="QR code for your authenticator app" className="size-36" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-4">
+              <div>
+                <p className="flex items-center gap-1.5 text-sm font-semibold text-fg">
+                  <QrCode size={15} /> 1. Scan the QR code
+                </p>
+                <p className="mt-1 text-xs text-fg-subtle">Or enter this key manually:</p>
+                <code className="mt-1 block select-all break-all rounded-md bg-surface-2 px-2 py-1.5 font-mono text-sm text-fg">{setup.secret}</code>
               </div>
               <div>
-                <h4
-                  className={`font-medium text-sm sm:text-base ${TC.textPrimary}`}
-                >
-                  Two-Factor Authentication
-                </h4>
-                <p className={`text-xs sm:text-sm ${TC.textSecondary}`}>
-                  {security.twoFactor
-                    ? "Your account is secured with 2FA"
-                    : "Add an extra layer of security"}
-                </p>
-              </div>
-            </div>
-
-            {security.twoFactor ? (
-              <div className="flex items-center gap-2 text-green-500 font-bold text-sm bg-green-500/10 px-3 py-1.5 rounded-full">
-                <FaCheckCircle /> Enabled
-              </div>
-            ) : (
-              <button
-                onClick={startSetup}
-                disabled={loading}
-                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
-              >
-                {loading ? "Loading..." : "Enable 2FA"}
-              </button>
-            )}
-          </div>
-
-          {/* SETUP AREA */}
-          {showSetup && setupData && (
-            <div className="mt-4 p-4 border border-cyan-500/30 rounded-xl bg-cyan-500/5 animate-in fade-in slide-in-from-top-4">
-              <h5
-                className={`font-bold mb-4 ${TC.textPrimary} flex items-center gap-2`}
-              >
-                <FaQrcode /> Scan QR Code
-              </h5>
-
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className="bg-white p-2 rounded-xl w-fit h-fit">
-                  <img
-                    src={setupData.qrCode}
-                    alt="2FA QR"
-                    className="w-32 h-32 sm:w-40 sm:h-40"
+                <label htmlFor="admin-2fa-code" className="text-sm font-semibold text-fg">
+                  2. Enter the 6-digit code
+                </label>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    id="admin-2fa-code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    className="tabular h-10 w-36 rounded-lg border border-line bg-surface px-3 text-center font-mono text-base tracking-[0.3em] text-fg outline-none focus:border-brand"
                   />
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <label
-                      className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary}`}
-                    >
-                      Manual Entry Code
-                    </label>
-                    <p
-                      className={`font-mono text-lg ${TC.textPrimary} break-all select-all`}
-                    >
-                      {setupData.secret}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`text-xs uppercase font-bold tracking-wider ${TC.textSecondary} mb-2 block`}
-                    >
-                      Verify Code
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={otp}
-                        onChange={(e) =>
-                          setOtp(e.target.value.replace(/\D/g, ""))
-                        }
-                        maxLength={6}
-                        placeholder="000 000"
-                        className={`w-full max-w-[200px] rounded-xl px-4 py-2 text-center tracking-[0.2em] font-mono outline-none border ${TC.bgInput}`}
-                      />
-                      <button
-                        onClick={verifyAndEnable}
-                        disabled={otp.length !== 6 || loading}
-                        className="px-4 py-2 bg-cyan-500 text-white rounded-xl font-bold disabled:opacity-50"
-                      >
-                        Verify
-                      </button>
-                    </div>
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={code.length !== 6 || loading}
+                    className="rounded-lg bg-brand px-4 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+                  >
+                    {loading ? "Checking…" : "Turn on"}
+                  </button>
+                  <button type="button" onClick={() => setSetup(null)} className="px-2 text-sm text-fg-muted hover:text-fg">
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 opacity-50 pointer-events-none">
-          {/* Unused Password fields for now, kept for layout but disabled as focus is 2FA */}
-          <div>
-            <label
-              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
-            >
-              Current Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                disabled
-                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
-              />
-            </div>
-          </div>
-          <div>
-            <label
-              className={`block text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide ${TC.textSecondary}`}
-            >
-              New Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                disabled
-                className={`w-full rounded-xl pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm outline-none transition-all border ${TC.bgInput}`}
-              />
-            </div>
-          </div>
-        </div>
-        <p className="text-xs text-center mt-2 text-yellow-500">
-          Password changes currently disabled in this demo.
-        </p>
+          </form>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }
-
-export default SecuritySettings;

@@ -1,422 +1,176 @@
-import { pressable } from "@/utils/a11y";
-import React, { useState, useMemo } from "react";
-import {
-  FaExchangeAlt,
-  FaBell,
-  FaLayerGroup,
-} from "react-icons/fa";
-import PriceAlertModal from "@/Components/Common/PriceAlertModal";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import React, { memo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell, Coins } from "lucide-react";
+import useSortedRows from "@/hooks/useSortedRows";
 import useMediaQuery from "@/hooks/useMediaQuery";
+import { EmptyState } from "@/Components/ui/card";
+import { SkeletonRows } from "@/Components/ui/skeleton";
+import { Delta } from "@/Components/ui/delta";
+import { CoinAvatar } from "@/Components/ui/coin-avatar";
+import { SortHeader } from "@/Components/ui/table";
+import { FlashPrice } from "@/Components/Crypto/LiveCoinRow";
+import { formatPrice, formatUSD } from "@/utils/format";
+import { cn } from "@/utils/utils";
 
-const HoldingsTable = ({
-  isLight,
-  holdings,
-  loading,
-  onTrade,
-  TC: passedTC,
-  disableAnimations = false,
-}) => {
-  const [alertModal, setAlertModal] = useState({ show: false, coin: null });
-  const isMobile = useMediaQuery("(max-width: 767px)"); // Below Tailwind md
-
-  const handleAlertClick = (e, coin) => {
-    e.stopPropagation();
-    setAlertModal({ show: true, coin });
-  };
-
-  const TC = useMemo(() => {
-    if (passedTC) return passedTC;
-
-    return {
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-
-      bgHeader: isLight
-        ? "bg-gray-100/50 border-b border-gray-200"
-        : "bg-gray-900/95 border-b border-gray-700/50",
-
-      bgHover: isLight ? "hover:bg-gray-50" : "hover:bg-white/5",
-
-      skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
-
-      textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
-      textNegative: isLight ? "text-rose-600" : "text-rose-400",
-
-      btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
-    };
-  }, [isLight, passedTC]);
-
-  if (loading) {
-    return (
-      <div
-        className={`
-          rounded-2xl
-          ${TC.bgCard}
-        `}
-      >
-        <div className="p-4 sm:p-6 space-y-4">
-          <Skeleton
-            height={40}
-            baseColor={TC.skeletonBase}
-            highlightColor={TC.skeletonHighlight}
-            borderRadius={12}
-          />
-          {[...Array(5)].map((_, i) => (
-            <Skeleton
-              key={i}
-              height={50}
-              baseColor={TC.skeletonBase}
-              highlightColor={TC.skeletonHighlight}
-              borderRadius={12}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!holdings || holdings.length === 0) {
-    return (
-      <div
-        className={`
-          rounded-2xl p-12 text-center
-          ${TC.bgCard}
-        `}
-      >
-        <div className="text-5xl mb-4 text-amber-500">🪙</div>
-        <h3 className={`text-xl font-bold mb-2 ${TC.textPrimary}`}>
-          No Holdings Yet
-        </h3>
-        <p className={TC.textSecondary}>
-          Start trading to build your portfolio.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`p-1 rounded-xl ${TC.bgCard}`}>
-      {/* Dashboard Style Header */}
-      <div className="px-4 pt-3 flex items-center justify-between mb-2">
-        <h3 className="font-bold text-base bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2">
-          <FaLayerGroup className="text-blue-500" size={14} />
-          Your Assets
-        </h3>
-        {holdings.length > 0 && (
-          <span
-            className={`text-[10px] ${TC.textSecondary} px-2 py-0.5 rounded-full border ${isLight ? "border-gray-200" : "border-gray-700"} font-bold uppercase tracking-wider`}
-          >
-            {holdings.length} {holdings.length === 1 ? "Asset" : "Assets"}
-          </span>
-        )}
-      </div>
-
-      {!isMobile ? (
-        <div
-          className={`overflow-hidden rounded-xl border ${isLight ? "border-gray-100" : "border-gray-700/50"} shadow-md mx-2 mb-2`}
-        >
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr
-                className={`${TC.bgHeader} uppercase tracking-wider text-xs font-bold`}
-              >
-                <th className={`px-4 sm:px-6 py-4 ${TC.textSecondary}`}>Name</th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-right ${TC.textSecondary}`}
-                >
-                  Price
-                </th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-right ${TC.textSecondary}`}
-                >
-                  Quantity
-                </th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-right ${TC.textSecondary}`}
-                >
-                  Value
-                </th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-right ${TC.textSecondary}`}
-                >
-                  24h Change
-                </th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-right ${TC.textSecondary}`}
-                >
-                  PnL
-                </th>
-                <th
-                  className={`px-4 sm:px-6 py-4 text-center ${TC.textSecondary}`}
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody
-              className={`divide-y ${isLight ? "divide-gray-100" : "divide-white/5"}`}
-            >
-              {holdings.map((coin) => (
-                <tr
-                  key={coin.coinId}
-                  className={`
-                    transition-all duration-200 cursor-pointer group
-                    ${TC.bgHover}
-                  `}
-                >
-                  <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img
-                          src={coin.image}
-                          alt={coin.coinName}
-                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-gray-200 dark:border-white/10 group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAlertClick(e, coin);
-                          }}
-                          className="absolute -top-1 -left-1 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-yellow-500"
-                        >
-                          <FaBell size={10} />
-                        </button>
-                      </div>
-                      <div>
-                        <div
-                          className={`font-bold ${TC.textPrimary} group-hover:text-cyan-400 transition-colors text-sm`}
-                        >
-                          {coin.coinName}
-                        </div>
-                        <div
-                          className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-                        >
-                          {coin.coinSymbol?.toUpperCase()}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td
-                    className={`
-                      px-4 sm:px-6 py-3 sm:py-4 text-right text-sm font-medium
-                      ${TC.textPrimary}
-                    `}
-                  >
-                    $
-                    {coin.currentPrice?.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 6,
-                    })}
-                  </td>
-
-                  <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
-                    <div
-                      className={`font-bold text-sm ${coin.profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}
-                    >
-                      {coin.totalQuantity?.toFixed(4)}
-                    </div>
-                    <div
-                      className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-                    >
-                      {coin.coinSymbol?.toUpperCase()}
-                    </div>
-                  </td>
-
-                  <td
-                    className={`
-                      px-4 sm:px-6 py-3 sm:py-4 text-right font-bold text-sm
-                      ${coin.profitLoss >= 0 ? TC.textPositive : TC.textNegative}
-                    `}
-                  >
-                    $
-                    {coin.totalCurrentValue?.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </td>
-
-                  <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
-                    <div
-                      className={`font-bold text-sm ${coin.priceChange24h >= 0 ? TC.textPositive : TC.textNegative}`}
-                    >
-                      {coin.priceChange24h >= 0 ? "+" : ""}
-                      {coin.priceChange24h?.toFixed(2)}%
-                    </div>
-                  </td>
-
-                  <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
-                    <div
-                      className={`font-bold text-sm ${coin.profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}
-                    >
-                      {coin.profitLoss >= 0 ? "+" : ""}$
-                      {Math.abs(coin.profitLoss).toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </div>
-                    <div
-                      className={`text-[10px] font-bold ${coin.profitLossPercentage >= 0 ? TC.textPositive : TC.textNegative} opacity-80`}
-                    >
-                      {coin.profitLossPercentage >= 0 ? "+" : ""}
-                      {coin.profitLossPercentage?.toFixed(2)}%
-                    </div>
-                  </td>
-
-                  <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onTrade(coin);
-                        }}
-                        className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-                        title="Trade"
-                      >
-                        <FaExchangeAlt className="text-xs" />
-                        Trade
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="space-y-4 px-2 pb-2">
-          {holdings.map((coin, index) => (
-            <div
-              key={coin.coinId}
-              className={`p-4 rounded-xl ${TC.bgCard} transition-all duration-300 cursor-pointer group relative overflow-hidden`}
-              style={
-                disableAnimations ? {} : { animationDelay: `${index * 0.05}s` }
-              }
-              {...pressable(() => onTrade(coin))}
-            >
-              <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                    <img
-                      src={coin.image}
-                      alt={coin.coinName}
-                      className="w-10 h-10 rounded-full"
-                    />
-                  </div>
-                  <div>
-                    <div className={`font-bold tracking-tight ${TC.textPrimary}`}>
-                      {coin.coinName}
-                    </div>
-                    <div
-                      className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary}`}
-                    >
-                      {coin.coinSymbol?.toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div
-                    className={`font-bold tracking-tight ${coin.profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}
-                  >
-                    $
-                    {coin.totalCurrentValue?.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
-                  <div className={`text-[10px] font-medium ${TC.textSecondary}`}>
-                    {coin.totalQuantity?.toFixed(4)}{" "}
-                    {coin.coinSymbol?.toUpperCase()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-sm pt-2 relative z-10">
-                <div>
-                  <div
-                    className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60 mb-1`}
-                  >
-                    Price
-                  </div>
-                  <div className={`font-bold text-xs ${TC.textPrimary}`}>
-                    $
-                    {coin.currentPrice?.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 6,
-                    })}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div
-                    className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60 mb-1`}
-                  >
-                    24h
-                  </div>
-                  <div
-                    className={`font-bold text-xs ${coin.priceChange24h >= 0 ? TC.textPositive : TC.textNegative}`}
-                  >
-                    {coin.priceChange24h >= 0 ? "+" : ""}
-                    {coin.priceChange24h?.toFixed(2)}%
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div
-                    className={`text-[10px] font-bold uppercase tracking-wider ${TC.textSecondary} opacity-60 mb-1`}
-                  >
-                    PnL
-                  </div>
-                  <div
-                    className={`font-bold text-xs ${coin.profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}
-                  >
-                    {coin.profitLoss >= 0 ? "+" : ""}$
-                    {Math.abs(coin.profitLoss).toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-dashed relative z-10 flex gap-2"
-                style={{
-                  borderColor: isLight ? "#e2e8f0" : "rgba(255,255,255,0.1)",
-                }}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTrade(coin);
-                  }}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
-                >
-                  Trade Now
-                </button>
-                <button
-                  onClick={(e) => handleAlertClick(e, coin)}
-                  className={`p-2 rounded-xl border ${isLight ? "bg-gray-50 border-gray-200 text-gray-600" : "bg-white/5 border-white/10 text-gray-400"} hover:text-yellow-500 transition-all active:scale-95`}
-                >
-                  <FaBell className="text-sm" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <PriceAlertModal
-        show={alertModal.show}
-        onClose={() => setAlertModal({ show: false, coin: null })}
-        coin={alertModal.coin}
-      />
-    </div>
-  );
+const SORT_COLUMNS = {
+  name: (p) => p.name?.toLowerCase(),
+  quantity: (p) => p.quantity,
+  avg: (p) => p.avgCost,
+  price: (p) => p.price,
+  h24: (p) => p.change24,
+  value: (p) => p.value,
+  pnl: (p) => p.pnl,
+  share: (p) => p.allocation,
 };
 
-export default React.memo(HoldingsTable);
+const qty = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 8 });
+const signedUSD = (n) => `${n >= 0 ? "+" : "−"}${formatUSD(Math.abs(n))}`;
+
+function ActionButtons({ position, onBuy, onSell, onAlert, compact }) {
+  const base = "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors";
+  return (
+    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+      {!compact && (
+        <button
+          type="button"
+          onClick={() => onAlert(position)}
+          aria-label={`Set a price alert for ${position.symbol}`}
+          title="Price alert"
+          className="grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+        >
+          <Bell size={15} />
+        </button>
+      )}
+      <button type="button" onClick={() => onBuy(position)} className={cn(base, "bg-up-soft text-up hover:bg-up hover:text-white")}>
+        Buy
+      </button>
+      <button type="button" onClick={() => onSell(position)} className={cn(base, "bg-down-soft text-down hover:bg-down hover:text-white")}>
+        Sell
+      </button>
+    </div>
+  );
+}
+
+/** Open positions valued at live prices */
+function HoldingsTable({ positions, loading, onBuy, onSell, onAlert }) {
+  const navigate = useNavigate();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { sorted, sort, toggleSort } = useSortedRows(positions, SORT_COLUMNS, { key: "value", dir: "desc" });
+
+  if (loading) return <SkeletonRows rows={4} />;
+  if (positions.length === 0) {
+    return (
+      <EmptyState
+        icon={Coins}
+        title="No open positions"
+        description="Coins you buy appear here with their live value and profit or loss."
+        className="py-12"
+        action={
+          <Link to="/cryptolist" className="mt-2 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-brand-fg hover:bg-brand-hover">
+            Explore markets
+          </Link>
+        }
+      />
+    );
+  }
+
+  if (!isDesktop) {
+    return (
+      <ul className="divide-y divide-line">
+        {sorted.map((p) => (
+          <li key={p.coinId} className="px-4 py-3">
+            <button type="button" onClick={() => navigate(`/coin/coin-details/${p.coinId}`)} className="flex w-full items-center gap-3 text-left">
+              <CoinAvatar src={p.image} symbol={p.symbol} size={32} />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-fg">{p.symbol}</span>
+                <span className="tabular block text-xs text-fg-subtle">
+                  {qty(p.quantity)} · avg {formatPrice(p.avgCost)}
+                </span>
+              </span>
+              <span className="text-right">
+                <span className="tabular block text-sm font-medium text-fg">{formatUSD(p.value)}</span>
+                <span className={cn("tabular text-xs", p.pnl >= 0 ? "text-up" : "text-down")}>
+                  {signedUSD(p.pnl)} ({p.pnlPct >= 0 ? "+" : "−"}
+                  {Math.abs(p.pnlPct).toFixed(2)}%)
+                </span>
+              </span>
+            </button>
+            <div className="mt-2.5 flex items-center justify-between">
+              <span className="text-xs text-fg-subtle">
+                {formatPrice(p.price)} <Delta value={p.change24} className="ml-1" />
+              </span>
+              <ActionButtons position={p} onBuy={onBuy} onSell={onSell} onAlert={onAlert} compact />
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  const header = (label, key, extra) => <SortHeader label={label} sortKey={key} sort={sort} onSort={toggleSort} {...extra} />;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[860px] border-collapse">
+        <thead className="border-b border-line bg-surface-2/60">
+          <tr>
+            {header("Asset", "name", { align: "left", className: "pl-4" })}
+            {header("Quantity", "quantity")}
+            {header("Avg cost", "avg", { className: "hidden lg:table-cell" })}
+            {header("Price", "price")}
+            {header("24h", "h24")}
+            {header("Value", "value")}
+            {header("Unrealized P&L", "pnl")}
+            {header("Share", "share", { className: "hidden xl:table-cell" })}
+            <th className="w-px" />
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((p) => (
+            <tr
+              key={p.coinId}
+              onClick={() => navigate(`/coin/coin-details/${p.coinId}`)}
+              className="cursor-pointer border-b border-line transition-colors last:border-0 hover:bg-surface-hover"
+            >
+              <td className="py-3 pl-4 pr-3">
+                <div className="flex items-center gap-3">
+                  <CoinAvatar src={p.image} symbol={p.symbol} size={28} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-fg">{p.name}</p>
+                    <p className="text-xs text-fg-subtle">{p.symbol}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="tabular px-3 py-3 text-right text-sm text-fg">{qty(p.quantity)}</td>
+              <td className="tabular hidden px-3 py-3 text-right text-sm text-fg-muted lg:table-cell">{formatPrice(p.avgCost)}</td>
+              <td className="px-3 py-3 text-right">
+                <FlashPrice value={p.price} className="text-sm font-medium text-fg" />
+              </td>
+              <td className="px-3 py-3 text-right text-sm">
+                <Delta value={p.change24} />
+              </td>
+              <td className="tabular px-3 py-3 text-right text-sm font-medium text-fg">{formatUSD(p.value)}</td>
+              <td className="px-3 py-3 text-right">
+                <span className={cn("tabular block text-sm font-medium", p.pnl >= 0 ? "text-up" : "text-down")}>{signedUSD(p.pnl)}</span>
+                <Delta value={p.pnlPct} className="text-xs" />
+              </td>
+              <td className="hidden px-3 py-3 xl:table-cell">
+                <div className="ml-auto flex w-24 items-center gap-2">
+                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+                    <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.min(p.allocation, 100)}%` }} />
+                  </span>
+                  <span className="tabular w-9 text-right text-xs text-fg-muted">{p.allocation.toFixed(0)}%</span>
+                </div>
+              </td>
+              <td className="py-3 pl-2 pr-4">
+                <ActionButtons position={p} onBuy={onBuy} onSell={onSell} onAlert={onAlert} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default memo(HoldingsTable);

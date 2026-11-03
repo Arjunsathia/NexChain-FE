@@ -32,6 +32,10 @@ export const CORE_COINS = {
   uniswap: "uni",
 };
 
+// Dollar-pegged coins: always ~$1, so they're left out of charts and "most traded"
+const STABLECOINS = new Set(["usdt", "usdc", "dai", "usde", "usds", "fdusd", "busd", "tusd", "pyusd", "usd1", "usdg", "rlusd", "usdtb", "usdd", "gho", "usdf", "usd0", "usdy", "usyc", "buidl"]);
+export const isStablecoin = (coin) => STABLECOINS.has(String(coin?.symbol || "").toLowerCase());
+
 /**
  * Binance USDT pair for a coin, e.g. ("bitcoin") → "btcusdt". Coins outside the
  * core list fall back to their CoinGecko symbol. Tether has no USDT pair.

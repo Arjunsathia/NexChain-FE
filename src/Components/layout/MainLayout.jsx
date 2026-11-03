@@ -1,109 +1,101 @@
-import Navbar from "./Navbar";
+import Topbar from "./Topbar";
+import DemoBanner from "./DemoBanner";
+import { DesktopSidebar } from "./Sidebar";
+import { sectionKey } from "./navConfig";
 
 import { useOutlet, useLocation } from "react-router-dom";
-import { useEffect, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
+import { motion } from "framer-motion";
 import useUserContext from "@/hooks/useUserContext";
-import { motion, AnimatePresence } from "framer-motion";
 import ChatbotWidget from "@/Components/Common/ChatbotWidget";
 import DataLoader from "@/Components/Common/DataLoader";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 
+const SIDEBAR_KEY = "nexchain:sidebar-collapsed";
+const SIDEBAR_WIDTH = { expanded: "240px", collapsed: "68px" };
+
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 const LayoutLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+    <div className="size-8 rounded-full border-2 border-line border-t-brand animate-spin" />
   </div>
 );
 
 export default function MainLayout() {
   const { fetchUsers } = useUserContext();
   const { markVisited } = useVisitedRoutes();
-
   const location = useLocation();
-  // Capture the current outlet element (frozen route)
   const element = useOutlet();
+
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleSidebar = useCallback(() => {
+    setCollapsed((prev) => {
+      try {
+        localStorage.setItem(SIDEBAR_KEY, prev ? "0" : "1");
+      } catch {
+        // preference just won't persist
+      }
+      return !prev;
+    });
+  }, []);
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   // ProtectedRoute guarantees a session here; refresh the full profile once
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Mark current route as visited
   useEffect(() => {
     markVisited(location.pathname);
+    setDrawerOpen(false);
   }, [location.pathname, markVisited]);
 
-  const pageKey = location.pathname.startsWith("/admin")
-    ? "admin"
-    : location.pathname.startsWith("/user")
-      ? "user"
-      : location.pathname;
-
-
-
-  // Scroll to top instantly when the pathname changes (navigation start)
+  // Start each page at the top
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.lenis) {
-        window.lenis.scrollTo(0, { immediate: true });
-      } else {
-        window.scrollTo({ top: 0, behavior: "instant" });
-      }
-    }
+    if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0, behavior: "instant" });
   }, [location.pathname]);
 
-
-  const isSidebarPage =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/user") ||
-    location.pathname.startsWith("/user-profile");
+  const pageKey = sectionKey(location.pathname);
 
   return (
-    <div className="min-h-screen w-full flex flex-col relative isolate transition-colors duration-300 scroll-smooth">
+    <div
+      className="app-shell relative isolate min-h-screen w-full bg-canvas text-fg"
+      style={{ "--sidebar-w": collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded }}
+    >
       {/* Market data and portfolio polling run only for signed-in pages */}
       <DataLoader />
-      <div
-        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-light pointer-events-none"
-        style={{
-          background: "linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff)",
-        }}
-      />
-      <div
-        className="fixed inset-0 -z-20 transition-opacity duration-500 ease-in-out bg-layer-dark pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom right, #000000, #0b182d, #000000)",
-        }}
-      />
+      <DesktopSidebar collapsed={collapsed} onToggle={toggleSidebar} />
 
+      <div className="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-[var(--sidebar-w)]">
+        <Topbar drawerOpen={drawerOpen} onOpenDrawer={openDrawer} onCloseDrawer={closeDrawer} />
+        <DemoBanner />
 
+        {/* Bottom padding keeps the last rows clear of the floating chat button */}
+        <main className="w-full min-w-0 flex-1 pb-24 sm:p-4 sm:pb-24 lg:p-6 lg:pb-24">
+          {/* Fade the new page in; no exit animation, so navigation never waits */}
+          <motion.div
+            key={pageKey}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="h-full w-full"
+          >
+            <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
+          </motion.div>
+        </main>
+      </div>
 
-      <Navbar />
-
-      <main className="flex-1 w-full max-w-full p-0 pt-[60px] lg:pt-0 sm:p-4 transition-colors duration-300">
-        <AnimatePresence mode="wait">
-          {!isSidebarPage ? (
-            <motion.div
-              key={pageKey}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }} // Slightly longer but smoother
-              className="w-full h-full"
-            >
-              <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
-            </motion.div>
-          ) : (
-            <div key={pageKey} className="w-full h-full">
-              <Suspense fallback={<LayoutLoader />}>{element}</Suspense>
-            </div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Footer - Only on Landing Page */}
-      {/* Footer Removed as per user request */}
-
-      { }
       <ChatbotWidget />
     </div>
   );

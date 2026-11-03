@@ -1,6 +1,7 @@
 @import "tailwindcss";
 /* animate-in / fade-in / slide-in-from-* utilities used across the app */
 @import "tw-animate-css";
+@import "./design-system.css";
 
 /* Dark mode follows the app's theme toggle (.dark on <html>), not the OS setting */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -63,22 +64,33 @@
   --sidebar-border: oklch(0.897 0.01 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
-  /* Application Colors */
-  --app-bg: linear-gradient(to top left, #ffffff, #f8fafc, #eff6ff);
+  /* App design tokens (light). Components use these through the Tailwind
+     classes mapped in @theme inline below (bg-surface, text-fg-muted, ...),
+     so they never need to check the theme in JavaScript. */
+  --canvas: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #f6f8fa;
+  --surface-hover: #eef2f6;
+  --line: #e3e8ef;
+  --line-strong: #cfd6e0;
+  --fg: #0d1626;
+  --fg-muted: #566175;
+  --fg-subtle: #8792a4;
+  --brand: #0a74d1;
+  --brand-hover: #0862b3;
+  --brand-fg: #ffffff;
+  --brand-soft: rgb(10 116 209 / 0.09);
+  --up: #068a5e;
+  --up-soft: rgb(6 138 94 / 0.1);
+  --down: #d02f37;
+  --down-soft: rgb(208 47 55 / 0.09);
+  --warn: #b7791f;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.05);
+  --shadow-pop: 0 12px 32px -8px rgb(16 24 40 / 0.18), 0 2px 6px rgb(16 24 40 / 0.06);
+  --chart-grid: #edf0f4;
+  --topbar-h: 56px;
 
-  /* Navbar Styles - Light */
-  --nav-bg: rgba(255, 255, 255, 0.6);
-  --nav-border: transparent;
-  --nav-text: #4b5563;
-  --nav-hover-bg: rgba(243, 244, 246, 0.8);
-  --nav-hover-text: #111827;
-  --nav-item-active-bg: linear-gradient(
-    to top,
-    rgba(191, 219, 254, 0.8),
-    rgba(219, 234, 254, 0.5),
-    rgba(239, 246, 255, 0.2)
-  );
-  --nav-item-active-text: #1d4ed8;
+  --app-bg: var(--canvas);
 }
 
 [data-theme="dark"],
@@ -117,21 +129,75 @@
   --sidebar-border: oklch(0.373 0.034 259.733);
   --sidebar-ring: oklch(0.551 0.027 264.364);
 
-  --app-bg: linear-gradient(to bottom right, #000000, #0b182d, #000000);
+  /* App design tokens (dark) */
+  --canvas: #0a0d13;
+  --surface: #11151d;
+  --surface-2: #161b25;
+  --surface-hover: #1c2230;
+  --line: #222936;
+  --line-strong: #2e3746;
+  --fg: #e8ecf3;
+  --fg-muted: #929cae;
+  --fg-subtle: #646e80;
+  --brand: #3a9eff;
+  --brand-hover: #5daeff;
+  --brand-fg: #04121f;
+  --brand-soft: rgb(58 158 255 / 0.12);
+  --up: #1ec98a;
+  --up-soft: rgb(30 201 138 / 0.12);
+  --down: #f2525a;
+  --down-soft: rgb(242 82 90 / 0.12);
+  --warn: #f0b429;
+  --shadow-card: none;
+  --shadow-pop: 0 16px 40px -8px rgb(0 0 0 / 0.6);
+  --chart-grid: #1a202b;
 
-  /* Navbar Styles - Dark */
-  --nav-bg: rgba(31, 41, 55, 0.5);
-  --nav-border: transparent;
-  --nav-text: #9ca3af;
-  --nav-hover-bg: rgba(255, 255, 255, 0.05);
-  --nav-hover-text: #ffffff;
-  --nav-item-active-bg: linear-gradient(
-    to top,
-    rgba(22, 78, 99, 0.6),
-    rgba(21, 94, 117, 0.4),
-    rgba(6, 182, 212, 0.1)
-  );
-  --nav-item-active-text: #67e8f9;
+  --app-bg: var(--canvas);
+}
+
+/* Map the tokens to Tailwind utilities. "inline" makes each utility read the
+   variable at runtime, so switching the .dark class restyles everything. */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-up: var(--up);
+  --color-up-soft: var(--up-soft);
+  --color-down: var(--down);
+  --color-down-soft: var(--down-soft);
+  --color-warn: var(--warn);
+
+  /* shadcn names used by Components/ui/button and input */
+  --color-background: var(--canvas);
+  --color-foreground: var(--fg);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--fg);
+  --color-primary: var(--brand);
+  --color-primary-foreground: var(--brand-fg);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--fg);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--fg-muted);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--fg);
+  --color-destructive: var(--down);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--brand);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* 
@@ -154,10 +220,63 @@ body {
   width: 100%;
 }
 
-/* Dark Mode Overscroll Fix */
-[data-theme="dark"] body,
-[data-theme="dark"] html {
-  background-color: #000000;
+/* Overscroll area matches the page */
+html {
+  background-color: var(--canvas);
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+body {
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prices and amounts: digits line up and don't jitter as they update */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading placeholders */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--surface-hover), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+/* Brief tint when a live price changes */
+@keyframes flash-up {
+  from { background-color: var(--up-soft); }
+  to { background-color: transparent; }
+}
+@keyframes flash-down {
+  from { background-color: var(--down-soft); }
+  to { background-color: transparent; }
+}
+.flash-up { animation: flash-up 0.9s ease-out; }
+.flash-down { animation: flash-down 0.9s ease-out; }
+
+/* Respect the OS "reduce motion" setting everywhere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Typography */
@@ -181,23 +300,22 @@ canvas {
 ================================================================
 */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(31, 41, 55, 0.8);
-  border-radius: 6px;
+  background: var(--canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.8);
-  border-radius: 6px;
-  border: 2px solid rgba(31, 41, 55, 0.8);
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--canvas);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.7);
+  background: var(--fg-subtle);
 }
 
 .no-scrollbar::-webkit-scrollbar,
@@ -447,4 +565,15 @@ html.lenis body {
 
 .animate-spin-slow-reverse {
   animation: spin-slow-reverse 12s linear infinite;
+}
+
+/* Toast countdown line; pauses while hovered, like the toast's own timer */
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.toast-progress { animation: toast-progress linear forwards; }
+.group:hover > .toast-progress { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .toast-progress { display: none; }
 }

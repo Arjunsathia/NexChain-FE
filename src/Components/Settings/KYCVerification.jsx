@@ -1,311 +1,204 @@
-import React, { useState, useEffect } from "react";
-import {
-  FaIdCard,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaSpinner,
-  FaUpload,
-} from "react-icons/fa";
+import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { BadgeCheck, Clock, FileText, Upload, XCircle } from "lucide-react";
 import api from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
-import toast from "react-hot-toast";
+import DemoLockNotice from "./DemoLockNotice";
+import { Badge } from "@/Components/ui/badge";
+import { Skeleton } from "@/Components/ui/skeleton";
+import SettingsSection, { Field } from "./SettingsSection";
+import { inputClass, primaryButton } from "./settingsStyles";
+import { cn } from "@/utils/utils";
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
-
-const KYCVerification = ({ TC, isLight }) => {
-  const { user } = useUserContext();
-  const isDark = !isLight;
-  const [status, setStatus] = useState("loading");
-  const [formData, setFormData] = useState({
-    fullName: "",
-    dob: "",
-    address: "",
-    idType: "passport",
-    idNumber: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [documentFile, setDocumentFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const res = await api.get(`/kyc/status/${user.id}`);
-        if (res.data.success) {
-          setStatus(res.data.kycStatus);
-          setRejectionReason(res.data.kycData?.rejectionReason || "");
-        }
-      } catch (error) {
-        console.error("Failed to fetch KYC status", error);
-        setStatus("unverified");
-      }
-    };
-
-    if (user?.id) {
-      fetchStatus();
-    }
-  }, [user?.id]);
-
-  // Image preview for the chosen file (PDFs just show their name)
-  useEffect(() => {
-    if (!documentFile || !documentFile.type.startsWith("image/")) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(documentFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [documentFile]);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > MAX_FILE_BYTES) {
-      toast.error("File is too large (max 5 MB)");
-      e.target.value = "";
-      return;
-    }
-    setDocumentFile(file);
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!documentFile) {
-      toast.error("Please attach a photo or scan of your ID document");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const body = new FormData();
-      Object.entries(formData).forEach(([key, value]) => body.append(key, value));
-      body.append("document", documentFile);
-      const res = await api.post("/kyc/submit", body);
-      if (res.data.success) {
-        toast.success("KYC Submitted Successfully!");
-        setStatus("pending");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to submit KYC");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (status === "loading")
-    return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-6"></div>
-        <div className="h-64 w-full bg-gray-100 dark:bg-gray-800/50 rounded-xl"></div>
-      </div>
-    );
-
-  return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      <h2
-        className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}
-      >
-        <FaIdCard className="text-cyan-500" />
-        Identity Verification (KYC)
-      </h2>
-
-      {status === "verified" && (
-        <div
-          className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}
-        >
-          <div className="p-4 rounded-full bg-green-500/10 mb-4">
-            <FaCheckCircle className="text-4xl text-green-500" />
-          </div>
-          <h3
-            className={`text-xl font-bold mb-2 ${isDark ? "text-green-400" : "text-green-700"}`}
-          >
-            Identity Verified
-          </h3>
-          <p
-            className={`text-sm ${isDark ? "text-green-300/80" : "text-green-600"}`}
-          >
-            Your identity has been verified. You have full access to all
-            features.
-          </p>
-        </div>
-      )}
-
-      {status === "pending" && (
-        <div
-          className={`border p-8 rounded-2xl text-center flex flex-col items-center justify-center ${isDark ? "bg-yellow-900/10 border-yellow-500/20" : "bg-yellow-50 border-yellow-200"}`}
-        >
-          <div className="p-4 rounded-full bg-yellow-500/10 mb-4">
-            <FaSpinner className="text-4xl text-yellow-500 animate-spin" />
-          </div>
-          <h3
-            className={`text-xl font-bold mb-2 ${isDark ? "text-yellow-400" : "text-yellow-700"}`}
-          >
-            Verification Pending
-          </h3>
-          <p
-            className={`text-sm ${isDark ? "text-yellow-300/80" : "text-yellow-600"}`}
-          >
-            Your documents are under review. This usually takes 24-48 hours.
-          </p>
-        </div>
-      )}
-
-      {(status === "unverified" || status === "rejected") && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {status === "rejected" && (
-            <div
-              className={`border p-4 rounded-xl flex items-center gap-3 mb-6 ${isDark ? "bg-red-900/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700"}`}
-            >
-              <FaTimesCircle className="text-xl shrink-0" />
-              <div>
-                <p className="font-bold text-sm">Verification Rejected</p>
-                <p className="text-xs opacity-90">
-                  {rejectionReason
-                    ? `Reason: ${rejectionReason}. Please correct it and submit again.`
-                    : "Please check your details and try again."}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                required
-                value={formData.fullName}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                placeholder="As per ID document"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                name="dob"
-                required
-                value={formData.dob}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-            >
-              Address
-            </label>
-            <textarea
-              name="address"
-              required
-              value={formData.address}
-              onChange={handleChange}
-              rows="2"
-              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all resize-none ${TC.bgInput} ${TC.textPrimary}`}
-              placeholder="Your residential address"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                ID Type
-              </label>
-              <select
-                name="idType"
-                value={formData.idType}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-              >
-                <option value="passport">Passport</option>
-                <option value="national_id">National ID</option>
-                <option value="drivers_license">Driver&apos;s License</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                ID Number
-              </label>
-              <input
-                type="text"
-                name="idNumber"
-                required
-                value={formData.idNumber}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                placeholder="Document Number"
-              />
-            </div>
-          </div>
-
-          <label
-            className={`block border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer group focus-within:border-cyan-500 ${isDark ? "border-gray-700 hover:border-cyan-500/50 hover:bg-gray-800" : "border-gray-300 hover:border-cyan-500 hover:bg-gray-50"}`}
-          >
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              onChange={handleFileChange}
-              className="sr-only"
-            />
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Selected ID document"
-                className="mx-auto mb-3 max-h-48 rounded-lg object-contain"
-              />
-            ) : (
-              <FaUpload
-                className={`text-3xl mx-auto mb-3 transition-colors ${isDark ? "text-gray-600 group-hover:text-cyan-500" : "text-gray-400 group-hover:text-cyan-500"}`}
-              />
-            )}
-            <p className={`text-sm font-medium ${TC.textPrimary}`}>
-              {documentFile ? documentFile.name : "Click to upload ID Document"}
-            </p>
-            <p className={`text-xs mt-1 ${TC.textSecondary}`}>
-              JPG, PNG, WebP or PDF, up to 5 MB. Only reviewers can see it.
-            </p>
-          </label>
-
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={TC.btnPrimary}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2 justify-center">
-                  <FaSpinner className="animate-spin" /> Submitting...
-                </span>
-              ) : (
-                "Submit Verification"
-              )}
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
-  );
+const ID_TYPES = [
+  { value: "passport", label: "Passport" },
+  { value: "national_id", label: "National ID card" },
+  { value: "drivers_license", label: "Driver's licence" },
+];
+const STATUS = {
+  verified: { label: "Verified", tone: "up" },
+  pending: { label: "In review", tone: "warn" },
+  rejected: { label: "Needs changes", tone: "down" },
+  unverified: { label: "Not started", tone: "neutral" },
 };
 
-export default KYCVerification;
+function Notice({ tone, icon: Icon, title, children }) {
+  const tones = { up: "border-up/30 bg-up-soft text-up", warn: "border-warn/30 bg-warn/10 text-warn", down: "border-down/30 bg-down-soft text-down" };
+  return (
+    <div className={cn("flex gap-3 rounded-xl border p-4", tones[tone])}>
+      <Icon size={20} className="mt-0.5 shrink-0" />
+      <div>
+        <p className="text-sm font-semibold text-fg">{title}</p>
+        <div className="mt-0.5 text-sm text-fg-muted">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Identity verification: current status, and the submission form when needed */
+export default function KYCVerification() {
+  const { user } = useUserContext();
+  const [status, setStatus] = useState("loading");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [form, setForm] = useState({ fullName: "", dob: "", address: "", idType: "passport", idNumber: "" });
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const fileRef = useRef(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    api
+      .get(`/kyc/status/${user.id}`)
+      .then((res) => {
+        setStatus(res.data.kycStatus || "unverified");
+        setRejectionReason(res.data.kycData?.rejectionReason || "");
+      })
+      .catch(() => setStatus("unverified"));
+  }, [user?.id]);
+
+  // Image preview for the chosen file (PDFs show their name)
+  useEffect(() => {
+    if (!file?.type.startsWith("image/")) {
+      setPreview(null);
+      return undefined;
+    }
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const set = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const pickFile = (e) => {
+    const chosen = e.target.files?.[0];
+    e.target.value = "";
+    if (!chosen) return;
+    if (chosen.size > MAX_FILE_BYTES) {
+      toast.error("File is too large (max 5 MB)");
+      return;
+    }
+    setFile(chosen);
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      toast.error("Attach a photo or scan of your ID document");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const body = new FormData();
+      Object.entries(form).forEach(([key, value]) => body.append(key, value));
+      body.append("document", file);
+      const res = await api.post("/kyc/submit", body);
+      if (res.data.success) {
+        toast.success("Submitted for review");
+        setStatus("pending");
+        setFile(null);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Couldn't submit your documents");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (user?.isDemo) {
+    return (
+      <DemoLockNotice title="Identity verification" description="Confirm who you are with a government-issued ID.">
+        Demo accounts can&apos;t submit identity documents.
+      </DemoLockNotice>
+    );
+  }
+
+  const meta = STATUS[status];
+  const showForm = status === "unverified" || status === "rejected";
+
+  return (
+    <SettingsSection
+      as={showForm ? "form" : "section"}
+      onSubmit={showForm ? submit : undefined}
+      title="Identity verification"
+      description="Confirm who you are with a government-issued ID. Your documents are stored privately and only reviewed by NexChain admins."
+      action={meta && <Badge tone={meta.tone} dot>{meta.label}</Badge>}
+      footerHint={showForm ? "You'll get a notification once an admin has reviewed it." : undefined}
+      footer={
+        showForm && (
+          <button type="submit" disabled={submitting} className={primaryButton}>
+            {submitting ? "Submitting…" : status === "rejected" ? "Resubmit for review" : "Submit for review"}
+          </button>
+        )
+      }
+    >
+      {status === "loading" ? (
+        <Skeleton className="h-24 w-full rounded-xl" />
+      ) : status === "verified" ? (
+        <Notice tone="up" icon={BadgeCheck} title="Your identity is verified">
+          Nothing else to do. Thanks for confirming your details.
+        </Notice>
+      ) : status === "pending" ? (
+        <Notice tone="warn" icon={Clock} title="Your documents are being reviewed">
+          {"We'll notify you as soon as an admin has checked them. You can keep trading in the meantime."}
+        </Notice>
+      ) : (
+        <div className="space-y-5">
+          {status === "rejected" && (
+            <Notice tone="down" icon={XCircle} title="Your last submission needs changes">
+              {rejectionReason || "Please check your details and upload a clearer document."}
+            </Notice>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field id="kyc-name" label="Full legal name" hint="Exactly as it appears on your ID.">
+              <input id="kyc-name" name="fullName" value={form.fullName} onChange={set} required minLength={2} maxLength={100} autoComplete="name" className={inputClass} />
+            </Field>
+            <Field id="kyc-dob" label="Date of birth">
+              <input id="kyc-dob" name="dob" type="date" value={form.dob} onChange={set} required max={new Date().toISOString().slice(0, 10)} className={inputClass} />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field id="kyc-address" label="Residential address">
+                <input id="kyc-address" name="address" value={form.address} onChange={set} required maxLength={300} autoComplete="street-address" className={inputClass} />
+              </Field>
+            </div>
+            <Field id="kyc-type" label="Document type">
+              <select id="kyc-type" name="idType" value={form.idType} onChange={set} className={inputClass}>
+                {ID_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field id="kyc-number" label="Document number">
+              <input id="kyc-number" name="idNumber" value={form.idNumber} onChange={set} required maxLength={50} className={inputClass} />
+            </Field>
+          </div>
+
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-fg">Photo or scan of the document</p>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="flex w-full items-center gap-4 rounded-xl border border-dashed border-line-strong p-4 text-left transition-colors hover:border-brand hover:bg-brand-soft/40"
+            >
+              {preview ? (
+                <img src={preview} alt="" className="size-16 shrink-0 rounded-lg object-cover" />
+              ) : (
+                <span className="grid size-16 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-subtle">
+                  {file ? <FileText size={22} /> : <Upload size={22} />}
+                </span>
+              )}
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-fg">{file ? file.name : "Choose a file"}</span>
+                <span className="block text-xs text-fg-subtle">{file ? "Click to replace" : "JPG, PNG, WebP or PDF, up to 5 MB. Make sure every corner is visible."}</span>
+              </span>
+            </button>
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={pickFile} className="hidden" />
+          </div>
+        </div>
+      )}
+    </SettingsSection>
+  );
+}

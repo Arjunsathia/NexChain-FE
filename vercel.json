@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/((?!assets/|favicon\\.png|apple-touch-icon\\.png).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/|favicon\\.png|apple-touch-icon\\.png|noise\\.svg).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

@@ -1,43 +1,10 @@
-import React from "react";
-import { FaBolt } from "react-icons/fa";
-
-function QuickActions({ isLoading, handleQuickAction, TC }) {
-  return (
-    <div className={`${TC.bgCard} rounded-2xl p-3 sm:p-4`}>
-      <h3
-        className={`text-sm sm:text-lg font-bold ${TC.textPrimary} mb-2 sm:mb-4 flex items-center gap-2`}
-      >
-        <FaBolt className="text-amber-400 text-xs sm:text-base" /> Quick Actions
-      </h3>
-      {isLoading ? (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 sm:h-10 rounded-xl animate-pulse bg-gray-700/30"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          {[
-            { label: "Add Coin", action: "addCoin" },
-            { label: "Users", action: "viewUsers" },
-            { label: "Settings", action: "systemSettings" },
-            { label: "Reports", action: "generateReport" },
-          ].map((action, i) => (
-            <button
-              key={i}
-              onClick={() => handleQuickAction(action.action)}
-              className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-[10px] sm:text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-cyan-500/10"
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+import { Users, Coins, Settings, MessageSquare, ArrowUpRight, Zap } from "lucide-react";
+import { Card, CardHeader } from "@/Components/ui/card";
+export default function QuickActions({ handleQuickAction }) {
+  return <Card><CardHeader icon={Zap} title="Quick actions" />
+    <div className="grid grid-cols-2 gap-2 px-4 pb-4">{[
+      { label: "Manage assets", action: "addCoin", icon: Coins }, { label: "Manage users", action: "viewUsers", icon: Users },
+      { label: "Configuration", action: "systemSettings", icon: Settings }, { label: "Review reports", action: "generateReport", icon: MessageSquare },
+    ].map(({label, action, icon: Icon}) => <button key={action} onClick={() => handleQuickAction(action)} className="flex items-center gap-2 rounded-lg border border-line px-3 py-3 text-left text-[11px] font-medium text-fg-muted transition-colors hover:border-line-strong hover:bg-surface-hover hover:text-fg"><Icon size={14} className="shrink-0" /><span className="flex-1">{label}</span><ArrowUpRight size={12} /></button>)}</div>
+  </Card>;
 }
-
-export default QuickActions;

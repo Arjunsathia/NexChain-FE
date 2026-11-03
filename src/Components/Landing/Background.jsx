@@ -159,7 +159,7 @@ const InteractiveGridPattern = React.memo(({ className = "" }) => {
       <QuantumBeam vertical={false} position="70%" color="#06b6d4" delay={3} />
 
       {/* 5. Noise Texture for premium feel */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.015] mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.015] mix-blend-overlay"></div>
     </div>
   );
 });

@@ -1,0 +1,24 @@
+import useMediaQuery from "@/hooks/useMediaQuery";
+
+/** Lightweight vector artwork inspired by the reference's engraved coins and orbit. */
+export default function HeroOrbit() {
+  const mobile = useMediaQuery("(max-width: 640px)");
+  return <svg className="hero-orbit-art" viewBox={mobile ? "0 0 400 260" : "0 0 1000 440"} fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="orbit-line" x1="100" y1="20" x2="850" y2="400" gradientUnits="userSpaceOnUse"><stop stopColor="#9681cb" stopOpacity=".3" /><stop offset=".45" stopColor="#9f7ccb" stopOpacity=".8" /><stop offset="1" stopColor="#70c9e6" stopOpacity=".45" /></linearGradient>
+      <linearGradient id="orbit-metal" x1="-35" y1="-35" x2="35" y2="40" gradientUnits="userSpaceOnUse"><stop stopColor="#6d638a" /><stop offset=".23" stopColor="#211b33" /><stop offset=".55" stopColor="#39324c" /><stop offset="1" stopColor="#100e1a" /></linearGradient>
+      <linearGradient id="orbit-edge" x1="-40" y1="-30" x2="35" y2="45" gradientUnits="userSpaceOnUse"><stop stopColor="#c3b5de" stopOpacity=".8" /><stop offset=".45" stopColor="#675b84" stopOpacity=".2" /><stop offset="1" stopColor="#93bbce" stopOpacity=".6" /></linearGradient>
+      <linearGradient id="orbit-rocket" x1="-25" y1="0" x2="25" y2="100" gradientUnits="userSpaceOnUse"><stop stopColor="#7d718d" /><stop offset=".45" stopColor="#252235" /><stop offset="1" stopColor="#0d0e1a" /></linearGradient>
+    </defs>
+    <path d={mobile ? "M32 42C40 177 112 225 200 228C294 235 364 166 368 42" : "M110 65C140 330 340 384 510 389C720 396 880 260 905 58"} stroke="url(#orbit-line)" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+    <path d={mobile ? "M54 62C73 173 132 205 200 208C281 212 337 152 346 62" : "M158 110C212 330 372 359 512 360C686 360 826 256 851 110"} stroke="#77708e" strokeOpacity=".16" strokeDasharray="3 9" />
+    <path d={mobile ? "M58 141l4 8M126 213l9 3M287 207l9-4M352 126l3-9" : "M191 246l5 12M355 365l14 4M686 354l16-6M872 189l5-14"} stroke="#c19aff" strokeOpacity=".75" strokeWidth="2" strokeLinecap="round" />
+    <g className="orbit-coin" transform={mobile ? "translate(32 42) rotate(-21) scale(.6)" : "translate(112 62) rotate(-21)"}><ellipse cx="4" cy="4" rx="34" ry="41" fill="#080712" stroke="#584a70" strokeOpacity=".4" /><ellipse rx="34" ry="41" fill="url(#orbit-metal)" stroke="url(#orbit-edge)" strokeWidth="2" /><ellipse rx="27" ry="34" stroke="#b6a0cf" strokeOpacity=".3" /><ellipse rx="23" ry="30" stroke="#080712" strokeWidth="2" /><text x="0" y="13" textAnchor="middle" fill="#b3a5c5" fillOpacity=".65" fontSize="40" fontFamily="sans-serif">₿</text></g>
+    <g className="orbit-coin" transform={mobile ? "translate(368 42) rotate(20) scale(.65)" : "translate(904 66) rotate(20)"}><ellipse cx="4" cy="4" rx="29" ry="36" fill="#080712" stroke="#584a70" strokeOpacity=".4" /><ellipse rx="29" ry="36" fill="url(#orbit-metal)" stroke="url(#orbit-edge)" strokeWidth="2" /><ellipse rx="23" ry="30" stroke="#c5b0df" strokeOpacity=".25" /><text x="0" y="12" textAnchor="middle" fill="#b8acce" fillOpacity=".65" fontSize="36" fontFamily="sans-serif">₿</text></g>
+    <g transform={mobile ? "translate(333 170) rotate(27) scale(.6)" : "translate(798 288) rotate(27)"}><ellipse cx="4" cy="4" rx="31" ry="36" fill="#080712" /><ellipse rx="31" ry="36" fill="url(#orbit-metal)" stroke="url(#orbit-edge)" strokeWidth="2" /><ellipse rx="24" ry="29" stroke="#b9add1" strokeOpacity=".22" /><text x="0" y="12" textAnchor="middle" fill="#b8acce" fillOpacity=".6" fontSize="36" fontFamily="sans-serif">Ξ</text></g>
+    <g transform={mobile ? "translate(353 132) rotate(68) scale(.35)" : "translate(837 232) rotate(68) scale(.52)"}><ellipse rx="31" ry="36" fill="url(#orbit-metal)" stroke="url(#orbit-edge)" strokeWidth="2" /><text x="0" y="11" textAnchor="middle" fill="#b8acce" fillOpacity=".5" fontSize="32">₿</text></g>
+    <g transform={mobile ? "translate(80 171) scale(.55)" : "translate(230 293)"} stroke="#79678e" strokeOpacity=".5"><path d="M0 19v35M19 0v48M38 9v45M57-13v47M76-3v36" /><path d="M-4 30h8v18h-8zM15 10h8v22h-8zM34 20h8v19h-8zM53-3h8v24h-8zM72 8h8v14h-8z" fill="#3b324c" /></g>
+    <g transform={mobile ? "translate(200 214) rotate(30) scale(.6)" : "translate(510 348) rotate(30)"}><path d="M0-43C-18-22-20 6-13 28L0 38L13 28C20 6 18-22 0-43Z" fill="url(#orbit-rocket)" stroke="#8d7c9f" strokeOpacity=".5" /><ellipse cy="-7" rx="7" ry="10" fill="#0b0b18" stroke="#887499" strokeOpacity=".5" /><path d="M-15 9L-29 29L-22 39L-11 27M15 9L29 29L22 39L11 27" fill="#201c30" stroke="#72637d" strokeOpacity=".4" /><path d="M-6 37L0 57L6 37" fill="#8c5eae" fillOpacity=".25" /><path d="M-3 44L0 66L3 44" stroke="#a28ec3" strokeOpacity=".25" /></g>
+    <circle cx="337" cy="133" r="1.3" fill="#b69ad5" fillOpacity=".45" /><circle cx="702" cy="94" r="1" fill="#8dbed3" fillOpacity=".45" /><circle cx="659" cy="285" r="1.2" fill="#b69ad5" fillOpacity=".25" />
+  </svg>;
+}

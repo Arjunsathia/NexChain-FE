@@ -1,1204 +1,316 @@
-import { pressable } from "@/utils/a11y";
-import { getAvatarUrl } from "@/utils/avatar";
-import { useSelector } from "react-redux";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { createPortal } from "react-dom";
-import {
-  Search,
-  Mail,
-  Phone,
-  Calendar,
-  Shield,
-  CheckCircle,
-  Ban,
-  Wallet,
-  FileText,
-  Clock,
-  Loader2,
-  X,
-  ArrowUpRight,
-  ArrowDownLeft,
-  User,
-  Archive,
-  RefreshCcw,
-  Unlock,
-  ChevronDown,
-  Lock,
-} from "lucide-react";
-import MessageUserModal from "@/Components/Admin/Users/MessageUserModal";
-import UserStatDetailModal from "@/Components/Admin/Users/UserStatDetailModal";
-import ActionConfirmModal from "@/Components/Admin/Users/ActionConfirmModal";
-import KycReviewPanel from "@/Components/Admin/Users/KycReviewPanel";
-import { getData, updateById } from "@/api/axiosConfig";
-import toast from "react-hot-toast";
-import useThemeCheck from "@/hooks/useThemeCheck";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import useTransitionDelay from "@/hooks/useTransitionDelay";
+import toast from "react-hot-toast";
+import { ChevronRight, SearchX, Users as UsersIcon } from "lucide-react";
+import { getData, updateById } from "@/api/axiosConfig";
+import useUserContext from "@/hooks/useUserContext";
+import useSortedRows from "@/hooks/useSortedRows";
+import useMediaQuery from "@/hooks/useMediaQuery";
+import { getAvatarUrl } from "@/utils/avatar";
+import { formatTimeAgo, formatUSD } from "@/utils/format";
+import { Card, EmptyState } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
+import { Segmented } from "@/Components/ui/segmented";
+import { Skeleton, SkeletonRows } from "@/Components/ui/skeleton";
+import { Pagination, SearchInput, SortHeader } from "@/Components/ui/table";
+import UserDetailSheet from "@/Components/Admin/Users/UserDetailSheet";
+import {
+  KYC_LABELS,
+  KYC_TONES,
+  ROLE_LABELS,
+  ROLE_TONES,
+  STATUS_META,
+  userId,
+  userStatus,
+} from "@/Components/Admin/Users/userMeta";
 
-import { useLocation } from "react-router-dom";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
+const PAGE_SIZE = 20;
+const isAdminRole = (u) => u.role === "admin" || u.role === "superadmin";
+const time = (v) => (v ? new Date(v).getTime() : null);
+const lastSeen = (v) => (v ? formatTimeAgo(new Date(v).getTime() / 1000) : "Never");
+const joined = (v) => (v ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(v)) : "–");
 
-const Users = () => {
-  const isLight = useThemeCheck();
-  // const [users, setUsers] = useState([]); // Removed in favor of React Query
-  // const [loading, setLoading] = useState(true); // Removed
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [filterRole, setFilterRole] = useState("all");
+const SORT_COLUMNS = {
+  name: (u) => u.name?.toLowerCase(),
+  role: (u) => ({ superadmin: 0, admin: 1, user: 2 })[u.role],
+  balance: (u) => u.virtualBalance,
+  joined: (u) => time(u.createdAt),
+  lastLogin: (u) => time(u.lastLogin),
+};
+
+const FILTERS = {
+  all: (u) => !u.isDeleted,
+  admins: (u) => !u.isDeleted && isAdminRole(u),
+  frozen: (u) => !u.isDeleted && u.isFrozen,
+  kyc: (u) => !u.isDeleted && u.kycStatus === "pending",
+  archived: (u) => u.isDeleted,
+};
+
+const ACTION_TOASTS = {
+  freeze: "Account frozen",
+  unfreeze: "Account unfrozen",
+  archive: "Account archived",
+  restore: "Account restored",
+  role: "Role updated",
+};
+
+function UserAvatar({ user }) {
+  const [failed, setFailed] = useState(false);
+  const src = getAvatarUrl(user.image);
+  return src && !failed ? (
+    <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className="size-8 shrink-0 rounded-full object-cover" />
+  ) : (
+    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-2 text-xs font-semibold text-fg-muted">
+      {(user.name || "?")[0].toUpperCase()}
+    </span>
+  );
+}
+
+const Stat = ({ label, value, loading, onClick, active }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`min-w-0 px-4 py-3.5 text-left transition-colors hover:bg-surface-hover ${active ? "bg-surface-2" : ""}`}
+  >
+    <p className="text-xs text-fg-subtle">{label}</p>
+    {loading ? <Skeleton className="mt-1.5 h-5 w-10" /> : <p className="tabular mt-1 text-lg font-semibold text-fg">{value}</p>}
+  </button>
+);
+
+/** Admin: every account, with filters, sorting and a detail panel for actions */
+export default function AdminUsers() {
+  const { user: actor } = useUserContext();
   const queryClient = useQueryClient();
-  const { isVisited, markVisited } = useVisitedRoutes();
-  const location = useLocation();
-  const isReady = useTransitionDelay(350, isVisited(location.pathname));
-  const [isFirstVisit] = useState(!isVisited(location.pathname));
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  useEffect(() => {
-    markVisited(location.pathname);
-  }, [location.pathname, markVisited]);
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [selectedId, setSelectedId] = useState(null);
+  const [busy, setBusy] = useState(false);
 
-  // Current admin's role comes from the session
-  const currentUserRole = useSelector((state) => state.user.user?.role) || null;
-
-  // Detailed User Data State
-  const [userDetails, setUserDetails] = useState({
-    balance: 0,
-    holdings: [],
-    transactions: [],
-    kycData: null,
-    kycStatus: "unverified",
-  });
-  const [loadingDetails, setLoadingDetails] = useState(false);
-
-  // Action Modal State
-  const [actionModal, setActionModal] = useState({
-    isOpen: false,
-    type: null, // 'archive', 'restore', 'role_switch'
-    user: null,
-  });
-  const [actionLoading, setActionLoading] = useState(false);
-
-  // Message Modal State
-  const [showMessageModal, setShowMessageModal] = useState(false);
-
-  // Stat Detail Modal State
-  const [expandedStat, setExpandedStat] = useState(null);
-
-  // Tabs for Detail View
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const [showArchived, setShowArchived] = useState(false);
-
-  // --- REACT QUERY IMPLEMENTATION ---
-  const {
-    data: users = [],
-    isLoading: loading,
-  } = useQuery({
-    queryKey: ["adminUsers", showArchived],
+  // One request including archived accounts; filters run on the client
+  const { data: users = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ["adminUsersAll"],
     queryFn: async () => {
-      try {
-        const response = await getData(`/users?includeDeleted=${showArchived}`);
-
-        // Ensure response is valid
-        if (!response) return [];
-
-        let usersData =
-          response?.users ??
-          response?.data ??
-          (Array.isArray(response) ? response : []);
-
-        const NOW = new Date().getTime();
-        const INACTIVE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-        if (Array.isArray(usersData)) {
-          usersData = usersData.map((user) => ({
-            ...user,
-            recentlyActive: user.lastLogin
-              ? NOW - new Date(user.lastLogin).getTime() < INACTIVE_THRESHOLD
-              : false,
-          }));
-        }
-
-        return Array.isArray(usersData)
-          ? usersData.sort((a, b) => {
-            // 1. Admins always on top
-            const isAdmin = (u) => u.role === "admin" || u.role === "superadmin";
-            if (isAdmin(a) && !isAdmin(b)) return -1;
-            if (!isAdmin(a) && isAdmin(b)) return 1;
-
-            // 2. Then sort alphabetically by name
-            return (a.name || "").localeCompare(b.name || "");
-          })
-          : [];
-      } catch (err) {
-        console.error("Failed to fetch users", err);
-        return [];
-      }
+      const res = await getData("/users?includeDeleted=true");
+      const rows = res?.users ?? res?.data ?? res;
+      if (!Array.isArray(rows)) throw new Error("Unable to load users");
+      return rows;
     },
-    staleTime: 5 * 60 * 1000, // 5 minute cache
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 30_000,
   });
 
-  const fetchUserDetails = useCallback(
-    async (userId) => {
-      if (!userId) return;
-      try {
-        setLoadingDetails(true);
-
-        // Execute all requests in parallel
-        const [balanceRes, holdingsRes, transactionsRes, kycRes] =
-          await Promise.allSettled([
-            getData(`/purchases/balance/${userId}`),
-            getData(`/purchases/holdings/${userId}`),
-            getData(`/purchases/transactions/${userId}`),
-            getData(`/kyc/status/${userId}`),
-          ]);
-
-        const newDetails = {
-          balance: 0,
-          holdings: [],
-          transactions: [],
-          kycData: null,
-          kycStatus: selectedUser?.kycStatus || "unverified",
-        };
-
-        if (balanceRes.status === "fulfilled" && balanceRes.value.success) {
-          newDetails.balance = balanceRes.value.virtualBalance;
-        }
-        if (holdingsRes.status === "fulfilled" && holdingsRes.value.success) {
-          newDetails.holdings = holdingsRes.value.holdings;
-        }
-        if (
-          transactionsRes.status === "fulfilled" &&
-          transactionsRes.value.success
-        ) {
-          newDetails.transactions = transactionsRes.value.transactions;
-        }
-        if (kycRes.status === "fulfilled" && kycRes.value.success) {
-          newDetails.kycData = kycRes.value.kycData;
-          newDetails.kycStatus = kycRes.value.kycStatus;
-        }
-
-        setUserDetails(newDetails);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-        toast.error("Failed to load user details");
-      } finally {
-        setLoadingDetails(false);
-      }
-    },
-    [selectedUser?.kycStatus],
+  const counts = useMemo(
+    () => Object.fromEntries(Object.entries(FILTERS).map(([key, fn]) => [key, users.filter(fn).length])),
+    [users],
   );
 
-  // Fetch detailed info when a user is selected
-  useEffect(() => {
-    if (selectedUser) {
-      fetchUserDetails(selectedUser.id || selectedUser._id);
-    }
-  }, [selectedUser, fetchUserDetails]);
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // Updated Role Matching: 'admin' filter includes both admin and superadmin
-    const isAdminRole = user.role === "admin" || user.role === "superadmin";
-    const matchesRole =
-      filterRole === "all" ||
-      (filterRole === "admin" ? isAdminRole : user.role === filterRole);
-
-    // Filter by archived status based on toggle
-    // If showArchived is true, show ONLY deleted users
-    // If showArchived is false, show ONLY active users
-    const matchesStatus = showArchived ? user.isDeleted : !user.isDeleted;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  const handleAction = useCallback(async () => {
-    const { type, user } = actionModal;
-    if (!type || !user) return;
-
-    setActionLoading(true);
-    try {
-      const targetId = user.id || user._id;
-      let updateData = {};
-
-      if (type === "archive") {
-        updateData = { isDeleted: true };
-      } else if (type === "restore") {
-        updateData = { isDeleted: false };
-      } else if (type === "promote_admin") {
-        updateData = { role: "admin" };
-      } else if (type === "demote_admin") {
-        updateData = { role: "user" };
-      } else if (type === "promote_super") {
-        updateData = { role: "superadmin" };
-      } else if (type === "demote_super") {
-        updateData = { role: "admin" };
-      }
-
-      await updateById("/users", targetId, updateData);
-
-      toast.success(
-        type === "archive"
-          ? "User archived successfully"
-          : type === "restore"
-            ? "User restored successfully"
-            : "User role updated successfully",
-      );
-
-      // Optimistic Update or Refetch
-      queryClient.setQueryData(["adminUsers", showArchived], (oldUsers) => {
-        return oldUsers
-          ? oldUsers.map((u) => {
-            if (u.id === targetId || u._id === targetId) {
-              return { ...u, ...updateData };
-            }
-            return u;
-          })
-          : [];
-      });
-      // Also invalidate to be sure
-      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
-
-      if (
-        selectedUser &&
-        (selectedUser.id === targetId || selectedUser._id === targetId)
-      ) {
-        // Refresh selected user details or clear if archived and viewing active list
-        if (type === "archive" && !showArchived) {
-          setSelectedUser(null);
-        } else {
-          // Re-fetch to update local state logic or just patch local
-          const updatedUser = { ...user, ...updateData };
-          setSelectedUser(updatedUser);
-        }
-      }
-
-      setActionModal({ isOpen: false, type: null, user: null });
-    } catch (error) {
-      console.error("Action error:", error);
-      toast.error("Failed to perform action");
-    } finally {
-      setActionLoading(false);
-    }
-  }, [actionModal, queryClient, showArchived, selectedUser]);
-
-  const handleToggleFreeze = useCallback(async (user, e) => {
-    if (e) e.stopPropagation();
-    if (!user) return;
-
-    // Permissions check (client side mostly visual, API enforces)
-    if (currentUserRole !== "superadmin" && user.role === "admin") {
-      toast.error("Admins cannot freeze other admins.");
-      return;
-    }
-    if (user.role === "superadmin") {
-      toast.error("Cannot freeze Super Admin.");
-      return;
-    }
-
-    const targetId = user.id || user._id;
-    const newFrozenStatus = !user.isFrozen;
-
-    const toastId = toast.loading(
-      newFrozenStatus ? "Freezing user..." : "Unfreezing user...",
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return users.filter(
+      (u) =>
+        FILTERS[filter](u) &&
+        (!q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.user_name?.toLowerCase().includes(q)),
     );
+  }, [users, filter, query]);
 
-    try {
-      await updateById("/users", targetId, { isFrozen: newFrozenStatus });
+  const { sorted, sort, toggleSort } = useSortedRows(filtered, SORT_COLUMNS, { key: "joined", dir: "desc" });
+  useEffect(() => setPage(1), [filter, query, sort]);
+  const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-      toast.success(
-        newFrozenStatus ? "User frozen successfully" : "User active again",
-        { id: toastId },
-      );
+  // The panel reads from the list, so updates show immediately; the last user
+  // is kept while the panel animates closed
+  const selected = users.find((u) => userId(u) === selectedId);
+  const lastSelected = useRef(null);
+  if (selected) lastSelected.current = selected;
 
-      // Update Query Cache
-      queryClient.setQueryData(["adminUsers", showArchived], (oldUsers) => {
-        return oldUsers
-          ? oldUsers.map((u) => {
-            if (u.id === targetId || u._id === targetId) {
-              return { ...u, isFrozen: newFrozenStatus };
-            }
-            return u;
-          })
-          : [];
-      });
-
-      if (
-        selectedUser &&
-        (selectedUser.id === targetId || selectedUser._id === targetId)
-      ) {
-        setSelectedUser((prev) => ({ ...prev, isFrozen: newFrozenStatus }));
-      }
-    } catch (error) {
-      console.error("Freeze error", error);
-      toast.error(error.message || "Failed to update user status", {
-        id: toastId,
-      });
-    }
-  }, [currentUserRole, queryClient, showArchived, selectedUser]);
-
-  const openActionModal = useCallback((type, user) => {
-    setActionModal({
-      isOpen: true,
-      type,
-      user,
-    });
-  }, []);
-
-  const TC = useMemo(
-    () => ({
-      bgMain: "bg-transparent",
-      bgPanel: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-      bgStatsCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-sm border border-gray-100 glass-card hover:bg-white/80 hover:shadow-md"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 hover:bg-gray-800/80",
-      border: isLight ? "border-gray-200" : "border-white/10",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
-      bgItem: isLight
-        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-        : "bg-transparent hover:bg-white/5 isolation-isolate",
-      itemHover: isLight ? "hover:bg-gray-100" : "hover:bg-white/5",
-      itemActive: isLight
-        ? "bg-blue-50 border-blue-500"
-        : "bg-cyan-500/10 border-cyan-500",
-      modalOverlay: "bg-black/60 backdrop-blur-sm",
-      modalContent: isLight
-        ? "bg-white"
-        : "bg-[#0B0E11] border border-gray-800 prevent-seam force-layer",
-      skeletonBase: isLight ? "#e5e7eb" : "#1f2937",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-      headerGradient: "from-blue-600 to-cyan-500",
-    }),
-    [isLight],
+  const patchUser = useCallback(
+    (id, patch) =>
+      queryClient.setQueryData(["adminUsersAll"], (old = []) => old.map((u) => (userId(u) === id ? { ...u, ...patch } : u))),
+    [queryClient],
   );
 
-  const UserListItem = React.memo(({ user, index, shouldAnimate, isSelected, onClick, isLight, TC }) => (
-    <div
-      {...pressable(() => onClick(user))}
-      style={shouldAnimate ? { animationDelay: `${index * 0.05}s` } : {}}
-      className={`
-        group flex items-center gap-4 p-3.5 mx-2 my-1.5 rounded-2xl cursor-pointer 
-        transition-all duration-300 border-l-4 relative overflow-hidden
-        ${shouldAnimate ? "fade-in" : ""}
-        ${isSelected
-          ? `${isLight ? "bg-white shadow-sm" : "bg-white/10 shadow-none"} border-blue-500 scale-[1.02] z-10`
-          : `border-transparent ${TC.bgItem} hover:border-blue-500/30 hover:scale-[1.01] hover:shadow-sm`
-        }
-      `}
-    >
-      {/* Subtle background glow on hover */}
-      <div
-        className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none
-        ${isLight ? "bg-gradient-to-r from-blue-50/50 to-transparent" : "bg-gradient-to-r from-blue-500/5 to-transparent"}`}
-      />
+  const handleAction = useCallback(
+    async (type, target, value) => {
+      const id = userId(target);
+      if (type === "kyc") {
+        patchUser(id, { kycStatus: value });
+        return;
+      }
+      const patch = {
+        freeze: { isFrozen: true },
+        unfreeze: { isFrozen: false },
+        archive: { isDeleted: true },
+        restore: { isDeleted: false },
+        role: { role: value },
+      }[type];
+      setBusy(true);
+      try {
+        await updateById("/users", id, patch);
+        patchUser(id, patch);
+        toast.success(ACTION_TOASTS[type]);
+        // Overview counts and lists use their own queries
+        queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+        queryClient.invalidateQueries({ queryKey: ["adminUsersAll"] });
+      } catch (error) {
+        toast.error(error.response?.data?.error || error.response?.data?.message || "The change couldn't be saved");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [patchUser, queryClient],
+  );
 
-      <div className="relative flex-shrink-0 z-10">
-        <div
-          className={`w-11 h-11 rounded-xl bg-gradient-to-br p-0.5 shadow-md transition-all
-          ${user.isFrozen
-              ? "from-red-500 to-orange-500 group-hover:shadow-red-500/30"
-              : "from-blue-500 to-cyan-500 group-hover:shadow-blue-500/30"
-            }
-          ${isSelected
-              ? user.isFrozen
-                ? "ring-2 ring-red-500/20"
-                : "ring-2 ring-blue-500/20"
-              : ""
-            } 
-          `}
-        >
-          <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-900 flex items-center justify-center text-xs font-bold text-white relative">
-            {user.image ? (
-              <img
-                src={
-                  getAvatarUrl(user.image)
-                }
-                alt={user.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            ) : (
-              <User className="w-5 h-5 text-gray-400" />
-            )}
-          </div>
-        </div>
-        {/* Status indicator with higher contrast border */}
-        <div
-          className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 
-          ${isLight ? "border-white" : "border-gray-800"} 
-          ${user.recentlyActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}
-        />
-      </div>
-
-      <div className="flex-1 min-w-0 relative z-10">
-        <div className="flex justify-between items-center mb-0.5">
-          <h4
-            className={`text-sm font-bold truncate transition-colors ${isSelected ? "text-blue-500" : TC.textPrimary}`}
-          >
-            {user.name}
-          </h4>
-          <div className="flex gap-1">
-            {/* Removed Ban Icon */}
-            {/* Admin/SuperAdmin Badge Icon */}
-            {(user.role === "admin" || user.role === "superadmin") && (
-              <div className={`p-1 rounded-md ${user.role === "superadmin" ? "bg-purple-500/10" : "bg-blue-500/10"}`}>
-                <Shield className={`w-3 h-3 ${user.role === "superadmin" ? "text-purple-500" : "text-blue-500"}`} title={user.role === "superadmin" ? "Super Admin" : "Admin"} />
-              </div>
-            )}
-            {user.isDeleted && (
-              <div className="p-1 rounded-md bg-red-500/10" title="Archived">
-                <Archive className="w-3 h-3 text-red-500" />
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <p
-            className={`text-[10px] sm:text-xs truncate transition-colors ${isSelected ? "text-blue-400/80" : TC.textSecondary}`}
-          >
-            {user.email}
-          </p>
-          <span
-            className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full 
-            ${isSelected
-                ? "bg-blue-500 text-white"
-                : "bg-blue-500/10 text-blue-500/70 border border-blue-500/10"
-              }`}
-          >
-            {user.role}
-          </span>
-          {/* Freeze Toggle Removed from List per request */}
-        </div>
-      </div>
-    </div>
-  ));
-  UserListItem.displayName = "UserListItem";
+  const filterOptions = [
+    { value: "all", label: `All ${counts.all ?? ""}` },
+    { value: "admins", label: `Admins ${counts.admins ?? ""}` },
+    { value: "frozen", label: `Frozen ${counts.frozen ?? ""}` },
+    { value: "kyc", label: `KYC pending ${counts.kyc ?? ""}` },
+    { value: "archived", label: `Archived ${counts.archived ?? ""}` },
+  ];
+  const header = (label, key, extra) => <SortHeader label={label} sortKey={key} sort={sort} onSort={toggleSort} align="left" {...extra} />;
 
   return (
-    // Updated Layout: Vertical Flex for Header + Content
-    <div
-      className={`flex flex-col h-[100dvh] md:h-[calc(100vh-24px)] p-2 sm:p-4 lg:p-4 gap-3 lg:gap-6 ${TC.bgMain} relative ${isFirstVisit ? "fade-in" : ""}`}
-    >
-      {/* 1. Page Header (Admin Styled) */}
-      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center sm:items-center gap-3 md:gap-4">
-        <div className="w-full sm:w-auto text-center sm:text-left">
-          <h1
-            className={`text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-0.5 sm:mb-1 ${TC.textPrimary}`}
-          >
-            User{" "}
-            <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-              Management
-            </span>
-          </h1>
-          <p className={`text-xs sm:text-sm font-medium ${TC.textSecondary}`}>
-            Manage system users, permissions, and accounts
-          </p>
-        </div>
-        {/* Removed "Add User" button */}
-      </div>
+    <div className="space-y-4 lg:space-y-5">
+      <header>
+        <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Users</h1>
+        <p className="mt-0.5 text-sm text-fg-subtle">Accounts, roles, identity checks and account status.</p>
+      </header>
 
-      {/* 2. Main Content Area (Split View) */}
-      <div
-        className={`
-        flex-1 flex gap-4 overflow-hidden min-h-0
-        ${isFirstVisit ? "fade-in" : ""}
-      `}
-        style={{ animationDelay: "0.2s" }}
-      >
-        {/* Left Pane: User List */}
-        <div
-          className={`
-          flex-shrink-0 flex flex-col ${TC.bgPanel} z-20 rounded-2xl md:rounded-3xl overflow-hidden
-          transition-all duration-200 ease-out
-          w-full ${selectedUser ? "md:w-[380px]" : "md:w-full"}
-        `}
-        >
-          {/* List Toolbar (Search & Filter) */}
-          <div className="p-3 md:p-4 sticky top-0 z-10 backdrop-blur-md bg-transparent border-b border-gray-100 dark:border-gray-800/50 space-y-3">
-            {/* Search and Filters Row */}
-            <div className="flex gap-2">
-              <div className="relative group flex-1">
-                <Search
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 md:w-4 md:h-4 transition-colors ${TC.textSecondary} group-focus-within:text-blue-500`}
-                />
-                <input
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full pl-8 md:pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl outline-none border transition-all ${isLight
-                    ? "bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500"
-                    : "bg-gray-900/50 border-white/10 focus:bg-black/50 focus:border-cyan-500 text-white placeholder-gray-500"
-                    }`}
-                />
-              </div>
-              <button
-                onClick={() =>
-                  setFilterRole(filterRole === "all" ? "admin" : "all")
-                }
-                className={`px-2.5 md:px-3 py-1.5 md:py-2 rounded-xl border transition-all flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold ${filterRole === "admin"
-                  ? "bg-purple-500/10 border-purple-500/50 text-purple-500"
-                  : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
-                  }`}
-                title="Toggle Admin Filter"
-              >
-                <Shield className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Admin</span>
-              </button>
-              <button
-                onClick={() => setShowArchived(!showArchived)}
-                className={`px-2.5 md:px-3 py-1.5 md:py-2 rounded-xl border transition-all flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold ${showArchived
-                  ? "bg-red-500/10 border-red-500/50 text-red-500"
-                  : `${TC.border} ${TC.textSecondary} hover:bg-gray-100 dark:hover:bg-white/5`
-                  }`}
-                title="Toggle Archived"
-              >
-                <Archive className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Archived</span>
-              </button>
-            </div>
-          </div>
+      <Card className="grid grid-cols-2 divide-line overflow-hidden md:grid-cols-4 md:divide-x [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-line md:[&>*:nth-child(n+3)]:border-t-0">
+        <Stat label="Active accounts" value={counts.all} loading={isLoading} onClick={() => setFilter("all")} active={filter === "all"} />
+        <Stat label="Admins" value={counts.admins} loading={isLoading} onClick={() => setFilter("admins")} active={filter === "admins"} />
+        <Stat label="Frozen" value={counts.frozen} loading={isLoading} onClick={() => setFilter("frozen")} active={filter === "frozen"} />
+        <Stat label="Identity checks to review" value={counts.kyc} loading={isLoading} onClick={() => setFilter("kyc")} active={filter === "kyc"} />
+      </Card>
 
-          {/* List Items */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-1.5 md:p-2 pb-20 md:pb-2">
-            {loading || !isReady ? (
-              <div className="flex justify-center p-8">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-              </div>
-            ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user, index) => (
-                <UserListItem
-                  key={user._id}
-                  user={user}
-                  index={index}
-                  shouldAnimate={isFirstVisit}
-                  isSelected={selectedUser?._id === user._id}
-                  onClick={setSelectedUser}
-                  isLight={isLight}
-                  TC={TC}
-                />
-              ))
-            ) : (
-              <div className={`p-8 text-center ${TC.textSecondary}`}>
-                No users found
-              </div>
-            )}
-          </div>
+      <Card>
+        <div className="flex flex-col gap-3 border-b border-line p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+          <Segmented label="Filter users" options={filterOptions} value={filter} onChange={setFilter} className="max-w-full overflow-x-auto no-scrollbar [&>button]:whitespace-nowrap" />
+          <SearchInput value={query} onChange={setQuery} placeholder="Search name, email or username" className="lg:w-72" />
         </div>
 
-        {/* 2. Right Pane: Detail Panel (Responsive Portal Logic) */}
-        <UserDetailPane
-          selectedUser={selectedUser}
-          setSelectedUser={setSelectedUser}
-          TC={TC}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          userDetails={userDetails}
-          loadingDetails={loadingDetails}
-          setExpandedStat={setExpandedStat}
-          // Use current user role to determine what buttons to show
-          currentUserRole={currentUserRole}
-          openActionModal={openActionModal}
-          setShowMessageModal={setShowMessageModal}
-          isLight={isLight}
-          onToggleFreeze={handleToggleFreeze}
-          onKycDecision={(kycStatus) =>
-            setUserDetails((prev) => ({ ...prev, kycStatus }))
-          }
-        />
-
-        <ActionConfirmModal
-          isOpen={actionModal.isOpen}
-          onClose={() => setActionModal({ ...actionModal, isOpen: false })}
-          onConfirm={handleAction}
-          actionType={actionModal.type}
-          userName={actionModal.user?.name}
-          loading={actionLoading}
-          TC={TC}
-        />
-
-        <MessageUserModal
-          isOpen={showMessageModal}
-          onClose={() => setShowMessageModal(false)}
-          user={selectedUser}
-          TC={TC}
-          isLight={isLight}
-        />
-
-        {expandedStat &&
-          createPortal(
-            <UserStatDetailModal
-              isOpen={!!expandedStat}
-              onClose={() => setExpandedStat(null)}
-              statType={expandedStat}
-              user={selectedUser}
-              userDetails={userDetails}
-              TC={TC}
-              isLight={isLight}
-            />,
-            document.body,
-          )}
-      </div>
-      {/* Closing Main Content Area */}
-    </div>
-  );
-};
-const UserDetailPane = ({
-  selectedUser,
-  setSelectedUser,
-  TC,
-  activeTab,
-  setActiveTab,
-  userDetails,
-  loadingDetails,
-  setExpandedStat,
-  currentUserRole,
-  isLight,
-  openActionModal,
-  setShowMessageModal,
-  onToggleFreeze,
-  onKycDecision,
-}) => {
-  // Simple media query hook
-  const [isDesktop, setIsDesktop] = useState(
-    window.matchMedia("(min-width: 768px)").matches,
-  );
-
-  // Permission Logic Helpers
-
-  const canArchive = useMemo(() => {
-    if (!selectedUser) return false;
-    // Super Admins can't be changed by anyone else (enforced by the server too)
-    if (selectedUser.role === "superadmin") return false;
-
-    if (currentUserRole === "superadmin") return true;
-    if (currentUserRole === "admin" && selectedUser.role === "user")
-      return true;
-    return false;
-  }, [currentUserRole, selectedUser]);
-
-  const canFreeze = useMemo(() => {
-    if (!selectedUser) return false;
-    if (selectedUser.role === "superadmin") return false;
-    if (currentUserRole === "superadmin") return true;
-    if (currentUserRole === "admin" && selectedUser.role === "user")
-      return true;
-    return false;
-  }, [currentUserRole, selectedUser]);
-
-  const renderRoleButton = () => {
-    if (!selectedUser) return null;
-    const targetRole = selectedUser.role;
-
-    // Super Admins can't be changed by anyone else (enforced by the server too)
-    if (selectedUser.role === "superadmin") return null;
-
-    // IF ACTOR IS SUPER ADMIN
-    if (currentUserRole === "superadmin") {
-      if (targetRole === "user") {
-        return (
-          <button
-            onClick={() => openActionModal("promote_admin", selectedUser)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-          >
-            <Shield className="w-4 h-4" /> Make Admin
-          </button>
-        );
-      }
-      if (targetRole === "admin") {
-        return (
-          <div className="flex gap-2">
-            <button
-              onClick={() => openActionModal("demote_admin", selectedUser)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-bold text-sm shadow-lg shadow-gray-500/20 transition-all hover:-translate-y-0.5"
-            >
-              <RefreshCcw className="w-4 h-4" /> Revoke Admin
-            </button>
-            <button
-              onClick={() => openActionModal("promote_super", selectedUser)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:-translate-y-0.5"
-            >
-              <Shield className="w-4 h-4" /> Make Super Admin
-            </button>
-          </div>
-        );
-      }
-      if (targetRole === "superadmin") {
-        return (
-          <button
-            onClick={() => openActionModal("demote_super", selectedUser)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5"
-          >
-            <RefreshCcw className="w-4 h-4" /> Demote Super Admin
-          </button>
-        );
-      }
-    }
-
-    // IF ACTOR IS ADMIN
-    if (currentUserRole === "admin") {
-      if (targetRole === "user") {
-        return (
-          <button
-            onClick={() => openActionModal("promote_admin", selectedUser)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-          >
-            <Shield className="w-4 h-4" /> Make Admin
-          </button>
-        );
-      }
-      // Admin cannot modify other admins or superadmins
-    }
-
-    return null;
-  };
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 768px)");
-    const listener = () => setIsDesktop(media.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, []);
-
-  const content = (
-    <div
-      className={`
-      fixed inset-0 z-[99999] md:static md:z-auto
-      w-full h-[100dvh] md:w-auto md:h-auto
-      ${isLight ? "bg-white" : "bg-gray-950"} md:bg-transparent ${/* Solid bg on mobile, transparent/variable on desktop */ ""}
-      md:flex-1 md:rounded-3xl md:overflow-hidden md:border md:border-gray-200 md:dark:border-gray-800
-      md:backdrop-blur-xl md:shadow-sm md:glass-card
-      transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)
-      flex flex-col
-      ${selectedUser
-          ? "translate-y-0 opacity-100 md:!translate-y-0 md:translate-x-0"
-          : "translate-y-[110%] opacity-100 md:opacity-0 pointers-events-none md:!translate-y-0 md:w-0 md:translate-x-20"
-        }
-    `}
-    >
-      {selectedUser && (
-        <div className="h-full w-full flex flex-col relative bg-transparent">
-          <div className="absolute top-4 right-4 z-40">
-            <button
-              onClick={() => setSelectedUser(null)}
-              className={`p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all`}
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {/* Cover - Updated styling to match Detail Panel roundedness */}
-            <div className="relative h-48 bg-gradient-to-r from-blue-600 to-indigo-700">
-              <div className="absolute bottom-6 left-6 md:left-8 flex items-end gap-5">
-                <div
-                  className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 shadow-xl overflow-hidden backdrop-blur-md
-                   ${selectedUser.isFrozen
-                      ? "border-red-500/50 bg-red-500/10 shadow-red-500/20"
-                      : "border-white/20 bg-white/10"
-                    }
-                `}
-                >
-                  {selectedUser.image ? (
-                    <img
-                      src={
-                        getAvatarUrl(selectedUser.image)
-                      }
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-transparent">
-                      <User className="w-12 h-12 text-white/50" />
-                    </div>
-                  )}
-                </div>
-                <div className="pb-1 mb-1">
-                  <h1 className="text-xl md:text-2xl font-black text-white drop-shadow-md">
-                    {selectedUser.name}
-                  </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${selectedUser.recentlyActive ? "bg-green-500" : "bg-red-500"} text-white`}
+        {isLoading ? (
+          <SkeletonRows rows={6} />
+        ) : isError ? (
+          <EmptyState
+            icon={UsersIcon}
+            title="Couldn't load users"
+            description="Check the API connection and try again."
+            className="py-14"
+            action={
+              <button type="button" onClick={() => refetch()} className="mt-2 text-sm font-semibold text-brand hover:underline">
+                Retry
+              </button>
+            }
+          />
+        ) : visible.length === 0 ? (
+          <EmptyState icon={SearchX} title="No users match" description="Try another filter or search term." className="py-14" />
+        ) : isDesktop ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[860px] border-collapse">
+              <thead className="border-b border-line bg-surface-2/60">
+                <tr>
+                  {header("User", "name", { className: "pl-4" })}
+                  {header("Role", "role")}
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-fg-subtle">Status</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-fg-subtle">KYC</th>
+                  <SortHeader label="Cash" sortKey="balance" sort={sort} onSort={toggleSort} />
+                  {header("Joined", "joined")}
+                  {header("Last sign-in", "lastLogin")}
+                  <th className="w-px" />
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((u) => {
+                  const status = userStatus(u);
+                  const kyc = u.kycStatus || "unverified";
+                  return (
+                    <tr
+                      key={userId(u)}
+                      onClick={() => setSelectedId(userId(u))}
+                      className="cursor-pointer border-b border-line transition-colors last:border-0 hover:bg-surface-hover"
                     >
-                      {selectedUser.recentlyActive ? "Active" : "Inactive"}
+                      <td className="py-2.5 pl-4 pr-3">
+                        <div className="flex items-center gap-3">
+                          <UserAvatar user={u} />
+                          <div className="min-w-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedId(userId(u));
+                              }}
+                              className="block max-w-[240px] truncate text-left text-sm font-semibold text-fg hover:text-brand"
+                            >
+                              {u.name}
+                              {userId(u) === userId(actor) && <span className="ml-1.5 text-xs font-normal text-brand">You</span>}
+                            </button>
+                            <p className="max-w-[240px] truncate text-xs text-fg-subtle">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Badge tone={ROLE_TONES[u.role]}>{ROLE_LABELS[u.role] || u.role}</Badge>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Badge tone={STATUS_META[status].tone} dot>
+                          {STATUS_META[status].label}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Badge tone={KYC_TONES[kyc]}>{KYC_LABELS[kyc]}</Badge>
+                      </td>
+                      <td className="tabular px-3 py-2.5 text-right text-sm text-fg">{formatUSD(u.virtualBalance ?? 0)}</td>
+                      <td className="tabular px-3 py-2.5 text-sm text-fg-muted">{joined(u.createdAt)}</td>
+                      <td className="tabular px-3 py-2.5 text-sm text-fg-muted">{lastSeen(u.lastLogin)}</td>
+                      <td className="py-2.5 pl-2 pr-4 text-fg-subtle">
+                        <ChevronRight size={16} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <ul className="divide-y divide-line">
+            {visible.map((u) => {
+              const status = userStatus(u);
+              return (
+                <li key={userId(u)}>
+                  <button type="button" onClick={() => setSelectedId(userId(u))} className="flex w-full items-center gap-3 px-4 py-3 text-left">
+                    <UserAvatar user={u} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-fg">{u.name}</span>
+                      <span className="block truncate text-xs text-fg-subtle">{u.email}</span>
+                      <span className="mt-1.5 flex flex-wrap gap-1.5">
+                        <Badge tone={ROLE_TONES[u.role]}>{ROLE_LABELS[u.role] || u.role}</Badge>
+                        <Badge tone={STATUS_META[status].tone} dot>
+                          {STATUS_META[status].label}
+                        </Badge>
+                        {u.kycStatus === "pending" && <Badge tone="warn">KYC pending</Badge>}
+                      </span>
                     </span>
-                    {selectedUser.isFrozen && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-600 text-white animate-pulse">
-                        Frozen
-                      </span>
-                    )}
-                    {selectedUser.role === "admin" && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500 text-white">
-                        Admin
-                      </span>
-                    )}
-                    {selectedUser.isDeleted && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-500 text-white">
-                        Archived
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-14 px-6 md:px-8 pb-10">
-              <div className="flex flex-col-reverse md:flex-row md:items-center justify-between gap-6 mb-8">
-                <div className="flex gap-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-                  {["Overview", "History", "Docs"].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab.toLowerCase())}
-                      className={`pb-2 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.toLowerCase()
-                        ? "text-blue-500 border-blue-500"
-                        : "text-gray-400 border-transparent hover:text-gray-500"
-                        }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-                {/* Updated Action Buttons */}
-                <div className="flex gap-2 self-end md:self-auto">
-                  {renderRoleButton()}
+                    <ChevronRight size={16} className="shrink-0 text-fg-subtle" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={sorted.length} onPage={setPage} />
+      </Card>
 
-                  {/* Archive Logic */}
-                  {selectedUser.isDeleted && canArchive ? (
-                    <button
-                      onClick={() => openActionModal("restore", selectedUser)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-sm shadow-lg shadow-green-500/20 transition-all hover:-translate-y-0.5"
-                    >
-                      <Unlock className="w-4 h-4" /> Restore User
-                    </button>
-                  ) : (
-                    canArchive && (
-                      <button
-                        onClick={() => openActionModal("archive", selectedUser)}
-                        className="p-2 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 hover:bg-orange-100 dark:bg-orange-900/10 dark:text-orange-400 dark:border-orange-900/30 transition-all"
-                        title="Archive User"
-                      >
-                        <Archive className="w-4 h-4" />
-                      </button>
-                    )
-                  )}
-
-                  {/* Freeze Logic */}
-                  {canFreeze && (
-                    <button
-                      onClick={(e) => onToggleFreeze(selectedUser, e)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all hover:-translate-y-0.5
-                        ${selectedUser.isFrozen
-                          ? "bg-green-600 hover:bg-green-700 text-white shadow-green-500/20"
-                          : "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20"
-                        }`}
-                    >
-                      {selectedUser.isFrozen ? (
-                        <>
-                          {" "}
-                          <Unlock className="w-4 h-4" /> Unfreeze User{" "}
-                        </>
-                      ) : (
-                        <>
-                          {" "}
-                          <Lock className="w-4 h-4" /> Freeze User{" "}
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                {activeTab === "overview" && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {/* Stats cards logic same as before... */}
-                      <div
-                        {...pressable(() => setExpandedStat("joined"))}
-                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-                      >
-                        <div
-                          className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`}
-                        />
-                        <div
-                          className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}
-                        >
-                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
-                        </div>
-                        <div className="flex-1 min-w-0 relative z-10">
-                          <p
-                            className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}
-                          >
-                            Joined
-                          </p>
-                          <p
-                            className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}
-                          >
-                            {new Date(
-                              selectedUser.createdAt,
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        {...pressable(() => setExpandedStat("balance"))}
-                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-                      >
-                        <div
-                          className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`}
-                        />
-                        <div
-                          className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}
-                        >
-                          <Wallet className="w-5 h-5 sm:w-6 sm:h-6" />
-                        </div>
-                        <div className="flex-1 min-w-0 relative z-10">
-                          <p
-                            className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}
-                          >
-                            Balance
-                          </p>
-                          <p
-                            className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}
-                          >
-                            {loadingDetails ? (
-                              <Skeleton
-                                width={80}
-                                baseColor={TC.skeletonBase}
-                                highlightColor={TC.skeletonHighlight}
-                              />
-                            ) : (
-                              `$${userDetails.balance?.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        {...pressable(() => setExpandedStat("assets"))}
-                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-                      >
-                        <div
-                          className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`}
-                        />
-                        <div
-                          className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}
-                        >
-                          <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
-                        </div>
-                        <div className="flex-1 min-w-0 relative z-10">
-                          <p
-                            className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}
-                          >
-                            Assets
-                          </p>
-                          <p
-                            className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}
-                          >
-                            {loadingDetails ? (
-                              <Skeleton
-                                width={80}
-                                baseColor={TC.skeletonBase}
-                                highlightColor={TC.skeletonHighlight}
-                              />
-                            ) : (
-                              userDetails.holdings?.length || 0
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        {...pressable(() => setExpandedStat("status"))}
-                        className={`p-4 rounded-2xl ${TC.bgStatsCard} flex items-center gap-4 cursor-pointer active:scale-95 transform transition-all group overflow-hidden relative`}
-                      >
-                        <div
-                          className={`absolute -top-10 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-300`}
-                        />
-                        <div
-                          className={`p-3 rounded-xl flex-shrink-0 bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg text-white group-hover:shadow-blue-500/40 transition-shadow`}
-                        >
-                          {selectedUser.recentlyActive ? (
-                            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                          ) : (
-                            <Ban className="w-5 h-5 sm:w-6 sm:h-6" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 relative z-10">
-                          <p
-                            className={`text-[10px] uppercase font-bold tracking-wider leading-none mb-1.5 ${TC.textSecondary}`}
-                          >
-                            Status
-                          </p>
-                          <p
-                            className={`text-lg sm:text-xl font-bold leading-tight truncate ${TC.textPrimary} group-hover:text-blue-500 transition-colors`}
-                          >
-                            {selectedUser.recentlyActive
-                              ? "Active"
-                              : "Inactive"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div
-                        className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border} space-y-4`}
-                      >
-                        <h3 className={`font-bold ${TC.textPrimary}`}>
-                          Contact Information
-                        </h3>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                            <Mail className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <p className={`text-xs ${TC.textSecondary}`}>
-                              Email Address
-                            </p>
-                            <p
-                              className={`text-sm font-medium ${TC.textPrimary}`}
-                            >
-                              {selectedUser.email}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <p className={`text-xs ${TC.textSecondary}`}>
-                              Phone Number
-                            </p>
-                            <p
-                              className={`text-sm font-medium ${TC.textPrimary}`}
-                            >
-                              {selectedUser.phone || "Not Set"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 flex gap-3">
-                          <button
-                            onClick={() => setShowMessageModal(true)}
-                            className={`flex-1 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${isLight ? "bg-blue-50 text-blue-600 hover:bg-blue-100" : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"}`}
-                          >
-                            <Mail className="w-4 h-4" /> Send Email
-                          </button>
-                        </div>
-                      </div>
-                      <div
-                        className={`p-6 rounded-2xl border ${TC.bgCard} ${TC.border}`}
-                      >
-                        <h3 className={`font-bold mb-4 ${TC.textPrimary}`}>
-                          Admin Notes
-                        </h3>
-                        <textarea
-                          className={`w-full h-32 p-3 rounded-xl resize-none outline-none text-sm ${isLight ? "bg-gray-50 text-gray-800" : "bg-[#0f111a] text-gray-300 border border-gray-800 focus:border-blue-500"}`}
-                          placeholder="Add note..."
-                        ></textarea>
-                        <button className="mt-3 w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2">
-                          Save Note
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {/* History & Docs Tabs remain largely unchanged in rendering logic, just simple display */}
-                {activeTab === "history" && (
-                  <div className="space-y-4">
-                    {loadingDetails ? (
-                      <div className="flex justify-center p-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-                      </div>
-                    ) : userDetails.transactions &&
-                      userDetails.transactions.length > 0 ? (
-                      userDetails.transactions.map((tx) => (
-                        <div
-                          key={tx._id}
-                          className={`flex items-center justify-between p-4 rounded-xl border ${TC.bgCard} ${TC.border}`}
-                        >
-                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div
-                              className={`p-2 rounded-full flex-shrink-0 ${tx.type === "buy" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
-                            >
-                              {tx.type === "buy" ? (
-                                <ArrowDownLeft className="w-5 h-5" />
-                              ) : (
-                                <ArrowUpRight className="w-5 h-5" />
-                              )}
-                            </div>
-                            <div className="min-w-0 truncate">
-                              <p className={`font-bold ${TC.textPrimary} truncate`}>
-                                {tx.coinName} ({tx.coinSymbol?.toUpperCase()})
-                              </p>
-                              <p className={`text-xs ${TC.textSecondary} truncate`}>
-                                {new Date(tx.transactionDate).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0 ml-2">
-                            <p
-                              className={`font-bold ${tx.type === "buy" ? "text-green-500" : "text-red-500"}`}
-                            >
-                              {tx.type === "buy" ? "+" : "-"}
-                              {tx.quantity?.toFixed(6)}
-                            </p>
-                            <p className={`text-xs ${TC.textSecondary}`}>
-                              ${tx.totalValue?.toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div
-                        className={`h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl ${isLight ? "border-gray-200" : "border-gray-800"}`}
-                      >
-                        <Clock className="w-10 h-10 text-gray-300 mb-3" />
-                        <p className={`font-bold ${TC.textSecondary}`}>
-                          No transactions found
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {activeTab === "docs" && (
-                  <KycReviewPanel
-                    userId={selectedUser.id}
-                    TC={TC}
-                    isLight={isLight}
-                    onDecision={onKycDecision}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <UserDetailSheet
+        user={selected || lastSelected.current}
+        actor={actor}
+        open={!!selected}
+        onClose={() => setSelectedId(null)}
+        onAction={handleAction}
+        busy={busy}
+      />
     </div>
   );
-
-  // If NOT Desktop (Mobile) and a user is selected, render via Portal to body.
-  if (!isDesktop) {
-    return createPortal(content, document.body);
-  }
-
-  // Otherwise (Desktop), render inline.
-  return content;
-};
-
-export default Users;
+}

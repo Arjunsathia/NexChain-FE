@@ -1,548 +1,224 @@
-import { pressable } from "@/utils/a11y";
-import { getAvatarUrl } from "@/utils/avatar";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaSave,
-  FaCamera,
-  FaTimes,
-  FaSearchPlus,
-  FaSearchMinus,
-  FaPhone,
-  FaShieldAlt,
-} from "react-icons/fa";
-import useUserContext from "@/hooks/useUserContext";
-import toast from "react-hot-toast";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
-import { getCroppedImgBlob } from "@/utils/canvasUtils";
-
+import toast from "react-hot-toast";
+import { Camera, Minus, Plus } from "lucide-react";
 import api, { setMemoryToken } from "@/api/axiosConfig";
-// import { Link } from 'react-router-dom'; // Unused
+import useUserContext from "@/hooks/useUserContext";
+import { UserAvatar } from "@/Components/ui/user-avatar";
+import { getCroppedImgBlob } from "@/utils/canvasUtils";
+import { Modal, ModalHeader } from "@/Components/ui/modal";
+import SettingsSection, { Field } from "./SettingsSection";
+import { inputClass, primaryButton, secondaryButton } from "./settingsStyles";
 
-const ProfileSettings = ({ TC, isLight }) => {
-  const { user, updateUser } = useUserContext();
-  const isDark = !isLight;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-  const [formData, setFormData] = useState({
-    name: "",
-    user_name: "",
-    email: "",
-    phone: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+const fromUser = (u) => ({ name: u?.name || "", user_name: u?.user_name || "", email: u?.email || "", phone: u?.phone || "" });
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
 
-  // Cropper State
-  const [imageSrc, setImageSrc] = useState(null);
+/** Square crop of the chosen photo before upload */
+function CropModal({ imageSrc, open, onClose, onSave, saving }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-  const [isCropping, setIsCropping] = useState(false);
+  const [pixels, setPixels] = useState(null);
+  const onComplete = useCallback((_, area) => setPixels(area), []);
 
   useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: user.name || "",
-        user_name: user.user_name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-      }));
-    }
-  }, [user]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  const handleFileSelect = async (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        setImageSrc(reader.result);
-        setIsCropping(true);
-      });
-      reader.readAsDataURL(file);
-      e.target.value = "";
-    }
-  };
-
-  const handleUploadCroppedImage = async () => {
-    if (!imageSrc || !croppedAreaPixels) return;
-
-    try {
-      setIsUploading(true);
-      const croppedBlob = await getCroppedImgBlob(imageSrc, croppedAreaPixels, 0, { horizontal: false, vertical: false }, 'image/png');
-      if (!croppedBlob) {
-        throw new Error("Failed to create image blob");
-      }
-      const file = new File([croppedBlob], "profile_image.png", {
-        type: "image/png",
-      });
-
-      await uploadImage(file);
-
-      setIsCropping(false);
-      setImageSrc(null);
+    if (open) {
+      setCrop({ x: 0, y: 0 });
       setZoom(1);
-    } catch (e) {
-      console.error(e);
-      toast.error("Error cropping image");
-      setIsUploading(false);
     }
-  };
+  }, [open, imageSrc]);
 
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append("image", file);
+  return (
+    <Modal open={open} onClose={onClose} label="Crop profile photo">
+      <ModalHeader title="Crop your photo" subtitle="Drag to position, and zoom to fit." onClose={onClose} />
+      <div className="relative mx-5 h-72 overflow-hidden rounded-xl bg-black">
+        {imageSrc && (
+          <Cropper image={imageSrc} crop={crop} zoom={zoom} aspect={1} cropShape="round" showGrid={false} onCropChange={setCrop} onZoomChange={setZoom} onCropComplete={onComplete} />
+        )}
+      </div>
+      <div className="flex items-center gap-3 px-5 pt-4">
+        <Minus size={15} className="text-fg-subtle" />
+        <input
+          type="range"
+          min={1}
+          max={3}
+          step={0.05}
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          aria-label="Zoom"
+          className="flex-1 accent-[var(--brand)]"
+        />
+        <Plus size={15} className="text-fg-subtle" />
+      </div>
+      <div className="flex justify-end gap-2 p-5">
+        <button type="button" onClick={onClose} className={secondaryButton}>
+          Cancel
+        </button>
+        <button type="button" disabled={!pixels || saving} onClick={() => onSave(pixels)} className={primaryButton}>
+          {saving ? "Uploading…" : "Save photo"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
-    try {
-      // Use the configured axios instance which handles headers/tokens automatically
-      const response = await api.put(
-        `/users/profile-image/${user.id}`,
-        formData,
-      );
-      const data = response.data;
+/** Photo and personal details. Password and 2FA live under Security. */
+export default function ProfileSettings() {
+  const { user, updateUser } = useUserContext();
+  const isGoogle = user?.provider === "google";
+  const isDemo = !!user?.isDemo;
+  const demoHint = "Locked on demo accounts.";
+  const [form, setForm] = useState(() => fromUser(user));
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
-      if (data.user) {
-        toast.success("Profile image updated successfully");
-        updateUser(data.user);
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to upload image";
-      toast.error(errorMessage);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  // Load the saved values once the profile arrives (and after every save)
+  useEffect(() => setForm(fromUser(user)), [user]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
+  const saved = useMemo(() => fromUser(user), [user]);
+  const dirty = Object.keys(form).some((k) => form[k] !== saved[k]);
+  const emailChanged = form.email.trim().toLowerCase() !== saved.email.toLowerCase();
 
-    if (
-      formData.newPassword &&
-      formData.newPassword !== formData.confirmPassword
-    ) {
-      toast.error("New passwords do not match");
-      setIsSaving(false);
+  const set = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const pickFile = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error("Choose an image under 5 MB");
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => setImageSrc(reader.result);
+    reader.readAsDataURL(file);
+  };
 
+  const uploadCropped = async (pixels) => {
+    setUploading(true);
     try {
-      const updateData = {
-        name: formData.name,
-        user_name: formData.user_name,
-        email: formData.email,
-        phone: formData.phone,
-      };
-
-      if (formData.currentPassword) {
-        updateData.currentPassword = formData.currentPassword;
-        updateData.newPassword = formData.newPassword;
-        updateData.confirmPassword = formData.confirmPassword;
-      }
-
-      // Use authenticated api instance instead of raw fetch
-      const response = await api.put(`/users/${user.id}`, updateData);
-      const data = response.data;
-
-      // A password change revokes old sessions; the response carries new tokens
-      if (data.accessToken) setMemoryToken(data.accessToken);
-      if (data.user) {
-        toast.success("Profile updated successfully");
-        updateUser(data.user);
-      }
+      const blob = await getCroppedImgBlob(imageSrc, pixels, 0, { horizontal: false, vertical: false }, "image/png");
+      if (!blob) throw new Error("Couldn't prepare the image");
+      const body = new FormData();
+      body.append("image", new File([blob], "profile_image.png", { type: "image/png" }));
+      const res = await api.put(`/users/profile-image/${user.id}`, body);
+      if (res.data.user) updateUser(res.data.user);
+      toast.success("Profile photo updated");
+      setImageSrc(null);
     } catch (error) {
-      console.error("Update error:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to update profile";
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || error.response?.data?.error || error.message || "Upload failed");
     } finally {
-      setIsSaving(false);
+      setUploading(false);
+    }
+  };
+
+  const save = async (e) => {
+    e.preventDefault();
+    if (emailChanged && !isGoogle && !isDemo && !currentPassword) {
+      toast.error("Enter your current password to change your email");
+      return;
+    }
+    setSaving(true);
+    try {
+      // Demo accounts may only rename themselves; the API rejects the other fields
+      const body = isDemo
+        ? { name: form.name.trim() }
+        : { name: form.name.trim(), user_name: form.user_name.trim(), phone: form.phone.trim() };
+      if (emailChanged && !isDemo) {
+        body.email = form.email.trim();
+        body.currentPassword = currentPassword;
+      }
+      const res = await api.put(`/users/${user.id}`, body);
+      if (res.data.accessToken) setMemoryToken(res.data.accessToken);
+      if (res.data.user) updateUser(res.data.user);
+      setCurrentPassword("");
+      toast.success("Profile saved");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.response?.data?.error || "Couldn't save your profile");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-8 animate-in fade-in duration-300"
+    <div className="space-y-5">
+      <SettingsSection title="Profile photo" description="Shown on the leaderboard and in your account menu.">
+        <div className="flex items-center gap-5">
+          <UserAvatar user={user} />
+          <div className="space-y-2">
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={isDemo} className={secondaryButton}>
+              <Camera size={16} /> Upload new photo
+            </button>
+            <p className="text-xs text-fg-subtle">{isDemo ? "Photo uploads are off on demo accounts." : "JPG, PNG or WebP, up to 5 MB."}</p>
+          </div>
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={pickFile} className="hidden" />
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        as="form"
+        onSubmit={save}
+        title="Personal details"
+        description="Your name and username are visible to other traders; email and phone stay private."
+        footerHint={dirty ? "You have unsaved changes." : "All changes saved."}
+        footer={
+          <>
+            <button type="button" disabled={!dirty || saving} onClick={() => setForm(saved)} className={secondaryButton}>
+              Discard
+            </button>
+            <button type="submit" disabled={!dirty || saving} className={primaryButton}>
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </>
+        }
       >
-        {/* Section 1: Avatar & Basic Info */}
-        <div
-          className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 pb-8 border-b border-dashed"
-          style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
-        >
-          <div
-            className="relative group cursor-pointer shrink-0"
-            {...pressable(() => !isUploading && fileInputRef.current.click())}
-          >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field id="profile-name" label="Full name">
+            <input id="profile-name" name="name" value={form.name} onChange={set} required minLength={2} maxLength={100} autoComplete="name" className={inputClass} />
+          </Field>
+          <Field id="profile-username" label="Username" hint={isDemo ? demoHint : "Letters and numbers, 3–30 characters."}>
             <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              className="hidden"
-              accept="image/jpeg,image/png,image/webp"
+              id="profile-username"
+              name="user_name"
+              value={form.user_name}
+              onChange={set}
+              disabled={isDemo}
+              required
+              minLength={3}
+              maxLength={30}
+              pattern="[A-Za-z0-9]+"
+              autoComplete="username"
+              className={inputClass}
             />
-            <div
-              className={`w-28 h-28 rounded-2xl overflow-hidden border-2 flex items-center justify-center relative shadow-lg ${isLight ? "border-white bg-gray-100 shadow-blue-500/10" : "border-gray-700 bg-gray-800 shadow-black/40"}`}
-            >
-              {user?.image ? (
-                <img
-                  src={
-                    getAvatarUrl(user.image)
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              ) : (
-                <span
-                  className={`text-4xl font-bold ${isLight ? "text-blue-600" : "text-cyan-400"}`}
-                >
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </span>
-              )}
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                {isUploading ? (
-                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <FaCamera className="text-white text-2xl drop-shadow-md" />
-                )}
-              </div>
-            </div>
-            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-xl text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-              <FaCamera size={12} />
-            </div>
-          </div>
-
-          <div className="text-center sm:text-left pt-2">
-            <h2
-              className={`text-2xl font-bold ${TC.textPrimary} mb-1 tracking-tight`}
-            >
-              {user?.name}
-            </h2>
-            <p className={`font-medium ${TC.textSecondary} mb-3`}>
-              @{user?.user_name}
-            </p>
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider ${isLight ? "bg-blue-50 text-blue-600" : "bg-blue-500/10 text-blue-400"}`}
-            >
-              <FaShieldAlt className="text-xs" /> Personal Account
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Personal Details */}
-        <div>
-          <h3
-            className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}
-          >
-            Basic Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Full Name
-              </label>
-              <div className="relative group">
-                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
+          </Field>
+          <Field id="profile-email" label="Email" hint={isDemo ? demoHint : isGoogle ? "Managed by your Google account." : undefined}>
+            <input id="profile-email" name="email" type="email" value={form.email} onChange={set} disabled={isGoogle || isDemo} required autoComplete="email" className={inputClass} />
+          </Field>
+          <Field id="profile-phone" label="Phone" hint={isDemo ? demoHint : "Optional."}>
+            <input id="profile-phone" name="phone" type="tel" value={form.phone} onChange={set} disabled={isDemo} maxLength={30} autoComplete="tel" className={inputClass} />
+          </Field>
+          {emailChanged && !isGoogle && !isDemo && (
+            <div className="sm:col-span-2">
+              <Field id="profile-current-password" label="Current password" hint="Required to change your email, so nobody else can redirect your password resets.">
                 <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  placeholder="Your Full Name"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Username
-              </label>
-              <div className="relative group">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold group-focus-within:text-cyan-500 transition-colors">
-                  @
-                </span>
-                <input
-                  type="text"
-                  name="user_name"
-                  value={formData.user_name}
-                  onChange={handleChange}
-                  className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  placeholder="username"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Email Address
-              </label>
-              <div className="relative group">
-                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  placeholder="name@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Phone Number
-              </label>
-              <div className="relative group">
-                <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  placeholder="+1 (555) 000-0000"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Security */}
-        <div
-          className={`pt-6 border-t border-dashed`}
-          style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
-        >
-          <h3
-            className={`text-lg font-bold mb-5 flex items-center gap-2 ${TC.textPrimary} tracking-tight`}
-          >
-            Security Settings
-          </h3>
-
-          <div className="space-y-5">
-            <div className="space-y-1.5">
-              <label
-                className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-              >
-                Current Password
-              </label>
-              <div className="relative group">
-                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <input
+                  id="profile-current-password"
                   type="password"
-                  name="currentPassword"
-                  placeholder="Enter current password to change"
-                  value={formData.currentPassword}
-                  onChange={handleChange}
-                  className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className={inputClass}
                 />
-              </div>
+              </Field>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label
-                  className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-                >
-                  New Password
-                </label>
-                <div className="relative group">
-                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                  <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="Min. 8 characters"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label
-                  className={`text-xs font-bold uppercase tracking-wider ${TC.textSecondary} ml-1`}
-                >
-                  Confirm Password
-                </label>
-                <div className="relative group">
-                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Re-enter new password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full pl-11 pr-4 py-3.5 rounded-xl border outline-none transition-all ${TC.bgInput} ${TC.textPrimary}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
+      </SettingsSection>
 
-        <div
-          className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-dashed"
-          style={{ borderColor: isLight ? "#e5e7eb" : "rgba(255,255,255,0.1)" }}
-        >
-          <button type="submit" disabled={isSaving} className={TC.btnPrimary}>
-            {isSaving ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Saving Changes...</span>
-              </>
-            ) : (
-              <>
-                <FaSave /> Save Changes
-              </>
-            )}
-          </button>
-        </div>
-      </form>
-
-      {/* Cropper Modal - Portaled to Body */}
-      {isCropping &&
-        createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-            <div
-              className={`w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in duration-300 ${isDark ? "bg-gray-900 border border-gray-800" : "bg-white"}`}
-            >
-              <div
-                className={`p-5 flex justify-between items-center border-b ${isDark ? "border-gray-800" : "border-gray-100"}`}
-              >
-                <h3
-                  className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}
-                >
-                  Adjust Image
-                </h3>
-                <button
-                  onClick={() => {
-                    setIsCropping(false);
-                    setImageSrc(null);
-                  }}
-                  className={`p-2 rounded-full transition-colors ${isDark ? "hover:bg-gray-800 text-gray-400" : "hover:bg-gray-100 text-gray-500"}`}
-                >
-                  <FaTimes />
-                </button>
-              </div>
-
-              <div className="relative h-64 sm:h-80 bg-[#1a1a1a] flex items-center justify-center overflow-hidden">
-                {/* Checkerboard Pattern for Transparency */}
-                <div
-                  className="absolute inset-0 opacity-20 pointer-events-none"
-                  style={{
-                    backgroundImage: `linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%)`,
-                    backgroundSize: '20px 20px',
-                    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
-                  }}
-                />
-                <Cropper
-                  image={imageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                  showGrid={false}
-                  restrictPosition={false}
-                  objectFit="auto-cover"
-                />
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="flex items-center gap-4">
-                  <FaSearchMinus className="text-gray-400" />
-                  <input
-                    type="range"
-                    value={zoom}
-                    min={1}
-                    max={3}
-                    step={0.1}
-                    aria-labelledby="Zoom"
-                    onChange={(e) => setZoom(Number(e.target.value))}
-                    className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                  />
-                  <FaSearchPlus className="text-gray-400" />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      setIsCropping(false);
-                      setImageSrc(null);
-                    }}
-                    className={`flex-1 py-3 rounded-xl font-bold transition-colors ${isDark
-                      ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleUploadCroppedImage}
-                    disabled={isUploading}
-                    className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
-                  >
-                    {isUploading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      "Save & Upload"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
-    </>
+      <CropModal imageSrc={imageSrc} open={!!imageSrc} onClose={() => setImageSrc(null)} onSave={uploadCropped} saving={uploading} />
+    </div>
   );
-};
-
-export default ProfileSettings;
+}

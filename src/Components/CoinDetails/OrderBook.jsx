@@ -1,58 +1,55 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  memo,
-} from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import useBinanceStream from "@/hooks/useBinanceStream";
+import { formatCompact } from "@/utils/format";
+import { cn } from "@/utils/utils";
 
 const FLUSH_MS = 250; // the stream sends up to 10 updates/s; render at most 4
+const LEVELS = 12;
 
-const OrderBook = memo(({ symbol }) => {
-  const isLight = useThemeCheck();
-  const [orderBook, setOrderBook] = useState({ bids: [], asks: [] });
-  const [activeTab, setActiveTab] = useState("all");
-  const maxVolumeRef = useRef(0);
+const decimalsFor = (price) => (price >= 1000 ? 2 : price >= 1 ? 3 : price >= 0.01 ? 5 : 8);
+const fmtAmount = (v) => (v >= 10_000 ? formatCompact(v) : v.toLocaleString("en-US", { maximumFractionDigits: v >= 1 ? 4 : 6 }));
+
+const SIDES = [
+  { value: "all", label: "Both sides" },
+  { value: "bids", label: "Bids only" },
+  { value: "asks", label: "Asks only" },
+];
+
+/** Two-tone icon for the side filter: green (bids) and red (asks) stripes */
+const SideIcon = ({ side }) => (
+  <span className="grid w-3.5 gap-px" aria-hidden="true">
+    {[0, 1, 2, 3].map((i) => (
+      <span
+        key={i}
+        className={cn(
+          "h-[2px] rounded-full",
+          side === "bids" ? "bg-up" : side === "asks" ? "bg-down" : i < 2 ? "bg-down" : "bg-up",
+        )}
+      />
+    ))}
+  </span>
+);
+
+const Level = ({ level, side, maxVolume, decimals }) => (
+  <div className="relative grid grid-cols-3 gap-2 px-4 py-[3px] text-xs">
+    <span
+      className={cn("absolute inset-y-0 right-0", side === "bid" ? "bg-up-soft" : "bg-down-soft")}
+      style={{ width: `${maxVolume ? (level.volume / maxVolume) * 100 : 0}%` }}
+      aria-hidden="true"
+    />
+    <span className={cn("tabular relative font-medium", side === "bid" ? "text-up" : "text-down")}>
+      {level.price.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+    </span>
+    <span className="tabular relative text-right text-fg">{fmtAmount(level.volume)}</span>
+    <span className="tabular relative text-right text-fg-muted">{formatCompact(level.price * level.volume)}</span>
+  </div>
+);
+
+/** Live top-of-book depth from Binance with the spread in the middle */
+const OrderBook = memo(({ symbol, baseSymbol }) => {
+  const [book, setBook] = useState({ bids: [], asks: [] });
+  const [side, setSide] = useState("all");
   const latestRef = useRef(null);
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-600" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-500" : "text-gray-500",
-
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 glass-card",
-      borderHeader: isLight ? "border-gray-100" : "border-gray-700/50",
-
-      headerGradient:
-        "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent",
-
-      bgTabBar: isLight ? "bg-gray-100/50" : "bg-gray-900/50",
-      textTabInactive: isLight
-        ? "text-gray-600 hover:text-gray-900"
-        : "text-gray-400 hover:text-white",
-      bgTabActiveCyan: "bg-cyan-600 text-white",
-      bgTabActiveGreen: "bg-green-600 text-white",
-      bgTabActiveRed: "bg-red-600 text-white",
-
-      bgBidVolume: isLight ? "bg-green-500/10" : "bg-green-500/10",
-      bgAskVolume: isLight ? "bg-red-500/10" : "bg-red-500/10",
-      textBidPrice: isLight ? "text-green-700" : "text-green-400",
-      textAskPrice: isLight ? "text-red-700" : "text-red-400",
-      textAmount: isLight ? "text-gray-800" : "text-gray-300",
-      textTotal: isLight ? "text-gray-500" : "text-gray-400",
-
-      bgSpread: isLight
-        ? "bg-gray-100/50 border-gray-300/50"
-        : "bg-gray-900/50 border-gray-700/50",
-      textSpreadValue: isLight ? "text-blue-600" : "text-cyan-400",
-    }),
-    [isLight],
-  );
 
   const status = useBinanceStream(symbol ? `${symbol.toLowerCase()}@depth20@100ms` : null, (data) => {
     if (data.bids && data.asks) latestRef.current = data;
@@ -61,159 +58,103 @@ const OrderBook = memo(({ symbol }) => {
   // Reset when switching coins, then render the latest snapshot on a timer
   useEffect(() => {
     latestRef.current = null;
-    setOrderBook({ bids: [], asks: [] });
+    setBook({ bids: [], asks: [] });
     const timer = setInterval(() => {
       const data = latestRef.current;
       if (!data) return;
       latestRef.current = null;
-      const toLevels = (levels) =>
-        levels.slice(0, 10).map(([price, volume]) => ({
-          price: parseFloat(price),
-          volume: parseFloat(volume),
-        }));
-      const bids = toLevels(data.bids);
-      const asks = toLevels(data.asks);
-      maxVolumeRef.current = Math.max(0, ...bids.map((o) => o.volume), ...asks.map((o) => o.volume));
-      setOrderBook({ bids, asks });
+      const toLevels = (levels) => levels.slice(0, LEVELS).map(([price, volume]) => ({ price: +price, volume: +volume }));
+      setBook({ bids: toLevels(data.bids), asks: toLevels(data.asks) });
     }, FLUSH_MS);
     return () => clearInterval(timer);
   }, [symbol]);
 
-  const renderOrderRow = useCallback(
-    (order, type) => {
-      const percentage =
-        maxVolumeRef.current > 0
-          ? (order.volume / maxVolumeRef.current) * 100
-          : 0;
-      const bgColor = type === "bid" ? TC.bgBidVolume : TC.bgAskVolume;
-      const textColor = type === "bid" ? TC.textBidPrice : TC.textAskPrice;
-      const amountColor = TC.textAmount;
-      const totalColor = TC.textTotal;
+  const levels = side === "all" ? LEVELS / 2 + 2 : LEVELS;
+  const asks = book.asks.slice(0, side === "asks" ? LEVELS : side === "all" ? levels : 0);
+  const bids = book.bids.slice(0, side === "bids" ? LEVELS : side === "all" ? levels : 0);
+  const maxVolume = Math.max(0, ...asks.map((l) => l.volume), ...bids.map((l) => l.volume));
+  const bestBid = book.bids[0]?.price;
+  const bestAsk = book.asks[0]?.price;
+  const decimals = decimalsFor(bestBid || bestAsk || 1);
+  const spread = bestBid && bestAsk ? bestAsk - bestBid : null;
+  const bidShare = (() => {
+    const b = book.bids.reduce((s, l) => s + l.volume * l.price, 0);
+    const a = book.asks.reduce((s, l) => s + l.volume * l.price, 0);
+    return a + b ? (b / (a + b)) * 100 : null;
+  })();
 
-      return (
-        <div key={`${type}-${order.price}`} className="relative">
-          <div
-            className={`absolute inset-0 ${bgColor}`}
-            style={{
-              width: `${percentage}%`,
-              right: type === "bid" ? undefined : 0,
-              left: type === "ask" ? undefined : 0,
-            }}
-          />
-          <div className="relative grid grid-cols-3 gap-2 px-3 py-1 text-xs">
-            <span className={`${textColor} font-mono font-medium`}>
-              {order.price.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
-            <span className={`${amountColor} text-right font-mono`}>
-              {order.volume.toFixed(5)}
-            </span>
-            <span className={`${totalColor} text-right font-mono text-xs`}>
-              {(order.price * order.volume).toLocaleString("en-US", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-        </div>
-      );
-    },
-    [TC],
-  );
+  if (status === "unavailable") {
+    return <p className="grid h-full place-items-center px-6 text-center text-sm text-fg-subtle">Order book isn’t available for this coin.</p>;
+  }
 
   return (
-    <div
-      className={`${TC.bgCard} rounded-lg md:rounded-2xl overflow-hidden h-full flex flex-col`}
-    >
-      <div className={`p-3 border-b ${TC.borderHeader} flex-shrink-0`}>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className={`text-base font-bold ${TC.headerGradient}`}>
-            Order Book
-            {status !== "live" && (
-              <span className={`ml-2 text-[10px] font-semibold ${TC.textTertiary}`} role="status">
-                {status === "unavailable" ? "Not available for this coin" : "Connecting…"}
-              </span>
-            )}
-          </h3>
-          <div className={`flex gap-1 rounded-lg p-0.5 ${TC.bgTabBar}`}>
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between gap-2 px-4 pb-2">
+        <div className="inline-flex gap-0.5 rounded-lg bg-surface-2 p-0.5" role="group" aria-label="Order book sides">
+          {SIDES.map((s) => (
             <button
-              onClick={() => setActiveTab("all")}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === "all" ? TC.bgTabActiveCyan : TC.textTabInactive
-              }`}
+              key={s.value}
+              type="button"
+              onClick={() => setSide(s.value)}
+              aria-pressed={side === s.value}
+              aria-label={s.label}
+              title={s.label}
+              className={cn(
+                "grid size-7 place-items-center rounded-md transition-colors",
+                side === s.value ? "bg-surface shadow-card ring-1 ring-line" : "opacity-60 hover:opacity-100",
+              )}
             >
-              All
+              <SideIcon side={s.value} />
             </button>
-            <button
-              onClick={() => setActiveTab("bids")}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === "bids" ? TC.bgTabActiveGreen : TC.textTabInactive
-              }`}
-            >
-              Bids
-            </button>
-            <button
-              onClick={() => setActiveTab("asks")}
-              className={`px-2 py-0.5 rounded text-xs transition-all ${
-                activeTab === "asks" ? TC.bgTabActiveRed : TC.textTabInactive
-              }`}
-            >
-              Asks
-            </button>
-          </div>
+          ))}
         </div>
-
-        <div
-          className={`grid grid-cols-3 gap-2 px-3 text-xs font-semibold ${TC.textSecondary}`}
-        >
-          <span>Price</span>
-          <span className="text-right">Amount</span>
-          <span className="text-right">Total</span>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        {(activeTab === "all" || activeTab === "asks") && (
-          <div className="flex flex-col-reverse">
-            {orderBook.asks.map((ask) => renderOrderRow(ask, "ask"))}
+        {bidShare != null && (
+          <div className="flex min-w-0 flex-1 items-center gap-2 pl-3 text-[11px] font-medium" title="Share of visible depth on each side">
+            <span className="tabular text-up">{bidShare.toFixed(0)}%</span>
+            <span className="flex h-1.5 flex-1 overflow-hidden rounded-full">
+              <span className="bg-up" style={{ width: `${bidShare}%` }} />
+              <span className="flex-1 bg-down" />
+            </span>
+            <span className="tabular text-down">{(100 - bidShare).toFixed(0)}%</span>
           </div>
         )}
+      </div>
 
-        {activeTab === "all" &&
-          orderBook.bids.length > 0 &&
-          orderBook.asks.length > 0 && (
-            <div
-              className={`py-1.5 px-3 border-y flex-shrink-0 ${TC.bgSpread}`}
-            >
-              <div className="flex items-center justify-between text-xs">
-                <span className={TC.textSecondary}>Spread</span>
-                <span
-                  className={`${TC.textSpreadValue} font-mono font-semibold`}
-                >
-                  {(orderBook.asks[0].price - orderBook.bids[0].price).toFixed(
-                    2,
-                  )}
+      <div className="grid grid-cols-3 gap-2 border-y border-line px-4 py-1.5 text-[11px] font-medium text-fg-subtle">
+        <span>Price (USDT)</span>
+        <span className="text-right">Amount ({baseSymbol})</span>
+        <span className="text-right">Total</span>
+      </div>
+
+      {!book.bids.length ? (
+        <p className="grid flex-1 place-items-center text-xs text-fg-subtle" role="status">
+          {status === "live" ? "Waiting for the first update…" : "Connecting to Binance…"}
+        </p>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-y-auto py-1">
+          <div className="flex flex-col-reverse">
+            {asks.map((l) => (
+              <Level key={`a${l.price}`} level={l} side="ask" maxVolume={maxVolume} decimals={decimals} />
+            ))}
+          </div>
+          {side === "all" && spread != null && (
+            <div className="my-1 flex items-center justify-between border-y border-line bg-surface-2/60 px-4 py-1.5 text-xs">
+              <span className="tabular text-sm font-semibold text-fg">
+                {((bestBid + bestAsk) / 2).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+              </span>
+              <span className="text-fg-subtle">
+                Spread{" "}
+                <span className="tabular font-medium text-fg">
+                  {spread.toLocaleString("en-US", { maximumFractionDigits: decimals })} ({((spread / bestAsk) * 100).toFixed(3)}%)
                 </span>
-              </div>
+              </span>
             </div>
           )}
-
-        {(activeTab === "all" || activeTab === "bids") && (
-          <div>{orderBook.bids.map((bid) => renderOrderRow(bid, "bid"))}</div>
-        )}
-      </div>
-
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+          {bids.map((l) => (
+            <Level key={`b${l.price}`} level={l} side="bid" maxVolume={maxVolume} decimals={decimals} />
+          ))}
+        </div>
+      )}
     </div>
   );
 });

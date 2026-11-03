@@ -36,6 +36,7 @@ The API must be running too (`npm run dev` in `NexChain-backend`), with `CLIENT_
 ## Notes for contributors
 
 - **Auth:** the access token lives only in memory (`src/api/axiosConfig.js`). On load, `SessionManager` restores the session from the API's httpOnly refresh cookie. Never store tokens or user objects in `localStorage`. Log out with the `useLogout` hook.
+- **Demo login:** "Try the demo" (landing hero, final CTA and the sign-in card) calls `useDemoLogin()`, which asks the API for a fresh sandbox account. `user.isDemo` drives the `DemoBanner` in `MainLayout` and the locked fields in Settings. It also works locally with `npm run dev:local` in the API, so you don't need the seeded passwords.
 - **Route guards:** `ProtectedRoute` (signed in), `AdminRoute` (admin role) and `AuthRoute` (signed out). They're UI guards only; the API enforces every rule itself.
 - **Live prices:** use `useLivePrice(coinId)` for one coin (re-renders only when that coin changes) or `useBinanceTicker()` for all. Both share one socket (`src/lib/tickerStore.js`) that opens only while something is subscribed. Coin id → Binance pair mapping lives in `src/utils/coinRegistry.js`.
 - **Pages are lazy-loaded** (`src/Routes/AppRoutes.jsx`). Keep heavy libraries out of `App.jsx` and the layouts so the first load stays small.

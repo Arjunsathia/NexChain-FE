@@ -10,6 +10,15 @@ export const formatUSD = (value, { minimumFractionDigits = 2, maximumFractionDig
     maximumFractionDigits,
   }).format(value);
 
+/** Coin price with precision that suits its size: $67,123.45, $0.1834, $0.00001234 */
+export const formatPrice = (value) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "–";
+  if (n >= 1) return formatUSD(n);
+  if (n >= 0.01) return formatUSD(n, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  return `$${n.toPrecision(4)}`;
+};
+
 /** "1.2K", "3.45M" */
 export const formatCompact = (value, maximumFractionDigits = 2) =>
   new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits }).format(value);
@@ -18,6 +27,7 @@ export const formatCompact = (value, maximumFractionDigits = 2) =>
 export const formatTimeAgo = (unixSeconds) => {
   if (!unixSeconds) return "";
   const minutes = Math.floor((Date.now() - unixSeconds * 1000) / 60000);
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes} min ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;

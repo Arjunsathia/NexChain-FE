@@ -1,197 +1,179 @@
-import Highlights from "@/Components/UserProfile/Highlights";
-import InfoCards from "@/Components/UserProfile/InfoCards";
-import Portfolio from "@/Components/UserProfile/Portfolio";
-import RecentActivity from "@/Components/UserProfile/RecentActivity";
-import Watchlist from "@/Components/UserProfile/Watchlist";
-import { useCallback, useEffect, useState } from "react";
-import { getById } from "@/api/axiosConfig";
-import { useParams } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { BellRing, Camera, ChevronRight, IdCard, ListChecks, Pencil, ShieldCheck } from "lucide-react";
+import api from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
-import useThemeCheck from "@/hooks/useThemeCheck";
+import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
+import { Card, CardHeader } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
+import { UserAvatar } from "@/Components/ui/user-avatar";
+import AccountSummary from "@/Components/Dashboard/AccountSummary";
+import RecentTradesCard from "@/Components/Dashboard/RecentTradesCard";
+import WatchlistPreview from "@/Components/Dashboard/WatchlistPreview";
+import { cn } from "@/utils/utils";
 
-export default function Dashboard() {
+const memberSince = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+
+const KYC = {
+  verified: { label: "Verified", tone: "up", done: true },
+  pending: { label: "In review", tone: "warn" },
+  rejected: { label: "Needs changes", tone: "down" },
+  unverified: { label: "Not started", tone: "neutral" },
+};
+
+const HeaderStat = ({ label, value }) => (
+  <div className="min-w-0">
+    <p className="tabular text-lg font-semibold text-fg">{value}</p>
+    <p className="text-xs text-fg-subtle">{label}</p>
+  </div>
+);
+
+/** One account setup step with its status and a link to fix it */
+const ChecklistRow = ({ icon: Icon, title, description, status, done, to }) => (
+  <li>
+    <Link to={to} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-hover">
+      <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", done ? "bg-up-soft text-up" : "bg-surface-2 text-fg-muted")}>
+        <Icon size={16} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium text-fg">{title}</span>
+        <span className="block truncate text-xs text-fg-subtle">{description}</span>
+      </span>
+      {status}
+      <ChevronRight size={16} className="shrink-0 text-fg-subtle" />
+    </Link>
+  </li>
+);
+
+/** Account overview: who you are, what you hold and what's left to set up */
+export default function UserDashboard() {
   const { userId } = useParams();
   const { user } = useUserContext();
-  const isLight = useThemeCheck();
+  const { transactionHistory } = usePurchasedCoins();
+  const { groupedHoldings } = useLivePortfolio();
 
-  const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [contentLoaded, setContentLoaded] = useState(false);
+  // Same key and shape as Settings → Price alerts, so both share one cache entry
+  const { data: alerts = [] } = useQuery({
+    queryKey: ["alerts", user?.id],
+    queryFn: async () => (await api.get(`/alerts/${user.id}`)).data.alerts || [],
+    enabled: !!user?.id,
+    staleTime: 30_000,
+  });
 
-  const fetchData = useCallback(async () => {
-    const id = userId || user?.id;
-    if (!id) return;
+  const kyc = KYC[user?.kycStatus] || KYC.unverified;
+  const steps = useMemo(
+    () => [
+      {
+        key: "photo",
+        icon: Camera,
+        title: "Profile photo",
+        description: user?.image ? "Shown on the leaderboard" : "Add a photo so others recognise you",
+        done: !!user?.image,
+        to: "/user/settings",
+      },
+      {
+        key: "2fa",
+        icon: ShieldCheck,
+        title: "Two-factor authentication",
+        description: user?.twoFactorEnabled ? "A code is needed at every sign-in" : "Protect sign-in with an authenticator app",
+        done: !!user?.twoFactorEnabled,
+        to: "/user/settings?tab=security",
+      },
+      {
+        key: "kyc",
+        icon: IdCard,
+        title: "Identity verification",
+        description: user?.kycStatus === "rejected" ? "An admin asked for changes" : "Confirm who you are with an ID document",
+        done: !!kyc.done,
+        status: <Badge tone={kyc.tone}>{kyc.label}</Badge>,
+        to: "/user/settings?tab=identity",
+      },
+    ],
+    [user, kyc],
+  );
+  const doneCount = steps.filter((s) => s.done).length;
 
-    setIsLoading(true);
-    setContentLoaded(false);
-    try {
-      const res = await getById("/users", id);
-      setData(res?.data ?? res);
-    } catch (err) {
-      console.error("Failed to fetch data", err);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => setContentLoaded(true), 300);
-    }
-  }, [userId, user?.id]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const currentUser = data || user;
-
-  // Theme constants
-  const textPrimary = isLight ? "text-gray-900" : "text-white";
-  const textSecondary = isLight ? "text-gray-500" : "text-gray-400";
-  const bgBadge = isLight
-    ? "bg-white/50 border-gray-100 text-gray-500"
-    : "bg-gray-800/50 border-gray-700 text-gray-400";
-
-  // Skeleton constants
-  const skelCardBg = isLight
-    ? "bg-white/50 border-gray-100"
-    : "bg-gray-800/50 border-gray-700";
-  const skelShapeBg = isLight ? "bg-gray-200" : "bg-gray-700";
+  // The overview is always your own; old links with another id land here too
+  if (user?.id && userId && userId !== String(user.id)) {
+    return <Navigate to={`/user-profile/${user.id}`} replace />;
+  }
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 sm:p-4 lg:p-6 space-y-6">
-      <style>{`
-        @keyframes wave {
-          0% { transform: rotate(0.0deg) }
-          10% { transform: rotate(14.0deg) }
-          20% { transform: rotate(-8.0deg) }
-          30% { transform: rotate(14.0deg) }
-          40% { transform: rotate(-4.0deg) }
-          50% { transform: rotate(10.0deg) }
-          60% { transform: rotate(0.0deg) }
-          100% { transform: rotate(0.0deg) }
-        }
-        .animate-wave {
-          animation-name: wave;
-          animation-duration: 2.5s;
-          animation-iteration-count: infinite;
-          transform-origin: 70% 70%;
-          display: inline-block;
-        }
-      `}</style>
-
-      <div
-        className={`transition-all duration-500 ease-in-out ${contentLoaded && !isLoading
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-4"
-          }`}
-      >
-        {/* Header Section */}
-        <header className="mb-8 py-2 px-2">
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
-            <div className="w-full sm:w-auto text-center sm:text-left">
-              <h1
-                className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${textPrimary}`}
-              >
-                Welcome back,{" "}
-                <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                  {currentUser?.name || "User"}
-                </span>{" "}
-                <span className="animate-wave">👋</span>
-              </h1>
-              <p className={`text-sm font-medium ${textSecondary}`}>
-                Here&apos;s what&apos;s happening with your portfolio today.
-              </p>
+    <div className="space-y-4 lg:space-y-5">
+      <Card className="flex flex-col gap-5 p-4 sm:p-5 lg:flex-row lg:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <UserAvatar user={user} size={64} />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-xl font-semibold tracking-tight text-fg">{user?.name || "Your account"}</h1>
+              {user?.role === "superadmin" && <Badge tone="violet">Super admin</Badge>}
+              {user?.role === "admin" && <Badge tone="brand">Admin</Badge>}
+              {kyc.done && <Badge tone="up" dot>Verified</Badge>}
             </div>
-
-            {isLoading && (
-              <div
-                className={`flex items-center self-start sm:self-auto text-xs font-medium backdrop-blur-sm px-4 py-2 rounded-full border shadow-sm ${bgBadge}`}
-              >
-                <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
-                Updating live data...
-              </div>
-            )}
+            <p className="truncate text-sm text-fg-muted">
+              {user?.user_name && <>@{user.user_name} · </>}
+              {user?.email}
+            </p>
+            {user?.createdAt && <p className="mt-0.5 text-xs text-fg-subtle">Member since {memberSince.format(new Date(user.createdAt))}</p>}
           </div>
-        </header>
+        </div>
 
-        {/* Dashboard Content */}
-        {isLoading ? (
-          <div className="space-y-6">
-            {/* Top Cards Skeleton */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`${skelCardBg} backdrop-blur-sm rounded-2xl p-4 border`}
-                >
-                  <div className="animate-pulse space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div
-                        className={`w-10 h-10 ${skelShapeBg} rounded-xl`}
-                      ></div>
-                      <div
-                        className={`w-12 h-4 ${skelShapeBg} rounded-md`}
-                      ></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className={`h-6 ${skelShapeBg} rounded w-2/3`}></div>
-                      <div className={`h-3 ${skelShapeBg} rounded w-1/2`}></div>
-                    </div>
-                  </div>
-                </div>
+        <div className="grid grid-cols-3 gap-4 border-t border-line pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+          <HeaderStat label="Trades made" value={transactionHistory.length.toLocaleString()} />
+          <HeaderStat label="Coins held" value={groupedHoldings.length} />
+          <HeaderStat label="Active alerts" value={alerts.length} />
+        </div>
+
+        <Link
+          to="/user/settings"
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
+        >
+          <Pencil size={14} /> Edit profile
+        </Link>
+      </Card>
+
+      <AccountSummary />
+
+      <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-7">
+          <RecentTradesCard />
+        </div>
+
+        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-5">
+          <Card>
+            <CardHeader
+              icon={ListChecks}
+              title="Account setup"
+              subtitle={doneCount === steps.length ? "Everything is set up" : `${doneCount} of ${steps.length} steps done`}
+              action={
+                <span className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-2" aria-hidden="true">
+                  <span className="block h-full rounded-full bg-up" style={{ width: `${(doneCount / steps.length) * 100}%` }} />
+                </span>
+              }
+            />
+            <ul className="divide-y divide-line border-t border-line">
+              {steps.map(({ key, ...step }) => (
+                <ChecklistRow
+                  key={key}
+                  {...step}
+                  status={step.status || (step.done ? <Badge tone="up">Done</Badge> : <Badge tone="warn">To do</Badge>)}
+                />
               ))}
-            </div>
+              <ChecklistRow
+                icon={BellRing}
+                title="Price alerts"
+                description={alerts.length ? "Notifications when coins hit your targets" : "Get notified when a coin crosses a price"}
+                status={<Badge tone={alerts.length ? "brand" : "neutral"}>{alerts.length} active</Badge>}
+                done={alerts.length > 0}
+                to="/user/settings?tab=alerts"
+              />
+            </ul>
+          </Card>
 
-            {/* Main Cards Skeleton */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {[...Array(2)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`${skelCardBg} backdrop-blur-sm rounded-2xl p-6 h-[380px] border`}
-                >
-                  <div className="animate-pulse h-full flex flex-col">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div
-                        className={`w-12 h-12 ${skelShapeBg} rounded-xl`}
-                      ></div>
-                      <div className="space-y-2 flex-1">
-                        <div
-                          className={`h-5 ${skelShapeBg} rounded w-1/3`}
-                        ></div>
-                        <div
-                          className={`h-4 ${skelShapeBg} rounded w-1/4`}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      {[...Array(5)].map((_, j) => (
-                        <div
-                          key={j}
-                          className={`h-12 ${skelShapeBg} rounded-xl w-full`}
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Top Stats */}
-            <InfoCards />
-
-            {/* Row 1: Financial Overview */}
-            <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <Portfolio />{" "}
-              {/* View details and history of your recent transactions. You can also view your account&apos;s activity. */}
-              <Watchlist />
-            </section>
-
-            {/* Row 2: Activity & Market */}
-            <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <RecentActivity />
-              <Highlights />
-            </section>
-          </div>
-        )}
+          <WatchlistPreview />
+        </div>
       </div>
     </div>
   );

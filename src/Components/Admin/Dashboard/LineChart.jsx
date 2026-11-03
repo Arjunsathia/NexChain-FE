@@ -1,4 +1,4 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
+import useChartTheme from "@/hooks/useChartTheme";
 import React, { useMemo } from "react";
 import {
   AreaChart,
@@ -11,32 +11,9 @@ import {
 } from "recharts";
 
 function UserLineChart({ users = [], timeRange = "Month" }) {
-  const isLight = useThemeCheck();
+  const theme = useChartTheme();
 
   const data = useMemo(() => {
-    if (users.length === 0) {
-      return timeRange === "Week"
-        ? [
-            { name: "Mon", users: 12 },
-            { name: "Tue", users: 18 },
-            { name: "Wed", users: 15 },
-            { name: "Thu", users: 25 },
-            { name: "Fri", users: 20 },
-            { name: "Sat", users: 30 },
-            { name: "Sun", users: 28 },
-          ]
-        : [
-            { name: "Jan", users: 120 },
-            { name: "Feb", users: 150 },
-            { name: "Mar", users: 180 },
-            { name: "Apr", users: 220 },
-            { name: "May", users: 250 },
-            { name: "Jun", users: 300 },
-            { name: "Jul", users: 280 },
-            { name: "Aug", users: 350 },
-          ];
-    }
-
     const now = new Date();
     const result = [];
 
@@ -108,23 +85,7 @@ function UserLineChart({ users = [], timeRange = "Month" }) {
     return result;
   }, [users, timeRange]);
 
-  const chartColors = useMemo(
-    () => ({
-      stroke: isLight ? "#0ea5e9" : "#06b6d4",
-      fillStart: isLight ? "#0ea5e9" : "#06b6d4",
-      fillEnd: isLight ? "#ffffff" : "#0f172a",
-      grid: isLight ? "#f1f5f9" : "#334155",
-      axis: isLight ? "#94a3b8" : "#64748b",
-      tooltipBg: isLight
-        ? "rgba(255, 255, 255, 0.95)"
-        : "rgba(15, 23, 42, 0.95)",
-      tooltipText: isLight ? "#0f172a" : "#f8fafc",
-      tooltipBorder: isLight
-        ? "rgba(226, 232, 240, 0.8)"
-        : "rgba(51, 65, 85, 0.8)",
-    }),
-    [isLight],
-  );
+  const chartColors = { stroke: theme.brand, fillStart: theme.brand, grid: theme.grid, axis: theme.axis, tooltipBg: theme.surface, tooltipText: theme.text, tooltipBorder: theme.line };
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -171,6 +132,7 @@ function UserLineChart({ users = [], timeRange = "Month" }) {
           fontSize={11}
           tickLine={false}
           axisLine={false}
+          allowDecimals={false}
           domain={[0, "auto"]}
         />
         <Tooltip
@@ -211,7 +173,7 @@ function UserLineChart({ users = [], timeRange = "Month" }) {
           type="monotone"
           dataKey="users"
           stroke={chartColors.stroke}
-          strokeWidth={4}
+          strokeWidth={2}
           fillOpacity={1}
           fill="url(#colorUsers)"
           isAnimationActive={false}

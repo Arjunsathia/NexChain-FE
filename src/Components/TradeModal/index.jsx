@@ -1,6 +1,4 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 import useUserContext from "@/hooks/useUserContext";
@@ -8,864 +6,486 @@ import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import useWalletContext from "@/hooks/useWalletContext";
 import api from "@/api/axiosConfig";
 import { useLivePrice } from "@/hooks/useBinanceTicker";
+import { Modal } from "@/Components/ui/modal";
+import { Delta } from "@/Components/ui/delta";
+import { formatUSD } from "@/utils/format";
+import { cn } from "@/utils/utils";
 
 import TradeModalHeader from "./TradeModalHeader";
-import TradeModalTabs from "./TradeModalTabs";
-import HoldingsInfo from "./HoldingsInfo";
 import TransactionForm from "./TransactionForm";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
-function TradeModal({
-    show,
-    onClose,
-    coin,
-    type = "buy",
-    showHoldingsInfo = false,
-    purchasedCoins = [],
-    initialAlertMode = false,
-}) {
-    const isLight = useThemeCheck();
-    const { user } = useUserContext();
-    const { balance, refreshBalance } = useWalletContext();
-    const { addPurchase, sellCoins, refreshPurchasedCoins } = usePurchasedCoins();
+const ORDER_TYPE_LABELS = {
+  market: "Market",
+  limit: "Limit",
+  stop_limit: "Stop-Limit",
+  stop_market: "Stop-Market",
+  oco: "OCO",
+};
 
-    // State
-    const [activeTab, setActiveTab] = useState("details");
-    const [usdAmount, setUsdAmount] = useState("");
-    const [coinAmount, setCoinAmount] = useState("");
-    const [slippage, setSlippage] = useState(1.0);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    // Only this coin's updates re-render the modal
-    const liveCoinData = useLivePrice(
-        coin?.id || coin?.coinId,
-        coin?.symbol || coin?.coinSymbol,
-    );
-    const [currentPrice, setCurrentPrice] = useState(0);
-    const [isVisible, setIsVisible] = useState(false);
-    const [isHoldingsView, setIsHoldingsView] = useState(false);
-    const [isTradeSuccess, setIsTradeSuccess] = useState(false);
-    const viewLockedRef = useRef(false);
+const coinImage = (coin) =>
+  typeof coin?.image === "string" ? coin.image : coin?.image?.small || coin?.image?.large || coin?.image?.thumb;
 
-    // Order Types
-    const [orderType, setOrderType] = useState("market");
-    const [limitPrice, setLimitPrice] = useState("");
-    const [stopPrice, setStopPrice] = useState("");
+/** Buy or sell a coin with market, limit, stop and OCO orders */
+function TradeModal({ show, onClose, coin, type = "buy", purchasedCoins = [] }) {
+  const { user } = useUserContext();
+  const { balance, refreshBalance } = useWalletContext();
+  const { addPurchase, sellCoins, refreshPurchasedCoins } = usePurchasedCoins();
 
-    // Alerts
-    const [isAlertMode, setIsAlertMode] = useState(initialAlertMode || false);
-    const [alertTargetPrice, setAlertTargetPrice] = useState("");
+  const [side, setSide] = useState(type === "sell" ? "sell" : "buy");
+  const [usdAmount, setUsdAmount] = useState("");
+  const [coinAmount, setCoinAmount] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTradeSuccess, setIsTradeSuccess] = useState(false);
+  // Only this coin's updates re-render the modal
+  const liveCoinData = useLivePrice(coin?.id || coin?.coinId, coin?.symbol || coin?.coinSymbol);
+  const [currentPrice, setCurrentPrice] = useState(0);
 
-    // Confirmation Modal
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [confirmDetails, setConfirmDetails] = useState(null);
+  const [orderType, setOrderType] = useState("market");
+  const [limitPrice, setLimitPrice] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
 
-    const prevCoinIdRef = useRef(null);
-    const prevShowRef = useRef(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmDetails, setConfirmDetails] = useState(null);
 
-    const formatOrderType = (type) => {
-        const types = {
-            market: "Market",
-            limit: "Limit",
-            stop_limit: "Stop-Limit",
-            stop_market: "Stop-Market",
-            oco: "OCO",
-        };
-        return types[type] || type;
+  const prevShowRef = useRef(false);
+  const prevCoinIdRef = useRef(null);
+  const isBuy = side === "buy";
+
+  const userHoldings = useMemo(() => {
+    if (!coin || !purchasedCoins?.length) return null;
+    const coinId = String(coin.id || coin.coinId);
+    return purchasedCoins.find((pc) => [pc.coin_id, pc.coinId, pc.id].some((v) => v != null && String(v) === coinId)) || null;
+  }, [coin, purchasedCoins]);
+
+  const holdingsSummary = useMemo(() => {
+    const holdings = userHoldings || {};
+    const totalQuantity = holdings.totalQuantity || holdings.quantity || 0;
+    const remainingInvestment = holdings.remainingInvestment || holdings.total_cost || holdings.totalCost || 0;
+    const currentValue = totalQuantity * currentPrice;
+    const profitLoss = currentValue - remainingInvestment;
+    return {
+      totalQuantity,
+      remainingInvestment,
+      currentValue,
+      profitLoss,
+      profitLossPercentage: remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0,
     };
+  }, [userHoldings, currentPrice]);
+  const hasHoldings = holdingsSummary.totalQuantity > 0;
 
-    const userHoldings = useMemo(() => {
-        if (!coin || !purchasedCoins || purchasedCoins.length === 0) return null;
+  const effectivePrice = useMemo(() => {
+    if (orderType === "stop_market" && stopPrice) return parseFloat(stopPrice);
+    if (orderType === "oco" && limitPrice && stopPrice) {
+      return Math.max(parseFloat(limitPrice), parseFloat(stopPrice));
+    }
+    return (orderType === "limit" || orderType === "stop_limit" || orderType === "oco") && limitPrice
+      ? parseFloat(limitPrice)
+      : currentPrice;
+  }, [orderType, limitPrice, stopPrice, currentPrice]);
 
-        const coinId = coin.id || coin.coinId;
-        const holding = purchasedCoins.find((pc) => {
-            return (
-                pc.coin_id === coinId ||
-                pc.coinId === coinId ||
-                pc.id === coinId ||
-                (pc.coin_id && coinId && pc.coin_id.toString() === coinId.toString()) ||
-                (pc.coinId && coinId && pc.coinId.toString() === coinId.toString()) ||
-                (pc.id && coinId && pc.id.toString() === coinId.toString())
-            );
-        });
+  // Coins the user can trade: holdings when selling; 95% of cash when buying,
+  // leaving headroom for the price to move before the order reaches the server
+  const maxAvailable = useMemo(() => {
+    if (!isBuy) return holdingsSummary.totalQuantity || 0;
+    if (balance && effectivePrice > 0) return (balance * 0.95) / effectivePrice;
+    return 0;
+  }, [isBuy, holdingsSummary, balance, effectivePrice]);
 
-        return holding;
-    }, [coin, purchasedCoins]);
+  // Reset the form when the modal opens or switches to another coin
+  useEffect(() => {
+    const currentCoinId = coin?.id || coin?.coinId;
+    const opening = show && !prevShowRef.current;
+    const differentCoin = currentCoinId !== prevCoinIdRef.current;
+    prevShowRef.current = show;
 
-    const hasHoldings = useMemo(() => {
-        return (
-            userHoldings &&
-            (userHoldings.totalQuantity > 0 || userHoldings.quantity > 0)
-        );
-    }, [userHoldings]);
+    if (!show || !coin || !(opening || differentCoin)) return;
+    prevCoinIdRef.current = currentCoinId;
 
-    const isBuyOperation = useMemo(
-        () => (isHoldingsView ? activeTab === "deposit" : type === "buy"),
-        [isHoldingsView, activeTab, type],
-    );
+    setSide(type === "sell" ? "sell" : "buy");
+    setUsdAmount("");
+    setCoinAmount("");
+    setIsSubmitting(false);
+    setIsTradeSuccess(false);
+    const price =
+      coin.current_price || coin.currentPrice || coin.coinPriceUSD || coin.market_data?.current_price?.usd || 0;
+    setCurrentPrice(price);
+    setLimitPrice("");
+    setStopPrice("");
+    setOrderType("market");
+    // Warm up the backend price cache for instant execution
+    if (coin.symbol || coin.coinSymbol) {
+      api.post("/coins/track", { symbol: coin.symbol || coin.coinSymbol }).catch(() => {});
+    }
+  }, [show, coin, type]);
 
-    const handleBackdropClick = (e) => {
-        if (e.target === e.currentTarget) {
-            setIsVisible(false);
-            setTimeout(onClose, 350);
-        }
-    };
+  // Live price updates without resetting the form
+  useEffect(() => {
+    if (!show || !coin) return;
+    const price =
+      liveCoinData?.current_price ||
+      coin.current_price ||
+      coin.currentPrice ||
+      coin.coinPriceUSD ||
+      coin.market_data?.current_price?.usd ||
+      0;
+    if (price !== 0 && price !== currentPrice) {
+      setCurrentPrice(price);
+      // Prices the user hasn't typed follow the market
+      if (orderType === "market") {
+        setLimitPrice(price);
+        setStopPrice(price);
+      }
+    }
+  }, [coin, show, currentPrice, orderType, liveCoinData]);
 
-    const handleClose = useCallback(() => {
-        setIsVisible(false);
-        setTimeout(onClose, 350);
-    }, [onClose]);
+  const handleUsdAmountChange = (e) => {
+    const value = e.target.value;
+    setUsdAmount(value);
+    const amount = parseFloat(value);
+    if (value && effectivePrice > 0) {
+      setCoinAmount(!isNaN(amount) && amount > 0 ? (amount / effectivePrice).toFixed(8) : "");
+    }
+  };
 
-    const holdingsSummary = useMemo(() => {
-        if (!isHoldingsView || !coin) return null;
+  const handleCoinAmountChange = (e) => {
+    const value = e.target.value;
+    setCoinAmount(value);
+    const coins = parseFloat(value);
+    if (value && effectivePrice > 0) {
+      setUsdAmount(!isNaN(coins) && coins > 0 ? (coins * effectivePrice).toFixed(2) : "");
+    } else if (!value) {
+      setUsdAmount("");
+    }
+  };
 
-        const holdings = userHoldings || {};
-        const totalQuantity = holdings.totalQuantity || holdings.quantity || 0;
-        const averagePrice =
-            holdings.averagePrice ||
-            holdings.avgBuyPrice ||
-            holdings.coin_price_usd ||
-            0;
-        const remainingInvestment =
-            holdings.remainingInvestment ||
-            holdings.total_cost ||
-            holdings.totalCost ||
-            0;
-        const currentValue = totalQuantity * currentPrice;
-        const profitLoss = currentValue - remainingInvestment;
-        const profitLossPercentage =
-            remainingInvestment > 0 ? (profitLoss / remainingInvestment) * 100 : 0;
+  const handleLimitPriceChange = (e) => {
+    const value = e.target.value;
+    setLimitPrice(value);
+    if (coinAmount && value > 0) {
+      setUsdAmount((parseFloat(coinAmount) * parseFloat(value)).toFixed(2));
+    }
+  };
 
-        return {
-            totalQuantity,
-            averagePrice,
-            remainingInvestment,
-            currentValue,
-            profitLoss,
-            profitLossPercentage,
-            coinName: coin.coinName || coin.name,
-            coinSymbol: coin.coinSymbol || coin.symbol,
-        };
-    }, [isHoldingsView, coin, currentPrice, userHoldings]);
+  const setMaxAmount = () => {
+    if (maxAvailable <= 0) return;
+    // Truncate to 8 decimals so rounding never exceeds what's available
+    const truncated = Math.floor(maxAvailable * 1e8) / 1e8;
+    setCoinAmount(truncated.toFixed(8));
+    setUsdAmount((truncated * effectivePrice).toFixed(2));
+  };
 
-    const effectivePrice = useMemo(() => {
-        if (orderType === "stop_market" && stopPrice) return parseFloat(stopPrice);
-        if (orderType === "oco" && limitPrice && stopPrice) {
-            return Math.max(parseFloat(limitPrice), parseFloat(stopPrice));
-        }
-        return (orderType === "limit" || orderType === "stop_limit" || orderType === "oco") && limitPrice
-            ? parseFloat(limitPrice)
-            : currentPrice;
-    }, [orderType, limitPrice, stopPrice, currentPrice]);
+  const calculateTotal = useMemo(() => (usdAmount ? parseFloat(usdAmount).toFixed(2) : 0), [usdAmount]);
 
-    const maxAvailable = useMemo(() => {
-        const isSellMode = isHoldingsView
-            ? activeTab === "withdraw"
-            : type === "sell";
-        if (isSellMode && holdingsSummary) {
-            return holdingsSummary.totalQuantity || 0;
-        }
+  const handleTradeSubmit = useCallback(
+    async ({ symbol, coinAmount: quantity, total, coinData }) => {
+      if (!user) {
+        toast.error("Please login to trade");
+        return;
+      }
 
-        if (balance && effectivePrice > 0) {
-            const maxUSD = balance * 0.95;
-            return maxUSD / effectivePrice;
-        }
-
-        return 0;
-    }, [
-        isHoldingsView,
-        activeTab,
-        type,
-        holdingsSummary,
-        balance,
-        effectivePrice,
-    ]);
-
-    const shouldShowSellAll = useMemo(() => {
-        const isSellMode = isHoldingsView
-            ? activeTab === "withdraw"
-            : type === "sell";
-        return isSellMode && holdingsSummary && holdingsSummary.totalQuantity > 0;
-    }, [holdingsSummary, isHoldingsView, activeTab, type]);
-
-    useEffect(() => {
-        const currentCoinId = coin?.id || coin?.coinId;
-        const isDifferentCoin = currentCoinId !== prevCoinIdRef.current;
-        if (show && isDifferentCoin) {
-            viewLockedRef.current = false;
-        }
-    }, [show, coin]);
-
-    useEffect(() => {
-        const currentCoinId = coin?.id || coin?.coinId;
-        const isOpening = show && !prevShowRef.current;
-        const isDifferentCoin = currentCoinId !== prevCoinIdRef.current;
-
-        if (show && coin) {
-            if ((isOpening || isDifferentCoin) && !viewLockedRef.current) {
-                setUsdAmount("");
-                setCoinAmount("");
-                setSlippage(1.0);
-                setIsSubmitting(false);
-                setIsTradeSuccess(false);
-                setIsAlertMode(initialAlertMode || false);
-
-                const mode = showHoldingsInfo || hasHoldings;
-                setIsHoldingsView(mode);
-                setActiveTab(mode ? "details" : (type === "buy" ? "deposit" : "withdraw"));
-
-                const price =
-                    coin.current_price ||
-                    coin.currentPrice ||
-                    coin.coinPriceUSD ||
-                    coin.market_data?.current_price?.usd ||
-                    0;
-                setCurrentPrice(price);
-                setLimitPrice("");
-                setStopPrice("");
-                setOrderType("market");
-                setAlertTargetPrice(price);
-
-                // Warm up backend cache for instant execution
-                if (coin.symbol || coin.coinSymbol) {
-                    api.post("/coins/track", { symbol: coin.symbol || coin.coinSymbol }).catch(() => { });
-                }
-
-                viewLockedRef.current = true;
-                const timer = setTimeout(() => setIsVisible(true), 10);
-                prevCoinIdRef.current = currentCoinId;
-                return () => clearTimeout(timer);
-            }
-        } else {
-            setIsVisible(false);
-            viewLockedRef.current = false;
-        }
-        prevShowRef.current = show;
-    }, [show, coin, initialAlertMode, showHoldingsInfo, hasHoldings, type]);
-
-    // Dedicated effect for live price updates to avoid form resets
-    useEffect(() => {
-        if (show && coin) {
-            const price = liveCoinData?.current_price ||
-                coin.current_price ||
-                coin.currentPrice ||
-                coin.coinPriceUSD ||
-                coin.market_data?.current_price?.usd ||
-                0;
-
-            if (price !== 0 && price !== currentPrice) {
-                setCurrentPrice(price);
-                // Only update these if they haven't been manually touched or if it's the first load
-                if (orderType === "market") {
-                    setLimitPrice(price);
-                    setStopPrice(price);
-                    setAlertTargetPrice(price);
-                }
-            }
-        }
-    }, [coin, show, currentPrice, orderType, liveCoinData]);
-
-    const handleUsdAmountChange = (e) => {
-        const value = e.target.value;
-        setUsdAmount(value);
-
-        if (value && effectivePrice > 0) {
-            const amount = parseFloat(value);
-            if (!isNaN(amount) && amount > 0) {
-                const calculatedCoins = amount / effectivePrice;
-                setCoinAmount(calculatedCoins.toFixed(8));
-            } else {
-                setCoinAmount("");
-            }
-        }
-    };
-
-    const handleCoinAmountChange = (e) => {
-        const value = e.target.value;
-        setCoinAmount(value);
-
-        if (value && effectivePrice > 0) {
-            const coins = parseFloat(value);
-            if (!isNaN(coins) && coins > 0) {
-                const calculatedUSD = coins * effectivePrice;
-                setUsdAmount(calculatedUSD.toFixed(2));
-            } else {
-                setUsdAmount("");
-            }
-        }
-    };
-
-    const handleLimitPriceChange = (e) => {
-        const value = e.target.value;
-        setLimitPrice(value);
-
-        if (coinAmount && value > 0) {
-            const price = parseFloat(value);
-            const calculatedUSD = parseFloat(coinAmount) * price;
-            setUsdAmount(calculatedUSD.toFixed(2));
-        }
-    };
-
-    const setMaxAmount = () => {
-        const maxCoins = maxAvailable;
-        if (maxCoins > 0) {
-            // Truncate to 8 decimals to avoid rounding up issues
-            const factor = Math.pow(10, 8);
-            const truncated = Math.floor(maxCoins * factor) / factor;
-
-            setCoinAmount(truncated.toFixed(8));
-            const calculatedUSD = truncated * effectivePrice;
-            setUsdAmount(calculatedUSD.toFixed(2));
-
-            const isSellMode = isHoldingsView
-                ? activeTab === "withdraw"
-                : type === "sell";
-            if (isSellMode) {
-                toast.success(
-                    `Set to maximum: ${truncated.toFixed(6)} ${coin.symbol?.toUpperCase()}`,
-                );
-            }
-        }
-    };
-
-    const handleSellAll = () => {
-        if (holdingsSummary && holdingsSummary.totalQuantity > 0) {
-            const totalQuantity = holdingsSummary.totalQuantity;
-
-            // Truncate to 8 decimals to avoid rounding up issues
-            const factor = Math.pow(10, 8);
-            const truncated = Math.floor(totalQuantity * factor) / factor;
-
-            setCoinAmount(truncated.toFixed(8));
-            const calculatedUSD = truncated * currentPrice;
-            setUsdAmount(calculatedUSD.toFixed(2));
-
-            toast.success(
-                `Filled with entire holdings: ${truncated.toFixed(6)} ${(
-                    coin.symbol || coin.coinSymbol
-                )?.toUpperCase()}`,
-            );
-        } else {
-            toast.error("You don't have any holdings to sell");
-        }
-    };
-
-    const calculateTotal = useMemo(() => {
-        if (!usdAmount) return 0;
-        const amount = parseFloat(usdAmount);
-        return amount.toFixed(2);
-    }, [usdAmount]);
-
-    const handleTradeSubmit = useCallback(
-        async (tradeData) => {
-            if (!user) {
-                toast.error("Please login to trade");
-                return;
-            }
-
-            const { type, symbol, coinAmount, total, coinData } = tradeData;
-
-            // Helper to run background updates without blocking UI flow
-            const runBackgroundUpdates = async () => {
-                try {
-                    if (refreshPurchasedCoins) await refreshPurchasedCoins();
-                } catch (e) {
-                    console.warn("Background refresh (coins) failed", e);
-                }
-
-                try {
-                    let retryCount = 0;
-                    const maxRetries = 3;
-                    const refreshBalanceWithRetry = async () => {
-                        try {
-                            await refreshBalance();
-                        } catch {
-                            retryCount++;
-                            if (retryCount < maxRetries) {
-                                await new Promise((resolve) => setTimeout(resolve, 500));
-                                return refreshBalanceWithRetry();
-                            }
-                        }
-                    };
-                    await refreshBalanceWithRetry();
-                } catch (e) {
-                    console.warn("Background refresh (balance) failed", e);
-                }
-            };
-
-            if (isAlertMode) {
-                const condition =
-                    parseFloat(alertTargetPrice) > currentPrice ? "above" : "below";
-                const alertData = {
-                    user_id: user.id,
-                    coin_id: coinData.coinId || coinData.id,
-                    coin_symbol: symbol,
-                    coin_name: coinData.name || coinData.coinName,
-                    coin_image: coinData.image,
-                    target_price: parseFloat(alertTargetPrice),
-                    condition,
-                };
-
-                try {
-                    const res = await api.post("/alerts/create", alertData);
-                    if (!res.data.success) {
-                        throw new Error("Failed to create alert");
-                    }
-                } catch {
-                    toast.error("Failed to create alert");
-                }
-
-                toast.success(
-                    `Alert Set: ${symbol.toUpperCase()} ${condition} $${parseFloat(alertTargetPrice).toFixed(2)}`,
-                );
-                return;
-            }
-
-            if (orderType === "limit" || orderType === "stop_limit" || orderType === "stop_market") {
-                const orderData = {
-                    user_id: user.id,
-                    coin_id: coinData.coinId || coinData.id,
-                    coin_symbol: symbol,
-                    coin_name: coinData.name || coinData.coinName,
-                    coin_image: coinData.image,
-                    type: type,
-                    category: orderType,
-                    limit_price: orderType === "stop_market" ? undefined : parseFloat(limitPrice),
-                    stop_price:
-                        (orderType === "stop_limit" || orderType === "stop_market") ? parseFloat(stopPrice) : undefined,
-                    quantity: parseFloat(coinAmount),
-                };
-
-                const res = await api.post("/orders/create", orderData);
-
-                if (!res.data.success) {
-                    throw new Error(res.data.error || "Failed to create order");
-                }
-
-                toast.success(
-                    `${formatOrderType(orderType)} Order Placed Successfully!`,
-                );
-
-                // Non-blocking updates
-                runBackgroundUpdates();
-                return;
-            } else if (orderType === "oco") {
-                // OCO Handling
-                const ocoData = {
-                    user_id: user.id,
-                    coin_id: coinData.coinId || coinData.id,
-                    coin_symbol: symbol,
-                    coin_name: coinData.name || coinData.coinName,
-                    coin_image: coinData.image,
-                    type: type,
-                    quantity: parseFloat(coinAmount),
-                    tp_limit_price: parseFloat(limitPrice),
-                    sl_stop_price: parseFloat(stopPrice),
-                    // For now assuming SL is Stop-Market as per standard simple OCO. 
-                    // If we added SL Limit input, we would pass it here.
-                    sl_limit_price: undefined
-                };
-
-                const res = await api.post("/orders/create-oco", ocoData);
-
-                if (!res.data.success) {
-                    throw new Error(res.data.error || "Failed to create OCO order");
-                }
-
-                toast.success("OCO Order Placed Successfully!");
-
-                runBackgroundUpdates();
-                return;
-            } else {
-                if (isBuyOperation) {
-                    if (!coinData) {
-                        throw new Error("Coin data not found");
-                    }
-
-                    const cryptocurrencyId = coinData.coinId || coinData.id;
-
-                    const purchaseData = {
-                        user_id: user.id,
-                        coin_id: cryptocurrencyId,
-                        coin_name: coinData.name || coinData.coinName,
-                        coin_symbol: coinData.symbol || coinData.coinSymbol,
-                        coin_price_usd: currentPrice,
-                        quantity: parseFloat(coinAmount),
-                        total_cost: parseFloat(total),
-                        fees: 0,
-                        image: coinData.image,
-                    };
-
-                    const result = await addPurchase(purchaseData);
-                    if (result.success) {
-                        toast.success(`${symbol.toUpperCase()} Purchase Successful`, {
-                            duration: 3000,
-                        });
-
-                        // Non-blocking
-                        runBackgroundUpdates();
-                    } else {
-                        throw new Error(result.error || "Purchase failed");
-                    }
-                } else {
-                    if (!coinData) {
-                        throw new Error("Coin data not found");
-                    }
-
-                    const cryptocurrencyId = coinData.coinId || coinData.id;
-
-                    const sellData = {
-                        user_id: user.id,
-                        coin_id: cryptocurrencyId,
-                        coin_symbol: symbol || coinData.symbol || coinData.coinSymbol,
-                        quantity: parseFloat(coinAmount),
-                    };
-
-                    const result = await sellCoins(sellData);
-                    if (result.success) {
-                        toast.success(`${symbol.toUpperCase()} Sale Successful`, {
-                            duration: 3000,
-                        });
-
-                        // Non-blocking
-                        runBackgroundUpdates();
-                    } else {
-                        throw new Error(result.error || "Sell failed");
-                    }
-                }
-            }
-        },
-        [
-            user,
-            addPurchase,
-            sellCoins,
-            currentPrice,
-            refreshBalance,
-            refreshPurchasedCoins,
-            orderType,
-            limitPrice,
-            stopPrice,
-            isAlertMode,
-            alertTargetPrice,
-            isBuyOperation,
-        ],
-    );
-
-    const handleProceedWithTrade = useCallback(async () => {
-        setShowConfirm(false);
-        setIsSubmitting(true);
+      // Refresh holdings and balance after a trade without blocking the UI
+      const runBackgroundUpdates = async () => {
         try {
-            const tradeType = isHoldingsView
-                ? activeTab === "deposit"
-                    ? "buy"
-                    : "sell"
-                : type;
-
-            await handleTradeSubmit({
-                type: tradeType,
-                coin: coin.name || coin.coinName,
-                symbol: coin.symbol || coin.coinSymbol,
-                usdAmount: parseFloat(usdAmount),
-                coinAmount: parseFloat(coinAmount),
-                slippage,
-                total: parseFloat(calculateTotal),
-                coinData: coin,
-            });
-
-            // Show success state on button before closing
-            setIsTradeSuccess(true);
-            setTimeout(() => {
-                handleClose();
-            }, 100);
-            // Clean submit state only after modal is long gone
-            setTimeout(() => {
-                setIsSubmitting(false);
-                setIsTradeSuccess(false);
-            }, 300);
-            return true;
-        } catch (error) {
-            console.error("Trade error:", error);
-            const errorMessage =
-                error.response?.data?.error ||
-                error.message ||
-                "Trade failed. Please try again.";
-            toast.error(errorMessage);
-            setIsSubmitting(false);
-            return false;
+          if (refreshPurchasedCoins) await refreshPurchasedCoins();
+        } catch {
+          // the next poll catches up
         }
-    }, [
-        activeTab,
-        calculateTotal,
-        coin,
-        coinAmount,
-        handleClose,
-        handleTradeSubmit,
-        isHoldingsView,
-        slippage,
-        type,
-        usdAmount,
-    ]);
-
-    const handleSubmit = async () => {
-        if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
-            toast.error("Please enter a valid amount");
-            return false;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await refreshBalance();
+            break;
+          } catch {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
         }
+      };
 
-        const isSellMode = isHoldingsView
-            ? activeTab === "withdraw"
-            : type === "sell";
-        if (isSellMode) {
-            const quantity = parseFloat(coinAmount);
-            const availableQuantity = holdingsSummary?.totalQuantity || 0;
+      const base = {
+        user_id: user.id,
+        coin_id: coinData.coinId || coinData.id,
+        coin_symbol: symbol,
+        coin_name: coinData.name || coinData.coinName,
+        coin_image: coinImage(coinData),
+        type: side,
+        quantity: parseFloat(quantity),
+      };
 
-            if (quantity <= 0) {
-                toast.error("Please enter a valid amount to sell");
-                return false;
-            }
+      if (orderType === "limit" || orderType === "stop_limit" || orderType === "stop_market") {
+        const res = await api.post("/orders/create", {
+          ...base,
+          category: orderType,
+          limit_price: orderType === "stop_market" ? undefined : parseFloat(limitPrice),
+          stop_price: orderType === "stop_limit" || orderType === "stop_market" ? parseFloat(stopPrice) : undefined,
+        });
+        if (!res.data.success) throw new Error(res.data.error || "Failed to create order");
+        toast.success(`${ORDER_TYPE_LABELS[orderType]} order placed`);
+        runBackgroundUpdates();
+        return;
+      }
 
-            if (quantity > availableQuantity + 1e-9) {
-                toast.error(
-                    `You only have ${availableQuantity.toFixed(8)} ${(
-                        coin.symbol || coin.coinSymbol
-                    )?.toUpperCase()} available`,
-                );
-                return false;
-            }
+      if (orderType === "oco") {
+        const res = await api.post("/orders/create-oco", {
+          ...base,
+          tp_limit_price: parseFloat(limitPrice),
+          sl_stop_price: parseFloat(stopPrice),
+          // Stop loss executes as stop-market
+          sl_limit_price: undefined,
+        });
+        if (!res.data.success) throw new Error(res.data.error || "Failed to create OCO order");
+        toast.success("OCO order placed");
+        runBackgroundUpdates();
+        return;
+      }
 
-            if (quantity < 0.000001) {
-                toast.error("Minimum sell amount is 0.000001");
-                return false;
-            }
+      const cryptocurrencyId = coinData.coinId || coinData.id;
+      const result = isBuy
+        ? await addPurchase({
+            user_id: user.id,
+            coin_id: cryptocurrencyId,
+            coin_name: coinData.name || coinData.coinName,
+            coin_symbol: coinData.symbol || coinData.coinSymbol,
+            coin_price_usd: currentPrice,
+            quantity: parseFloat(quantity),
+            total_cost: parseFloat(total),
+            fees: 0,
+            image: coinImage(coinData),
+          })
+        : await sellCoins({
+            user_id: user.id,
+            coin_id: cryptocurrencyId,
+            coin_symbol: symbol || coinData.symbol || coinData.coinSymbol,
+            quantity: parseFloat(quantity),
+          });
 
-            if (!holdingsSummary || availableQuantity === 0) {
-                toast.error(
-                    "No holdings found for this coin. Please refresh and try again.",
-                );
-                return false;
-            }
+      if (!result.success) throw new Error(result.error || (isBuy ? "Purchase failed" : "Sell failed"));
+      toast.success(`${symbol.toUpperCase()} ${isBuy ? "purchase" : "sale"} complete`);
+      runBackgroundUpdates();
+    },
+    [user, addPurchase, sellCoins, currentPrice, refreshBalance, refreshPurchasedCoins, orderType, limitPrice, stopPrice, side, isBuy],
+  );
+
+  const handleProceedWithTrade = useCallback(async () => {
+    setShowConfirm(false);
+    setIsSubmitting(true);
+    try {
+      await handleTradeSubmit({
+        symbol: coin.symbol || coin.coinSymbol,
+        coinAmount: parseFloat(coinAmount),
+        total: parseFloat(calculateTotal),
+        coinData: coin,
+      });
+      setIsTradeSuccess(true);
+      onClose();
+      // Clear the submit state once the modal has animated out
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setIsTradeSuccess(false);
+      }, 300);
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || "Trade failed. Please try again.");
+      setIsSubmitting(false);
+      return false;
+    }
+  }, [calculateTotal, coin, coinAmount, onClose, handleTradeSubmit]);
+
+  const handleSubmit = async () => {
+    if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return false;
+    }
+    const sym = (coin.symbol || coin.coinSymbol)?.toUpperCase();
+    const price = currentPrice.toLocaleString();
+
+    if (!isBuy) {
+      const quantity = parseFloat(coinAmount);
+      const available = holdingsSummary.totalQuantity || 0;
+      if (!hasHoldings) {
+        toast.error("No holdings found for this coin. Please refresh and try again.");
+        return false;
+      }
+      if (quantity <= 0) {
+        toast.error("Please enter a valid amount to sell");
+        return false;
+      }
+      if (quantity > available + 1e-9) {
+        toast.error(`You only have ${available.toFixed(8)} ${sym} available`);
+        return false;
+      }
+      if (quantity < 0.000001) {
+        toast.error("Minimum sell amount is 0.000001");
+        return false;
+      }
+    }
+
+    // Stop-limit, stop-market and OCO validation
+    if (orderType === "stop_limit" || orderType === "stop_market" || orderType === "oco") {
+      const stop = parseFloat(stopPrice);
+      const limit = parseFloat(limitPrice);
+
+      if (orderType === "stop_market" && isNaN(stop)) {
+        toast.error("Please enter a stop price");
+        return false;
+      }
+      if (orderType === "oco" && (isNaN(stop) || isNaN(limit))) {
+        toast.error("Please enter both the take-profit (limit) and stop-loss (stop) prices");
+        return false;
+      }
+      if (orderType === "stop_limit" && (isNaN(stop) || isNaN(limit))) {
+        toast.error("Please enter both stop and limit prices");
+        return false;
+      }
+
+      if (orderType === "oco") {
+        // Buy OCO: limit catches a dip (below market), stop buys a breakout (above market).
+        // Sell OCO: limit takes profit (above market), stop cuts losses (below market).
+        if (isBuy && limit >= currentPrice) {
+          toast.error(`For a buy OCO, the buy limit must be below the current price ($${price}).`);
+          return false;
         }
-
-        const isBuyMode = isHoldingsView
-            ? activeTab === "deposit"
-            : type === "buy";
-
-        // Stop-Limit & OCO Validations
-        if (orderType === "stop_limit" || orderType === "stop_market" || orderType === "oco") {
-            const stop = parseFloat(stopPrice);
-            const limit = parseFloat(limitPrice);
-
-            if (orderType === "stop_market") {
-                if (isNaN(stop)) {
-                    toast.error("Please enter Stop price");
-                    return false;
-                }
-            } else if (orderType === "oco") {
-                if (isNaN(stop) || isNaN(limit)) {
-                    toast.error("Please enter both Take Profit (Limit) and Stop Loss (Stop) prices");
-                    return false;
-                }
-            } else {
-                // Stop Limit
-                if (isNaN(stop) || isNaN(limit)) {
-                    toast.error("Please enter both Stop and Limit prices");
-                    return false;
-                }
-            }
-
-            // Additional Logic checks for OCO
-            if (orderType === "oco") {
-                if (isBuyMode) {
-                    // Buy OCO:
-                    // 1. Limit Order (Take Profit / Buy Dip) -> MUST be BELOW current price
-                    // 2. Stop Order (Stop Loss / Breakout Buy) -> MUST be ABOVE current price
-
-                    if (limit >= currentPrice) {
-                        toast.error(
-                            `For Buy OCO, Take Profit (Limit) acts as a "Buy Limit" and must be LOWER than current price ($${currentPrice.toLocaleString()}). Use this to catch a dip.`
-                        );
-                        return false;
-                    }
-                    if (stop <= currentPrice) {
-                        toast.error(
-                            `For Buy OCO, Stop Loss (Trigger) acts as a "Buy Stop" and must be HIGHER than current price ($${currentPrice.toLocaleString()}). Use this to buy a breakout.`
-                        );
-                        return false;
-                    }
-                } else {
-                    // Sell OCO:
-                    // 1. Limit Order (Take Profit) -> MUST be ABOVE current price (Sell High)
-                    // 2. Stop Order (Stop Loss) -> MUST be BELOW current price (Cut Loss)
-
-                    if (limit <= currentPrice) {
-                        toast.error(
-                            `For Sell OCO, Take Profit (Limit) must be HIGHER than current price ($${currentPrice.toLocaleString()}). You want to sell at a profit.`
-                        );
-                        return false;
-                    }
-                    if (stop >= currentPrice) {
-                        toast.error(
-                            `For Sell OCO, Stop Loss (Trigger) must be LOWER than current price ($${currentPrice.toLocaleString()}). You want to limit your losses.`
-                        );
-                        return false;
-                    }
-                }
-            }
-
-            if (orderType === "stop_limit") {
-                if (isBuyMode) {
-                    if (stop <= currentPrice) {
-                        toast.error(`Buy Stop must be ABOVE current price ($${currentPrice.toLocaleString()}). Use a Limit order to buy lower.`);
-                        return false;
-                    }
-                } else {
-                    if (stop >= currentPrice) {
-                        toast.error(`Sell Stop must be BELOW current price ($${currentPrice.toLocaleString()}). Use a Limit order to sell higher.`);
-                        return false;
-                    }
-                }
-            }
+        if (isBuy && stop <= currentPrice) {
+          toast.error(`For a buy OCO, the buy stop must be above the current price ($${price}).`);
+          return false;
         }
-
-        if (isBuyMode) {
-            const quantity = parseFloat(coinAmount);
-            if (quantity > maxAvailable) {
-                toast.error("Insufficient balance for this purchase");
-                return false;
-            }
+        if (!isBuy && limit <= currentPrice) {
+          toast.error(`For a sell OCO, take profit must be above the current price ($${price}).`);
+          return false;
         }
-
-        const tradeType = isHoldingsView
-            ? activeTab === "deposit"
-                ? "buy"
-                : "sell"
-            : type;
-
-        // Instant Fill Confirmation
-        const isLimitOrder = orderType === "limit" || orderType === "stop_limit";
-        if (isLimitOrder && limitPrice) {
-            const lp = parseFloat(limitPrice);
-            const isInstant = tradeType === "buy" ? lp >= currentPrice : lp <= currentPrice;
-
-            if (isInstant) {
-                setConfirmDetails({
-                    title: "Instant Execution",
-                    message: `Your ${orderType} price ($${lp.toLocaleString()}) is ${tradeType === "buy" ? "ABOVE" : "BELOW"} the current market price ($${currentPrice.toLocaleString()}). This order will execute IMMEDIATELY.`,
-                    confirmText: "Execute Anyway",
-                    cancelText: "Go Back"
-                });
-                setShowConfirm(true);
-                return false;
-            }
+        if (!isBuy && stop >= currentPrice) {
+          toast.error(`For a sell OCO, the stop loss must be below the current price ($${price}).`);
+          return false;
         }
+      }
 
-        return await handleProceedWithTrade();
-    };
+      if (orderType === "stop_limit") {
+        if (isBuy && stop <= currentPrice) {
+          toast.error(`A buy stop must be above the current price ($${price}). Use a limit order to buy lower.`);
+          return false;
+        }
+        if (!isBuy && stop >= currentPrice) {
+          toast.error(`A sell stop must be below the current price ($${price}). Use a limit order to sell higher.`);
+          return false;
+        }
+      }
+    }
 
-    if (!coin) return null;
+    if (isBuy && parseFloat(coinAmount) > maxAvailable) {
+      toast.error("Insufficient balance for this purchase");
+      return false;
+    }
 
-    const symbol = coin.symbol?.toUpperCase() || coin.coinSymbol?.toUpperCase();
+    // A limit price already past the market fills immediately: confirm first
+    if ((orderType === "limit" || orderType === "stop_limit") && limitPrice) {
+      const lp = parseFloat(limitPrice);
+      if (isBuy ? lp >= currentPrice : lp <= currentPrice) {
+        setConfirmDetails({
+          title: "This order fills immediately",
+          message: `Your ${ORDER_TYPE_LABELS[orderType].toLowerCase()} price ($${lp.toLocaleString()}) is ${isBuy ? "above" : "below"} the market price ($${price}), so it will execute right away.`,
+          confirmText: "Place order",
+          cancelText: "Go back",
+        });
+        setShowConfirm(true);
+        return false;
+      }
+    }
 
-    return createPortal(
-        <div
-            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300 ease-in-out ${isVisible
-                ? "bg-black/50 backdrop-blur-sm opacity-100"
-                : "bg-black/0 backdrop-blur-none opacity-0 pointer-events-none"
-                }`}
-            onClick={handleBackdropClick}
-        >
-            <div
-                className={`w-full sm:max-w-[440px] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative overflow-hidden transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isLight
-                    ? "bg-white sm:bg-white/90 border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
-                    : "bg-gray-950 sm:bg-gray-900 border-t border-gray-800 sm:border-gray-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)]"
-                    } ${isVisible
-                        ? "translate-y-0 opacity-100 scale-100"
-                        : "translate-y-full opacity-100 sm:opacity-0 sm:scale-95 sm:translate-y-8"
-                    }`}
-                style={{
-                    willChange: "transform, opacity",
-                    backfaceVisibility: "hidden",
-                }}
-            >
-                <TradeModalHeader
-                    coin={coin}
-                    coinName={coin.coinName || coin.name}
-                    symbol={symbol}
-                    currentPrice={currentPrice}
-                    priceChange={liveCoinData?.price_change_percentage_24h ?? coin.price_change_percentage_24h ?? 0}
-                    isLight={isLight}
-                    handleClose={handleClose}
-                />
+    return handleProceedWithTrade();
+  };
 
-                {isHoldingsView && (
-                    <TradeModalTabs
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        isLight={isLight}
-                    />
-                )}
+  const symbol = (coin?.symbol || coin?.coinSymbol || "").toUpperCase();
 
-                <div className="p-3 sm:p-4 pt-1">
-                    {isHoldingsView && holdingsSummary && (
-                        <HoldingsInfo
-                            holdingsSummary={holdingsSummary}
-                            activeTab={activeTab}
-                            isLight={isLight}
-                            symbol={symbol}
-                            currentPrice={currentPrice}
-                            coin={coin}
-                            setActiveTab={setActiveTab}
-                        />
-                    )}
+  return (
+    <Modal open={!!show && !!coin} onClose={onClose} label={`Trade ${symbol}`}>
+      {coin && (
+        <>
+          <TradeModalHeader
+            image={coinImage(coin)}
+            coinName={coin.coinName || coin.name}
+            symbol={symbol}
+            currentPrice={currentPrice}
+            priceChange={liveCoinData?.price_change_percentage_24h ?? coin.price_change_percentage_24h}
+            onClose={onClose}
+          />
 
-                    {(!isHoldingsView || activeTab !== "details") && (
-                        <TransactionForm
-                            coinAmount={coinAmount}
-                            handleCoinAmountChange={handleCoinAmountChange}
-                            usdAmount={usdAmount}
-                            handleUsdAmountChange={handleUsdAmountChange}
-                            shouldShowSellAll={shouldShowSellAll}
-                            handleSellAll={handleSellAll}
-                            setMaxAmount={setMaxAmount}
-                            maxAvailable={maxAvailable}
-                            symbol={symbol}
-                            currentPrice={currentPrice}
-                            slippage={slippage}
-                            setSlippage={setSlippage}
-                            calculateTotal={calculateTotal}
-                            isBuyOperation={isBuyOperation}
-                            handleSubmit={handleSubmit}
-                            coin={coin}
-                            isSubmitting={isSubmitting || isTradeSuccess}
-                            orderType={orderType}
-                            setOrderType={setOrderType}
-                            limitPrice={limitPrice}
-                            handleLimitPriceChange={handleLimitPriceChange}
-                            isAlertMode={isAlertMode}
-                            setIsAlertMode={setIsAlertMode}
-                            alertTargetPrice={alertTargetPrice}
-                            setAlertTargetPrice={setAlertTargetPrice}
-                            stopPrice={stopPrice}
-                            setStopPrice={setStopPrice}
-                        />
-                    )}
-                </div>
+          <div className="space-y-4 p-5">
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1" role="tablist" aria-label="Order side">
+              {[
+                { value: "buy", label: "Buy", active: "bg-up text-white" },
+                { value: "sell", label: "Sell", active: "bg-down text-white" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={side === option.value}
+                  onClick={() => setSide(option.value)}
+                  className={cn(
+                    "rounded-md py-2 text-sm font-semibold transition-colors",
+                    side === option.value ? option.active : "text-fg-muted hover:text-fg",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
 
-            {showConfirm && confirmDetails && (
-                <ConfirmDialog
-                    show={showConfirm}
-                    onClose={() => setShowConfirm(false)}
-                    onConfirm={handleProceedWithTrade}
-                    title={confirmDetails.title}
-                    message={confirmDetails.message}
-                    confirmText={confirmDetails.confirmText}
-                    cancelText={confirmDetails.cancelText}
-                    variant="warning"
-                />
+            {hasHoldings && (
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2.5 text-xs">
+                <div>
+                  <p className="text-fg-subtle">Your position</p>
+                  <p className="tabular mt-0.5 text-sm font-medium text-fg">
+                    {holdingsSummary.totalQuantity.toLocaleString(undefined, { maximumFractionDigits: 8 })} {symbol}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="tabular text-sm font-medium text-fg">{formatUSD(holdingsSummary.currentValue)}</p>
+                  <Delta value={holdingsSummary.profitLossPercentage} />
+                </div>
+              </div>
             )}
-        </div>,
-        document.body,
-    );
+
+            <TransactionForm
+              isBuy={isBuy}
+              symbol={symbol}
+              currentPrice={currentPrice}
+              effectivePrice={effectivePrice}
+              orderType={orderType}
+              setOrderType={setOrderType}
+              limitPrice={limitPrice}
+              handleLimitPriceChange={handleLimitPriceChange}
+              stopPrice={stopPrice}
+              setStopPrice={setStopPrice}
+              coinAmount={coinAmount}
+              handleCoinAmountChange={handleCoinAmountChange}
+              usdAmount={usdAmount}
+              handleUsdAmountChange={handleUsdAmountChange}
+              maxAvailable={maxAvailable}
+              setMaxAmount={setMaxAmount}
+              balance={balance}
+              holdingQuantity={holdingsSummary.totalQuantity}
+              calculateTotal={calculateTotal}
+              handleSubmit={handleSubmit}
+              isSubmitting={isSubmitting || isTradeSuccess}
+              disabledReason={!isBuy && !hasHoldings ? `You don't hold any ${symbol} to sell.` : null}
+            />
+          </div>
+
+          {/* Rendered inside the modal so it stays interactive on top of it */}
+          <ConfirmDialog
+            show={showConfirm && !!confirmDetails}
+            onClose={() => setShowConfirm(false)}
+            onConfirm={handleProceedWithTrade}
+            title={confirmDetails?.title}
+            message={confirmDetails?.message}
+            confirmText={confirmDetails?.confirmText}
+            cancelText={confirmDetails?.cancelText}
+            variant="warning"
+          />
+        </>
+      )}
+    </Modal>
+  );
 }
 
 export default React.memo(TradeModal);

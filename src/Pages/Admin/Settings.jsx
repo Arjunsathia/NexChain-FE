@@ -1,217 +1,95 @@
-import toast from "react-hot-toast";
-import React, { useState, useMemo, useEffect } from "react";
-import { FaCog, FaShieldAlt, FaBell, FaKey, FaSave } from "react-icons/fa";
-import { motion } from "framer-motion";
-import GeneralSettings from "@/Components/Admin/Settings/GeneralSettings";
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Check, KeyRound, Minus, UserCog } from "lucide-react";
+import useUserContext from "@/hooks/useUserContext";
+import { Card, CardHeader } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
 import SecuritySettings from "@/Components/Admin/Settings/SecuritySettings";
-import NotificationSettings from "@/Components/Admin/Settings/NotificationSettings";
-import ApiSettings from "@/Components/Admin/Settings/ApiSettings";
+import { cn } from "@/utils/utils";
 
-import useThemeCheck from "@/hooks/useThemeCheck";
+// Mirrors the rules the API enforces (Controllers/userController.js, coin and feedback routes)
+const PERMISSIONS = [
+  { label: "View users, balances and trade history", admin: true, superadmin: true },
+  { label: "Review identity (KYC) submissions", admin: true, superadmin: true },
+  { label: "Message users by email or notification", admin: true, superadmin: true },
+  { label: "Freeze and unfreeze coins", admin: true, superadmin: true },
+  { label: "Manage feedback and bug reports", admin: true, superadmin: true },
+  { label: "Promote users to admin, or back to user", admin: true, superadmin: true },
+  { label: "Freeze or archive regular users", admin: true, superadmin: true },
+  { label: "Freeze or archive other admins", admin: false, superadmin: true },
+  { label: "Grant the super admin role", admin: false, superadmin: true },
+];
 
-const AdminSettings = () => {
-  const isLight = useThemeCheck();
-  const [activeTab, setActiveTab] = useState("general");
-  const isSaving = false;
-  const [loading, setLoading] = useState(true);
+const Cell = ({ on, highlight }) => (
+  <td className={cn("px-3 py-2.5 text-center", highlight && "bg-brand-soft/60")}>
+    {on ? <Check size={16} className="mx-auto text-up" aria-label="Allowed" /> : <Minus size={16} className="mx-auto text-fg-subtle" aria-label="Not allowed" />}
+  </td>
+);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 150);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-      textTertiary: isLight ? "text-gray-400" : "text-gray-500",
-
-      // Glassmorphism Cards - Synced with Admin Sidebar exact styling
-      bgCard: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 transform-gpu glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 transform-gpu",
-
-      bgInput: isLight
-        ? "bg-gray-100/50 border-gray-200 focus:bg-white focus:border-blue-500 shadow-inner"
-        : "bg-white/5 border-white/5 focus:bg-white/10 focus:border-cyan-500 text-white placeholder-gray-500 shadow-inner",
-
-      bgItem: isLight
-        ? "bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 isolation-isolate"
-        : "bg-transparent hover:bg-white/5 isolation-isolate",
-
-      btnPrimary:
-        "bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold",
-      btnSecondary: isLight
-        ? "bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20"
-        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 p-2 sm:p-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-cyan-500/20",
-
-      headerGradient: "from-blue-600 to-cyan-500",
-    }),
-    [isLight],
-  );
-
-  const [settings, setSettings] = useState({
-    platformName: "NexChain",
-    contactEmail: "contact@nexchain.com",
-    supportEmail: "support@nexchain.com",
-  });
-
-  const [security, setSecurity] = useState({
-    twoFactor: true,
-  });
-
-  const [notifications, setNotifications] = useState({
-    emailAlerts: true,
-    pushNotifications: false,
-    securityAlerts: true,
-  });
-
-  const [apiSettings, setApiSettings] = useState({
-    apiKey: "••••••••••••••••",
-    rateLimitEnabled: true,
-  });
-
-  // There is no settings API yet; platform configuration lives in the server's
-  // environment variables. Only the 2FA section below talks to the server.
-  const handleSave = () => {
-    toast("Saving platform settings isn't available yet. They're configured on the server.", {
-      icon: "ℹ️",
-    });
-  };
+/** Admin settings: 2FA, what each role can do, and links to account security */
+export default function AdminSettings() {
+  const { user } = useUserContext();
+  const isSuper = user?.role === "superadmin";
 
   return (
-    <div
-      className={`flex-1 p-2 sm:p-4 lg:p-8 space-y-4 lg:space-y-6 min-h-screen ${TC.textPrimary} fade-in`}
-    >
-      {/* 1. Page Header (Admin Styled) */}
-      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4 mb-2">
-        <div className="w-full sm:w-auto text-center sm:text-left">
-          <h1
-            className={`text-2xl lg:text-3xl font-bold tracking-tight mb-1 ${TC.textPrimary}`}
-          >
-            Admin{" "}
-            <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-              Settings
-            </span>
-          </h1>
-          <p className={`text-sm font-medium ${TC.textSecondary}`}>
-            Manage system configuration and preferences
-          </p>
-        </div>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className={`px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 ${TC.btnPrimary} disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg transition-all duration-200 hover:shadow-xl`}
-        >
-          {isSaving ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <FaSave /> Save Changes (coming soon)
-            </>
-          )}
-        </button>
-      </div>
+    <div className="space-y-4 lg:space-y-5">
+      <header>
+        <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Settings</h1>
+        <p className="mt-0.5 text-sm text-fg-subtle">Security for your admin account and what each admin role can do.</p>
+      </header>
 
-      { }
-      <div
-        className={`p-1.5 rounded-full ${isLight ? "bg-gray-100/80 border border-gray-200" : "bg-gray-900/50 border border-white/5"} backdrop-blur-md inline-flex items-center gap-1 mb-6 relative overflow-visible flex-wrap sm:flex-nowrap`}
-      >
-        {[
-          { id: "general", label: "General", icon: FaCog },
-          { id: "security", label: "Security", icon: FaShieldAlt },
-          { id: "notifications", label: "Notifications", icon: FaBell },
-          { id: "api", label: "API", icon: FaKey },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`
-                relative px-5 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 
-                flex items-center gap-2 outline-none select-none flex-1 justify-center sm:flex-none
-                ${activeTab === tab.id ? "text-white" : TC.textSecondary + " hover:text-gray-900 dark:hover:text-gray-200"}
-              `}
-          >
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="active-pill"
-                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg rounded-full z-0"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              <tab.icon
-                className={`text-base ${activeTab === tab.id ? "text-white" : ""}`}
-              />
-              {tab.label}
-            </span>
-          </button>
-        ))}
-      </div>
+      <div className="grid items-start gap-4 lg:gap-5 xl:grid-cols-12">
+        <div className="space-y-4 lg:space-y-5 xl:col-span-7">
+          <SecuritySettings />
 
-      { }
-      {loading ? (
-        <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-          <div className="space-y-6">
-            <div className="h-8 w-48 bg-gray-700/30 rounded animate-pulse mb-6" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i}>
-                  <div className="h-4 w-32 bg-gray-700/30 rounded animate-pulse mb-2" />
-                  <div className="h-12 w-full bg-gray-700/30 rounded-xl animate-pulse" />
-                </div>
-              ))}
+          <Card>
+            <CardHeader icon={KeyRound} title="Password and sessions" subtitle="Managed from your personal account settings." />
+            <div className="flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-fg-muted">
+                Change your password or turn off 2FA from your account settings. A new password signs you out on every other device.
+              </p>
+              <Link
+                to="/user/settings?tab=security"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg hover:bg-surface-hover"
+              >
+                Account settings <ArrowRight size={14} />
+              </Link>
             </div>
-          </div>
+          </Card>
         </div>
-      ) : (
-        <div className="fade-in" style={{ animationDelay: "0.2s" }}>
-          <div className={`${TC.bgCard} rounded-2xl p-4 sm:p-6 lg:p-8`}>
-            { }
-            {activeTab === "general" && (
-              <GeneralSettings
-                settings={settings}
-                setSettings={setSettings}
-                TC={TC}
-              />
-            )}
 
-            { }
-            {activeTab === "security" && (
-              <SecuritySettings
-                security={security}
-                setSecurity={setSecurity}
-                TC={TC}
-              />
-            )}
-
-            { }
-            {activeTab === "notifications" && (
-              <NotificationSettings
-                notifications={notifications}
-                setNotifications={setNotifications}
-                TC={TC}
-              />
-            )}
-
-            { }
-            {activeTab === "api" && (
-              <ApiSettings
-                apiSettings={apiSettings}
-                setApiSettings={setApiSettings}
-                TC={TC}
-              />
-            )}
+        <Card className="xl:col-span-5">
+          <CardHeader
+            icon={UserCog}
+            title="Role permissions"
+            subtitle="Enforced by the server for every request."
+            action={<Badge tone={isSuper ? "violet" : "brand"}>You: {isSuper ? "Super admin" : "Admin"}</Badge>}
+          />
+          <div className="overflow-x-auto border-t border-line">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-surface-2/60 text-xs text-fg-subtle">
+                <tr>
+                  <th className="px-4 py-2.5 text-left font-medium">Action</th>
+                  <th className={cn("px-3 py-2.5 font-medium", !isSuper && "bg-brand-soft/60 text-brand")}>Admin</th>
+                  <th className={cn("px-3 py-2.5 font-medium", isSuper && "bg-brand-soft/60 text-brand")}>Super admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PERMISSIONS.map((p) => (
+                  <tr key={p.label} className="border-t border-line">
+                    <td className="px-4 py-2.5 text-fg-muted">{p.label}</td>
+                    <Cell on={p.admin} highlight={!isSuper} />
+                    <Cell on={p.superadmin} highlight={isSuper} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
+          <p className="border-t border-line px-4 py-3 text-xs text-fg-subtle">
+            Nobody can change their own role or freeze their own account, and a super admin&apos;s account can only be changed by its owner.
+          </p>
+        </Card>
+      </div>
     </div>
   );
-};
-
-export default AdminSettings;
+}

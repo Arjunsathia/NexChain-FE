@@ -1,218 +1,143 @@
-import { pressable } from "@/utils/a11y";
-import { useBinanceTicker } from "@/hooks/useBinanceTicker";
-import useThemeCheck from "@/hooks/useThemeCheck";
-import React, { useMemo, useState } from "react";
-import { FaChartLine, FaCoins, FaArrowRight } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { memo, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { PieChart, Coins, ArrowRight } from "lucide-react";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import { useBinanceTicker } from "@/hooks/useBinanceTicker";
+import { Card, CardHeader, CardLink, EmptyState } from "@/Components/ui/card";
+import { SkeletonRows } from "@/Components/ui/skeleton";
+import { Delta } from "@/Components/ui/delta";
+import LiveCoinRow from "@/Components/Crypto/LiveCoinRow";
+import { formatUSD } from "@/utils/format";
 
-function PortfolioCard({ disableAnimations = false }) {
-  const isLight = useThemeCheck();
-  const { groupedHoldings, loading: portfolioLoading } = useLivePortfolio();
+// Allocation colors: brand first, then distinct hues that work in both themes
+const SEGMENT_COLORS = ["var(--brand)", "#8b5cf6", "#f59e0b", "#14b8a6", "#ec4899", "#64748b"];
+
+const HoldingValue = memo(({ quantity, cost, price }) => {
+  const value = quantity * (price || 0);
+  const pnlPct = cost > 0 ? ((value - cost) / cost) * 100 : null;
+  return (
+    <div className="text-right">
+      <p className="tabular text-sm font-medium text-fg">{formatUSD(value)}</p>
+      <Delta value={pnlPct} className="text-xs" />
+    </div>
+  );
+});
+HoldingValue.displayName = "HoldingValue";
+
+/** Open positions with allocation, valued at live prices */
+function PortfolioCard() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { isVisited } = useVisitedRoutes();
-  const [shouldAnimate] = useState(
-    !disableAnimations && !isVisited(location.pathname),
+  const { groupedHoldings, loading } = useLivePortfolio();
+  const live = useBinanceTicker();
+
+  const holdings = useMemo(
+    () =>
+      groupedHoldings
+        .map((h) => {
+          const price = live[h.coinId]?.current_price ?? h.currentPrice ?? 0;
+          return { ...h, value: (h.totalQuantity || 0) * price };
+        })
+        .sort((a, b) => b.value - a.value),
+    [groupedHoldings, live],
   );
+  const total = holdings.reduce((sum, h) => sum + h.value, 0);
+  const costBasis = holdings.reduce((sum, h) => sum + (h.remainingInvestment || 0), 0);
+  const pnl = total - costBasis;
 
-  // Use the shared hook for live prices
-  const livePrices = useBinanceTicker();
-
-  const TC = useMemo(
-    () => ({
-      bgContainer: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50",
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      bgItem: isLight
-        ? "hover:bg-blue-50/50 border-b border-gray-100 last:border-0 isolation-isolate"
-        : "hover:bg-white/5 border-b border-gray-800 last:border-0 isolation-isolate",
-
-      textProfit: isLight ? "text-green-600" : "text-green-400",
-      textLoss: isLight ? "text-red-600" : "text-red-400",
-
-      bgIcon: isLight
-        ? "bg-cyan-100 text-cyan-600"
-        : "bg-cyan-500/20 text-cyan-400",
-      bgEmpty: isLight ? "bg-gray-50" : "bg-gray-800/30",
-    }),
-    [isLight],
-  );
-
-  const allCoins = useMemo(() => {
-    if (!Array.isArray(groupedHoldings)) return [];
-
-    return groupedHoldings
-      .map((coin) => {
-        const liveData = livePrices[coin.coinId];
-        const currentPrice = liveData
-          ? liveData.current_price
-          : coin.currentPrice || 0;
-        const currentValue = (coin.totalQuantity || 0) * currentPrice;
-        const profitLoss = currentValue - (coin.remainingInvestment || 0);
-        return {
-          ...coin,
-          currentPrice,
-          currentValue,
-          profitLoss,
-          percentChange: liveData?.price_change_percentage_24h,
-        };
-      })
-      .sort((a, b) => b.profitLoss - a.profitLoss);
-  }, [groupedHoldings, livePrices]);
-
-  const totalValue = allCoins.reduce((sum, c) => sum + c.currentValue, 0);
-
-  if (portfolioLoading) {
-    return (
-      <div className={`p-4 rounded-xl h-full flex flex-col ${TC.bgContainer}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <Skeleton
-            circle
-            width={24}
-            height={24}
-            baseColor={isLight ? "#e5e7eb" : "#2c303a"}
-            highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"}
-          />
-          <Skeleton
-            width={100}
-            baseColor={isLight ? "#e5e7eb" : "#2c303a"}
-            highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"}
-          />
-        </div>
-        <div className="space-y-2">
-          <Skeleton
-            height={50}
-            baseColor={isLight ? "#e5e7eb" : "#2c303a"}
-            highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"}
-          />
-          <Skeleton
-            height={50}
-            baseColor={isLight ? "#e5e7eb" : "#2c303a"}
-            highlightColor={isLight ? "#f3f4f6" : "#3a3f4b"}
-          />
-        </div>
-      </div>
-    );
-  }
+  // Top five positions get their own segment; the rest are grouped as "Other"
+  const segments = useMemo(() => {
+    if (total <= 0) return [];
+    const top = holdings.slice(0, 5).map((h, i) => ({
+      label: h.coinSymbol?.toUpperCase(),
+      pct: (h.value / total) * 100,
+      color: SEGMENT_COLORS[i],
+    }));
+    const rest = holdings.slice(5).reduce((sum, h) => sum + h.value, 0);
+    if (rest > 0) top.push({ label: "Other", pct: (rest / total) * 100, color: SEGMENT_COLORS[5] });
+    return top;
+  }, [holdings, total]);
 
   return (
-    <div
-      className={`p-1 rounded-xl h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg ${TC.bgContainer} ${allCoins.length === 0 ? "hidden sm:flex" : ""}`}
-    >
-      { }
-      <div className="px-4 pt-3 flex items-center justify-between mb-2">
-        <h3 className="font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-          <FaChartLine className="text-blue-500" />
-          Holdings
-        </h3>
-        <span
-          className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border ${isLight ? "bg-gray-100 border-gray-200 text-gray-700" : "bg-gray-700 border-gray-600 text-gray-300"}`}
-        >
-          ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-        </span>
-      </div>
+    <Card className="flex h-full flex-col">
+      <CardHeader
+        icon={PieChart}
+        title="Holdings"
+        subtitle={holdings.length ? `${holdings.length} position${holdings.length > 1 ? "s" : ""} · ${formatUSD(total)}` : undefined}
+        action={
+          <CardLink onClick={() => navigate("/portfolio")}>
+            Details <ArrowRight size={12} />
+          </CardLink>
+        }
+      />
 
-      { }
-      <div
-        data-lenis-prevent
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-hide max-h-[240px] md:max-h-full"
-      >
-        {allCoins.length === 0 ? (
-          <div
-            className={`h-full flex flex-col items-center justify-center text-center opacity-60 rounded-lg ${TC.bgEmpty}`}
-          >
-            <div
-              className={`p-3 rounded-full mb-2 ${isLight ? "bg-white" : "bg-gray-700"}`}
-            >
-              <FaCoins />
-            </div>
-            <p className={`text-xs ${TC.textSecondary}`}>No coins yet</p>
+      {loading && holdings.length === 0 ? (
+        <SkeletonRows rows={5} />
+      ) : holdings.length === 0 ? (
+        <EmptyState
+          icon={Coins}
+          title="No positions yet"
+          description="Buy your first coin with your virtual balance to start tracking performance."
+          className="flex-1"
+          action={
             <button
+              type="button"
               onClick={() => navigate("/cryptolist")}
-              className="text-[10px] text-blue-500 mt-2 hover:underline"
+              className="mt-2 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-brand-fg hover:bg-brand-hover"
             >
-              Buy Crypto
+              Explore markets
             </button>
-          </div>
-        ) : (
-          allCoins.map((coin, i) => (
-            <div
-              key={coin.coinId || i}
-              {...pressable(() => navigate("/portfolio"))}
-              style={shouldAnimate ? { animationDelay: `${i * 0.1}s` } : {}}
-              className={`flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer group ${shouldAnimate ? "fade-in" : ""} ${TC.bgItem}`}
-            >
-              <div className="flex items-center gap-3">
-                {coin.image ? (
-                  <img
-                    src={coin.image}
-                    alt={coin.coinName}
-                    className="w-8 h-8 rounded-lg object-cover"
-                  />
-                ) : (
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${TC.bgIcon}`}
-                  >
-                    {coin.coinSymbol?.substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <p className={`text-xs font-bold ${TC.textPrimary}`}>
-                    {coin.coinSymbol?.toUpperCase()}
-                  </p>
-                  <p className={`text-[10px] ${TC.textSecondary}`}>
-                    {coin.totalQuantity?.toFixed(4)} qty
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <p className={`text-xs font-bold ${TC.textPrimary}`}>
-                  $
-                  {coin.currentValue?.toLocaleString(undefined, {
-                    maximumFractionDigits: 0,
-                  })}
-                </p>
-                <p
-                  className={`text-[10px] flex items-center justify-end gap-1 ${coin.profitLoss >= 0 ? TC.textProfit : TC.textLoss}`}
-                >
-                  {coin.profitLoss >= 0 ? "+" : ""}
-                  {coin.profitLoss?.toLocaleString(undefined, {
-                    maximumFractionDigits: 0,
-                  })}
-                  {coin.percentChange && (
-                    <span className="opacity-70">
-                      ({coin.percentChange > 0 ? "+" : ""}
-                      {coin.percentChange.toFixed(1)}%)
-                    </span>
-                  )}
-                </p>
-              </div>
+          }
+        />
+      ) : (
+        <>
+          <div className="px-4 pb-3">
+            <div className="flex h-2 overflow-hidden rounded-full bg-surface-2" role="img" aria-label="Portfolio allocation">
+              {segments.map((s) => (
+                <div key={s.label} style={{ width: `${s.pct}%`, background: s.color }} className="h-full first:rounded-l-full last:rounded-r-full" />
+              ))}
             </div>
-          ))
-        )}
-      </div>
-
-      { }
-      {allCoins.length > 0 && (
-        <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700/50 text-center">
-          <button
-            onClick={() => navigate("/portfolio")}
-            className={`text-[10px] font-medium flex items-center justify-center gap-1 mx-auto transition-colors ${TC.textSecondary} hover:text-blue-500`}
-          >
-            View Stats <FaArrowRight size={8} />
-          </button>
-        </div>
+            <ul className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
+              {segments.map((s) => (
+                <li key={s.label} className="flex items-center gap-1.5 text-[11px] text-fg-muted">
+                  <span className="size-2 rounded-full" style={{ background: s.color }} />
+                  {s.label} <span className="tabular text-fg-subtle">{s.pct.toFixed(1)}%</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="max-h-[320px] flex-1 divide-y divide-line overflow-y-auto border-t border-line xl:max-h-none" data-lenis-prevent>
+            {holdings.map((h) => (
+              <LiveCoinRow
+                key={h.coinId}
+                id={h.coinId}
+                symbol={h.coinSymbol}
+                image={h.marketData?.image || h.image}
+                meta={`${Number(h.totalQuantity || 0).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${h.coinSymbol?.toUpperCase() ?? ""}`}
+                price={h.currentPrice}
+                onClick={() => navigate(`/coin/coin-details/${h.coinId}`)}
+                right={({ price }) => (
+                  <HoldingValue quantity={h.totalQuantity || 0} cost={h.remainingInvestment || 0} price={price} />
+                )}
+              />
+            ))}
+          </div>
+          <dl className="grid grid-cols-2 gap-3 border-t border-line px-4 py-3 text-xs">
+            <div>
+              <dt className="text-fg-subtle">Cost basis</dt>
+              <dd className="tabular mt-0.5 text-sm font-medium text-fg">{formatUSD(costBasis)}</dd>
+            </div>
+            <div className="text-right">
+              <dt className="text-fg-subtle">Unrealized P&amp;L</dt>
+              <dd className={`tabular mt-0.5 text-sm font-medium ${pnl >= 0 ? "text-up" : "text-down"}`}>
+                {pnl >= 0 ? "+" : "−"}
+                {formatUSD(Math.abs(pnl))}
+              </dd>
+            </div>
+          </dl>
+        </>
       )}
-    </div>
+    </Card>
   );
 }
 
-export default PortfolioCard;
+export default memo(PortfolioCard);

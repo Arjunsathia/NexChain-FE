@@ -1,81 +1,12 @@
-import { pressable } from "@/utils/a11y";
-import React from "react";
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
-
-function StatCard({
-  label,
-  value,
-  icon,
-  color,
-  badge,
-  TC,
-  onClick,
-  isLoading,
-}) {
-  const Icon = icon;
-
-  // Helper to parse numeric badge for trend styling (if applicable)
-  const isPositive = badge && (badge.includes("+") || !badge.includes("-"));
-  const trendColor = isPositive
-    ? "text-emerald-500 bg-emerald-500/10"
-    : "text-red-500 bg-red-500/10";
-
-  return (
-    <div
-      {...pressable(onClick)}
-      className={`
-        relative overflow-hidden cursor-pointer group
-        ${TC.bgStatsCard} rounded-2xl p-3 sm:p-4 transition-all duration-300
-      `}
-    >
-      {/* Header: Icon & Badge */}
-      <div className="flex items-start justify-between mb-4 relative z-10">
-        <div
-          className={`p-2.5 sm:p-3 bg-gradient-to-br ${color} rounded-xl shadow-lg shadow-black/5 group-hover:shadow-current/20 transition-all duration-300`}
-        >
-          <Icon className="text-white text-lg sm:text-xl" />
-        </div>
-
-        {badge && (
-          <div
-            className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-lg backdrop-blur-sm ${trendColor}`}
-          >
-            {badge.includes("%") &&
-              (isPositive ? <FaArrowUp size={8} /> : <FaArrowDown size={8} />)}
-            {badge}
-          </div>
-        )}
-      </div>
-
-      {/* Content: Title & Value */}
-      <div className="relative z-10">
-        <p
-          className={`text-xs sm:text-sm font-medium uppercase tracking-wider mb-1 ${TC.textSecondary}`}
-        >
-          {label}
-        </p>
-
-        <p
-          className={`text-xl sm:text-2xl font-bold transition-colors ${TC.textPrimary} group-hover:text-blue-500`}
-        >
-          {isLoading ? (
-            <span className="inline-block w-24 h-8 bg-gray-500/10 rounded animate-pulse" />
-          ) : (
-            (value ?? 0)
-          )}
-        </p>
-
-        {/* Optional Description Line (mirrors InfoCards description) */}
-        {!isLoading && (
-          <p
-            className={`text-[10px] sm:text-xs mt-1 ${TC.textTertiary || "text-gray-400"}`}
-          >
-            View Details
-          </p>
-        )}
-      </div>
-    </div>
-  );
+import { ArrowUpRight } from "lucide-react";
+export default function StatCard({ label, value, icon: Icon, badge, onClick, isLoading, description }) {
+  const Tag = onClick ? "button" : "div";
+  return <Tag type={onClick ? "button" : undefined} onClick={onClick} className={[
+    "premium-card min-w-0 rounded-xl border border-line bg-surface p-4 text-left shadow-card",
+    onClick ? "group transition-colors hover:border-line-strong hover:bg-surface-hover" : "",
+  ].join(" ")}>
+    <div className="mb-3 flex items-center justify-between gap-2"><span className="text-xs font-medium text-fg-muted">{label}</span><Icon size={16} className="shrink-0 text-fg-subtle" /></div>
+    {isLoading ? <span className="block h-8 w-20 animate-pulse rounded bg-surface-2" /> : <p className="truncate text-2xl font-semibold tracking-tight text-fg tabular-nums">{value ?? "—"}</p>}
+    <div className="mt-2 flex min-h-4 items-center justify-between gap-2"><span className="truncate text-[11px] text-fg-subtle">{badge || description || "View details"}</span>{onClick && <ArrowUpRight size={13} className="shrink-0 text-fg-subtle group-hover:text-brand" />}</div>
+  </Tag>;
 }
-
-export default StatCard;

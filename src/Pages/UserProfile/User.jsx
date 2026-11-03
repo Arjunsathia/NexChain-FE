@@ -1,75 +1,59 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
-import React, { useState, useEffect, Suspense } from "react";
-import { Outlet } from "react-router-dom";
-import Sidebar from "@/Components/UserProfile/Sidebar";
-import UserMobileNavbar from "@/Components/UserProfile/UserMobileNavbar";
-import useLogout from "@/hooks/useLogout";
+import React, { Suspense } from "react";
+import { NavLink, Outlet } from "react-router-dom";
+import { LayoutDashboard, LifeBuoy, Settings, UserRound } from "lucide-react";
+import useUserContext from "@/hooks/useUserContext";
+import { cn } from "@/utils/utils";
 
-const UserLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
-  </div>
-);
-
+/** Account section shell: label, section tabs, then the page */
 export default function User() {
-
-  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-  const isLight = useThemeCheck();
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      const desktop = window.innerWidth >= 1024;
-      setIsDesktop(desktop);
-
-      if (desktop && isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, [isMobileMenuOpen]);
-
-  const signOut = useLogout();
-  const handleLogout = async () => {
-    setIsLogoutLoading(true);
-    try {
-      await signOut();
-    } finally {
-      setIsLogoutLoading(false);
-    }
-  };
+  const { user } = useUserContext();
+  const sections = [
+    { label: "Overview", to: `/user-profile/${user?.id}`, icon: LayoutDashboard },
+    { label: "Settings", to: "/user/settings", icon: Settings },
+    { label: "Support", to: "/user/support", icon: LifeBuoy },
+  ];
 
   return (
-    <div
-      className={`min-h-screen flex items-start font-sans selection:bg-cyan-500/30 ${isLight ? "text-gray-900" : "text-white"}`}
-    >
-      { }
-      {isDesktop && (
-        <div className="sticky top-0 h-screen flex-shrink-0 z-40 hidden lg:flex items-start py-6 pl-4">
-          <Sidebar onLogout={handleLogout} isLogoutLoading={isLogoutLoading} />
+    <div className="mx-auto max-w-[1600px] space-y-5 px-3 py-4 sm:p-0">
+      <div className="border-b border-line">
+        <div className="flex items-center gap-2 pb-2 text-xs text-fg-subtle">
+          <UserRound size={15} className="text-brand" />
+          <span className="font-medium text-fg-muted">Your account</span>
+          {user?.email && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="truncate">{user.email}</span>
+            </>
+          )}
         </div>
-      )}
-
-      { }
-      <div className="flex-1 flex flex-col min-h-screen relative w-full overflow-x-hidden">
-        { }
-        {!isDesktop && (
-          <UserMobileNavbar
-            isOpen={isMobileMenuOpen}
-            onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            onLogout={handleLogout}
-            isLogoutLoading={isLogoutLoading}
-          />
-        )}
-        <div className="flex-1 w-full max-w-[1600px] mx-auto overflow-x-hidden p-0 sm:p-4 pb-20 lg:pb-4">
-          <Suspense fallback={<UserLoader />}>
-            <Outlet />
-          </Suspense>
-        </div>
+        <nav aria-label="Account sections" className="section-navigation flex gap-1 overflow-x-auto no-scrollbar">
+          {sections.map(({ label, to, icon: Icon }) => (
+            <NavLink
+              key={label}
+              to={to}
+              className={({ isActive }) =>
+                cn(
+                  "relative flex shrink-0 items-center gap-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  "after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full",
+                  isActive ? "text-fg after:bg-brand" : "text-fg-muted hover:text-fg",
+                )
+              }
+            >
+              <Icon size={16} strokeWidth={1.9} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
+      <Suspense
+        fallback={
+          <div role="status" className="h-80 animate-pulse rounded-xl border border-line bg-surface">
+            <span className="sr-only">Loading</span>
+          </div>
+        }
+      >
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

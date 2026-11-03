@@ -1,514 +1,184 @@
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Area,
-} from "recharts";
-import { FaArrowUp, FaArrowDown, FaChartLine } from "react-icons/fa";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import React, { memo, useId, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart as LineChartIcon } from "lucide-react";
 import api from "@/api/axiosConfig";
+import useChartTheme from "@/hooks/useChartTheme";
+import { Card, CardHeader, EmptyState } from "@/Components/ui/card";
+import { Segmented } from "@/Components/ui/segmented";
+import { Skeleton } from "@/Components/ui/skeleton";
+import { Delta } from "@/Components/ui/delta";
+import { formatCompact, formatUSD } from "@/utils/format";
 
-const PerformanceChart = ({
-  isLight,
-  groupedHoldings,
-  balance,
-  loading,
-  disableAnimations = false,
-}) => {
-  const [timeRange, setTimeRange] = useState("7d");
+const RANGES = [
+  { label: "24H", value: "1d" },
+  { label: "7D", value: "7d" },
+  { label: "30D", value: "30d" },
+  { label: "90D", value: "90d" },
+];
 
-  const TC = useMemo(
-    () => ({
-      bgContainer: isLight
-        ? "bg-white/70 backdrop-blur-xl shadow-md border border-gray-100 glass-card rounded-xl"
-        : "bg-gray-900/95 backdrop-blur-none shadow-none border border-gray-700/50 rounded-xl",
-
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      bgRangeButtonActive:
-        "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20",
-      bgRangeButtonDefault: isLight
-        ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200/50"
-        : "text-gray-400 hover:text-gray-300 hover:bg-white/5",
-      bgRangeContainer: isLight
-        ? "bg-gray-100/80 border-gray-200"
-        : "bg-gray-800/50 border-gray-700/50",
-
-      bgStatCard: isLight ? "bg-gray-50 dark:bg-white/5" : "bg-white/5",
-
-      bgPillPositive: isLight ? "bg-emerald-50" : "bg-emerald-500/10",
-      bgPillNegative: isLight ? "bg-rose-50" : "bg-rose-500/10",
-      textPositive: isLight ? "text-emerald-600" : "text-emerald-400",
-      textNegative: isLight ? "text-rose-600" : "text-rose-400",
-
-      chartStroke: "#9CA3AF",
-      chartGrid: isLight ? "#e5e7eb" : "#374151",
-
-      tooltipBg: isLight
-        ? "bg-white border border-gray-300 shadow-xl"
-        : "bg-gray-900 border border-gray-800 shadow-2xl",
-      tooltipTextPrimary: isLight ? "text-gray-900" : "text-white",
-      tooltipTextSecondary: isLight ? "text-gray-500" : "text-gray-400",
-
-      skeletonBase: isLight ? "#e5e7eb" : "#2c303a",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#3a3f4d",
-    }),
-    [isLight],
+const ChartTooltip = ({ active, payload, intraday }) => {
+  if (!active || !payload?.length) return null;
+  const p = payload[0].payload;
+  const pnl = p.value - p.invested;
+  return (
+    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-pop">
+      <p className="mb-1 text-fg-subtle">
+        {p.live
+          ? "Now"
+          : new Intl.DateTimeFormat(undefined, intraday ? { hour: "2-digit", minute: "2-digit" } : { month: "short", day: "numeric" }).format(p.t)}
+      </p>
+      <p className="tabular text-sm font-semibold text-fg">{formatUSD(p.value)}</p>
+      <p className="tabular text-fg-muted">
+        Cost {formatUSD(p.invested)} ·{" "}
+        <span className={pnl >= 0 ? "text-up" : "text-down"}>
+          {pnl >= 0 ? "+" : "−"}
+          {formatUSD(Math.abs(pnl))}
+        </span>
+      </p>
+    </div>
   );
+};
 
-  const currentMetrics = useMemo(() => {
-    let totalCurrentValue = 0;
-    let totalInvestment = 0;
-
-    if (groupedHoldings && groupedHoldings.length > 0) {
-      groupedHoldings.forEach((coin) => {
-        const currentPrice = coin.currentPrice || 0;
-        const currentValue = (coin.totalQuantity || 0) * currentPrice;
-        const remainingInvestment = coin.remainingInvestment || 0;
-
-        totalCurrentValue += currentValue;
-        totalInvestment += remainingInvestment;
-      });
-    }
-
-    const portfolioValue = totalCurrentValue + (balance || 0);
-    const profitLoss = totalCurrentValue - totalInvestment;
-    const profitLossPercentage =
-      totalInvestment > 0 ? (profitLoss / totalInvestment) * 100 : 0;
-
-    return {
-      currentValue: portfolioValue,
-      totalInvestment,
-      profitLoss,
-      profitLossPercentage,
-      investedValue: totalInvestment,
-    };
-  }, [groupedHoldings, balance]);
-
-  // Stabilized Chart Data: Only updates when Time Range changes or initial data loads
-  const [chartData, setChartData] = useState([]);
-
-  // Use a Ref to pass live data to tooltip without re-rendering the Chart component
-  const tooltipDataRef = React.useRef(currentMetrics);
-  useEffect(() => {
-    tooltipDataRef.current = currentMetrics;
-  }, [currentMetrics]);
-
-  // Real history: hourly snapshots recorded by the server (daily points for
-  // ranges over a day), ending with a live point. Refetched when the range
-  // changes or holdings change, not on every price tick.
-  const [historySince, setHistorySince] = useState(null);
+/**
+ * Holdings value over time from the server's hourly snapshots (daily points for
+ * longer ranges), ending with a live point. The dashed line is the cost basis.
+ */
+function PerformanceChart({ holdingsCount }) {
   const userId = useSelector((state) => state.user.user?.id);
-  const hasHoldings = currentMetrics.totalInvestment > 0;
+  const theme = useChartTheme();
+  const gradientId = useId();
+  const [range, setRange] = useState("7d");
 
-  useEffect(() => {
-    if (!userId || !hasHoldings) {
-      setChartData([]);
-      return;
-    }
-    let active = true;
-    const isIntraday = timeRange === "1d";
-    api
-      .get(`/purchases/performance/${userId}`, { params: { range: timeRange } })
-      .then(({ data }) => {
-        if (!active) return;
-        setHistorySince(data.historySince ? new Date(data.historySince) : null);
-        setChartData(
-          (data.points || []).map((p) => {
-            const date = new Date(p.at);
-            const profitLoss = p.holdingsValue - p.invested;
-            return {
-              date: p.live
-                ? isIntraday ? "Now" : "Today"
-                : isIntraday
-                  ? date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-                  : date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-              value: Math.round(p.holdingsValue * 100) / 100,
-              profitLoss,
-              profitLossPercentage: p.invested > 0 ? (profitLoss / p.invested) * 100 : 0,
-              investment: p.invested,
-              day: p.live ? (isIntraday ? "Now" : "Today") : null,
-              fullDate: date,
-            };
-          }),
-        );
-      })
-      .catch(() => active && setChartData([]));
-    return () => {
-      active = false;
-    };
-  }, [userId, timeRange, hasHoldings, groupedHoldings?.length]);
+  const { data = [], isLoading, isFetching } = useQuery({
+    // Holdings count in the key: a buy or sell refetches the history
+    queryKey: ["performance", userId, range, holdingsCount],
+    queryFn: async () => {
+      const res = await api.get(`/purchases/performance/${userId}`, { params: { range } });
+      return (res.data.points || []).map((p) => ({
+        t: new Date(p.at).getTime(),
+        value: Math.round(p.holdingsValue * 100) / 100,
+        invested: p.invested,
+        live: !!p.live,
+      }));
+    },
+    enabled: !!userId && holdingsCount > 0,
+    staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
+  });
 
-  const periodReturns = useMemo(() => {
-    if (chartData.length < 2)
-      return { "1d": 0, "7d": 0, "30d": 0, "90d": 0, current: 0 };
+  // Change in unrealized P&L over the range, relative to the current cost basis,
+  // so buying more mid-range doesn't count as a gain
+  const change = useMemo(() => {
+    if (data.length < 2) return null;
+    const first = data[0];
+    const last = data[data.length - 1];
+    const delta = last.value - last.invested - (first.value - first.invested);
+    return { amount: delta, pct: last.invested > 0 ? (delta / last.invested) * 100 : 0 };
+  }, [data]);
 
-    // Change in unrealized P/L across the range, relative to the current cost
-    // basis, so buying more coins mid-range doesn't count as a gain
-    const first = chartData[0];
-    const last = chartData[chartData.length - 1];
-    const totalReturn =
-      last.investment > 0 ? ((last.profitLoss - first.profitLoss) / last.investment) * 100 : 0;
-
-    const periodReturn = totalReturn;
-
-    return {
-      "1d": periodReturn,
-      "7d": periodReturn,
-      "30d": periodReturn,
-      "90d": periodReturn,
-      current: totalReturn,
-    };
-  }, [chartData]);
-
-  if (loading) {
-    return (
-      <div className={`rounded-2xl p-6 ${TC.bgContainer}`}>
-        <Skeleton
-          height={300}
-          baseColor={TC.skeletonBase}
-          highlightColor={TC.skeletonHighlight}
-        />
-      </div>
-    );
-  }
-
-  if (currentMetrics.totalInvestment === 0) {
-    return <EmptyState isLight={isLight} TC={TC} />;
-  }
+  const intraday = range === "1d";
+  const tickFormat = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(undefined, intraday ? { hour: "2-digit", minute: "2-digit" } : { month: "short", day: "numeric" });
+    return (t) => fmt.format(t);
+  }, [intraday]);
+  const up = !change || change.amount >= 0;
+  const color = up ? theme.up : theme.down;
 
   return (
-    <div
-      className={`
-        p-1 h-full flex flex-col
-        ${TC.bgContainer}
-      `}
-    >
-      <Header
-        isLight={isLight}
-        timeRange={timeRange}
-        setTimeRange={setTimeRange}
-        TC={TC}
-      />
-      <StatsGrid
-        isLight={isLight}
-        currentMetrics={currentMetrics}
-        periodReturns={periodReturns}
-        timeRange={timeRange}
-        TC={TC}
-      />
-      <Chart
-        isLight={isLight}
-        chartData={chartData}
-        tooltipDataRef={tooltipDataRef}
-        isPositive={currentMetrics.profitLoss >= 0}
-        TC={TC}
-        disableAnimations={disableAnimations}
-      />
-      {historySince && (
-        <p className={`px-4 pb-3 text-[11px] ${TC.textSecondary}`}>
-          Tracking since {historySince.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-        </p>
-      )}
-    </div>
-  );
-};
-
-const EmptyState = ({ TC }) => {
-  return (
-    <div
-      className={`
-        rounded-2xl p-6 h-full
-        ${TC.bgContainer}
-        transition-all duration-300 ease-in-out
-      `}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-          <FaChartLine className="text-cyan-500" />
-          Portfolio Performance
-        </h2>
-      </div>
-      <div
-        className={`flex flex-col items-center justify-center py-12 ${TC.textSecondary} h-full`}
-      >
-        <div className="text-4xl mb-3">📊</div>
-        <p className={`text-center text-base ${TC.textPrimary}`}>
-          No investment data available
-        </p>
-        <p className={`text-sm mt-2 text-center ${TC.textSecondary}`}>
-          Start investing to track your performance
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Header = ({ timeRange, setTimeRange, TC }) => {
-  return (
-    <div className="px-4 pt-3 flex items-center justify-between mb-2">
-      <div className="flex items-center gap-3">
-        <h2 className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2 tracking-tight">
-          <FaChartLine className="text-blue-500" size={14} />
-          Performance
-        </h2>
-      </div>
-      <div
-        className={`flex rounded-lg p-0.5 border shadow-sm ${TC.bgRangeContainer}`}
-      >
-        {["1d", "7d", "30d", "90d"].map((range) => (
-          <button
-            key={range}
-            onClick={() => setTimeRange(range)}
-            className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${timeRange === range
-              ? TC.bgRangeButtonActive
-              : TC.bgRangeButtonDefault
-              }`}
-          >
-            {range}
-          </button>
-        ))}
-      </div>
-    </div >
-  );
-};
-
-const StatsGrid = ({ currentMetrics, periodReturns, timeRange, TC }) => {
-  const { totalInvestment, profitLoss } = currentMetrics;
-
-  return (
-    <div className="grid grid-cols-3 gap-2 px-2 mb-4">
-      <div className={`rounded-xl p-2 md:p-3 ${TC.bgStatCard}`}>
-        <p
-          className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-        >
-          Invested
-        </p>
-        <p className={`text-sm md:text-base font-bold ${TC.textPrimary}`}>
-          $
-          {totalInvestment.toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </p>
-      </div>
-
-      <div
-        className={`rounded-xl p-2 md:p-3 ${profitLoss >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}
-      >
-        <p
-          className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-        >
-          Total P&L
-        </p>
-        <div
-          className={`flex items-center gap-1 font-bold text-sm md:text-base ${profitLoss >= 0 ? TC.textPositive : TC.textNegative}`}
-        >
-          {profitLoss >= 0 ? <FaArrowUp size={8} /> : <FaArrowDown size={8} />}
-          <span>
-            $
-            {Math.abs(profitLoss).toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
-        </div>
-      </div>
-
-      <div
-        className={`rounded-xl p-2 md:p-3 ${periodReturns[timeRange] >= 0 ? TC.bgPillPositive : TC.bgPillNegative}`}
-      >
-        <p
-          className={`text-[10px] font-bold mb-0.5 uppercase tracking-wider ${TC.textSecondary} opacity-60`}
-        >
-          {timeRange} Return
-        </p>
-        <div
-          className={`flex items-center gap-1 font-bold text-sm md:text-base ${periodReturns[timeRange] >= 0 ? TC.textPositive : TC.textNegative}`}
-        >
-          {periodReturns[timeRange] >= 0 ? (
-            <FaArrowUp size={8} />
+    <Card className="flex h-full flex-col">
+      <CardHeader
+        icon={LineChartIcon}
+        title="Performance"
+        subtitle={
+          change ? (
+            <span className="flex items-center gap-1.5">
+              <span className={`tabular ${up ? "text-up" : "text-down"}`}>
+                {up ? "+" : "−"}
+                {formatUSD(Math.abs(change.amount))}
+              </span>
+              <Delta value={change.pct} />
+              <span className="hidden sm:inline">this period</span>
+            </span>
           ) : (
-            <FaArrowDown size={8} />
-          )}
-          <span>{Math.abs(periodReturns[timeRange]).toFixed(2)}%</span>
-        </div>
+            "Value of your holdings over time"
+          )
+        }
+        action={holdingsCount > 0 && <Segmented label="Range" options={RANGES} value={range} onChange={setRange} />}
+      />
+
+      <div className="relative min-h-[280px] flex-1 px-2 pb-3 sm:px-4">
+        {holdingsCount === 0 ? (
+          <EmptyState icon={LineChartIcon} title="No performance yet" description="Buy a coin and your portfolio value will be charted here." className="h-full" />
+        ) : isLoading ? (
+          <Skeleton className="h-[280px] w-full rounded-lg" />
+        ) : data.length < 2 ? (
+          <EmptyState
+            icon={LineChartIcon}
+            title="Building your history"
+            description="Your portfolio value is recorded every hour. Check back soon to see the chart."
+            className="h-full"
+          />
+        ) : (
+          <>
+            {isFetching && <div className="absolute inset-x-4 top-0 z-10 h-0.5 animate-pulse rounded-full bg-brand" />}
+            <ResponsiveContainer width="100%" height={280}>
+              <ComposedChart data={data} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity={0.2} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke={theme.grid} />
+                <XAxis
+                  dataKey="t"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin", "dataMax"]}
+                  tickFormatter={tickFormat}
+                  tick={{ fill: theme.axis, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={48}
+                />
+                <YAxis
+                  orientation="right"
+                  domain={["auto", "auto"]}
+                  tickFormatter={(v) => `$${formatCompact(v)}`}
+                  tick={{ fill: theme.axis, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={56}
+                />
+                <Tooltip content={<ChartTooltip intraday={intraday} />} cursor={{ stroke: theme.axis, strokeDasharray: "3 3" }} />
+                <Line type="stepAfter" dataKey="invested" stroke={theme.axis} strokeWidth={1} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={color}
+                  strokeWidth={1.75}
+                  fill={`url(#${gradientId})`}
+                  dot={false}
+                  activeDot={{ r: 3.5, strokeWidth: 2, stroke: theme.surface, fill: color }}
+                  isAnimationActive={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div className="mt-1 flex items-center gap-4 px-2 text-[11px] text-fg-subtle">
+              <span className="flex items-center gap-1.5">
+                <span className="h-0.5 w-4 rounded-full" style={{ background: color }} /> Holdings value
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 border-t border-dashed" style={{ borderColor: theme.axis }} /> Cost basis
+              </span>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </Card>
   );
-};
+}
 
-// 1. Move Tooltip OUTSIDE and use Ref for live data
-const ChartTooltip = ({ active, payload, TC, tooltipDataRef }) => {
-  if (active && payload && payload.length) {
-    let data = payload[0].payload;
-
-    // Retrieve live metrics seamlessly from Ref without triggering Chart re-render
-    const currentMetrics = tooltipDataRef?.current;
-
-    // Override 'Today' data point with live metrics
-    if (data.day === "Today" && currentMetrics) {
-      data = {
-        ...data,
-        value: currentMetrics.currentValue,
-        profitLoss: currentMetrics.profitLoss,
-        profitLossPercentage: currentMetrics.profitLossPercentage
-      };
-    }
-
-    const rowPositive = data.profitLoss >= 0;
-
-    return (
-      <div
-        className={`rounded-lg p-3 shadow-lg min-w-[150px] ${TC.tooltipBg}`}
-      >
-        <p className={`font-semibold text-xs mb-2 ${TC.tooltipTextPrimary} opacity-70`}>
-          {data.day || data.date}
-        </p>
-
-        {/* P&L Amount */}
-        <div className="flex items-center justify-between gap-4 mb-1">
-          <span className={`text-xs ${TC.textSecondary}`}>P&L:</span>
-          <span className={`text-sm font-bold ${rowPositive ? TC.textPositive : TC.textNegative}`}>
-            {rowPositive ? "+" : "-"}$
-            {Math.abs(data.profitLoss).toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
-        </div>
-
-        {/* Percentage */}
-        <div className="flex items-center justify-between gap-4">
-          <span className={`text-xs ${TC.textSecondary}`}>Return:</span>
-          <span
-            className={`text-xs font-medium ${rowPositive ? TC.textPositive : TC.textNegative}`}
-          >
-            {rowPositive ? "+" : ""}
-            {data.profitLossPercentage.toFixed(2)}%
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-// 2. Wrap Chart in React.memo to prevent re-renders (fixing Axis flicker)
-const Chart = React.memo(({ chartData, isPositive, tooltipDataRef, TC, disableAnimations }) => {
-  const gradientId = `performanceGradient`;
-
-  const [shouldAnimate, setShouldAnimate] = useState(!disableAnimations);
-
-  useEffect(() => {
-    if (disableAnimations) return;
-
-    setShouldAnimate(true);
-    const timer = setTimeout(() => {
-      setShouldAnimate(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [chartData?.length, disableAnimations]);
-
-  if (!chartData || chartData.length < 2) {
-    return (
-      <div className="flex-1 min-h-[250px] flex items-center justify-center text-gray-400 px-6 text-center">
-        <p className="text-sm">
-          {chartData?.length
-            ? "Your performance history is recorded every hour. Check back soon to see the chart."
-            : "No performance data yet. Buy a coin to start tracking performance."}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-1 min-h-[250px] w-full px-2 pb-2">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={chartData}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop
-                offset="5%"
-                stopColor={isPositive ? "#10B981" : "#EF4444"}
-                stopOpacity={0.3}
-              />
-              <stop
-                offset="95%"
-                stopColor={isPositive ? "#10B981" : "#EF4444"}
-                stopOpacity={0}
-              />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={TC.chartGrid}
-            vertical={false}
-            opacity={0.5}
-          />
-          <XAxis
-            dataKey="date"
-            stroke={TC.chartStroke}
-            fontSize={11}
-            tickLine={false}
-            axisLine={false}
-            minTickGap={30}
-          />
-          <YAxis
-            width={40}
-            stroke={TC.chartStroke}
-            fontSize={11}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-            domain={['auto', 'auto']}
-          />
-          <Tooltip
-            content={<ChartTooltip TC={TC} tooltipDataRef={tooltipDataRef} />}
-            cursor={{
-              stroke: TC.chartGrid,
-              strokeWidth: 1,
-              strokeDasharray: "3 3",
-            }}
-            isAnimationActive={false}
-          />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="none"
-            fill={`url(#${gradientId})`}
-            fillOpacity={1}
-            isAnimationActive={shouldAnimate}
-            animationDuration={1500}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={isPositive ? "#10B981" : "#EF4444"}
-            strokeWidth={3}
-            dot={false}
-            activeDot={{ r: 6, strokeWidth: 0 }}
-            isAnimationActive={shouldAnimate}
-            animationDuration={1500}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-});
-
-Chart.displayName = "Chart";
-
-export default React.memo(PerformanceChart);
+export default memo(PerformanceChart);

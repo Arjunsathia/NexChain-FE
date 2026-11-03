@@ -242,6 +242,51 @@ export const getBinanceKlines = async (coinId, days = 1, coinSymbol) => {
 };
 
 
+/**
+ * OHLCV candles for the coin page chart. Binance klines when the coin trades
+ * there (volume in USDT, live-updatable); otherwise CoinGecko's OHLC, which has
+ * no volume and picks its own candle size from `geckoDays`.
+ * Times are unix seconds, as the chart library expects.
+ * @returns {Promise<{ candles: Array<{time,open,high,low,close,volume?}>, source: "binance" | "coingecko" }>}
+ */
+export const getCandles = async (coinId, coinSymbol, { interval, limit, geckoDays }) => {
+  const pair = getBinancePair(coinId, coinSymbol);
+  if (pair) {
+    try {
+      const response = await axios.get(`${BINANCE_REST_URL}/api/v3/klines`, {
+        params: { symbol: pair.toUpperCase(), interval, limit },
+        timeout: 8000,
+      });
+      if (Array.isArray(response.data) && response.data.length) {
+        return {
+          source: "binance",
+          candles: response.data.map((k) => ({
+            time: Math.floor(k[0] / 1000),
+            open: Number(k[1]),
+            high: Number(k[2]),
+            low: Number(k[3]),
+            close: Number(k[4]),
+            volume: Number(k[7]),
+          })),
+        };
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) console.warn(`Binance candles failed for ${pair}:`, error.message);
+    }
+  }
+
+  const response = await coinGecko.get(`/coins/${coinId}/ohlc`, {
+    params: { vs_currency: "usd", days: geckoDays },
+  });
+  const rows = Array.isArray(response.data) ? response.data : [];
+  // CoinGecko can repeat a timestamp at the edge of a range; the chart needs strictly increasing times
+  const byTime = new Map();
+  for (const [t, open, high, low, close] of rows) {
+    byTime.set(Math.floor(t / 1000), { time: Math.floor(t / 1000), open, high, low, close });
+  }
+  return { source: "coingecko", candles: [...byTime.values()].sort((a, b) => a.time - b.time) };
+};
+
 // Admin Helpers
 export const freezeCoin = async (coinData) => {
   const response = await api.post("/coins/freeze", coinData);

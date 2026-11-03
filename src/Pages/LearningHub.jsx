@@ -1,374 +1,161 @@
-import useThemeCheck from "@/hooks/useThemeCheck";
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  FaGraduationCap,
-  FaBook,
-  FaChartLine,
-  FaShieldAlt,
-  FaRocket,
-  FaPlay,
-  FaArrowRight,
-  FaSearch,
-  FaBolt,
-  FaClock,
-  FaSignal,
-} from "react-icons/fa";
-import { useLocation } from "react-router-dom";
-import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import useLearnBase from "@/hooks/useLearnBase";
+import { ArrowRight, BookOpen, CheckCircle2, Clock, GraduationCap, SearchX } from "lucide-react";
+import { CATEGORIES, GUIDES, readMinutes } from "@/content/learnGuides";
+import useReadGuides from "@/hooks/useReadGuides";
+import { Card, EmptyState } from "@/Components/ui/card";
+import { Segmented } from "@/Components/ui/segmented";
+import { SearchInput } from "@/Components/ui/table";
+import { cn } from "@/utils/utils";
 
-// --- Mock Data ---
-const MOCK_COURSES = [
-  {
-    id: 1,
-    title: "Crypto Fundamentals",
-    subtitle: "Start your journey here. Understand the core concepts.",
-    category: "basics",
-    duration: "2h 15m",
-    lessons: 12,
-    level: "Beginner",
-    progress: 0,
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
-    border: "border-emerald-400/20",
-  },
-  {
-    id: 2,
-    title: "Technical Analysis",
-    subtitle: "Master candlesticks, indicators, and market trends.",
-    category: "trading",
-    duration: "4h 30m",
-    lessons: 18,
-    level: "Intermediate",
-    progress: 0,
-    color: "text-violet-400",
-    bg: "bg-violet-400/10",
-    border: "border-violet-400/20",
-  },
-  {
-    id: 3,
-    title: "Wallet Security",
-    subtitle: "Essential security practices for every crypto investor.",
-    category: "security",
-    duration: "1h 45m",
-    lessons: 8,
-    level: "Beginner",
-    progress: 0,
-    color: "text-blue-400",
-    bg: "bg-blue-400/10",
-    border: "border-blue-400/20",
-  },
-  {
-    id: 4,
-    title: "Smart Contracts",
-    subtitle: "Build your first dApp on Ethereum.",
-    category: "advanced",
-    duration: "6h 15m",
-    lessons: 24,
-    level: "Advanced",
-    progress: 0,
-    color: "text-orange-400",
-    bg: "bg-orange-400/10",
-    border: "border-orange-400/20",
-  },
-];
+const categoryLabel = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]));
+const FILTERS = [{ value: "all", label: "All" }, ...CATEGORIES.map((c) => ({ value: c.id, label: c.label }))];
 
-const CATEGORIES = [
-  { id: "all", name: "Discover" },
-  { id: "basics", name: "Basics" },
-  { id: "trading", name: "Trading" },
-  { id: "security", name: "Security" },
-];
-
-function LearningHub() {
-  const isLight = useThemeCheck();
-  const { isVisited, markVisited } = useVisitedRoutes();
-  const location = useLocation();
-  // Freeze validated state on mount
-  const [hasVisited] = useState(() => isVisited(location.pathname));
-
-  useEffect(() => {
-    markVisited(location.pathname);
-  }, [location.pathname, markVisited]);
-
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  // Instant load if visited, otherwise simulate loading
-  const loading = false; // course data is local; nothing to wait for
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-
-  // Premium Styling Config
-  const TC = useMemo(
-    () => ({
-      textPrimary: isLight ? "text-gray-900" : "text-white",
-      textSecondary: isLight ? "text-gray-500" : "text-gray-400",
-      textMuted: isLight ? "text-gray-400" : "text-gray-600",
-
-      // Glass Cards (No solid backgrounds)
-      cardBase: isLight
-        ? "bg-white/60 backdrop-blur-md border border-gray-200"
-        : "bg-white/5 backdrop-blur-md border border-white/10",
-
-      cardHover: isLight
-        ? "hover:bg-white hover:border-gray-300 hover:shadow-xl hover:shadow-gray-200/50"
-        : "hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:shadow-black/20",
-
-      accentGradient:
-        "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500",
-
-      // Skeleton Colors (Matches Watchlist)
-      skeletonBase: isLight ? "#e5e7eb" : "#2d3748",
-      skeletonHighlight: isLight ? "#f3f4f6" : "#374151",
-    }),
-    [isLight],
+function GuideCard({ guide, base, done }) {
+  return (
+    <Link
+      to={`${base}/${guide.slug}`}
+      className="group flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-card transition-colors hover:border-line-strong"
+    >
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="font-medium text-brand">{categoryLabel[guide.category]}</span>
+        <span className="rounded bg-surface-2 px-1.5 py-0.5 text-fg-subtle">{guide.level}</span>
+      </div>
+      <h3 className="mt-2 text-[15px] font-semibold leading-snug text-fg group-hover:text-brand">{guide.title}</h3>
+      <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-fg-muted">{guide.summary}</p>
+      <div className="mt-4 flex items-center justify-between text-xs text-fg-subtle">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock size={13} /> {readMinutes(guide)} min read
+        </span>
+        {done ? (
+          <span className="inline-flex items-center gap-1 font-medium text-up">
+            <CheckCircle2 size={14} /> Read
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 font-medium text-fg-muted group-hover:text-brand">
+            Read <ArrowRight size={13} />
+          </span>
+        )}
+      </div>
+    </Link>
   );
+}
 
-  const filteredCourses = MOCK_COURSES.filter(
-    (c) => selectedCategory === "all" || c.category === selectedCategory,
-  );
+/** Learning hub: practical guides grouped by topic, with reading progress */
+export default function LearningHub() {
+  const base = useLearnBase();
+  const { read } = useReadGuides();
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return GUIDES.filter(
+      (g) =>
+        (filter === "all" || g.category === filter) &&
+        (!q || g.title.toLowerCase().includes(q) || g.summary.toLowerCase().includes(q)),
+    );
+  }, [filter, query]);
+
+  const doneCount = GUIDES.filter((g) => read.has(g.slug)).length;
+  const next = GUIDES.find((g) => !read.has(g.slug));
+  const grouped = filter === "all" && !query.trim();
 
   return (
-    // No global background, fits into parent
-    <div
-      className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 font-sans ${hasVisited ? "" : `transition-all duration-300 ease-out transform-gpu ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}`}
-    >
-      {/* --- Hero: "Start Here" (Premium Banner) --- */}
-      {!loading && selectedCategory === "all" && (
-        <div
-          className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden mb-6 md:mb-16 group cursor-pointer ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
-        >
-          {/* Abstract Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900"></div>
-          <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed"></div>
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2"></div>
-
-          <div className="relative z-10 p-5 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-300 text-xs font-bold mb-4 backdrop-blur-sm">
-                <FaBolt size={10} /> RECOMMENDED STARTER
-              </div>
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                Crypto 101: <br />
-                The Foundation
-              </h2>
-              <p className="text-slate-300 text-sm md:text-lg mb-6 md:mb-8 leading-relaxed">
-                Everything you need to know to start trading. From blockchain
-                basics to setting up your first wallet securely.
-              </p>
-
-              <div className="flex items-center gap-4">
-                {/* Lessons aren't built yet; don't present a button that does nothing */}
-                <button
-                  type="button"
-                  disabled
-                  title="Lessons are coming soon"
-                  className="px-6 md:px-8 py-3 md:py-3.5 bg-white/80 text-slate-900 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 cursor-not-allowed opacity-80"
-                >
-                  <FaPlay size={12} /> Lessons coming soon
-                </button>
-                <span className="text-slate-400 text-xs md:text-sm font-medium">
-                  12 Lessons • 2h 15m
-                </span>
-              </div>
-            </div>
-
-            {/* Visual Element (Glass Card inside Hero) */}
-            <div className="hidden md:block">
-              <div className="w-64 h-40 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center transform group-hover:-translate-y-2 transition-transform duration-500">
-                <FaRocket className="text-6xl text-white/20" />
-              </div>
-            </div>
+    <div className="mx-auto max-w-[1600px] space-y-5 px-3 py-4 sm:p-0">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Learn</h1>
+          <p className="mt-0.5 max-w-xl text-sm text-fg-subtle">
+            Short, practical guides to trading and staying safe, written for how NexChain works.
+          </p>
+        </div>
+        <div className="w-full sm:w-56" aria-label={`${doneCount} of ${GUIDES.length} guides read`}>
+          <div className="flex justify-between text-xs">
+            <span className="text-fg-muted">Your progress</span>
+            <span className="tabular font-medium text-fg">
+              {doneCount}/{GUIDES.length} read
+            </span>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div className="h-full rounded-full bg-up transition-[width] duration-500" style={{ width: `${(doneCount / GUIDES.length) * 100}%` }} />
           </div>
         </div>
-      )}
+      </header>
 
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8 border-b border-gray-200 dark:border-gray-800 pb-4 md:pb-1">
-        <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar w-full md:w-auto pb-2 md:pb-0 px-1">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`
-              pb-2 md:pb-3 text-sm font-medium transition-all relative whitespace-nowrap
-              ${selectedCategory === cat.id ? TC.textPrimary : TC.textSecondary}
-              hover:${TC.textPrimary}
-            `}
-            >
-              {cat.name}
-              {selectedCategory === cat.id && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-500 rounded-full"></span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar (Moved Here) */}
-        <div className={`relative group w-full md:w-64`}>
-          <input
-            type="text"
-            placeholder="Search topics..."
-            className={`w-full py-2.5 px-4 pr-10 rounded-full text-sm outline-none transition-all duration-300
-                 ${isLight
-                ? "bg-gray-100 focus:bg-white focus:shadow-md border border-transparent focus:border-gray-200 text-gray-900 placeholder-gray-500"
-                : "bg-white/5 focus:bg-gray-900 focus:shadow-lg border border-white/5 focus:border-white/20 text-white placeholder-gray-500"
-              }
-               `}
-          />
-          <FaSearch
-            className={`absolute right-3.5 top-3 text-gray-400 group-focus-within:text-cyan-500 transition-colors`}
-            size={14}
-          />
-        </div>
-      </div>
-
-      {/* --- Premium Grid --- */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className={`rounded-2xl p-6 h-[260px] flex flex-col justify-between ${TC.cardBase}`}
-            >
-              <div className="flex justify-between items-start">
-                <Skeleton
-                  circle
-                  width={48}
-                  height={48}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-                <Skeleton
-                  width={60}
-                  height={20}
-                  borderRadius={6}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-              </div>
-              <div className="space-y-3">
-                <Skeleton
-                  width="90%"
-                  height={24}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-                <Skeleton
-                  width="70%"
-                  height={16}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-              </div>
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-white/5">
-                <Skeleton
-                  width={80}
-                  height={16}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-                <Skeleton
-                  circle
-                  width={32}
-                  height={32}
-                  baseColor={TC.skeletonBase}
-                  highlightColor={TC.skeletonHighlight}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 ${hasVisited ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
-        >
-          {filteredCourses.map((course) => (
-            <PremiumCard key={course.id} course={course} TC={TC} />
-          ))}
-
-          {/* "Coming Soon" Placeholder for visual balance */}
-          <div
-            className={`rounded-2xl border border-dashed ${isLight ? "border-gray-300" : "border-gray-800"} flex flex-col items-center justify-center p-8 text-center opacity-60 h-full min-h-[220px] md:min-h-[260px]`}
-          >
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-              <span className="text-xl">✨</span>
-            </div>
-            <p className={`text-sm font-medium ${TC.textPrimary}`}>
-              More coming soon
+      {grouped && next && (
+        <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
+          <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand">
+            {doneCount === 0 ? <GraduationCap size={24} /> : <BookOpen size={22} />}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-brand">{doneCount === 0 ? "Start here" : "Up next"}</p>
+            <h2 className="mt-1 text-lg font-semibold text-fg">{next.title}</h2>
+            <p className="mt-0.5 text-sm text-fg-muted">
+              {next.summary} · {readMinutes(next)} min read
             </p>
           </div>
+          <Link
+            to={`${base}/${next.slug}`}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover"
+          >
+            {doneCount === 0 ? "Start reading" : "Continue"} <ArrowRight size={16} />
+          </Link>
+        </Card>
+      )}
+
+      {grouped && !next && (
+        <Card className="flex items-center gap-4 p-5">
+          <CheckCircle2 size={28} className="shrink-0 text-up" />
+          <p className="text-sm text-fg">
+            You&apos;ve read every guide. Put it into practice on the{" "}
+            <Link to={base === "/learning" ? "/cryptolist" : "/auth"} className="font-semibold text-brand hover:underline">
+              markets
+            </Link>
+            .
+          </p>
+        </Card>
+      )}
+
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <Segmented label="Topic" options={FILTERS} value={filter} onChange={setFilter} className="max-w-full overflow-x-auto no-scrollbar [&>button]:whitespace-nowrap" />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search guides" className="md:w-64" />
+      </div>
+
+      {results.length === 0 ? (
+        <Card>
+          <EmptyState icon={SearchX} title="No guides match" description="Try a different word or topic." className="py-14" />
+        </Card>
+      ) : grouped ? (
+        CATEGORIES.map((category) => {
+          const guides = results.filter((g) => g.category === category.id);
+          const done = guides.filter((g) => read.has(g.slug)).length;
+          return (
+            <section key={category.id} aria-labelledby={`cat-${category.id}`}>
+              <div className="mb-3 flex items-baseline justify-between">
+                <h2 id={`cat-${category.id}`} className="text-sm font-semibold text-fg">
+                  {category.label}
+                </h2>
+                <span className={cn("tabular text-xs", done === guides.length ? "text-up" : "text-fg-subtle")}>
+                  {done}/{guides.length} read
+                </span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {guides.map((g) => (
+                  <GuideCard key={g.slug} guide={g} base={base} done={read.has(g.slug)} />
+                ))}
+              </div>
+            </section>
+          );
+        })
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {results.map((g) => (
+            <GuideCard key={g.slug} guide={g} base={base} done={read.has(g.slug)} />
+          ))}
         </div>
       )}
     </div>
   );
 }
-
-// --- Sub-Components ---
-
-const PremiumCard = ({ course, TC }) => {
-  return (
-    <div
-      className={`
-      group relative rounded-2xl p-5 md:p-6 transition-all duration-500 ease-out cursor-pointer
-      ${TC.cardBase} ${TC.cardHover}
-      flex flex-col h-full min-h-[220px] md:min-h-[260px]
-    `}
-    >
-      {/* Icon Top Right */}
-      <div className="flex justify-between items-start mb-8 md:mb-12">
-        <div className={`p-3 rounded-2xl ${course.bg} ${course.border} border`}>
-          {course.category === "basics" && (
-            <FaGraduationCap className={course.color} size={20} />
-          )}
-          {course.category === "trading" && (
-            <FaChartLine className={course.color} size={20} />
-          )}
-          {course.category === "security" && (
-            <FaShieldAlt className={course.color} size={20} />
-          )}
-          {course.category === "advanced" && (
-            <FaRocket className={course.color} size={20} />
-          )}
-        </div>
-
-        {/* Level Badge */}
-        <span
-          className={`text-[10px] font-bold tracking-widest uppercase py-1 px-2 rounded-md ${TC.textSecondary} bg-gray-100/50 dark:bg-gray-800/50`}
-        >
-          {course.level}
-        </span>
-      </div>
-
-      {/* Info */}
-      <div className="mt-auto">
-        <h3
-          className={`text-base md:text-lg font-bold mb-1 ${TC.textPrimary} group-hover:text-cyan-500 transition-colors`}
-        >
-          {course.title}
-        </h3>
-        <p className={`text-xs md:text-sm ${TC.textSecondary} mb-4 md:mb-6`}>{course.subtitle}</p>
-
-        {/* Footer Meta */}
-        <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
-            <FaClock size={10} /> {course.duration}
-          </div>
-
-          <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-            <FaArrowRight
-              size={10}
-              className="-rotate-45 group-hover:rotate-0 transition-transform duration-300"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default LearningHub;
