@@ -13,6 +13,7 @@ import { cn } from "@/utils/utils";
 
 import TradeModalHeader from "./TradeModalHeader";
 import TransactionForm from "./TransactionForm";
+import { validateTrade, fillsImmediately } from "./validateTrade";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
 const ORDER_TYPE_LABELS = {
@@ -291,103 +292,36 @@ function TradeModal({ show, onClose, coin, type = "buy", purchasedCoins = [] }) 
   }, [calculateTotal, coin, coinAmount, onClose, handleTradeSubmit]);
 
   const handleSubmit = async () => {
-    if (!coin || !usdAmount || parseFloat(usdAmount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return false;
-    }
-    const sym = (coin.symbol || coin.coinSymbol)?.toUpperCase();
-    const price = currentPrice.toLocaleString();
-
-    if (!isBuy) {
-      const quantity = parseFloat(coinAmount);
-      const available = holdingsSummary.totalQuantity || 0;
-      if (!hasHoldings) {
-        toast.error("No holdings found for this coin. Please refresh and try again.");
-        return false;
-      }
-      if (quantity <= 0) {
-        toast.error("Please enter a valid amount to sell");
-        return false;
-      }
-      if (quantity > available + 1e-9) {
-        toast.error(`You only have ${available.toFixed(8)} ${sym} available`);
-        return false;
-      }
-      if (quantity < 0.000001) {
-        toast.error("Minimum sell amount is 0.000001");
-        return false;
-      }
-    }
-
-    // Stop-limit, stop-market and OCO validation
-    if (orderType === "stop_limit" || orderType === "stop_market" || orderType === "oco") {
-      const stop = parseFloat(stopPrice);
-      const limit = parseFloat(limitPrice);
-
-      if (orderType === "stop_market" && isNaN(stop)) {
-        toast.error("Please enter a stop price");
-        return false;
-      }
-      if (orderType === "oco" && (isNaN(stop) || isNaN(limit))) {
-        toast.error("Please enter both the take-profit (limit) and stop-loss (stop) prices");
-        return false;
-      }
-      if (orderType === "stop_limit" && (isNaN(stop) || isNaN(limit))) {
-        toast.error("Please enter both stop and limit prices");
-        return false;
-      }
-
-      if (orderType === "oco") {
-        // Buy OCO: limit catches a dip (below market), stop buys a breakout (above market).
-        // Sell OCO: limit takes profit (above market), stop cuts losses (below market).
-        if (isBuy && limit >= currentPrice) {
-          toast.error(`For a buy OCO, the buy limit must be below the current price ($${price}).`);
-          return false;
-        }
-        if (isBuy && stop <= currentPrice) {
-          toast.error(`For a buy OCO, the buy stop must be above the current price ($${price}).`);
-          return false;
-        }
-        if (!isBuy && limit <= currentPrice) {
-          toast.error(`For a sell OCO, take profit must be above the current price ($${price}).`);
-          return false;
-        }
-        if (!isBuy && stop >= currentPrice) {
-          toast.error(`For a sell OCO, the stop loss must be below the current price ($${price}).`);
-          return false;
-        }
-      }
-
-      if (orderType === "stop_limit") {
-        if (isBuy && stop <= currentPrice) {
-          toast.error(`A buy stop must be above the current price ($${price}). Use a limit order to buy lower.`);
-          return false;
-        }
-        if (!isBuy && stop >= currentPrice) {
-          toast.error(`A sell stop must be below the current price ($${price}). Use a limit order to sell higher.`);
-          return false;
-        }
-      }
-    }
-
-    if (isBuy && parseFloat(coinAmount) > maxAvailable) {
-      toast.error("Insufficient balance for this purchase");
+    if (!coin) return false;
+    const error = validateTrade({
+      side,
+      orderType,
+      usdAmount,
+      coinAmount,
+      stopPrice,
+      limitPrice,
+      currentPrice,
+      available: hasHoldings ? holdingsSummary.totalQuantity : 0,
+      maxAvailable,
+      symbol: coin.symbol || coin.coinSymbol,
+    });
+    if (error) {
+      toast.error(error);
       return false;
     }
 
     // A limit price already past the market fills immediately: confirm first
-    if ((orderType === "limit" || orderType === "stop_limit") && limitPrice) {
+    if (fillsImmediately({ side, orderType, limitPrice, currentPrice })) {
       const lp = parseFloat(limitPrice);
-      if (isBuy ? lp >= currentPrice : lp <= currentPrice) {
-        setConfirmDetails({
-          title: "This order fills immediately",
-          message: `Your ${ORDER_TYPE_LABELS[orderType].toLowerCase()} price ($${lp.toLocaleString()}) is ${isBuy ? "above" : "below"} the market price ($${price}), so it will execute right away.`,
-          confirmText: "Place order",
-          cancelText: "Go back",
-        });
-        setShowConfirm(true);
-        return false;
-      }
+      const price = currentPrice.toLocaleString();
+      setConfirmDetails({
+        title: "This order fills immediately",
+        message: `Your ${ORDER_TYPE_LABELS[orderType].toLowerCase()} price ($${lp.toLocaleString()}) is ${isBuy ? "above" : "below"} the market price ($${price}), so it will execute right away.`,
+        confirmText: "Place order",
+        cancelText: "Go back",
+      });
+      setShowConfirm(true);
+      return false;
     }
 
     return handleProceedWithTrade();

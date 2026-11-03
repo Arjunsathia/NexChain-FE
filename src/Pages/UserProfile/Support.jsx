@@ -79,6 +79,22 @@ function Sent({ title, children, onReset }) {
   );
 }
 
+/** Demo accounts have no real email to reply to, so support email is off */
+function DemoSupportNote() {
+  return (
+    <div className="space-y-3 px-4 pb-4 text-sm text-fg-muted">
+      <p>Demo accounts can&apos;t email support, because there&apos;s no address for us to reply to.</p>
+      <p>
+        You can still send product feedback from the Feedback tab, or{" "}
+        <Link to="/auth?mode=register" className="font-medium text-brand hover:underline">
+          create a free account
+        </Link>{" "}
+        to contact the team.
+      </p>
+    </div>
+  );
+}
+
 /** Emails the support inbox; an admin replies to the account's address */
 function SupportForm({ email }) {
   const [topic, setTopic] = useState(SUPPORT_TOPICS[0]);
@@ -309,7 +325,11 @@ export default function Support() {
             <div className="px-4 pb-4">
               <Segmented label="Contact type" options={CONTACT_MODES} value={mode} onChange={setMode} size="md" className="w-full [&>button]:flex-1" />
             </div>
-            {mode === "support" ? <SupportForm email={user?.email} /> : <FeedbackForm email={user?.email} />}
+            {mode === "support" ? (
+              user?.isDemo ? <DemoSupportNote /> : <SupportForm email={user?.email} />
+            ) : (
+              <FeedbackForm email={user?.isDemo ? undefined : user?.email} />
+            )}
           </Card>
 
           <Card as="nav" aria-label="More help" className="divide-y divide-line">

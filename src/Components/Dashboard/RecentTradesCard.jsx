@@ -50,6 +50,15 @@ function RecentTradesCard() {
           title="No trades yet"
           description="Your buys and sells will show up here."
           className="flex-1"
+          action={
+            <button
+              type="button"
+              onClick={() => navigate("/cryptolist")}
+              className="mt-2 rounded-lg border border-line px-3.5 py-2 text-xs font-semibold text-fg hover:bg-surface-hover"
+            >
+              Make your first trade
+            </button>
+          }
         />
       ) : (
         <ul className="divide-y divide-line">
