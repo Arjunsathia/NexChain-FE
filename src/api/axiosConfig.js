@@ -1,6 +1,7 @@
 import axios from "axios";
 import { TwoFactorEvent } from "../utils/twoFactorEvent";
 import toast from "react-hot-toast";
+import { requestStarted, requestFinished, trackRequest } from "./serverWake";
 
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
@@ -25,8 +26,10 @@ export const SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 export const BACKEND_WS_URL =
   import.meta.env.VITE_WS_URL || SERVER_URL.replace(/^http/, "ws");
 
+// Binance's market-data mirror: same streams as stream.binance.com, but also
+// reachable where binance.com is blocked (e.g. the US)
 export const BINANCE_WS_URL =
-  import.meta.env.VITE_BINANCE_WS_URL || "wss://stream.binance.com:9443";
+  import.meta.env.VITE_BINANCE_WS_URL || "wss://data-stream.binance.vision";
 
 export const coinGecko = axios.create({
   baseURL: COINGECKO_BASE_URL,
@@ -74,8 +77,10 @@ let refreshPromise = null;
 /** @returns {Promise<{ accessToken: string, user: object }>} */
 export const refreshSession = () => {
   if (!refreshPromise) {
-    refreshPromise = axios
-      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+    // Usually the first call after a page load, so it's the one that wakes the server
+    refreshPromise = trackRequest(
+      axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true }),
+    )
       .then((res) => {
         setMemoryToken(res.data.accessToken);
         return res.data;
@@ -87,8 +92,18 @@ export const refreshSession = () => {
   return refreshPromise;
 };
 
+// Counted once per attempt; settled in the response interceptor below
+const finishTracking = (config, answered) => {
+  if (config?._wakeTracked) {
+    config._wakeTracked = false;
+    requestFinished(answered);
+  }
+};
+
 api.interceptors.request.use(
   (config) => {
+    config._wakeTracked = true;
+    requestStarted();
     if (memoryToken) {
       config.headers.Authorization = `Bearer ${memoryToken}`;
     }
@@ -102,6 +117,7 @@ const isAuthEndpoint = (url = "") => /\/auth\/(login|register|refresh|google|log
 
 api.interceptors.response.use(
   (response) => {
+    finishTracking(response?.config, true);
     const contentType = response?.headers?.["content-type"];
     if (contentType && !contentType.includes("application/json") && !contentType.includes("multipart/form-data")) {
       // Check if response is string and looks like HTML
@@ -114,6 +130,7 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    finishTracking(originalRequest, !!error.response);
 
     // Check for 2FA requirement
     if (
