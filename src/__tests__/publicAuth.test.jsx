@@ -83,7 +83,7 @@ describe("Public authentication flows", () => {
     open(); fill("Email or username", "preview@example.com"); fill("Password", "test-password-123");
     fireEvent.click(screen.getByRole("button", { name: "Forgot password?" }));
     fireEvent.click(screen.getByRole("button", { name: "Back to sign in" }));
-    expect(screen.getByRole("heading", { name: "Good to see you again." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Welcome back" })).toBeTruthy();
     expect(postForm).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Sign in", exact: true }).disabled).toBe(false);
   });
@@ -112,7 +112,7 @@ describe("Public authentication flows", () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /Try the demo/ }));
     await waitFor(() => expect(postForm).toHaveBeenCalledWith("/auth/demo"));
-    expect(screen.getByRole("heading", { name: "Good to see you again." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Welcome back" })).toBeTruthy();
     expect(dispatch).not.toHaveBeenCalled();
   });
 

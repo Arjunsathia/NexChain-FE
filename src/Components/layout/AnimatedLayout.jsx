@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useVisitedRoutes } from "@/hooks/useVisitedRoutes";
 import "@/Components/Landing/public.css";
 import "@/Components/Landing/public-orbit.css";
+import "@/Components/Landing/auth.css";
 
 /** Native document scrolling; no canvas loop, scroll hijacking, or nested scroll area. */
 export default function AnimatedLayout() {

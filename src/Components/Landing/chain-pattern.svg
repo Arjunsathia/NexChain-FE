@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 45 1040 245" fill="none">
+  <defs>
+    <linearGradient id="trace" x1="30" y1="0" x2="1010" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9673ff" stop-opacity="0"/>
+      <stop offset=".22" stop-color="#9673ff"/>
+      <stop offset=".52" stop-color="#e1c7ff"/>
+      <stop offset=".8" stop-color="#7dbdff"/>
+      <stop offset="1" stop-color="#7dbdff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="-64" y1="-52" x2="64" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#eddbff"/>
+      <stop offset=".46" stop-color="#aa8df9"/>
+      <stop offset="1" stop-color="#6998e5"/>
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="-46" x2="0" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6853ab"/>
+      <stop offset="1" stop-color="#2b2554"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#854de9" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#854de9" stop-opacity="0"/>
+    </radialGradient>
+    <g id="block" stroke="url(#edge)" stroke-width="1.3" stroke-linejoin="round">
+      <path d="m-64-9 64-37 64 37-64 37z" fill="url(#top)"/>
+      <path d="m-64-9 64 37v64l-64-37z" fill="#2c2351"/>
+      <path d="M0 28 64-9v64L0 92z" fill="#211e42"/>
+      <path d="m-46-9 46-26 46 26-46 26z" fill="#bda4ff" fill-opacity=".07" stroke-opacity=".48"/>
+      <path d="m-15-9 15-8 15 8-15 8z" fill="#d8beff" fill-opacity=".38"/>
+      <path d="m-49 35 30 17m-30-6 20 11M16 57l31-18" stroke-opacity=".55"/>
+    </g>
+  </defs>
+  <ellipse cx="520" cy="151" rx="250" ry="132" fill="url(#glow)"/>
+  <g stroke="url(#trace)">
+    <path d="M0 197h127l48-27h94l90-47h115m92 0h115l91 47h94l48 27h126" stroke-opacity=".66"/>
+    <path d="M0 212h147l60-28h95l94-46m248 0 94 46h95l60 28h147" stroke-dasharray="3 8" stroke-opacity=".36"/>
+    <path d="M82 249h163l66-32h111l98 39 98-39h111l66 32h163" stroke-opacity=".18"/>
+    <path d="M207 145h95l83-41m270 0 83 41h95" stroke-opacity=".22"/>
+    <circle cx="269" cy="170" r="3" fill="#a681ff"/>
+    <circle cx="771" cy="170" r="3" fill="#95c1ff"/>
+    <circle cx="419" cy="123" r="3" fill="#c5a9ff"/>
+    <circle cx="621" cy="123" r="3" fill="#b7b5ff"/>
+  </g>
+  <use href="#block" transform="translate(175 153) scale(.39)" opacity=".44"/>
+  <use href="#block" transform="translate(344 125) scale(.68)" opacity=".81"/>
+  <use href="#block" transform="translate(520 109) scale(1.12)"/>
+  <use href="#block" transform="translate(696 125) scale(.68)" opacity=".81"/>
+  <use href="#block" transform="translate(865 153) scale(.39)" opacity=".44"/>
+</svg>
