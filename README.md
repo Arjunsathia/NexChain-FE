@@ -15,7 +15,7 @@ A paper-trading app with live Binance prices, a $10,000 virtual wallet, real ord
 
 [Quick start](#-quick-start) · [Architecture](#-architecture) · [Pages](#-pages) · [Conventions](#-conventions-for-contributors) · [Deploying](#-deploying-vercel)
 
-Backend: [NexChain API](../NexChain-backend)
+Backend: [NexChain API](https://github.com/Arjunsathia/NexChain-backend)
 
 </div>
 
@@ -40,7 +40,7 @@ Backend: [NexChain API](../NexChain-backend)
 
 ## 🚀 Quick start
 
-> **You need:** Node.js 20+ and the [API](../NexChain-backend) running locally.
+> **You need:** Node.js 20+ and the [API](https://github.com/Arjunsathia/NexChain-backend) running locally.
 
 ```bash
 # 1. In NexChain-backend
