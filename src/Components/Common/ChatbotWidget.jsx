@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { ArrowUp, RotateCcw, Sparkles, X } from "lucide-react";
 import api from "@/api/axiosConfig";
 import { cn } from "@/utils/utils";
+import useMediaQuery from "@/hooks/useMediaQuery";
+import { BACKDROP, useSheetMotion } from "@/Components/ui/motion";
 
 const WELCOME = "Hi! I'm the NexChain assistant. Ask me anything about crypto, charts or how trading works here.";
 const SUGGESTIONS = ["How do I read a candlestick chart?", "What's the difference between a limit and a market order?", "What does market cap tell me?"];
@@ -11,10 +13,28 @@ const TIMEOUT_MS = 45_000;
 const MAX_LENGTH = 500; // the API rejects longer questions
 
 let nextId = 0;
+
+/** Hides the launcher while the page scrolls down (so it never covers what you're reading) and brings it back on scroll up */
+function useTuckOnScroll() {
+  const [tucked, setTucked] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - last) < 6) return;
+      setTucked(y > last && y > 120);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return tucked;
+}
 const message = (text, sender, extra) => ({ id: ++nextId, text, sender, timestamp: new Date(), ...extra });
 const fmtTime = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
 
-// Same offset from the corner on every page, clear of the phone's home indicator
+// Corner offset for the open chat card (sm and up). The launcher's position is in
+// design-system.css (.chat-launcher) so it can sit above the phone tab bar.
 const CORNER = {
   right: "max(1rem, calc(env(safe-area-inset-right) + 1rem))",
   bottom: "max(1rem, calc(env(safe-area-inset-bottom) + 1rem))",
@@ -51,7 +71,7 @@ const Bubble = ({ msg }) => {
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className={cn("flex", mine ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap",
+          "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap sm:text-[13px]",
           mine
             ? "rounded-br-md bg-brand text-brand-fg"
             : msg.isError
@@ -60,8 +80,8 @@ const Bubble = ({ msg }) => {
         )}
       >
         <RichText text={msg.text} />
-        {msg.disclaimer && <p className="mt-2 border-t border-line pt-1.5 text-[11px] leading-snug text-fg-subtle italic">{msg.disclaimer}</p>}
-        <p className={cn("mt-1 text-right text-[10px]", mine ? "text-brand-fg/70" : "text-fg-subtle")}>{fmtTime.format(msg.timestamp)}</p>
+        {msg.disclaimer && <p className="mt-2 border-t border-line pt-1.5 text-xs leading-snug text-fg-subtle italic sm:text-[11px]">{msg.disclaimer}</p>}
+        <p className={cn("mt-1 text-right text-2xs", mine ? "text-brand-fg/70" : "text-fg-subtle")}>{fmtTime.format(msg.timestamp)}</p>
       </div>
     </motion.div>
   );
@@ -70,6 +90,10 @@ const Bubble = ({ msg }) => {
 /** Floating "Ask AI" button and the learning-assistant chat panel */
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const tucked = useTuckOnScroll();
+  const drag = useDragControls();
+  const isPhone = useMediaQuery("(max-width: 639px)");
+  const sheetMotion = useSheetMotion("bottom");
   const [messages, setMessages] = useState(() => [message(WELCOME, "bot", { greeting: true })]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -162,10 +186,10 @@ const ChatbotWidget = () => {
             aria-label="Open the NexChain assistant"
             aria-expanded={false}
             onClick={() => setIsOpen(true)}
-            style={CORNER}
-            className="group fixed z-[1001] flex h-12 min-w-12 items-center justify-center rounded-full bg-brand px-3.5 text-brand-fg shadow-pop ring-1 ring-black/5 transition-shadow hover:shadow-[0_12px_32px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            tabIndex={tucked ? -1 : undefined}
+            className="chat-launcher group fixed z-[var(--z-chat)] flex h-11 min-w-11 items-center justify-center rounded-full bg-brand px-3 sm:h-12 sm:min-w-12 sm:px-3.5 text-brand-fg shadow-pop ring-1 ring-black/5 transition-shadow hover:shadow-[0_12px_32px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            animate={tucked ? { scale: 0.6, opacity: 0, pointerEvents: "none" } : { scale: 1, opacity: 1, pointerEvents: "auto" }}
             exit={{ scale: 0.6, opacity: 0 }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -186,9 +210,7 @@ const ChatbotWidget = () => {
             {/* Phones get a dimmed backdrop behind the bottom sheet */}
             <motion.div
               key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              {...BACKDROP}
               onClick={closeAssistant}
               className="fixed inset-0 z-[1000] bg-black/45 sm:hidden"
             />
@@ -197,25 +219,40 @@ const ChatbotWidget = () => {
               key="panel"
               role="dialog"
               aria-label="NexChain assistant"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              {...(isPhone
+                ? sheetMotion
+                : {
+                    initial: { opacity: 0, y: 16, scale: 0.98 },
+                    animate: { opacity: 1, y: 0, scale: 1 },
+                    exit: { opacity: 0, y: 16, scale: 0.98 },
+                    transition: { type: "spring", stiffness: 380, damping: 32 },
+                  })}
               style={{ "--chat-right": CORNER.right, "--chat-bottom": CORNER.bottom }}
+              // Phones: swipe the handle down to close
+              drag="y"
+              dragControls={drag}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.7 }}
+              onDragEnd={(_, info) => (info.offset.y > 80 || info.velocity.y > 500) && closeAssistant()}
               className={cn(
                 "fixed z-[1001] flex origin-bottom-right flex-col overflow-hidden border border-line bg-surface shadow-pop",
-                // Phone: bottom sheet. Larger: card in the corner that never reaches under the top bar
-                "inset-x-0 bottom-0 h-[85dvh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
-                "sm:inset-x-auto sm:right-[var(--chat-right)] sm:bottom-[var(--chat-bottom)] sm:h-[min(620px,calc(100dvh-var(--topbar-h)-2.5rem))] sm:w-[400px] sm:rounded-2xl sm:pb-0",
+                // Phone: a bottom sheet only as tall as the conversation (up to 86% of the screen).
+                // Larger: card in the corner that never reaches under the top bar
+                "inset-x-0 bottom-0 max-h-[86dvh] min-h-[50dvh] rounded-t-3xl pb-[env(safe-area-inset-bottom)]",
+                "sm:inset-x-auto sm:right-[var(--chat-right)] sm:bottom-[var(--chat-bottom)] sm:h-[min(620px,calc(100dvh-var(--topbar-h)-2.5rem))] sm:max-h-none sm:min-h-0 sm:w-[400px] sm:rounded-2xl sm:pb-0",
               )}
             >
-              <header className="flex items-center gap-3 border-b border-line px-4 py-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
+              <div className="flex shrink-0 cursor-grab touch-none justify-center pt-2.5 pb-1 active:cursor-grabbing sm:hidden" onPointerDown={(e) => drag.start(e)} aria-hidden="true">
+                <span className="h-1 w-10 rounded-full bg-line-strong" />
+              </div>
+              <header className="flex items-center gap-3 border-b border-line px-4 pt-1 pb-2.5 sm:py-3">
+                <span className="grid size-8 shrink-0 sm:size-9 place-items-center rounded-full bg-brand-soft text-brand">
                   <Sparkles size={18} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-sm font-semibold text-fg">NexChain assistant</h2>
-                  <p className="flex items-center gap-1.5 text-[11px] text-fg-subtle">
+                  <p className="flex items-center gap-1.5 truncate text-xs text-fg-subtle sm:text-[11px]">
                     <span className={cn("size-1.5 rounded-full", offline ? "bg-fg-subtle" : "bg-up")} aria-hidden="true" />
                     {offline ? "Offline" : "Learning help · not financial advice"}
                   </p>
@@ -226,7 +263,7 @@ const ChatbotWidget = () => {
                     onClick={reset}
                     aria-label="Start a new conversation"
                     title="New conversation"
-                    className="grid size-8 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+                    className="grid size-10 place-items-center rounded-full bg-surface-2 text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg sm:size-8 sm:rounded-lg sm:bg-transparent"
                   >
                     <RotateCcw size={15} />
                   </button>
@@ -235,7 +272,7 @@ const ChatbotWidget = () => {
                   type="button"
                   onClick={closeAssistant}
                   aria-label="Close assistant"
-                  className="grid size-8 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+                  className="grid size-10 place-items-center rounded-full bg-surface-2 text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg sm:size-8 sm:rounded-lg sm:bg-transparent"
                 >
                   <X size={17} />
                 </button>
@@ -258,17 +295,20 @@ const ChatbotWidget = () => {
 
                 {fresh && !offline && (
                   <div className="space-y-1.5 pt-1">
-                    <p className="text-[11px] font-medium text-fg-subtle">Try asking</p>
-                    {SUGGESTIONS.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => send(s)}
-                        className="block w-full rounded-xl border border-line bg-surface px-3 py-2 text-left text-[13px] text-fg transition-colors hover:border-brand/50 hover:bg-brand-soft"
-                      >
-                        {s}
-                      </button>
-                    ))}
+                    <p className="text-xs font-medium text-fg-subtle">Try asking</p>
+                    {/* Phones: one row of chips to swipe through */}
+                    <div className="space-y-1.5 max-sm:-mx-4 max-sm:flex max-sm:gap-2 max-sm:space-y-0 max-sm:overflow-x-auto max-sm:px-4 max-sm:pb-1 no-scrollbar">
+                      {SUGGESTIONS.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => send(s)}
+                          className="block w-full rounded-xl border border-line bg-surface px-3 text-left text-sm text-fg transition-colors hover:border-brand/50 hover:bg-brand-soft max-sm:min-h-10 max-sm:w-auto max-sm:shrink-0 max-sm:rounded-full max-sm:px-3.5 max-sm:whitespace-nowrap sm:py-2 sm:text-[13px]"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -285,7 +325,7 @@ const ChatbotWidget = () => {
               </div>
 
               <div className="border-t border-line p-3">
-                <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 py-1 pr-1 pl-3 transition-colors focus-within:border-brand">
+                <div className="flex items-center gap-2 rounded-full border border-line bg-surface-2 py-1 pr-1 pl-4 sm:rounded-xl sm:pl-3 transition-colors focus-within:border-brand">
                   <input
                     ref={inputRef}
                     type="text"
@@ -305,13 +345,13 @@ const ChatbotWidget = () => {
                     aria-label="Send message"
                     onClick={() => send()}
                     disabled={!inputValue.trim() || isTyping || offline}
-                    className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand text-brand-fg transition-opacity disabled:opacity-40"
+                    className="grid size-10 shrink-0 place-items-center rounded-full bg-brand text-brand-fg transition-opacity disabled:opacity-40 sm:size-8 sm:rounded-lg"
                   >
                     <ArrowUp size={16} />
                   </button>
                 </div>
                 {inputValue.length > MAX_LENGTH - 100 && (
-                  <p className={cn("tabular mt-1 text-right text-[11px]", inputValue.length >= MAX_LENGTH ? "text-down" : "text-fg-subtle")}>
+                  <p className={cn("tabular mt-1 text-right text-xs sm:text-[11px]", inputValue.length >= MAX_LENGTH ? "text-down" : "text-fg-subtle")}>
                     {inputValue.length}/{MAX_LENGTH}
                   </p>
                 )}

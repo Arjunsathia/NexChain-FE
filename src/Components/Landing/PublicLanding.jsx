@@ -153,6 +153,7 @@ export default function PublicLanding() {
               <div>
                 <span className="nx-eyebrow">03 / Learning hub</span>
                 <h2 id="learn-title">Get to know the basics.</h2>
+                <p className="nx-intro">Short, practical guides to the ideas behind every trade.</p>
               </div>
               <Link to="/public-learning" className="nx-text-link nx-text-link-desktop">All guides <ArrowUpRight size={17} aria-hidden="true" /></Link>
             </div>
@@ -170,7 +171,7 @@ export default function PublicLanding() {
                 </li>
               ))}
             </ul>
-            <Link to="/public-learning" className="nx-text-link nx-text-link-mobile">All guides <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link to="/public-learning" className="nx-button nx-button-outline nx-guides-all">Browse all guides <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </section>
 

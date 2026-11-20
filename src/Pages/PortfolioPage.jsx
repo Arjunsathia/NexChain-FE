@@ -110,27 +110,33 @@ const PortfolioPage = () => {
 
   const counts = { positions: positions.length, orders: orders.length, history: transactionHistory.length };
   const labels = { positions: "Positions", orders: "Open orders", history: "Trade history" };
+  // Phones show short labels so all three tabs fit side by side
+  const shortLabels = { positions: "Positions", orders: "Orders", history: "History" };
   const portfolioLoading = loading && groupedHoldings.length === 0;
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-5 px-4 py-5 sm:block sm:space-y-4 sm:p-0 lg:space-y-5">
+      {/* Phones: title and actions on one row; positions come right after the summary */}
+      <header className="flex items-center justify-between gap-3 sm:items-end">
+        <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Portfolio</h1>
-          <p className="mt-0.5 text-sm text-fg-subtle">Your positions, orders and trades, valued at live prices.</p>
+          <p className="mt-0.5 text-sm text-fg-subtle max-sm:hidden">Your positions, orders and trades, valued at live prices.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
             disabled={resetting}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-fg-muted transition-colors hover:border-down hover:text-down disabled:opacity-50 sm:flex-none"
+            aria-label="Reset account"
+            title="Reset account"
+            className="inline-flex size-10 items-center justify-center gap-2 rounded-full border border-line bg-surface text-sm font-semibold text-fg-muted transition-colors hover:border-down hover:text-down disabled:opacity-50 sm:size-auto sm:rounded-lg sm:px-3.5 sm:py-2"
           >
-            <RotateCcw size={15} className={resetting ? "animate-spin" : ""} /> Reset account
+            <RotateCcw size={15} className={resetting ? "animate-spin" : ""} />
+            <span className="max-sm:hidden">Reset account</span>
           </button>
           <Link
             to="/cryptolist"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover sm:flex-none"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover sm:min-h-0 sm:rounded-lg sm:px-3.5"
           >
             <ArrowLeftRight size={16} /> Trade
           </Link>
@@ -139,7 +145,7 @@ const PortfolioPage = () => {
 
       <AccountSummary />
 
-      <div className="grid gap-4 lg:gap-5 xl:grid-cols-12">
+      <div className="grid gap-5 max-sm:order-4 sm:gap-4 lg:gap-5 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <PerformanceChart holdingsCount={groupedHoldings.length} />
         </div>
@@ -148,7 +154,7 @@ const PortfolioPage = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="max-sm:order-3">
         <div role="tablist" aria-label="Portfolio sections" className="flex gap-1 overflow-x-auto border-b border-line px-2 no-scrollbar">
           {TABS.map((t) => (
             <button
@@ -158,14 +164,15 @@ const PortfolioPage = () => {
               aria-selected={tab === t}
               onClick={() => setTab(t)}
               className={cn(
-                "relative flex shrink-0 items-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
+                "relative flex min-h-12 flex-1 shrink-0 items-center justify-center gap-1.5 px-2 py-3 text-sm font-medium transition-colors sm:flex-none sm:justify-start sm:gap-2 sm:px-3",
                 "after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full",
                 tab === t ? "text-fg after:bg-brand" : "text-fg-muted hover:text-fg",
               )}
             >
-              {labels[t]}
+              <span className="sm:hidden">{shortLabels[t]}</span>
+              <span className="hidden sm:inline">{labels[t]}</span>
               {counts[t] > 0 && (
-                <span className={cn("tabular rounded-full px-1.5 py-px text-[11px]", tab === t ? "bg-brand-soft text-brand" : "bg-surface-2 text-fg-subtle")}>
+                <span className={cn("tabular rounded-full px-1.5 py-px text-2xs", tab === t ? "bg-brand-soft text-brand" : "bg-surface-2 text-fg-subtle")}>
                   {counts[t]}
                 </span>
               )}

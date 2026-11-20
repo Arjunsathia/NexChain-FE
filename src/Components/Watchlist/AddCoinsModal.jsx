@@ -21,15 +21,15 @@ export default function AddCoinsModal({ open, onClose, watchedIds, onToggle }) {
   return (
     <Modal open={open} onClose={onClose} size="lg" label="Add coins to watchlist">
       <ModalHeader title="Add coins" subtitle="Follow coins to see their live prices on your watchlist." onClose={onClose} />
-      <div className="px-5 pb-3">
+      <div className="px-4 pb-3 sm:px-5">
         <SearchInput value={query} onChange={setQuery} placeholder="Search by name or symbol" />
       </div>
       <ul className="max-h-[55dvh] divide-y divide-line overflow-y-auto border-t border-line">
-        {results.length === 0 && <li className="px-5 py-10 text-center text-sm text-fg-subtle">No coins match “{query}”.</li>}
+        {results.length === 0 && <li className="px-4 py-10 text-center sm:px-5 text-sm text-fg-subtle">No coins match “{query}”.</li>}
         {results.map((coin) => {
           const watched = watchedIds.has(coin.id);
           return (
-            <li key={coin.id} className="flex items-center gap-3 px-5 py-2.5">
+            <li key={coin.id} className="flex items-center gap-3 px-4 py-2.5 sm:px-5">
               <CoinAvatar src={coin.image} symbol={coin.symbol} size={28} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-fg">
@@ -47,7 +47,7 @@ export default function AddCoinsModal({ open, onClose, watchedIds, onToggle }) {
                 aria-pressed={watched}
                 aria-label={watched ? `Remove ${coin.symbol} from watchlist` : `Add ${coin.symbol} to watchlist`}
                 className={cn(
-                  "ml-2 inline-flex h-8 w-[88px] items-center justify-center gap-1 rounded-md text-xs font-semibold transition-colors",
+                  "ml-1 inline-flex h-9 w-[76px] shrink-0 items-center justify-center gap-1 rounded-md text-[13px] font-semibold sm:ml-2 sm:h-8 sm:w-[88px] sm:text-xs transition-colors",
                   watched ? "bg-brand-soft text-brand" : "border border-line text-fg hover:border-brand hover:text-brand",
                 )}
               >

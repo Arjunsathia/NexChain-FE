@@ -7,15 +7,17 @@ function CoinAvatar({ src, symbol = "", size = 32, className }) {
   const style = { width: size, height: size };
 
   if (!src || failed) {
+    // Letters scale with the circle (never below the 11px badge size); small circles fit two
     return (
       <span
-        style={style}
+        aria-hidden="true"
+        style={{ ...style, fontSize: Math.max(11, Math.round(size * 0.34)) }}
         className={cn(
-          "grid place-items-center rounded-full bg-surface-2 text-fg-muted text-[10px] font-semibold uppercase shrink-0",
+          "grid place-items-center rounded-full bg-surface-2 text-fg-muted font-semibold uppercase leading-none tracking-tight shrink-0",
           className,
         )}
       >
-        {symbol.slice(0, 3)}
+        {symbol.slice(0, size < 28 ? 2 : 3)}
       </span>
     );
   }

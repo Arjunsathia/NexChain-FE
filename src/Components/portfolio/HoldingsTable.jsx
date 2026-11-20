@@ -27,7 +27,7 @@ const qty = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDig
 const signedUSD = (n) => `${n >= 0 ? "+" : "−"}${formatUSD(Math.abs(n))}`;
 
 function ActionButtons({ position, onBuy, onSell, onAlert, compact }) {
-  const base = "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors";
+  const base = "min-h-9 rounded-full px-4 text-[13px] font-semibold transition-colors sm:min-h-0 sm:rounded-md sm:px-2.5 sm:py-1.5 sm:text-xs";
   return (
     <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
       {!compact && (
@@ -36,7 +36,7 @@ function ActionButtons({ position, onBuy, onSell, onAlert, compact }) {
           onClick={() => onAlert(position)}
           aria-label={`Set a price alert for ${position.symbol}`}
           title="Price alert"
-          className="grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+          className="tap-target grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
         >
           <Bell size={15} />
         </button>
@@ -66,7 +66,7 @@ function HoldingsTable({ positions, loading, onBuy, onSell, onAlert }) {
         description="Coins you buy appear here with their live value and profit or loss."
         className="py-12"
         action={
-          <Link to="/cryptolist" className="mt-2 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-brand-fg hover:bg-brand-hover">
+          <Link to="/cryptolist" className="mt-2 inline-flex min-h-10 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-brand-fg hover:bg-brand-hover sm:min-h-0 sm:px-3.5 sm:py-2 sm:text-xs">
             Explore markets
           </Link>
         }
@@ -78,7 +78,7 @@ function HoldingsTable({ positions, loading, onBuy, onSell, onAlert }) {
     return (
       <ul className="divide-y divide-line">
         {sorted.map((p) => (
-          <li key={p.coinId} className="px-4 py-3">
+          <li key={p.coinId} className="px-4 py-3 max-sm:py-2.5">
             <button type="button" onClick={() => navigate(`/coin/coin-details/${p.coinId}`)} className="flex w-full items-center gap-3 text-left">
               <CoinAvatar src={p.image} symbol={p.symbol} size={32} />
               <span className="min-w-0 flex-1">
@@ -95,8 +95,8 @@ function HoldingsTable({ positions, loading, onBuy, onSell, onAlert }) {
                 </span>
               </span>
             </button>
-            <div className="mt-2.5 flex items-center justify-between">
-              <span className="text-xs text-fg-subtle">
+            <div className="mt-2.5 flex items-center justify-between max-sm:mt-1.5 max-sm:pl-11">
+              <span className="tabular text-xs text-fg-subtle">
                 {formatPrice(p.price)} <Delta value={p.change24} className="ml-1" />
               </span>
               <ActionButtons position={p} onBuy={onBuy} onSell={onSell} onAlert={onAlert} compact />

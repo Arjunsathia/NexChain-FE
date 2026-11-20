@@ -78,15 +78,15 @@ export default function SecuritySettings() {
               type="button"
               onClick={start}
               disabled={loading}
-              className="shrink-0 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+              className="min-h-11 shrink-0 rounded-lg bg-brand px-3.5 text-sm font-semibold sm:min-h-0 sm:py-2 text-brand-fg hover:bg-brand-hover disabled:opacity-50"
             >
               {loading ? "Starting…" : "Set up 2FA"}
             </button>
           </div>
         ) : (
           <form onSubmit={verify} className="flex flex-col gap-5 rounded-xl border border-line p-4 sm:flex-row">
-            <div className="shrink-0 self-start rounded-lg bg-white p-2">
-              <img src={setup.qrCode} alt="QR code for your authenticator app" className="size-36" />
+            <div className="shrink-0 self-center rounded-lg bg-white p-2 sm:self-start">
+              <img src={setup.qrCode} alt="QR code for your authenticator app" className="size-40 sm:size-36" />
             </div>
             <div className="min-w-0 flex-1 space-y-4">
               <div>
@@ -100,7 +100,7 @@ export default function SecuritySettings() {
                 <label htmlFor="admin-2fa-code" className="text-sm font-semibold text-fg">
                   2. Enter the 6-digit code
                 </label>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   <input
                     id="admin-2fa-code"
                     inputMode="numeric"
@@ -108,16 +108,16 @@ export default function SecuritySettings() {
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="000000"
-                    className="tabular h-10 w-36 rounded-lg border border-line bg-surface px-3 text-center font-mono text-base tracking-[0.3em] text-fg outline-none focus:border-brand"
+                    className="tabular h-11 w-full rounded-lg sm:h-10 sm:w-36 border border-line bg-surface px-3 text-center font-mono text-base tracking-[0.3em] text-fg outline-none focus:border-brand"
                   />
                   <button
                     type="submit"
                     disabled={code.length !== 6 || loading}
-                    className="rounded-lg bg-brand px-4 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+                    className="min-h-11 flex-1 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-fg hover:bg-brand-hover disabled:opacity-50 sm:min-h-0 sm:flex-none"
                   >
                     {loading ? "Checking…" : "Turn on"}
                   </button>
-                  <button type="button" onClick={() => setSetup(null)} className="px-2 text-sm text-fg-muted hover:text-fg">
+                  <button type="button" onClick={() => setSetup(null)} className="min-h-11 px-3 text-sm text-fg-muted hover:text-fg sm:min-h-0 sm:px-2">
                     Cancel
                   </button>
                 </div>

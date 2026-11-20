@@ -38,11 +38,11 @@ export default function Settings() {
     <div className="space-y-5">
       <header>
         <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Settings</h1>
-        <p className="mt-0.5 text-sm text-fg-subtle">Manage your profile, security, identity and preferences.</p>
+        <p className="mt-0.5 text-sm text-fg-subtle max-sm:hidden">Manage your profile, security, identity and preferences.</p>
       </header>
 
       <div className="grid items-start gap-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
-        <nav aria-label="Settings sections" className="settings-navigation -mx-3 flex gap-1 overflow-x-auto px-3 no-scrollbar lg:sticky lg:top-[calc(var(--topbar-h)+24px)] lg:mx-0 lg:flex-col lg:px-0">
+        <nav aria-label="Settings sections" className="settings-navigation -mx-4 flex gap-1 overflow-x-auto px-4 sm:-mx-3 sm:px-3 no-scrollbar lg:sticky lg:top-[calc(var(--topbar-h)+24px)] lg:mx-0 lg:flex-col lg:px-0">
           {SECTIONS.map(({ id, label, icon: Icon }) => {
             const selected = active.id === id;
             return (
@@ -52,7 +52,7 @@ export default function Settings() {
                 onClick={() => select(id)}
                 aria-current={selected ? "page" : undefined}
                 className={cn(
-                  "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors lg:min-h-0 lg:gap-2.5 lg:py-2",
                   selected ? "bg-surface text-fg shadow-card ring-1 ring-line lg:bg-brand-soft lg:text-brand lg:shadow-none lg:ring-0" : "text-fg-muted hover:bg-surface-hover hover:text-fg",
                 )}
               >

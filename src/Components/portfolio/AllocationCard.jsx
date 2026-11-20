@@ -46,8 +46,8 @@ function AllocationCard({ positions, cash, loading }) {
           <Skeleton className="h-3 w-40" />
         </div>
       ) : (
-        <div className="flex flex-1 flex-col gap-4 px-4 pb-4 sm:flex-row sm:items-center xl:flex-col xl:items-stretch">
-          <div className="relative mx-auto size-48 shrink-0">
+        <div className="flex flex-1 items-center gap-4 px-4 pb-4 sm:flex-row sm:items-center xl:flex-col xl:items-stretch">
+          <div className="relative size-32 shrink-0 sm:mx-auto sm:size-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={slices} dataKey="value" nameKey="label" innerRadius="70%" outerRadius="100%" paddingAngle={slices.length > 1 ? 1.5 : 0} stroke="none" isAnimationActive={false}>
@@ -59,17 +59,17 @@ function AllocationCard({ positions, cash, loading }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">
-              <span className="text-[11px] text-fg-subtle">Total equity</span>
-              <span className="tabular text-base font-semibold text-fg">{formatUSD(total, { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+              <span className="text-xs text-fg-subtle max-sm:hidden">Total equity</span>
+              <span className="tabular text-sm font-semibold text-fg sm:text-base">{formatUSD(total, { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             </div>
           </div>
-          <ul className="flex-1 space-y-2">
+          <ul className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
             {slices.map((s) => (
               <li key={s.label} className="flex items-center gap-2.5 text-sm">
                 <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
                 <span className="min-w-0 flex-1 truncate font-medium text-fg">{s.label}</span>
-                <span className="tabular text-fg-muted">{formatUSD(s.value, { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-                <span className="tabular w-12 text-right text-fg-subtle">{s.pct.toFixed(1)}%</span>
+                <span className="tabular text-fg-muted max-sm:hidden">{formatUSD(s.value, { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+                <span className="tabular w-12 text-right text-fg-muted sm:text-fg-subtle">{s.pct.toFixed(1)}%</span>
               </li>
             ))}
           </ul>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useId, useRef } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { ArrowLeft, ArrowRight, ArrowUpRight, ShieldCheck, LockKeyhole, MailCheck, Eye, EyeOff, FlaskConical } from "lucide-react";
 import PublicBrand from "@/Components/Landing/PublicBrand";
 import AuthStory from "@/Components/Landing/AuthStory";
@@ -271,4 +271,13 @@ const AuthPage = () => {
     <footer className="auth-footer public-container"><span>© {new Date().getFullYear()} NexChain</span><p>{DISCLAIMER}</p></footer>
   </div>;
 };
-export default AuthPage;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "PLACEHOLDER_CLIENT_ID";
+
+/** Google's sign-in script loads only with this page, not on every page of the app */
+const AuthPageWithGoogle = () => (
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <AuthPage />
+  </GoogleOAuthProvider>
+);
+
+export default AuthPageWithGoogle;

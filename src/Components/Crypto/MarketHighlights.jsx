@@ -46,6 +46,7 @@ function HighlightRows({ coins, loading, kind }) {
 function MarketHighlights() {
   const { coins, coinsLoading } = useCoinContext();
   const isWide = useMediaQuery("(min-width: 1024px)");
+  const isPhone = useMediaQuery("(max-width: 639px)");
   const [active, setActive] = useState("volume");
   const loading = coinsLoading && coins.length === 0;
 
@@ -72,7 +73,7 @@ function MarketHighlights() {
           <Segmented label="Highlights" options={LISTS} value={active} onChange={setActive} className="w-full [&>button]:flex-1" />
         </div>
         <p className="px-4 pb-1 text-xs text-fg-subtle">{current.subtitle}</p>
-        <HighlightRows coins={lists[active]} loading={loading} kind={active} />
+        <HighlightRows coins={isPhone ? lists[active].slice(0, 3) : lists[active]} loading={loading} kind={active} />
       </Card>
     );
   }

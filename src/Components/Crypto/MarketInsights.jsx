@@ -55,7 +55,7 @@ function Breadth({ stats, period }) {
         <ul className="mt-3 grid grid-cols-3 gap-2">
           {parts.map((p) => (
             <li key={p.key}>
-              <p className="flex items-center gap-1.5 text-[11px] text-fg-subtle">
+              <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
                 <span className="size-2 rounded-full" style={{ background: p.color }} />
                 {p.label}
               </p>
@@ -123,7 +123,7 @@ function Heatmap({ coins, period, onSelect }) {
         title="Heatmap"
         subtitle={`Top ${tiles.length} by market cap, ${period.label} change`}
         action={
-          <span className="hidden items-center gap-1.5 text-[11px] text-fg-subtle sm:flex" aria-hidden="true">
+          <span className="hidden items-center gap-1.5 text-xs text-fg-subtle sm:flex" aria-hidden="true">
             −{period.scale}%
             <span
               className="h-1.5 w-20 rounded-full"
@@ -146,7 +146,8 @@ function Heatmap({ coins, period, onSelect }) {
                 style={{ background: tileColor(change, period.scale) }}
               >
                 <span className={i < 2 ? "text-base font-semibold text-fg" : "text-xs font-semibold text-fg"}>{c.symbol?.toUpperCase()}</span>
-                <span className={`tabular text-fg-muted ${i < 2 ? "text-sm" : "text-[11px]"}`}>
+                {/* Phones: full-strength text so the change stays readable on strongly tinted tiles */}
+                <span className={`tabular text-fg-muted max-sm:font-medium max-sm:text-fg ${i < 2 ? "text-sm" : "text-xs"}`}>
                   {Number.isFinite(change) ? `${change >= 0 ? "+" : "−"}${Math.abs(change).toFixed(1)}%` : "–"}
                 </span>
               </button>
@@ -251,7 +252,7 @@ function MarketInsights({ onSelect }) {
   if (coins.length === 0) {
     return (
       <Card>
-        <EmptyState icon={CloudOff} title="Market data unavailable" description="The price provider is limiting requests. Insights will appear on the next refresh." />
+        <EmptyState icon={CloudOff} title="Market data unavailable" description="The price provider isn’t responding right now. Insights will appear on the next refresh." />
       </Card>
     );
   }

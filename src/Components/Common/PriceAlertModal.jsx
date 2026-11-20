@@ -170,7 +170,7 @@ const PriceAlertModal = ({ show, onClose, coin }) => {
                   onClick={() => applyPreset(p)}
                   aria-pressed={preset === p}
                   className={cn(
-                    "tabular rounded-lg border py-1.5 text-xs font-medium transition-colors",
+                    "tabular rounded-lg border py-1.5 text-xs font-medium transition-colors max-sm:min-h-10 max-sm:text-[13px]",
                     preset === p
                       ? p > 0
                         ? "border-up/40 bg-up-soft text-up"

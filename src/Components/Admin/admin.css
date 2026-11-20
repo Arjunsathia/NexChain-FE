@@ -2,6 +2,6 @@
 .admin-workspace h1 { font-size: 1.5rem; line-height: 2rem; font-weight: 600; letter-spacing: -0.025em; }
 .admin-workspace table { font-variant-numeric: tabular-nums; }
 .admin-workspace th { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; }
-.admin-workspace :is(input, select, textarea) { font-size: 0.8125rem; }
-@media (max-width: 639px) { .admin-workspace h1 { font-size: 1.25rem; line-height: 1.75rem; } }
+@media (min-width: 640px) { .admin-workspace :is(input, select, textarea) { font-size: 0.8125rem; } }
+@media (max-width: 639px) { .admin-workspace h1 { font-size: 1.25rem; line-height: 1.75rem; } .admin-workspace th { font-size: 0.75rem; } }
 @media (prefers-reduced-motion: reduce) { .admin-workspace *, .admin-workspace *::before, .admin-workspace *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

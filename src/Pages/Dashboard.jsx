@@ -14,7 +14,7 @@ import { isStablecoin } from "@/utils/coinRegistry";
 
 export default function Dashboard() {
   // The market list is already loaded app-wide (DataLoader); no extra request here
-  const { coins, coinsLoading } = useCoinContext();
+  const { coins, coinsLoading, error: coinsError } = useCoinContext();
   const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
 
   const topCoins = useMemo(
@@ -26,17 +26,18 @@ export default function Dashboard() {
 
   // Each card shows its own skeleton, so the page renders immediately
   return (
-    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:space-y-4 sm:p-0 lg:space-y-5">
       <DashboardHeader />
       <AccountSummary />
 
-      <div className="grid gap-4 lg:gap-5 xl:grid-cols-12">
+      <div className="grid gap-5 sm:gap-4 lg:gap-5 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <ChartSection
             coins={topCoins}
             selectedCoinId={selectedCoinId}
             onSelect={handleSelect}
             loading={coinsLoading && topCoins.length === 0}
+            unavailable={!!coinsError && !coinsLoading && topCoins.length === 0}
           />
         </div>
         <div className="min-w-0 xl:col-span-4">
@@ -44,7 +45,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
+      <div className="grid gap-5 sm:gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
         <MarketMovers />
         <WatchlistPreview />
         <div className="md:col-span-2 xl:col-span-1">
@@ -52,11 +53,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:gap-5 xl:grid-cols-12">
+      <div className="grid gap-5 sm:gap-4 lg:gap-5 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <NewsPanel />
         </div>
-        <div className="flex min-w-0 flex-col gap-4 lg:gap-5 xl:col-span-4">
+        <div className="flex min-w-0 flex-col gap-5 sm:gap-4 lg:gap-5 xl:col-span-4">
           <LeaderboardWidget />
           <LearningHubWidget />
         </div>

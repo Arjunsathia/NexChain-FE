@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Sun, Moon, Menu as MenuIcon, Bell, LogOut, ShieldCheck, ChevronDown, Wallet } from "lucide-react";
+import { Sun, Moon, Bell, LogOut, ShieldCheck, ChevronDown, Wallet } from "lucide-react";
 import useUserContext from "@/hooks/useUserContext";
 import useRoleContext from "@/hooks/useRoleContext";
 import useLogout from "@/hooks/useLogout";
 import api from "@/api/axiosConfig";
 import { useTheme } from "@/hooks/useTheme";
-import { getAvatarUrl } from "@/utils/avatar";
 import { formatUSD } from "@/utils/format";
 import { cn } from "@/utils/utils";
 import NotificationModal from "@/Components/Common/NotificationModal";
@@ -16,36 +15,12 @@ import ConfirmDialog from "@/Components/Common/ConfirmDialog";
 import GlobalSearch from "./GlobalSearch";
 import Brand from "@/Components/ui/brand";
 import { MobileSidebar } from "./Sidebar";
+import MoreSheet from "./MoreSheet";
+import UserAvatar from "./UserAvatar";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { ACCOUNT_ITEMS, profileItem } from "./navConfig";
 
-const initials = (name = "") =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join("") || "U";
-
-function Avatar({ user, size = 32 }) {
-  const [failed, setFailed] = useState(false);
-  const src = getAvatarUrl(user?.image);
-  return src && !failed ? (
-    <img
-      src={src}
-      alt=""
-      onError={() => setFailed(true)}
-      style={{ width: size, height: size }}
-      className="rounded-full object-cover ring-1 ring-line"
-    />
-  ) : (
-    <span
-      style={{ width: size, height: size }}
-      className="grid place-items-center rounded-full bg-brand-soft text-xs font-semibold text-brand ring-1 ring-line"
-    >
-      {initials(user?.name)}
-    </span>
-  );
-}
+const Avatar = UserAvatar;
 
 const ADMIN_LINK = { to: "/admin", label: "Admin panel", icon: ShieldCheck };
 
@@ -80,7 +55,7 @@ function useUnreadCount(userId) {
 }
 
 /** Slim header above the page: search, balance, notifications, theme and account */
-function TopbarComponent({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
+function TopbarComponent({ drawerOpen, onCloseDrawer }) {
   const { toggleTheme, isLight } = useTheme();
   const signOut = useLogout();
   const { user } = useUserContext();
@@ -91,6 +66,8 @@ function TopbarComponent({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
   const [confirmLogout, setConfirmLogout] = useState(false);
   const bellRef = useRef(null);
   const unreadCount = useUnreadCount(user?.id);
+  // Phones: the full logo, and "More" opens a bottom sheet instead of the side drawer
+  const isPhone = useMediaQuery("(max-width: 639px)");
 
   const accountLinks = [...(user?.id ? [profileItem(user.id)] : []), ...ACCOUNT_ITEMS, ...(isAdmin ? [ADMIN_LINK] : [])];
 
@@ -107,14 +84,12 @@ function TopbarComponent({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
     <>
       <header className="app-topbar sticky top-0 z-30 h-[var(--topbar-h)] border-b border-line bg-surface/85 backdrop-blur-md">
         <div className="flex h-full items-center gap-2 px-3 sm:px-4 lg:px-6">
-          <button type="button" onClick={onOpenDrawer} className="mobile-menu-toggle shrink-0 lg:hidden" aria-label="Open menu" aria-expanded={drawerOpen}>
-            <MenuIcon size={20} />
-          </button>
-          <Brand compact className="shrink-0 lg:hidden" />
+          {/* Below lg the bottom tab bar's "More" opens the menu drawer */}
+          <Brand compact={!isPhone} className="shrink-0 lg:hidden" />
 
           <GlobalSearch className="w-full max-w-md" />
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
+          <div className="ml-auto flex items-center gap-2 max-sm:ml-0 sm:gap-1.5">
             {user?.id && Number.isFinite(balance) && (
               <Link
                 to="/portfolio"
@@ -146,19 +121,20 @@ function TopbarComponent({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
               </div>
             )}
 
+            {/* On phones the theme switch lives in the More sheet */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={iconButton}
+              className={cn(iconButton, "hidden sm:grid")}
               aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
             >
               {isLight ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
             {user?.id && (
-              <Menu as="div" className="relative ml-1">
-                <MenuButton className="flex items-center gap-1.5 rounded-lg p-1 transition-colors hover:bg-surface-hover data-[open]:bg-surface-hover">
-                  <Avatar user={user} />
+              <Menu as="div" className="relative sm:ml-1">
+                <MenuButton aria-label="Account menu" className="flex items-center gap-1.5 rounded-full p-0.5 transition-colors hover:bg-surface-hover data-[open]:bg-surface-hover sm:rounded-lg sm:p-1">
+                  <Avatar user={user} size={isPhone ? 36 : 32} />
                   <ChevronDown size={14} className="hidden text-fg-subtle sm:block" />
                 </MenuButton>
                 <MenuItems
@@ -194,8 +170,19 @@ function TopbarComponent({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
         </div>
       </header>
 
+      {isPhone && (
+        <MoreSheet
+          open={drawerOpen}
+          onClose={onCloseDrawer}
+          onSignOut={() => {
+            onCloseDrawer();
+            setConfirmLogout(true);
+          }}
+        />
+      )}
+
       <MobileSidebar
-        open={drawerOpen}
+        open={drawerOpen && !isPhone}
         onClose={onCloseDrawer}
         footer={
           user?.id && (

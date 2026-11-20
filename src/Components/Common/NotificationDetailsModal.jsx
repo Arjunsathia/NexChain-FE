@@ -41,7 +41,7 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification, onDelete }) =
                 <button
                   type="button"
                   onClick={() => onDelete(notification._id)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-down transition-colors hover:bg-down-soft"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-down sm:min-h-0 sm:py-2 transition-colors hover:bg-down-soft"
                 >
                   <Trash2 size={15} /> Delete
                 </button>
@@ -52,7 +52,7 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification, onDelete }) =
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
+                  className="min-h-11 rounded-lg border border-line px-3.5 text-sm font-semibold text-fg sm:min-h-0 sm:py-2 transition-colors hover:bg-surface-hover"
                 >
                   Close
                 </button>
@@ -60,7 +60,7 @@ const NotificationDetailsModal = ({ isOpen, onClose, notification, onDelete }) =
                   <Link
                     to={follow.to}
                     onClick={onClose}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand px-3.5 text-sm font-semibold sm:min-h-0 sm:py-2 text-brand-fg transition-opacity hover:opacity-90"
                   >
                     {follow.label} <ArrowRight size={15} />
                   </Link>

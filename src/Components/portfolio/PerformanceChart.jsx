@@ -10,6 +10,8 @@ import { Segmented } from "@/Components/ui/segmented";
 import { Skeleton } from "@/Components/ui/skeleton";
 import { Delta } from "@/Components/ui/delta";
 import { formatCompact, formatUSD } from "@/utils/format";
+import { cn } from "@/utils/utils";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 const RANGES = [
   { label: "24H", value: "1d" },
@@ -48,6 +50,7 @@ const ChartTooltip = ({ active, payload, intraday }) => {
 function PerformanceChart({ holdingsCount }) {
   const userId = useSelector((state) => state.user.user?.id);
   const theme = useChartTheme();
+  const isPhone = useMediaQuery("(max-width: 639px)");
   const gradientId = useId();
   const [range, setRange] = useState("7d");
 
@@ -108,11 +111,11 @@ function PerformanceChart({ holdingsCount }) {
         action={holdingsCount > 0 && <Segmented label="Range" options={RANGES} value={range} onChange={setRange} />}
       />
 
-      <div className="relative min-h-[280px] flex-1 px-2 pb-3 sm:px-4">
+      <div className={cn("relative flex-1 px-2 pb-3 sm:px-4", holdingsCount === 0 ? "min-h-[180px] sm:min-h-[280px]" : "min-h-[200px] sm:min-h-[280px]")}>
         {holdingsCount === 0 ? (
           <EmptyState icon={LineChartIcon} title="No performance yet" description="Buy a coin and your portfolio value will be charted here." className="h-full" />
         ) : isLoading ? (
-          <Skeleton className="h-[280px] w-full rounded-lg" />
+          <Skeleton className="h-[200px] w-full rounded-lg sm:h-[280px]" />
         ) : data.length < 2 ? (
           <EmptyState
             icon={LineChartIcon}
@@ -123,7 +126,7 @@ function PerformanceChart({ holdingsCount }) {
         ) : (
           <>
             {isFetching && <div className="absolute inset-x-4 top-0 z-10 h-0.5 animate-pulse rounded-full bg-brand" />}
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={isPhone ? 200 : 280}>
               <ComposedChart data={data} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -138,7 +141,7 @@ function PerformanceChart({ holdingsCount }) {
                   scale="time"
                   domain={["dataMin", "dataMax"]}
                   tickFormatter={tickFormat}
-                  tick={{ fill: theme.axis, fontSize: 11 }}
+                  tick={{ fill: theme.axis, fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
                   minTickGap={48}
@@ -147,7 +150,7 @@ function PerformanceChart({ holdingsCount }) {
                   orientation="right"
                   domain={["auto", "auto"]}
                   tickFormatter={(v) => `$${formatCompact(v)}`}
-                  tick={{ fill: theme.axis, fontSize: 11 }}
+                  tick={{ fill: theme.axis, fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
                   width={56}
@@ -166,7 +169,7 @@ function PerformanceChart({ holdingsCount }) {
                 />
               </ComposedChart>
             </ResponsiveContainer>
-            <div className="mt-1 flex items-center gap-4 px-2 text-[11px] text-fg-subtle">
+            <div className="mt-1 flex items-center gap-4 px-2 text-xs text-fg-subtle">
               <span className="flex items-center gap-1.5">
                 <span className="h-0.5 w-4 rounded-full" style={{ background: color }} /> Holdings value
               </span>

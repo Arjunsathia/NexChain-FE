@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { ArrowLeftRight, Bell } from "lucide-react";
 import { useLivePrice } from "@/hooks/useBinanceTicker";
 import { Delta } from "@/Components/ui/delta";
 import { CoinAvatar } from "@/Components/ui/coin-avatar";
@@ -137,8 +137,15 @@ const MobileRow = memo(({ coin, onRemove, onTrade }) => {
           <Delta value={change24} className="text-xs" />
         </span>
       </button>
-      <button type="button" onClick={() => onTrade(coin)} className="ml-1 rounded-md bg-brand-soft px-2.5 py-1.5 text-xs font-semibold text-brand">
-        Trade
+      {/* Phones: a round icon button; small tablets keep the labelled one */}
+      <button
+        type="button"
+        onClick={() => onTrade(coin)}
+        aria-label={`Trade ${symbol}`}
+        className="ml-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[13px] font-semibold text-brand sm:size-auto sm:min-h-9 sm:rounded-md sm:px-3"
+      >
+        <ArrowLeftRight size={16} className="sm:hidden" aria-hidden="true" />
+        <span className="max-sm:hidden">Trade</span>
       </button>
     </li>
   );

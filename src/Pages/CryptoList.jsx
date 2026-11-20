@@ -48,11 +48,11 @@ function CryptoList() {
   const selectView = (value) => setParams(value === "overview" ? {} : { view: value }, { replace: true });
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:space-y-4 sm:p-0 lg:space-y-5">
+      <header className="flex flex-wrap items-end justify-between gap-3 max-sm:flex-nowrap max-sm:items-center">
+        <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Markets</h1>
-          <p className="mt-0.5 text-sm text-fg-subtle">
+          <p className="mt-0.5 text-sm text-fg-subtle max-sm:hidden">
             {view === "insights" ? "How the top 100 cryptocurrencies are moving, at a glance." : "Live prices for the top 100 cryptocurrencies by market cap."}
           </p>
         </div>

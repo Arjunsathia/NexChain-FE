@@ -222,7 +222,7 @@ const CandleCanvas = memo(function CandleCanvas({ candles, liveBar, type, intrad
     <div className="relative h-full w-full">
       <div ref={elRef} className="h-full w-full" />
       {bar && (
-        <div className="pointer-events-none absolute top-1 left-1 z-10 flex max-w-[calc(100%-72px)] flex-wrap items-center gap-x-3 gap-y-0.5 rounded-md bg-surface/80 px-1.5 py-1 text-[11px] backdrop-blur-sm">
+        <div className="pointer-events-none absolute top-1 left-1 z-10 flex max-w-[calc(100%-72px)] flex-wrap items-center gap-x-3 gap-y-0.5 rounded-md bg-surface/80 px-1.5 py-1 text-xs backdrop-blur-sm">
           <span className="font-medium text-fg-muted">{(intraday ? fmtDateTime : fmtDate).format(bar.time * 1000)}</span>
           {type === "candles" ? (
             <>
@@ -230,7 +230,7 @@ const CandleCanvas = memo(function CandleCanvas({ candles, liveBar, type, intrad
               <LegendValue label="H" value={formatPrice(bar.high)} />
               <LegendValue label="L" value={formatPrice(bar.low)} />
               <LegendValue label="C" value={formatPrice(bar.close)} className={barUp ? "text-up" : "text-down"} />
-              {bar.open > 0 && <Delta value={((bar.close - bar.open) / bar.open) * 100} className="text-[11px]" />}
+              {bar.open > 0 && <Delta value={((bar.close - bar.open) / bar.open) * 100} className="text-xs" />}
             </>
           ) : (
             <LegendValue label="Price" value={formatPrice(bar.close)} />
@@ -257,7 +257,7 @@ const IconButton = ({ label, onClick, children }) => (
     onClick={onClick}
     aria-label={label}
     title={label}
-    className="grid size-8 place-items-center rounded-lg border border-line text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+    className="grid size-10 shrink-0 place-items-center rounded-lg border border-line text-fg-muted sm:size-8 transition-colors hover:bg-surface-hover hover:text-fg"
   >
     {children}
   </button>
@@ -343,8 +343,8 @@ export default function PriceChart({ coinId, symbol }) {
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
         <Segmented label="Chart type" options={types} value={activeType} onChange={selectType} />
         {!advanced && (
-          <div className="flex items-center gap-1.5">
-            <Segmented label="Time range" options={RANGES} value={rangeKey} onChange={setRangeKey} />
+          <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
+            <Segmented label="Time range" options={RANGES} value={rangeKey} onChange={setRangeKey} className="no-scrollbar min-w-0 max-sm:flex-1 max-sm:overflow-x-auto sm:flex-none" />
             <IconButton label="Reset zoom" onClick={() => setResetSignal((n) => n + 1)}>
               <RotateCcw size={14} />
             </IconButton>
@@ -372,7 +372,7 @@ export default function PriceChart({ coinId, symbol }) {
           ) : (
             <Skeleton className="h-5 w-56" />
           )}
-          <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-fg-subtle" role="status">
+          <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-fg-subtle" role="status">
             {streaming && status === "live" ? (
               <>
                 <span className="relative flex size-1.5">
@@ -391,7 +391,7 @@ export default function PriceChart({ coinId, symbol }) {
       <div
         className={cn(
           "relative px-2 pt-2 pb-3 sm:px-3",
-          fullscreen ? "min-h-0 flex-1" : advanced ? "h-[460px] sm:h-[560px]" : "h-[380px] sm:h-[460px]",
+          fullscreen ? "min-h-0 flex-1" : advanced ? "h-[460px] sm:h-[560px]" : "h-[320px] sm:h-[460px]",
         )}
       >
         {advanced ? (
@@ -408,7 +408,7 @@ export default function PriceChart({ coinId, symbol }) {
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="mt-3 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-fg transition-colors hover:bg-surface-hover"
+                className="mt-3 min-h-10 rounded-lg border border-line px-4 py-1.5 text-[13px] font-semibold sm:min-h-0 sm:text-xs text-fg transition-colors hover:bg-surface-hover"
               >
                 Try again
               </button>

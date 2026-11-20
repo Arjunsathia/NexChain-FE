@@ -30,7 +30,7 @@ export default function AboutSettings() {
         </Row>
         <Row icon={LifeBuoy} title="Help">
           Questions or a problem with your account?
-          <Link to="/user/support" className="ml-1 inline-flex items-center gap-1 font-medium text-brand hover:underline">
+          <Link to="/user/support" className="ml-1 inline-flex min-h-9 items-center gap-1 font-medium text-brand hover:underline sm:min-h-0">
             Contact support <ArrowRight size={13} />
           </Link>
         </Row>

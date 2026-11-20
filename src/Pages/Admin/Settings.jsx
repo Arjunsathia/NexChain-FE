@@ -21,7 +21,7 @@ const PERMISSIONS = [
 ];
 
 const Cell = ({ on, highlight }) => (
-  <td className={cn("px-3 py-2.5 text-center", highlight && "bg-brand-soft/60")}>
+  <td className={cn("px-2 py-2.5 text-center sm:px-3", highlight && "bg-brand-soft/60")}>
     {on ? <Check size={16} className="mx-auto text-up" aria-label="Allowed" /> : <Minus size={16} className="mx-auto text-fg-subtle" aria-label="Not allowed" />}
   </td>
 );
@@ -39,7 +39,7 @@ export default function AdminSettings() {
       </header>
 
       <div className="grid items-start gap-4 lg:gap-5 xl:grid-cols-12">
-        <div className="space-y-4 lg:space-y-5 xl:col-span-7">
+        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-7">
           <SecuritySettings />
 
           <Card>
@@ -50,7 +50,7 @@ export default function AdminSettings() {
               </p>
               <Link
                 to="/user/settings?tab=security"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg hover:bg-surface-hover"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line px-3.5 text-sm font-semibold text-fg hover:bg-surface-hover sm:min-h-0 sm:py-2"
               >
                 Account settings <ArrowRight size={14} />
               </Link>
@@ -58,7 +58,7 @@ export default function AdminSettings() {
           </Card>
         </div>
 
-        <Card className="xl:col-span-5">
+        <Card className="min-w-0 xl:col-span-5">
           <CardHeader
             icon={UserCog}
             title="Role permissions"
@@ -70,14 +70,17 @@ export default function AdminSettings() {
               <thead className="bg-surface-2/60 text-xs text-fg-subtle">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-medium">Action</th>
-                  <th className={cn("px-3 py-2.5 font-medium", !isSuper && "bg-brand-soft/60 text-brand")}>Admin</th>
-                  <th className={cn("px-3 py-2.5 font-medium", isSuper && "bg-brand-soft/60 text-brand")}>Super admin</th>
+                  <th className={cn("px-2 py-2.5 font-medium sm:px-3", !isSuper && "bg-brand-soft/60 text-brand")}>Admin</th>
+                  <th className={cn("px-2 py-2.5 font-medium sm:px-3", isSuper && "bg-brand-soft/60 text-brand")}>
+                    <span className="sm:hidden">Super</span>
+                    <span className="hidden sm:inline">Super admin</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {PERMISSIONS.map((p) => (
                   <tr key={p.label} className="border-t border-line">
-                    <td className="px-4 py-2.5 text-fg-muted">{p.label}</td>
+                    <td className="py-2.5 pr-2 pl-4 text-fg-muted sm:px-4">{p.label}</td>
                     <Cell on={p.admin} highlight={!isSuper} />
                     <Cell on={p.superadmin} highlight={isSuper} />
                   </tr>

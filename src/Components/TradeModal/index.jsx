@@ -342,11 +342,11 @@ function TradeModal({ show, onClose, coin, type = "buy", purchasedCoins = [] }) 
             onClose={onClose}
           />
 
-          <div className="space-y-4 p-5">
+          <div className="space-y-4 p-4 sm:p-5">
             <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1" role="tablist" aria-label="Order side">
               {[
-                { value: "buy", label: "Buy", active: "bg-up text-white" },
-                { value: "sell", label: "Sell", active: "bg-down text-white" },
+                { value: "buy", label: "Buy", active: "bg-up text-white max-sm:text-brand-fg" },
+                { value: "sell", label: "Sell", active: "bg-down text-white max-sm:text-brand-fg" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -355,7 +355,7 @@ function TradeModal({ show, onClose, coin, type = "buy", purchasedCoins = [] }) 
                   aria-selected={side === option.value}
                   onClick={() => setSide(option.value)}
                   className={cn(
-                    "rounded-md py-2 text-sm font-semibold transition-colors",
+                    "min-h-11 rounded-md py-2 text-sm font-semibold transition-colors sm:min-h-0",
                     side === option.value ? option.active : "text-fg-muted hover:text-fg",
                   )}
                 >

@@ -7,7 +7,7 @@ export default function DayRange({ low, high, price, lowLabel = "24h low", highL
   const pos = Math.min(100, Math.max(0, ((price - low) / (high - low)) * 100));
   return (
     <div className={className}>
-      <div className="flex justify-between text-[11px] text-fg-subtle">
+      <div className="flex justify-between text-xs text-fg-subtle">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>

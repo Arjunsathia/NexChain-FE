@@ -7,9 +7,13 @@ import { Delta } from "@/Components/ui/delta";
 import { Skeleton } from "@/Components/ui/skeleton";
 import { formatCompact } from "@/utils/format";
 
-const Stat = ({ label, loading, children }) => (
-  <div className="min-w-0 px-4 py-3.5">
-    <p className="text-xs text-fg-subtle">{label}</p>
+// Phones show the short label so the stats fit one swipeable row
+const Stat = ({ label, short = label, loading, children }) => (
+  <div className="min-w-0 px-4 py-3.5 max-sm:shrink-0 max-sm:py-3 max-sm:pr-5">
+    <p className="text-xs whitespace-nowrap text-fg-subtle">
+      <span className="sm:hidden">{short}</span>
+      <span className="max-sm:hidden">{label}</span>
+    </p>
     {loading ? <Skeleton className="mt-1.5 h-5 w-24" /> : <div className="mt-1 flex items-center gap-2">{children}</div>}
   </div>
 );
@@ -43,18 +47,18 @@ function MarketStats() {
   }
 
   return (
-    <Card className="grid grid-cols-2 divide-line md:grid-cols-5 md:divide-x [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-line md:[&>*:nth-child(n+3)]:border-t-0">
+    <Card className="no-scrollbar divide-line max-sm:flex max-sm:divide-x max-sm:overflow-x-auto sm:grid sm:grid-cols-2 md:grid-cols-5 md:divide-x sm:[&>*:nth-child(n+3)]:border-t sm:[&>*:nth-child(n+3)]:border-line md:[&>*:nth-child(n+3)]:border-t-0">
       <Stat label="Market cap" loading={loading}>
         <span className="tabular text-base font-semibold text-fg">{usd(data?.total_market_cap?.usd)}</span>
         <Delta value={data?.market_cap_change_percentage_24h_usd} className="text-xs" />
       </Stat>
-      <Stat label="24h volume" loading={loading}>
+      <Stat label="24h volume" short="Volume" loading={loading}>
         <span className="tabular text-base font-semibold text-fg">{usd(data?.total_volume?.usd)}</span>
       </Stat>
-      <Stat label="BTC dominance" loading={loading}>
+      <Stat label="BTC dominance" short="BTC dom." loading={loading}>
         <Dominance value={data?.market_cap_percentage?.btc} color="#f7931a" />
       </Stat>
-      <Stat label="ETH dominance" loading={loading}>
+      <Stat label="ETH dominance" short="ETH dom." loading={loading}>
         <Dominance value={data?.market_cap_percentage?.eth} color="#627eea" />
       </Stat>
       <Stat label="Active coins" loading={loading}>

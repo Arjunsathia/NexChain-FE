@@ -38,7 +38,7 @@ function CardLink({ className, children, ...props }) {
     <button
       type="button"
       className={cn(
-        "text-xs font-medium text-fg-muted hover:text-brand transition-colors inline-flex items-center gap-1 shrink-0",
+        "-mx-1.5 inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md px-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-brand",
         className,
       )}
       {...props}

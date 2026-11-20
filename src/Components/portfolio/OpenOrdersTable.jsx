@@ -32,7 +32,7 @@ const Distance = ({ order }) => {
 };
 
 const SideBadge = ({ type }) => (
-  <span className={cn("rounded px-1.5 py-px text-[10px] font-bold uppercase", type === "buy" ? "bg-up-soft text-up" : "bg-down-soft text-down")}>
+  <span className={cn("rounded px-1.5 py-px text-2xs font-bold uppercase tracking-wide", type === "buy" ? "bg-up-soft text-up" : "bg-down-soft text-down")}>
     {type}
   </span>
 );
@@ -82,7 +82,7 @@ function OpenOrdersTable({ orders, onChanged }) {
             type="button"
             onClick={() => setEditing(o)}
             aria-label={`Edit ${o.coin_symbol?.toUpperCase()} order`}
-            className="grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+            className="grid size-9 place-items-center rounded-md text-fg-subtle sm:size-8 transition-colors hover:bg-surface-2 hover:text-fg"
           >
             <Pencil size={14} />
           </button>
@@ -91,7 +91,7 @@ function OpenOrdersTable({ orders, onChanged }) {
           type="button"
           onClick={() => cancel(o)}
           disabled={cancelling === o._id}
-          className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs font-semibold text-fg transition-colors hover:border-down hover:text-down disabled:opacity-50"
+          className="inline-flex min-h-9 items-center gap-1 rounded-md border border-line px-3 py-1.5 text-[13px] font-semibold sm:min-h-0 sm:px-2.5 sm:text-xs text-fg transition-colors hover:border-down hover:text-down disabled:opacity-50"
         >
           <X size={13} /> Cancel
         </button>

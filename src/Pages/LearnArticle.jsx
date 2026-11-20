@@ -59,36 +59,39 @@ export default function LearnArticle() {
 
   if (!guide) {
     return (
-      <Card className="mx-auto max-w-xl">
-        <EmptyState
-          icon={BookOpen}
-          title="Guide not found"
-          description="It may have been renamed or removed."
-          className="py-14"
-          action={
-            <Link to={base} className="mt-2 text-sm font-semibold text-brand hover:underline">
-              Back to all guides
-            </Link>
-          }
-        />
-      </Card>
+      <div className="px-3 py-6 sm:p-0">
+        <Card className="mx-auto max-w-xl">
+          <EmptyState
+            icon={BookOpen}
+            title="Guide not found"
+            description="It may have been renamed or removed."
+            className="py-14"
+            action={
+              <Link to={base} className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-brand hover:underline">
+                Back to all guides
+              </Link>
+            }
+          />
+        </Card>
+      </div>
     );
   }
 
   const headings = guide.sections.filter((s) => s.heading).map((s) => s.heading);
 
   return (
-    <div className="mx-auto grid max-w-[1200px] gap-8 px-3 py-4 sm:p-0 lg:grid-cols-[minmax(0,1fr)_220px]">
+    <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-5 sm:p-0 lg:grid-cols-[minmax(0,1fr)_220px]">
       <article className="min-w-0">
         <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-fg-subtle">
-          <Link to={base} className="hover:text-fg">
+          <Link to={base} className="-ml-1 inline-flex min-h-9 items-center gap-1 rounded-md px-1 hover:text-fg sm:min-h-0">
+            <ArrowLeft size={13} className="sm:hidden" aria-hidden="true" />
             Learn
           </Link>
           <span aria-hidden="true">/</span>
           <span>{categoryLabel[guide.category]}</span>
         </nav>
 
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">{guide.title}</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">{guide.title}</h1>
         <p className="mt-2 text-base text-fg-muted">{guide.summary}</p>
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line pb-5 text-xs text-fg-subtle">
           <span className="rounded bg-surface-2 px-1.5 py-0.5">{guide.level}</span>
@@ -111,14 +114,14 @@ export default function LearnArticle() {
                 </h2>
               )}
               {section.body?.map((p) => (
-                <p key={p.slice(0, 32)} className="text-[15px] leading-7 text-fg-muted">
+                <p key={p.slice(0, 32)} className="text-[15px] leading-7 text-fg-muted max-sm:text-base">
                   {p}
                 </p>
               ))}
               {section.bullets && (
                 <ul className="space-y-2 pl-1">
                   {section.bullets.map((b) => (
-                    <li key={b.slice(0, 32)} className="flex gap-3 text-[15px] leading-7 text-fg-muted">
+                    <li key={b.slice(0, 32)} className="flex gap-3 text-[15px] leading-7 text-fg-muted max-sm:text-base">
                       <span className="mt-[11px] size-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true" />
                       {b}
                     </li>
@@ -131,7 +134,7 @@ export default function LearnArticle() {
         </div>
 
         <div ref={endRef} className="mt-8 max-w-[68ch]">
-          <Card className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:p-5 sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-fg">{isPublic ? "Practise with $10,000 in virtual funds" : "Try it in NexChain"}</p>
               <p className="text-xs text-fg-subtle">
@@ -140,7 +143,7 @@ export default function LearnArticle() {
             </div>
             <Link
               to={isPublic ? "/auth" : guide.cta.to}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-fg sm:min-h-0 sm:py-2.5 transition-colors hover:bg-brand-hover"
             >
               {isPublic ? "Create free account" : guide.cta.label} <ArrowRight size={15} />
             </Link>
@@ -156,10 +159,10 @@ export default function LearnArticle() {
               <span className="mt-1 block text-sm font-semibold text-fg group-hover:text-brand">{prev.title}</span>
             </Link>
           ) : (
-            <span />
+            <span className="hidden sm:block" />
           )}
           {next && (
-            <Link to={`${base}/${next.slug}`} className="group rounded-xl border border-line p-4 text-right transition-colors hover:border-line-strong">
+            <Link to={`${base}/${next.slug}`} className="group rounded-xl border border-line p-4 transition-colors sm:text-right hover:border-line-strong">
               <span className="inline-flex items-center gap-1 text-xs text-fg-subtle">
                 Next <ArrowRight size={13} />
               </span>

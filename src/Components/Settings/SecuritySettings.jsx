@@ -224,7 +224,7 @@ function TwoFactorSection({ user, updateUser }) {
               <button type="button" onClick={() => setDisableOpen(false)} className={`${secondaryButton} flex-1`}>
                 Keep 2FA on
               </button>
-              <button type="submit" disabled={disableCode.length !== 6 || loading} className={cn(primaryButton, "flex-1 bg-down text-white hover:bg-down/90")}>
+              <button type="submit" disabled={disableCode.length !== 6 || loading} className={cn(primaryButton, "flex-1 bg-down text-white hover:bg-down/90 max-sm:text-brand-fg")}>
                 Turn off
               </button>
             </div>

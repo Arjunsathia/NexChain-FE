@@ -121,7 +121,7 @@ function UserLineChart({ users = [], timeRange = "Month" }) {
         <XAxis
           dataKey="name"
           stroke={chartColors.axis}
-          fontSize={11}
+          fontSize={12}
           tickLine={false}
           axisLine={false}
           dy={10}
@@ -129,7 +129,7 @@ function UserLineChart({ users = [], timeRange = "Month" }) {
         />
         <YAxis
           stroke={chartColors.axis}
-          fontSize={11}
+          fontSize={12}
           tickLine={false}
           axisLine={false}
           allowDecimals={false}

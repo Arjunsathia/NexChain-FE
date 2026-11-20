@@ -19,7 +19,7 @@ const TraderAvatar = ({ trader }) => {
   return src && !failed ? (
     <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className="size-7 rounded-full object-cover" />
   ) : (
-    <span className="grid size-7 place-items-center rounded-full bg-surface-2 text-[11px] font-semibold text-fg-muted">
+    <span className="grid size-7 place-items-center rounded-full bg-surface-2 text-xs font-semibold text-fg-muted">
       {(trader.name || trader.user_name || "?")[0].toUpperCase()}
     </span>
   );

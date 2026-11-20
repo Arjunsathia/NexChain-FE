@@ -45,7 +45,7 @@ export function StarButton({ active, onClick, symbol }) {
       aria-pressed={active}
       aria-label={active ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
       className={cn(
-        "grid size-7 place-items-center rounded-md transition-colors hover:bg-surface-hover",
+        "tap-target grid size-9 shrink-0 place-items-center rounded-md transition-colors hover:bg-surface-hover sm:size-7",
         active ? "text-warn" : "text-fg-subtle hover:text-fg",
       )}
     >
@@ -86,7 +86,7 @@ const MarketRow = memo(({ coin, watched, held, onToggleWatch, onTrade, onAlert }
             </Link>
             <span className="flex items-center gap-1.5 text-xs text-fg-subtle">
               {symbol}
-              {held && <span className="rounded bg-brand-soft px-1 py-px text-[10px] font-semibold text-brand">Held</span>}
+              {held && <span className="rounded bg-brand-soft px-1 py-px text-2xs font-semibold text-brand">Held</span>}
             </span>
           </div>
         </div>
@@ -148,7 +148,7 @@ const MobileRow = memo(({ coin, watched, held, onToggleWatch, onTrade }) => {
   const symbol = coin.symbol?.toUpperCase();
 
   return (
-    <li className="flex items-center gap-2 py-2.5 pl-2 pr-3">
+    <li className="flex items-center gap-1.5 py-2.5 pl-1.5 pr-3 max-sm:pr-4">
       <StarButton active={watched} symbol={symbol} onClick={() => onToggleWatch(coin)} />
       <button
         type="button"
@@ -159,7 +159,7 @@ const MobileRow = memo(({ coin, watched, held, onToggleWatch, onTrade }) => {
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-fg">
             {symbol}
-            {held && <span className="rounded bg-brand-soft px-1 py-px text-[10px] font-semibold text-brand">Held</span>}
+            {held && <span className="rounded bg-brand-soft px-1 py-px text-2xs font-semibold text-brand">Held</span>}
           </span>
           <span className="tabular block truncate text-xs text-fg-subtle">MCap {usd(coin.market_cap)}</span>
         </span>
@@ -171,7 +171,7 @@ const MobileRow = memo(({ coin, watched, held, onToggleWatch, onTrade }) => {
       <button
         type="button"
         onClick={() => onTrade(coin)}
-        className="ml-1 rounded-md bg-brand-soft px-2.5 py-1.5 text-xs font-semibold text-brand"
+        className="ml-1 min-h-9 shrink-0 rounded-lg bg-brand-soft px-3 text-[13px] font-semibold text-brand max-sm:hidden"
       >
         Trade
       </button>
@@ -249,8 +249,9 @@ function CoinTable({ onTrade, onAlert }) {
 
   return (
     <Card>
-      <div className="flex flex-col gap-3 border-b border-line p-3 sm:p-4 md:flex-row md:items-center md:justify-between">
-        <Segmented label="Filter coins" options={filters} value={filter} onChange={setFilter} className="max-w-full overflow-x-auto no-scrollbar" />
+      {/* Phones: filters stay under the top bar while scrolling the list */}
+      <div className="flex flex-col gap-3 border-b border-line p-3 max-sm:sticky max-sm:top-[var(--topbar-h)] max-sm:z-10 max-sm:rounded-t-[inherit] max-sm:bg-surface sm:p-4 md:flex-row md:items-center md:justify-between">
+        <Segmented label="Filter coins" options={filters} value={filter} onChange={setFilter} className="max-w-full overflow-x-auto no-scrollbar max-sm:[mask-image:linear-gradient(to_right,#000_82%,transparent)]" />
         <SearchInput value={query} onChange={setQuery} placeholder="Filter by name or symbol" label="Filter coins" className="md:w-64" />
       </div>
 
@@ -270,7 +271,7 @@ function CoinTable({ onTrade, onAlert }) {
         <EmptyState
           icon={CloudOff}
           title="Market data is temporarily unavailable"
-          description="The price provider is limiting requests. The list reloads automatically within a minute."
+          description="The price provider isn’t responding right now. The list reloads automatically within a minute."
           className="py-14"
         />
       ) : visible.length === 0 ? (

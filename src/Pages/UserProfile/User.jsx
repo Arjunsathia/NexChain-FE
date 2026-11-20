@@ -14,9 +14,9 @@ export default function User() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 px-3 py-4 sm:p-0">
-      <div className="border-b border-line">
-        <div className="flex items-center gap-2 pb-2 text-xs text-fg-subtle">
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:p-0">
+      <div className="border-b border-line max-sm:border-0">
+        <div className="flex items-center gap-2 pb-2 text-xs text-fg-subtle max-sm:hidden">
           <UserRound size={15} className="text-brand" />
           <span className="font-medium text-fg-muted">Your account</span>
           {user?.email && (
@@ -26,14 +26,14 @@ export default function User() {
             </>
           )}
         </div>
-        <nav aria-label="Account sections" className="section-navigation flex gap-1 overflow-x-auto no-scrollbar">
+        <nav aria-label="Account sections" className="section-navigation flex gap-1 overflow-x-auto no-scrollbar max-sm:grid max-sm:grid-cols-3">
           {sections.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={label}
               to={to}
               className={({ isActive }) =>
                 cn(
-                  "relative flex shrink-0 items-center gap-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  "relative flex shrink-0 items-center gap-2 px-3 py-2.5 text-sm font-medium transition-colors max-sm:justify-center max-sm:gap-1.5 max-sm:px-2",
                   "after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full",
                   isActive ? "text-fg after:bg-brand" : "text-fg-muted hover:text-fg",
                 )

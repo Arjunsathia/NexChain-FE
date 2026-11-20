@@ -13,7 +13,7 @@ const toList = (res) =>
   Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : Array.isArray(res?.watchlist) ? res.watchlist : [];
 
 /** First few watchlist coins with live prices */
-function WatchlistPreview() {
+function WatchlistPreview({ limit = 5 }) {
   const navigate = useNavigate();
   const { user } = useUserContext();
 
@@ -23,7 +23,7 @@ function WatchlistPreview() {
     enabled: !!user?.id,
     staleTime: 0, // show the cached list instantly, refresh in the background
   });
-  const coins = data.slice(0, 5);
+  const coins = data.slice(0, limit);
 
   return (
     <Card className="flex h-full flex-col">
@@ -51,7 +51,7 @@ function WatchlistPreview() {
             <button
               type="button"
               onClick={() => navigate("/cryptolist")}
-              className="mt-2 rounded-lg border border-line px-3.5 py-2 text-xs font-semibold text-fg hover:bg-surface-hover"
+              className="mt-2 min-h-10 rounded-lg border border-line px-4 py-2 text-[13px] sm:min-h-0 sm:text-xs font-semibold text-fg hover:bg-surface-hover"
             >
               Browse markets
             </button>

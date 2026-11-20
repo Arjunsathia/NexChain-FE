@@ -16,7 +16,7 @@ export default function LearningHubWidget() {
       </div>
       <Link
         to="/learning"
-        className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-fg transition-colors hover:bg-surface-hover"
+        className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-lg border border-line px-3.5 py-1.5 text-[13px] sm:min-h-0 sm:px-3 sm:text-xs font-semibold text-fg transition-colors hover:bg-surface-hover"
       >
         Start <ArrowRight size={12} />
       </Link>

@@ -1,9 +1,10 @@
 import React, { useMemo } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BellRing, Camera, ChevronRight, IdCard, ListChecks, Pencil, ShieldCheck } from "lucide-react";
+import { BellRing, Briefcase, Camera, ChevronRight, IdCard, ListChecks, Pencil, ShieldCheck } from "lucide-react";
 import api from "@/api/axiosConfig";
 import useUserContext from "@/hooks/useUserContext";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { usePurchasedCoins } from "@/hooks/usePurchasedCoins";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { Card, CardHeader } from "@/Components/ui/card";
@@ -24,7 +25,7 @@ const KYC = {
 };
 
 const HeaderStat = ({ label, value }) => (
-  <div className="min-w-0">
+  <div className="min-w-0 max-sm:text-center">
     <p className="tabular text-lg font-semibold text-fg">{value}</p>
     <p className="text-xs text-fg-subtle">{label}</p>
   </div>
@@ -53,6 +54,7 @@ export default function UserDashboard() {
   const { user } = useUserContext();
   const { transactionHistory } = usePurchasedCoins();
   const { groupedHoldings } = useLivePortfolio();
+  const isPhone = useMediaQuery("(max-width: 639px)");
 
   // Same key and shape as Settings → Price alerts, so both share one cache entry
   const { data: alerts = [] } = useQuery({
@@ -101,12 +103,13 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="space-y-4 lg:space-y-5">
+    <div className="space-y-4 max-sm:flex max-sm:flex-col max-sm:gap-5 max-sm:space-y-0 lg:space-y-5">
+      {/* Phones: a centred profile header */}
       <Card className="flex flex-col gap-5 p-4 sm:p-5 lg:flex-row lg:items-center">
-        <div className="flex min-w-0 flex-1 items-center gap-4">
-          <UserAvatar user={user} size={64} />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-4 max-sm:flex-col max-sm:gap-3 max-sm:text-center">
+          <UserAvatar user={user} size={isPhone ? 72 : 64} />
+          <div className="min-w-0 max-sm:w-full">
+            <div className="flex flex-wrap items-center gap-2 max-sm:justify-center">
               <h1 className="truncate text-xl font-semibold tracking-tight text-fg">{user?.name || "Your account"}</h1>
               {user?.role === "superadmin" && <Badge tone="violet">Super admin</Badge>}
               {user?.role === "admin" && <Badge tone="brand">Admin</Badge>}
@@ -128,21 +131,24 @@ export default function UserDashboard() {
 
         <Link
           to="/user/settings"
-          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover max-sm:min-h-11 max-sm:rounded-xl"
         >
           <Pencil size={14} /> Edit profile
         </Link>
       </Card>
 
-      <AccountSummary />
+      <div className="max-sm:hidden">
+        <AccountSummary />
+      </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-7">
-          <RecentTradesCard />
+      <div className="grid grid-cols-1 items-start gap-4 max-sm:flex max-sm:flex-col max-sm:items-stretch max-sm:gap-5 lg:gap-5 xl:grid-cols-12">
+        <div className="min-w-0 max-sm:order-2 xl:col-span-7">
+          <RecentTradesCard limit={isPhone ? 3 : 5} />
         </div>
 
-        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-5">
-          <Card>
+        <div className="min-w-0 space-y-4 max-sm:contents lg:space-y-5 xl:col-span-5">
+          {/* Phones show setup only while something is left to do */}
+          <Card className={cn("max-sm:order-1", doneCount === steps.length && "max-sm:hidden")}>
             <CardHeader
               icon={ListChecks}
               title="Account setup"
@@ -172,7 +178,22 @@ export default function UserDashboard() {
             </ul>
           </Card>
 
-          <WatchlistPreview />
+          <div className="max-sm:order-3">
+            <WatchlistPreview limit={isPhone ? 4 : 5} />
+          </div>
+          <Link
+            to="/portfolio"
+            className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 shadow-card transition-colors hover:bg-surface-hover max-sm:order-4 sm:hidden"
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
+              <Briefcase size={17} aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-fg">Your portfolio</span>
+              <span className="block truncate text-xs text-fg-subtle">Equity, positions, orders and history</span>
+            </span>
+            <ChevronRight size={16} className="shrink-0 text-fg-subtle" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </div>

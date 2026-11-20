@@ -15,10 +15,10 @@ const Thumb = ({ src }) => {
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className="size-16 shrink-0 rounded-lg bg-surface-2 object-cover sm:size-[72px]"
+      className="size-14 shrink-0 rounded-lg bg-surface-2 object-cover sm:size-[72px]"
     />
   ) : (
-    <span className="grid size-16 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-subtle sm:size-[72px]">
+    <span className="grid size-14 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-subtle sm:size-[72px]">
       <Newspaper size={18} />
     </span>
   );
@@ -52,8 +52,8 @@ function NewsPanel() {
       {isLoading ? (
         <div className="grid gap-x-4 sm:grid-cols-2">
           {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="flex gap-3 px-4 py-3">
-              <Skeleton className="size-16 shrink-0 rounded-lg sm:size-[72px]" />
+            <div key={i} className={i >= 3 ? "hidden gap-3 px-4 py-3 sm:flex" : "flex gap-3 px-4 py-3"}>
+              <Skeleton className="size-14 shrink-0 rounded-lg sm:size-[72px]" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-3.5 w-full" />
                 <Skeleton className="h-3.5 w-3/4" />
@@ -66,13 +66,14 @@ function NewsPanel() {
         <EmptyState icon={Newspaper} title="News is unavailable right now" description="Try again in a few minutes." className="flex-1" />
       ) : (
         <ul className="grid flex-1 content-start sm:grid-cols-2">
-          {data.map((item) => (
-            <li key={item.id}>
+          {/* Phones show the three newest stories; "All news" has the rest */}
+          {data.map((item, i) => (
+            <li key={item.id} className={i >= 3 ? "hidden sm:block" : undefined}>
               <a
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex gap-3 px-4 py-3 transition-colors hover:bg-surface-hover"
+                className="group flex gap-3 px-4 py-2.5 transition-colors hover:bg-surface-hover sm:py-3"
               >
                 <Thumb src={item.image} />
                 <div className="min-w-0">

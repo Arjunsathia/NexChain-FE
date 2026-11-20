@@ -2,11 +2,11 @@ import React, { memo, useId, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CloudOff } from "lucide-react";
 import { getMarketChart, getBinanceKlines } from "@/api/coinApis";
 import { useLivePrice } from "@/hooks/useBinanceTicker";
 import useChartTheme from "@/hooks/useChartTheme";
-import { Card } from "@/Components/ui/card";
+import { Card, EmptyState } from "@/Components/ui/card";
 import { Segmented } from "@/Components/ui/segmented";
 import { Skeleton } from "@/Components/ui/skeleton";
 import { Delta } from "@/Components/ui/delta";
@@ -42,14 +42,16 @@ const MarketTab = memo(({ coin, active, onSelect }) => {
       aria-selected={active}
       onClick={() => onSelect(coin.id)}
       className={cn(
-        "flex min-w-[132px] shrink-0 items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition-colors",
+        "flex min-w-[132px] shrink-0 snap-start items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition-colors",
+        "max-sm:min-h-10 max-sm:min-w-0 max-sm:gap-2 max-sm:rounded-full max-sm:py-1 max-sm:pr-3.5 max-sm:pl-1.5",
         active ? "border-brand bg-brand-soft" : "border-line hover:border-line-strong hover:bg-surface-hover",
       )}
     >
       <CoinAvatar src={coin.image} symbol={coin.symbol} size={24} />
-      <span className="min-w-0">
-        <span className="block text-xs font-semibold text-fg">{coin.symbol?.toUpperCase()}</span>
-        <Delta value={live?.price_change_percentage_24h ?? coin.price_change_percentage_24h} className="text-[11px]" />
+      {/* Phones: symbol and change on one line */}
+      <span className="min-w-0 max-sm:flex max-sm:items-center max-sm:gap-1.5">
+        <span className="block text-xs font-semibold text-fg max-sm:text-[13px]">{coin.symbol?.toUpperCase()}</span>
+        <Delta value={live?.price_change_percentage_24h ?? coin.price_change_percentage_24h} className="text-xs" />
       </span>
     </button>
   );
@@ -79,11 +81,11 @@ const PriceHeader = memo(({ coin }) => {
           </div>
         </div>
       </div>
-      <dl className="flex gap-6">
+      <dl className="grid w-full grid-cols-3 gap-3 sm:flex sm:w-auto sm:gap-6">
         {stats.map((s) => (
           <div key={s.label}>
-            <dt className="text-[11px] text-fg-subtle">{s.label}</dt>
-            <dd className="tabular text-sm font-medium text-fg">{s.value}</dd>
+            <dt className="text-xs text-fg-subtle">{s.label}</dt>
+            <dd className="tabular truncate text-sm font-medium text-fg">{s.value}</dd>
           </div>
         ))}
       </dl>
@@ -103,7 +105,7 @@ const ChartTooltip = ({ active, payload, days }) => {
   }).format(t);
   return (
     <div className="rounded-lg border border-line bg-surface px-3 py-2 shadow-pop">
-      <p className="text-[11px] text-fg-subtle">{date}</p>
+      <p className="text-xs text-fg-subtle">{date}</p>
       <p className="tabular text-sm font-semibold text-fg">{formatPrice(price)}</p>
     </div>
   );
@@ -162,7 +164,7 @@ const PriceChart = memo(({ coinId, days }) => {
             scale="time"
             domain={["dataMin", "dataMax"]}
             tickFormatter={formatTick}
-            tick={{ fill: theme.axis, fontSize: 11 }}
+            tick={{ fill: theme.axis, fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             minTickGap={48}
@@ -171,7 +173,7 @@ const PriceChart = memo(({ coinId, days }) => {
             orientation="right"
             domain={["auto", "auto"]}
             tickFormatter={(v) => (v >= 1000 ? `${formatCompact(v)}` : formatPrice(v).replace("$", ""))}
-            tick={{ fill: theme.axis, fontSize: 11 }}
+            tick={{ fill: theme.axis, fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             width={56}
@@ -199,15 +201,29 @@ const PriceChart = memo(({ coinId, days }) => {
 PriceChart.displayName = "PriceChart";
 
 /** Market overview: coin tabs, live price header and the price chart */
-export default function ChartSection({ coins, selectedCoinId, onSelect, loading }) {
+export default function ChartSection({ coins, selectedCoinId, onSelect, loading, unavailable }) {
   const [days, setDays] = useState(1);
   const coin = coins.find((c) => c.id === selectedCoinId) || coins[0];
 
+  // The coin list failed to load: say so instead of showing skeletons forever
+  if (unavailable) {
+    return (
+      <Card className="flex h-full flex-col justify-center">
+        <EmptyState
+          icon={CloudOff}
+          title="Prices are unavailable right now"
+          description="The market-data provider isn’t responding. The chart reloads automatically when it’s back."
+          className="py-14"
+        />
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex h-full flex-col">
-      <div role="tablist" aria-label="Markets" className="flex gap-2 overflow-x-auto px-4 pt-4 no-scrollbar">
+      <div role="tablist" aria-label="Markets" className="flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pt-4 no-scrollbar">
         {loading
-          ? Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-[46px] w-[132px] shrink-0 rounded-lg" />)
+          ? Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-[46px] w-[132px] shrink-0 rounded-lg max-sm:h-10 max-sm:w-28 max-sm:rounded-full" />)
           : coins.map((c) => <MarketTab key={c.id} coin={c} active={c.id === coin?.id} onSelect={onSelect} />)}
       </div>
 
@@ -215,18 +231,18 @@ export default function ChartSection({ coins, selectedCoinId, onSelect, loading 
         {coin ? <PriceHeader coin={coin} /> : <Skeleton className="h-12 w-64" />}
 
         <div className="flex items-center justify-between gap-3">
-          <Segmented label="Timeframe" options={TIMEFRAMES} value={days} onChange={setDays} />
+          <Segmented label="Timeframe" options={TIMEFRAMES} value={days} onChange={setDays} className="max-sm:min-w-0" />
           {coin && (
             <Link
               to={`/coin/coin-details/${coin.id}`}
-              className="inline-flex items-center gap-1 text-xs font-medium text-fg-muted transition-colors hover:text-brand"
+className="-mr-2 inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-[13px] font-medium text-fg-muted transition-colors hover:text-brand sm:min-h-8 sm:text-xs"
             >
               Trade {coin.symbol?.toUpperCase()} <ArrowUpRight size={14} />
             </Link>
           )}
         </div>
 
-        <div className="h-[260px] min-h-[260px] flex-1 sm:h-[320px] xl:h-auto xl:min-h-[340px]">
+        <div className="h-[220px] min-h-[220px] flex-1 sm:h-[320px] sm:min-h-[260px] xl:h-auto xl:min-h-[340px]">
           {coin ? <PriceChart coinId={coin.id} days={days} /> : <Skeleton className="h-full w-full rounded-lg" />}
         </div>
       </div>

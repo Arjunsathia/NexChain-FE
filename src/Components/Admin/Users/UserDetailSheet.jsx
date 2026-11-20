@@ -143,13 +143,13 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
           type="button"
           onClick={() => setMessaging(true)}
           disabled={user.isDeleted}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-fg hover:bg-surface-hover disabled:opacity-40"
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-[13px] font-semibold sm:min-h-0 sm:py-1.5 sm:text-xs text-fg hover:bg-surface-hover disabled:opacity-40"
         >
           <Mail size={14} /> Message
         </button>
         {allowed.roles.length > 0 && !user.isDeleted && (
           <Menu as="div" className="relative">
-            <MenuButton className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-fg hover:bg-surface-hover data-[open]:bg-surface-hover">
+            <MenuButton className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-[13px] font-semibold sm:min-h-0 sm:py-1.5 sm:text-xs text-fg hover:bg-surface-hover data-[open]:bg-surface-hover">
               <Shield size={14} /> Change role <ChevronDown size={13} />
             </MenuButton>
             <MenuItems
@@ -161,7 +161,7 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
                   <button
                     type="button"
                     onClick={() => setConfirm({ type: "role", role })}
-                    className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-fg-muted data-[focus]:bg-surface-hover data-[focus]:text-fg"
+                    className="min-h-10 w-full rounded-md px-2.5 py-1.5 text-left text-sm text-fg-muted sm:min-h-0 data-[focus]:bg-surface-hover data-[focus]:text-fg"
                   >
                     Make {ROLE_LABELS[role].toLowerCase()}
                   </button>
@@ -176,7 +176,7 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
             disabled={busy}
             onClick={() => (user.isFrozen ? run("unfreeze") : setConfirm({ type: "freeze" }))}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
+              "inline-flex min-h-10 items-center gap-1.5 rounded-lg border px-3 text-[13px] font-semibold sm:min-h-0 sm:py-1.5 sm:text-xs disabled:opacity-50",
               user.isFrozen ? "border-line text-fg hover:bg-surface-hover" : "border-line text-down hover:bg-down-soft",
             )}
           >
@@ -190,7 +190,7 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
             disabled={busy}
             onClick={() => (user.isDeleted ? run("restore") : setConfirm({ type: "archive" }))}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
+              "inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-[13px] font-semibold sm:min-h-0 sm:py-1.5 sm:text-xs disabled:opacity-50",
               user.isDeleted ? "text-fg hover:bg-surface-hover" : "text-fg-muted hover:bg-surface-hover hover:text-fg",
             )}
           >
@@ -205,7 +205,7 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
         )}
       </div>
 
-      <div role="tablist" aria-label="User details" className="flex shrink-0 gap-1 border-b border-line px-3">
+      <div role="tablist" aria-label="User details" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 no-scrollbar">
         {TABS.map((t) => (
           <button
             key={t}
@@ -214,7 +214,7 @@ export default function UserDetailSheet({ user, actor, open, onClose, onAction, 
             aria-selected={tab === t}
             onClick={() => setTab(t)}
             className={cn(
-              "relative px-2.5 py-2.5 text-sm font-medium transition-colors",
+              "relative min-h-11 shrink-0 whitespace-nowrap px-2.5 py-2.5 text-sm font-medium transition-colors sm:min-h-0",
               "after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:rounded-full",
               tab === t ? "text-fg after:bg-brand" : "text-fg-muted hover:text-fg",
             )}

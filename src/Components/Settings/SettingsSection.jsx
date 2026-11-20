@@ -8,18 +8,18 @@ import { cn } from "@/utils/utils";
 export default function SettingsSection({ title, description, action, footer, footerHint, children, className, as: Comp = "section", ...rest }) {
   return (
     <Comp className={cn("premium-card rounded-xl border border-line bg-surface shadow-card", className)} {...rest}>
-      <div className="flex items-start justify-between gap-4 px-5 pt-5">
+      <div className="flex items-start justify-between gap-4 px-4 pt-4 sm:px-5 sm:pt-5">
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-fg">{title}</h2>
           {description && <p className="mt-0.5 text-sm text-fg-subtle">{description}</p>}
         </div>
         {action}
       </div>
-      <div className="px-5 py-5">{children}</div>
+      <div className="px-4 py-4 sm:px-5 sm:py-5">{children}</div>
       {footer && (
-        <div className="flex flex-col-reverse gap-3 rounded-b-xl border-t border-line bg-surface-2/50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col-reverse gap-3 rounded-b-xl border-t border-line bg-surface-2/50 px-4 py-3 sm:flex-row sm:px-5 sm:items-center sm:justify-between">
           <p className="text-xs text-fg-subtle">{footerHint}</p>
-          <div className="flex justify-end gap-2">{footer}</div>
+          <div className="flex gap-2 max-sm:[&>*]:flex-1 sm:justify-end">{footer}</div>
         </div>
       )}
     </Comp>

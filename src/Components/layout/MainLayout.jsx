@@ -1,5 +1,7 @@
 import Topbar from "./Topbar";
 import DemoBanner from "./DemoBanner";
+import MobileTabBar from "./MobileTabBar";
+import useScrollRows from "@/hooks/useScrollRows";
 import { DesktopSidebar } from "./Sidebar";
 import { sectionKey } from "./navConfig";
 
@@ -23,8 +25,9 @@ const readCollapsed = () => {
 };
 
 const LayoutLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="size-8 rounded-full border-2 border-line border-t-brand animate-spin" />
+  <div role="status" className="flex min-h-[60vh] items-center justify-center">
+    <div className="size-8 animate-spin rounded-full border-2 border-line border-t-brand" aria-hidden="true" />
+    <span className="sr-only">Loading page</span>
   </div>
 );
 
@@ -36,6 +39,7 @@ export default function MainLayout() {
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useScrollRows();
 
   const toggleSidebar = useCallback(() => {
     setCollapsed((prev) => {
@@ -77,11 +81,11 @@ export default function MainLayout() {
       <DesktopSidebar collapsed={collapsed} onToggle={toggleSidebar} />
 
       <div className="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-[var(--sidebar-w)]">
-        <Topbar drawerOpen={drawerOpen} onOpenDrawer={openDrawer} onCloseDrawer={closeDrawer} />
+        <Topbar drawerOpen={drawerOpen} onCloseDrawer={closeDrawer} />
         <DemoBanner />
 
-        {/* Bottom padding keeps the last rows clear of the floating chat button */}
-        <main className="w-full min-w-0 flex-1 pb-24 sm:p-4 sm:pb-24 lg:p-6 lg:pb-24">
+        {/* Bottom padding keeps the last rows clear of the tab bar (below lg) and the chat button */}
+        <main className="w-full min-w-0 flex-1 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+2.5rem)] sm:p-4 sm:pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+2.5rem)] lg:p-6 lg:pb-24">
           {/* Fade the new page in; no exit animation, so navigation never waits */}
           <motion.div
             key={pageKey}
@@ -95,6 +99,7 @@ export default function MainLayout() {
         </main>
       </div>
 
+      <MobileTabBar drawerOpen={drawerOpen} onOpenDrawer={openDrawer} />
       <ChatbotWidget />
     </div>
   );

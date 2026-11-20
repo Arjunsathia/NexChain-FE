@@ -41,7 +41,7 @@ function FreezeButton({ coin, frozen, busy, onToggle }) {
       disabled={busy}
       onClick={() => onToggle(coin, frozen)}
       className={cn(
-        "inline-flex w-[104px] items-center justify-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50",
+        "inline-flex min-h-9 w-[104px] items-center justify-center gap-1.5 rounded-md border px-2.5 text-[13px] font-semibold sm:min-h-0 sm:py-1.5 sm:text-xs transition-colors disabled:opacity-50",
         frozen ? "border-line text-fg hover:bg-surface-hover" : "border-line text-fg-muted hover:border-down hover:text-down",
       )}
     >
@@ -166,7 +166,7 @@ export default function AdminCryptocurrencies() {
           <EmptyState
             icon={CloudOff}
             title="Market data is temporarily unavailable"
-            description="The price provider is limiting requests. The list reloads automatically within a minute."
+            description="The price provider isn’t responding right now. The list reloads automatically within a minute."
             className="py-14"
           />
         ) : visible.length === 0 ? (

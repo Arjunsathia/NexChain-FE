@@ -8,24 +8,17 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import ErrorBoundary from "./Components/Common/ErrorBoundary";
 
-import { GoogleOAuthProvider } from "@react-oauth/google";
-
 import { VisitedRoutesProvider } from "./context/VisitedRoutesContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <MotionConfig reducedMotion="user">
     <ErrorBoundary>
-      <GoogleOAuthProvider
-        clientId={
-          import.meta.env.VITE_GOOGLE_CLIENT_ID || "PLACEHOLDER_CLIENT_ID"
-        }
-      >
-          <VisitedRoutesProvider>
-            <App />
-            <AppToaster />
-          </VisitedRoutesProvider>
-      </GoogleOAuthProvider>
+      {/* Google sign-in is provided by the auth page only, so its script doesn't load on every page */}
+      <VisitedRoutesProvider>
+        <App />
+        <AppToaster />
+      </VisitedRoutesProvider>
     </ErrorBoundary>
     </MotionConfig>
   </StrictMode>,

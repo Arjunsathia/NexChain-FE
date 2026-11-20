@@ -100,7 +100,7 @@ const OrderBook = memo(({ symbol, baseSymbol }) => {
               aria-label={s.label}
               title={s.label}
               className={cn(
-                "grid size-7 place-items-center rounded-md transition-colors",
+                "grid size-9 place-items-center rounded-md transition-colors sm:size-7",
                 side === s.value ? "bg-surface shadow-card ring-1 ring-line" : "opacity-60 hover:opacity-100",
               )}
             >
@@ -109,7 +109,7 @@ const OrderBook = memo(({ symbol, baseSymbol }) => {
           ))}
         </div>
         {bidShare != null && (
-          <div className="flex min-w-0 flex-1 items-center gap-2 pl-3 text-[11px] font-medium" title="Share of visible depth on each side">
+          <div className="flex min-w-0 flex-1 items-center gap-2 pl-3 text-xs font-medium" title="Share of visible depth on each side">
             <span className="tabular text-up">{bidShare.toFixed(0)}%</span>
             <span className="flex h-1.5 flex-1 overflow-hidden rounded-full">
               <span className="bg-up" style={{ width: `${bidShare}%` }} />
@@ -120,7 +120,7 @@ const OrderBook = memo(({ symbol, baseSymbol }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-2 border-y border-line px-4 py-1.5 text-[11px] font-medium text-fg-subtle">
+      <div className="grid grid-cols-3 gap-2 border-y border-line px-4 py-1.5 text-xs font-medium text-fg-subtle">
         <span>Price (USDT)</span>
         <span className="text-right">Amount ({baseSymbol})</span>
         <span className="text-right">Total</span>

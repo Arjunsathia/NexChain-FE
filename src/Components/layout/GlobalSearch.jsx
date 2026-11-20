@@ -50,9 +50,9 @@ function useResults(query) {
 }
 
 function ResultList({ results }) {
-  const section = "px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-fg-subtle";
+  const section = "px-3 pt-3 pb-1 text-2xs font-semibold uppercase tracking-wider text-fg-subtle";
   const option =
-    "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg data-[focus]:bg-surface-hover";
+    "flex min-h-12 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg data-[focus]:bg-surface-hover md:min-h-0";
 
   if (results.hasQuery && results.pages.length === 0 && results.coins.length === 0) {
     return <p className="px-4 py-8 text-center text-sm text-fg-subtle">No coins or pages match your search.</p>;
@@ -84,7 +84,7 @@ function ResultList({ results }) {
             const Icon = r.icon;
             return (
               <ComboboxOption key={r.key} value={r} className={cn(option, "group")}>
-                <span className="grid size-6 place-items-center rounded-md bg-surface-2 text-fg-muted">
+                <span className="grid size-7 place-items-center rounded-md bg-surface-2 text-fg-muted md:size-6">
                   <Icon size={14} />
                 </span>
                 <span className="flex-1">{r.label}</span>
@@ -158,27 +158,36 @@ export default function GlobalSearch({ className }) {
         type="button"
         onClick={() => setMobileOpen(true)}
         aria-label="Search"
-        className="grid size-9 place-items-center rounded-lg text-fg-muted hover:bg-surface-hover hover:text-fg md:hidden"
+        className="app-search-trigger grid size-10 shrink-0 place-items-center rounded-lg text-fg-muted hover:bg-surface-hover hover:text-fg md:hidden"
       >
         <Search size={18} />
       </button>
-      <Dialog open={mobileOpen} onClose={() => setMobileOpen(false)} className="relative z-[2000] md:hidden">
+      <Dialog open={mobileOpen} onClose={() => setMobileOpen(false)} className="relative z-[var(--z-sheet)] md:hidden">
         <DialogBackdrop transition className="fixed inset-0 bg-black/50 transition-opacity duration-150 data-[closed]:opacity-0" />
         <DialogPanel
           transition
-          className="fixed inset-x-0 top-0 max-h-[85dvh] overflow-y-auto border-b border-line bg-surface p-3 shadow-pop transition duration-150 data-[closed]:-translate-y-4 data-[closed]:opacity-0"
+          className="fixed inset-x-0 top-0 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-b-2xl border-b border-line bg-surface p-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-pop transition duration-150 data-[closed]:-translate-y-4 data-[closed]:opacity-0"
         >
           <Combobox value={null} onChange={go}>
-            <div className="relative">
-              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
-              <ComboboxInput
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search coins and pages"
-                autoComplete="off"
-                className="h-11 w-full rounded-lg border border-line bg-surface-2 pl-9 pr-3 text-base text-fg placeholder:text-fg-subtle outline-none focus:border-brand"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
+                <ComboboxInput
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search coins and pages"
+                  autoComplete="off"
+                  className="h-11 w-full rounded-lg border border-line bg-surface-2 pl-9 pr-3 text-base text-fg placeholder:text-fg-subtle outline-none focus:border-brand"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                className="min-h-11 shrink-0 rounded-lg px-2 text-sm font-semibold text-brand hover:bg-brand-soft"
+              >
+                Cancel
+              </button>
             </div>
             <ComboboxOptions static className="mt-1">
               <ResultList results={results} />

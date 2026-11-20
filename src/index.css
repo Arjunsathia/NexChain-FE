@@ -13,6 +13,10 @@
   --animate-bounce-short: bounce-short 0.6s ease-in-out;
   --animate-bounce-slow: bounce 3s infinite;
 
+  /* 11px: only for uppercase labels, badges and tab-bar labels. Content text is 12px (text-xs) or larger. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
@@ -23,138 +27,14 @@
   }
 }
 
-/* 
+/*
 ================================================================
-   1. COLOR TOKENS & DESIGN SYSTEM (THEME)
+   1. TOKENS
+   Colors, shadows, radii, control sizes and layers are defined once, in
+   design-system.css (light on html:root, dark on html:root.dark). They are
+   mapped to Tailwind utilities below (bg-surface, text-fg-muted, ...).
 ================================================================
 */
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.546 0.245 262.881);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.897 0.01 255.508);
-  --input: oklch(0.897 0.01 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-
-  /* Sidebar Variables */
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.546 0.245 262.881);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.897 0.01 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
-
-  /* App design tokens (light). Components use these through the Tailwind
-     classes mapped in @theme inline below (bg-surface, text-fg-muted, ...),
-     so they never need to check the theme in JavaScript. */
-  --canvas: #f4f6f9;
-  --surface: #ffffff;
-  --surface-2: #f6f8fa;
-  --surface-hover: #eef2f6;
-  --line: #e3e8ef;
-  --line-strong: #cfd6e0;
-  --fg: #0d1626;
-  --fg-muted: #566175;
-  --fg-subtle: #8792a4;
-  --brand: #0a74d1;
-  --brand-hover: #0862b3;
-  --brand-fg: #ffffff;
-  --brand-soft: rgb(10 116 209 / 0.09);
-  --up: #068a5e;
-  --up-soft: rgb(6 138 94 / 0.1);
-  --down: #d02f37;
-  --down-soft: rgb(208 47 55 / 0.09);
-  --warn: #b7791f;
-  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.05);
-  --shadow-pop: 0 12px 32px -8px rgb(16 24 40 / 0.18), 0 2px 6px rgb(16 24 40 / 0.06);
-  --chart-grid: #edf0f4;
-  --topbar-h: 56px;
-
-  --app-bg: var(--canvas);
-}
-
-[data-theme="dark"],
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.279 0.041 260.031);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.279 0.041 260.031);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.783 0.108 231.176);
-  --primary-foreground: oklch(0.129 0.042 264.695);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.373 0.034 259.733);
-  --input: oklch(0.373 0.034 259.733);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-
-  /* Sidebar Dark Variables */
-  --sidebar: oklch(0.279 0.041 260.031);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.783 0.108 231.176);
-  --sidebar-primary-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(0.373 0.034 259.733);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
-
-  /* App design tokens (dark) */
-  --canvas: #0a0d13;
-  --surface: #11151d;
-  --surface-2: #161b25;
-  --surface-hover: #1c2230;
-  --line: #222936;
-  --line-strong: #2e3746;
-  --fg: #e8ecf3;
-  --fg-muted: #929cae;
-  --fg-subtle: #646e80;
-  --brand: #3a9eff;
-  --brand-hover: #5daeff;
-  --brand-fg: #04121f;
-  --brand-soft: rgb(58 158 255 / 0.12);
-  --up: #1ec98a;
-  --up-soft: rgb(30 201 138 / 0.12);
-  --down: #f2525a;
-  --down-soft: rgb(242 82 90 / 0.12);
-  --warn: #f0b429;
-  --shadow-card: none;
-  --shadow-pop: 0 16px 40px -8px rgb(0 0 0 / 0.6);
-  --chart-grid: #1a202b;
-
-  --app-bg: var(--canvas);
-}
-
 /* Map the tokens to Tailwind utilities. "inline" makes each utility read the
    variable at runtime, so switching the .dark class restyles everything. */
 @theme inline {

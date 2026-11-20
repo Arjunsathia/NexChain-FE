@@ -45,7 +45,7 @@ const TradeHistory = memo(({ symbol, baseSymbol }) => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="grid grid-cols-3 gap-2 border-y border-line px-4 py-1.5 text-[11px] font-medium text-fg-subtle">
+      <div className="grid grid-cols-3 gap-2 border-y border-line px-4 py-1.5 text-xs font-medium text-fg-subtle">
         <span>Price (USDT)</span>
         <span className="text-right">Amount ({baseSymbol})</span>
         <span className="text-right">Time</span>

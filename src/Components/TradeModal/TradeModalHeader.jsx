@@ -22,7 +22,7 @@ const TradeModalHeader = React.memo(({ image, coinName, symbol, currentPrice, pr
       type="button"
       onClick={onClose}
       aria-label="Close"
-      className="grid size-8 shrink-0 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+      className="grid size-10 shrink-0 place-items-center rounded-lg sm:size-8 text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
     >
       <X size={18} />
     </button>

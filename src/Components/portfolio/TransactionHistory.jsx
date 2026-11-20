@@ -50,7 +50,7 @@ const exportCsv = (rows) => {
 };
 
 const SideBadge = ({ type }) => (
-  <span className={cn("rounded px-1.5 py-px text-[10px] font-bold uppercase", type === "buy" ? "bg-up-soft text-up" : "bg-down-soft text-down")}>
+  <span className={cn("rounded px-1.5 py-px text-2xs font-bold uppercase tracking-wide", type === "buy" ? "bg-up-soft text-up" : "bg-down-soft text-down")}>
     {type === "buy" ? "Buy" : "Sell"}
   </span>
 );

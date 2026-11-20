@@ -17,6 +17,8 @@ const dateOf = (iso) => {
   return d && !Number.isNaN(d.getTime()) ? fmtDate.format(d) : null;
 };
 
+const usd = (v) => (Number.isFinite(v) ? `$${formatCompact(v, 2)}` : "–");
+
 const Row = ({ label, children }) => (
   <div className="flex items-baseline justify-between gap-4 py-2.5">
     <dt className="shrink-0 text-xs text-fg-subtle">{label}</dt>
@@ -25,7 +27,7 @@ const Row = ({ label, children }) => (
 );
 
 /** 24h range, supply, all-time high/low and the timeframe returns */
-export function MarketStatsCard({ info, price, high24h, low24h }) {
+export function MarketStatsCard({ info, price, volume, high24h, low24h }) {
   const symbol = info.symbol.toUpperCase();
   const supplyPct = info.maxSupply && info.circulating ? Math.min(100, (info.circulating / info.maxSupply) * 100) : null;
   const amount = (v) => (Number.isFinite(v) ? `${formatCompact(v, 2)} ${symbol}` : "–");
@@ -34,12 +36,25 @@ export function MarketStatsCard({ info, price, high24h, low24h }) {
     <Card>
       <CardHeader icon={BarChart3} title="Market stats" subtitle="Prices in US dollars" />
       <div className="space-y-5 px-4 pb-4">
+        {/* Phones: the hero's headline numbers live here */}
+        <dl className="grid grid-cols-3 gap-1.5 sm:hidden">
+          {[
+            ["Market cap", usd(info.marketCap)],
+            ["24h volume", usd(volume)],
+            ["Diluted value", usd(info.fdv)],
+          ].map(([label, value]) => (
+            <div key={label} className="min-w-0 rounded-lg bg-surface-2/60 px-2.5 py-2">
+              <dt className="truncate text-xs text-fg-subtle">{label}</dt>
+              <dd className="tabular mt-0.5 truncate text-sm font-semibold text-fg">{value}</dd>
+            </div>
+          ))}
+        </dl>
         <DayRange low={low24h} high={high24h} price={price} />
 
         <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6 xl:grid-cols-3">
           {info.performance.map((p) => (
             <div key={p.label} className="rounded-lg bg-surface-2/60 px-2 py-2 text-center">
-              <p className="text-[11px] text-fg-subtle">{p.label}</p>
+              <p className="text-xs text-fg-subtle">{p.label}</p>
               <Delta value={p.value} digits={p.value != null && Math.abs(p.value) >= 100 ? 0 : 1} className="text-xs" />
             </div>
           ))}
@@ -56,7 +71,7 @@ export function MarketStatsCard({ info, price, high24h, low24h }) {
               <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
                 <div className="h-full rounded-full bg-brand" style={{ width: `${supplyPct}%` }} />
               </div>
-              <p className="mt-1 text-[11px] text-fg-subtle">{supplyPct.toFixed(1)}% of the max supply is in circulation</p>
+              <p className="mt-1 text-xs text-fg-subtle">{supplyPct.toFixed(1)}% of the max supply is in circulation</p>
             </div>
           )}
         </div>
@@ -96,7 +111,7 @@ export function PositionCard({ holding, price, symbol }) {
         title="Your position"
         subtitle={`${qty.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${symbol.toUpperCase()}`}
         action={
-          <Link to="/portfolio" className="text-xs font-medium text-fg-muted transition-colors hover:text-brand">
+          <Link to="/portfolio" className="-mx-1.5 inline-flex min-h-8 items-center rounded-md px-1.5 text-xs font-medium text-fg-muted transition-colors hover:text-brand">
             Portfolio
           </Link>
         }
@@ -116,7 +131,7 @@ export function PositionCard({ holding, price, symbol }) {
           ],
         ].map(([label, v]) => (
           <div key={label} className="bg-surface px-4 py-3">
-            <dt className="text-[11px] text-fg-subtle">{label}</dt>
+            <dt className="text-xs text-fg-subtle">{label}</dt>
             <dd className="tabular mt-0.5 truncate text-sm font-semibold text-fg">{v}</dd>
           </div>
         ))}
@@ -136,7 +151,7 @@ export function MarketActivityCard({ pair, symbol }) {
   const base = symbol.toUpperCase();
 
   return (
-    <Card className="flex h-[520px] flex-col">
+    <Card className="flex h-[440px] flex-col sm:h-[520px]">
       <CardHeader
         icon={Activity}
         title="Live market"
@@ -165,6 +180,8 @@ export function MarketActivityCard({ pair, symbol }) {
 /** Description, categories and official links from CoinGecko */
 export function AboutCard({ info }) {
   const [expanded, setExpanded] = useState(false);
+  // Phones keep categories and links folded away
+  const [more, setMore] = useState(false);
   const paragraphs = info.description;
   const long = paragraphs.length > 1 || (paragraphs[0]?.length ?? 0) > 420;
   const shown = expanded ? paragraphs : paragraphs.slice(0, 1);
@@ -191,7 +208,7 @@ export function AboutCard({ info }) {
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
                 aria-expanded={expanded}
-                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
+                className="mt-1 inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-brand hover:underline"
               >
                 {expanded ? "Show less" : "Read more"}
                 <ChevronDown size={14} className={cn("transition-transform", expanded && "rotate-180")} />
@@ -204,15 +221,27 @@ export function AboutCard({ info }) {
           <dl className="flex flex-wrap gap-x-6 gap-y-2">
             {facts.map(([label, value]) => (
               <div key={label}>
-                <dt className="text-[11px] text-fg-subtle">{label}</dt>
+                <dt className="text-xs text-fg-subtle">{label}</dt>
                 <dd className="text-sm font-medium text-fg">{value}</dd>
               </div>
             ))}
           </dl>
         )}
 
+        {(info.categories.length > 0 || info.links.length > 0) && (
+          <button
+            type="button"
+            onClick={() => setMore((v) => !v)}
+            aria-expanded={more}
+            className="flex min-h-11 w-full items-center justify-between rounded-lg border border-line px-3 text-sm font-medium text-fg transition-colors hover:bg-surface-hover sm:hidden"
+          >
+            Links and categories
+            <ChevronDown size={16} className={cn("text-fg-subtle transition-transform", more && "rotate-180")} />
+          </button>
+        )}
+
         {info.categories.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className={cn("flex flex-wrap gap-1.5", !more && "max-sm:hidden")}>
             {info.categories.slice(0, 8).map((c) => (
               <Badge key={c}>{c}</Badge>
             ))}
@@ -220,14 +249,14 @@ export function AboutCard({ info }) {
         )}
 
         {info.links.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t border-line pt-4">
+          <div className={cn("flex flex-wrap gap-2 border-t border-line pt-4", !more && "max-sm:hidden")}>
             {info.links.map((l) => (
               <a
                 key={l.url}
                 href={l.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:border-line-strong hover:bg-surface-hover"
+                className="inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium sm:min-h-0 sm:px-2.5 sm:text-xs text-fg transition-colors hover:border-line-strong hover:bg-surface-hover"
               >
                 <span className="truncate">{l.label}</span>
                 <ExternalLink size={12} className="shrink-0 text-fg-subtle" />

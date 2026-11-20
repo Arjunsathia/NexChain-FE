@@ -131,7 +131,7 @@ const TransactionForm = React.memo(
                 hint={
                   orderType === "limit" &&
                   limitPrice && (
-                    <span className={cn("text-[11px] font-medium", instantFill ? "text-warn" : "text-fg-subtle")}>
+                    <span className={cn("text-xs font-medium", instantFill ? "text-warn" : "text-fg-subtle")}>
                       {instantFill ? "Fills instantly" : "Pending"}
                     </span>
                   )
@@ -150,7 +150,7 @@ const TransactionForm = React.memo(
               type="button"
               onClick={() => applyPercent(pct)}
               disabled={maxAvailable <= 0}
-              className="rounded-md border border-line py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-line-strong hover:text-fg disabled:pointer-events-none disabled:opacity-40"
+              className="min-h-9 rounded-md border border-line py-1.5 text-[13px] font-medium text-fg-muted sm:min-h-0 sm:text-xs transition-colors hover:border-line-strong hover:text-fg disabled:pointer-events-none disabled:opacity-40"
             >
               {pct === 100 ? "Max" : `${pct}%`}
             </button>
@@ -174,23 +174,27 @@ const TransactionForm = React.memo(
 
         {disabledReason && <p className="text-center text-xs text-fg-subtle">{disabledReason}</p>}
 
+        {/* Phones: the submit button stays visible at the bottom of the sheet while the form scrolls */}
+        <div className="sticky bottom-0 -mx-4 bg-surface px-4 pt-2 pb-1 sm:static sm:mx-0 sm:bg-transparent sm:p-0">
         <button
           type="submit"
           disabled={isSubmitting || !!disabledReason || !usdAmount || parseFloat(usdAmount) <= 0}
           className={cn(
             "flex h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white transition-colors disabled:pointer-events-none disabled:opacity-50",
             isBuy ? "bg-up hover:bg-up/90" : "bg-down hover:bg-down/90",
+            "max-sm:text-brand-fg",
           )}
         >
           {isSubmitting ? (
             <>
-              <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              <span className="size-4 animate-spin rounded-full border-2 border-current/40 border-t-current" />
               Processing…
             </>
           ) : (
             `${isBuy ? "Buy" : "Sell"} ${symbol}${orderType === "market" ? "" : ` · ${ORDER_TYPES.find((t) => t.value === orderType)?.label}`}`
           )}
         </button>
+        </div>
       </form>
     );
   },

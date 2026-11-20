@@ -23,7 +23,7 @@ export default function PublicLayout() {
   return (
     <div className="public-content-shell flex min-h-screen flex-col bg-canvas text-fg">
       <header className="sticky top-0 z-30 h-[var(--topbar-h)] border-b border-line bg-surface/85 backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-[1200px] items-center gap-4 px-4">
+        <div className="mx-auto flex h-full max-w-[1200px] items-center gap-3 px-3 sm:gap-4 sm:px-4">
           <Brand to="/" className="shrink-0" />
           <NavLink
             to="/public-learning"
@@ -31,26 +31,27 @@ export default function PublicLayout() {
           >
             Learn
           </NavLink>
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
             <button
               type="button"
               onClick={toggleTheme}
               aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
-              className="grid size-9 place-items-center rounded-lg text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+              className="grid size-10 shrink-0 place-items-center rounded-lg text-fg-muted sm:size-9 transition-colors hover:bg-surface-hover hover:text-fg"
             >
               {isLight ? <Moon size={18} /> : <Sun size={18} />}
             </button>
             {signedIn ? (
-              <Link to="/dashboard" className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg hover:bg-brand-hover">
+              <Link to="/dashboard" className="inline-flex min-h-10 items-center rounded-lg bg-brand px-3.5 text-sm font-semibold text-brand-fg hover:bg-brand-hover sm:min-h-9">
                 Open app
               </Link>
             ) : (
               <>
-                <Link to="/auth" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-fg hover:bg-surface-hover sm:block">
+                <Link to="/auth" className="inline-flex min-h-10 shrink-0 items-center rounded-lg px-2.5 text-sm font-semibold text-fg hover:bg-surface-hover sm:min-h-9 sm:px-3">
                   Sign in
                 </Link>
-                <Link to="/auth" className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg hover:bg-brand-hover">
-                  Create account
+                <Link to="/auth?mode=register" className="inline-flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-lg bg-brand px-3 text-sm font-semibold text-brand-fg hover:bg-brand-hover sm:min-h-9 sm:px-3.5">
+                  <span className="sm:hidden">Sign up</span>
+                  <span className="hidden sm:inline">Create account</span>
                 </Link>
               </>
             )}
@@ -59,7 +60,6 @@ export default function PublicLayout() {
       </header>
       {/* Pages add their own phone padding (px-3), as they do inside the app */}
       <main className="mx-auto w-full max-w-[1200px] flex-1 sm:px-4 sm:py-6">
-
         <Outlet />
       </main>
     </div>

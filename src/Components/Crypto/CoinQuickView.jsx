@@ -15,9 +15,9 @@ const amount = (v) => (Number.isFinite(v) ? formatCompact(v, 2) : "–");
 
 const Stat = ({ label, children, hint }) => (
   <div className="min-w-0 rounded-lg bg-surface-2/60 px-3 py-2.5">
-    <p className="text-[11px] text-fg-subtle">{label}</p>
+    <p className="text-xs text-fg-subtle">{label}</p>
     <p className="tabular mt-0.5 truncate text-sm font-semibold text-fg">{children}</p>
-    {hint && <div className="mt-0.5 text-[11px]">{hint}</div>}
+    {hint && <div className="mt-0.5 text-xs">{hint}</div>}
   </div>
 );
 
@@ -53,7 +53,7 @@ function QuickViewBody({ coin, onClose, onTrade }) {
           </div>
           <div className="text-right">
             <Sparkline data={coin.sparkline_in_7d?.price} width={150} height={44} />
-            <p className="mt-0.5 text-[11px] text-fg-subtle">Last 7 days</p>
+            <p className="mt-0.5 text-xs text-fg-subtle">Last 7 days</p>
           </div>
         </div>
 
@@ -65,7 +65,7 @@ function QuickViewBody({ coin, onClose, onTrade }) {
           <Stat label="Volume / market cap">
             {coin.market_cap ? `${((coin.total_volume / coin.market_cap) * 100).toFixed(2)}%` : "–"}
           </Stat>
-          <Stat label="All-time high" hint={<Delta value={coin.ath_change_percentage} className="text-[11px]" />}>
+          <Stat label="All-time high" hint={<Delta value={coin.ath_change_percentage} className="text-xs" />}>
             {formatPrice(coin.ath)}
           </Stat>
           <Stat label="Circulating supply" hint={supplyPct != null && <span className="text-fg-subtle">{supplyPct.toFixed(0)}% of max</span>}>

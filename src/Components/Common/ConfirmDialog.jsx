@@ -4,7 +4,7 @@ import { Modal, ModalTitle } from "@/Components/ui/modal";
 import { cn } from "@/utils/utils";
 
 const VARIANTS = {
-  danger: { icon: LogOut, iconClass: "bg-down-soft text-down", button: "bg-down hover:bg-down/90 text-white" },
+  danger: { icon: LogOut, iconClass: "bg-down-soft text-down", button: "bg-down hover:bg-down/90 text-white max-sm:text-brand-fg" },
   info: { icon: Info, iconClass: "bg-brand-soft text-brand", button: "bg-brand hover:bg-brand-hover text-brand-fg" },
   warning: { icon: AlertTriangle, iconClass: "bg-warn/15 text-warn", button: "bg-warn hover:bg-warn/90 text-black" },
 };

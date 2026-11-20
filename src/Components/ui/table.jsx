@@ -39,7 +39,7 @@ function Pagination({ page, pageSize, total, onPage, className }) {
   const start = Math.min(Math.max(1, page - Math.floor(span / 2)), pageCount - span + 1);
   const pages = Array.from({ length: span }, (_, i) => start + i);
   const arrow =
-    "grid size-8 place-items-center rounded-md border border-line text-fg transition-colors hover:bg-surface-hover disabled:pointer-events-none disabled:opacity-40";
+    "grid size-10 place-items-center sm:size-8 rounded-full sm:rounded-md border border-line text-fg transition-colors hover:bg-surface-hover disabled:pointer-events-none disabled:opacity-40";
 
   return (
     <div className={cn("premium-pagination flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-xs text-fg-subtle", className)}>
@@ -50,6 +50,10 @@ function Pagination({ page, pageSize, total, onPage, className }) {
         <button type="button" onClick={() => onPage(page - 1)} disabled={page === 1} aria-label="Previous page" className={arrow}>
           <ChevronLeft size={15} />
         </button>
+        {/* Phones show "2 / 4" instead of page buttons */}
+        <span className="tabular min-w-14 text-center text-sm font-medium text-fg sm:hidden" aria-live="polite">
+          {page} / {pageCount}
+        </span>
         {pages.map((n) => (
           <button
             key={n}
@@ -57,7 +61,7 @@ function Pagination({ page, pageSize, total, onPage, className }) {
             onClick={() => onPage(n)}
             aria-current={n === page ? "page" : undefined}
             className={cn(
-              "tabular grid size-8 place-items-center rounded-md text-xs font-medium transition-colors",
+              "tabular hidden size-8 place-items-center rounded-md text-xs font-medium transition-colors sm:grid",
               n === page ? "bg-brand text-brand-fg" : "text-fg-muted hover:bg-surface-hover",
             )}
           >
@@ -83,7 +87,7 @@ function SearchInput({ value, onChange, placeholder, label, className }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={label || placeholder}
-        className="h-9 w-full rounded-lg border border-line bg-surface-2 pl-9 pr-3 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-brand focus:bg-surface"
+        className="h-10 w-full rounded-lg border border-line bg-surface-2 pl-9 pr-3 text-base text-fg sm:h-9 sm:text-sm outline-none placeholder:text-fg-subtle focus:border-brand focus:bg-surface"
       />
     </div>
   );

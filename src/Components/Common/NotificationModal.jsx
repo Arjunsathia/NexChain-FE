@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { Bell, CheckCheck, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "@/api/axiosConfig";
@@ -8,7 +8,9 @@ import { Segmented } from "@/Components/ui/segmented";
 import { formatTimeAgo } from "@/utils/format";
 import { categoryLabel, groupByDay, typeOf } from "@/utils/notifications";
 import { cn } from "@/utils/utils";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import NotificationDetailsModal from "./NotificationDetailsModal";
+import { BACKDROP, useSheetMotion } from "@/Components/ui/motion";
 
 const FILTERS = [
   { value: "all", label: "All" },
@@ -69,10 +71,10 @@ const NotificationRow = ({ notification, onOpen, onDelete }) => {
             <p className={cn("min-w-0 flex-1 truncate text-sm", unread ? "font-semibold text-fg" : "font-medium text-fg-muted")}>
               {notification.title}
             </p>
-            <span className="shrink-0 pt-0.5 text-[11px] text-fg-subtle">{formatTimeAgo(Date.parse(notification.createdAt) / 1000)}</span>
+            <span className="shrink-0 pt-0.5 text-xs text-fg-subtle">{formatTimeAgo(Date.parse(notification.createdAt) / 1000)}</span>
           </div>
           <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-fg-subtle">{notification.message}</p>
-          {category && <p className="mt-1 text-[11px] font-medium text-fg-muted">{category}</p>}
+          {category && <p className="mt-1 text-xs font-medium text-fg-muted">{category}</p>}
         </div>
         {unread && <span className="pointer-events-none relative mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-hidden="true" />}
         <button
@@ -101,6 +103,20 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
   const [confirmClear, setConfirmClear] = useState(false);
   const panelRef = useRef(null);
   const loadedRef = useRef(false);
+  // Phones get a sheet that drops down from the top; tablets and desktop keep the dropdown under the bell
+  const isPhone = useMediaQuery("(max-width: 639px)");
+  const drag = useDragControls();
+
+  // The sheet covers the page, so the page behind it must not scroll
+  useEffect(() => {
+    if (!isOpen || !isPhone) return undefined;
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = previous;
+    };
+  }, [isOpen, isPhone]);
 
   // Spinner only for the first load; later refreshes swap the list quietly
   const fetchNotifications = useCallback(async () => {
@@ -203,30 +219,55 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
   const visible = filter === "unread" ? notifications.filter((n) => !n.isRead) : notifications;
   const groups = useMemo(() => groupByDay(visible), [visible]);
 
+  const sheetMotion = useSheetMotion("top");
+  const motionProps = isPhone
+    ? sheetMotion
+    : { initial: { opacity: 0, y: -8, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: -8, scale: 0.98 }, transition: { duration: 0.16, ease: "easeOut" } };
+
   const panel = (
     <AnimatePresence>
+      {isOpen && isPhone && (
+        <motion.div
+          key="backdrop"
+          aria-hidden="true"
+          {...BACKDROP}
+          className="fixed inset-0 z-[1499] bg-black/45"
+        />
+      )}
       {isOpen && (
         <motion.div
+          key="panel"
           ref={panelRef}
           role="dialog"
+          aria-modal={isPhone || undefined}
           aria-label="Notifications"
-          initial={{ opacity: 0, y: -8, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.98 }}
-          transition={{ duration: 0.16, ease: "easeOut" }}
-          className="fixed top-[calc(var(--topbar-h)+8px)] right-2 left-2 z-[1500] flex max-h-[min(640px,calc(100dvh-var(--topbar-h)-24px))] origin-top-right flex-col overflow-hidden rounded-2xl border border-line bg-surface text-fg shadow-pop sm:left-auto sm:right-4 sm:w-[400px]"
+          {...motionProps}
+          {...(isPhone && {
+            drag: "y",
+            dragControls: drag,
+            dragListener: false,
+            dragConstraints: { top: 0, bottom: 0 },
+            dragElastic: { top: 0.7, bottom: 0 },
+            onDragEnd: (_, info) => (info.offset.y < -60 || info.velocity.y < -500) && onClose(),
+          })}
+          className={cn(
+            "fixed z-[1500] flex flex-col overflow-hidden border-line bg-surface text-fg shadow-pop",
+            isPhone
+              ? "inset-x-0 top-0 max-h-[85dvh] rounded-b-3xl border-b pt-[env(safe-area-inset-top)]"
+              : "top-[calc(var(--topbar-h)+8px)] right-4 max-h-[min(640px,calc(100dvh-var(--topbar-h)-24px))] w-[400px] origin-top-right rounded-2xl border",
+          )}
         >
           <header className="flex items-center gap-2 px-4 pt-4 pb-3">
             <h2 className="text-base font-semibold text-fg">Notifications</h2>
             {unreadCount > 0 && (
-              <span className="tabular rounded-full bg-brand px-1.5 py-px text-[11px] font-semibold text-brand-fg">{unreadCount}</span>
+              <span className="tabular rounded-full bg-brand px-1.5 py-px text-2xs font-semibold text-brand-fg">{unreadCount}</span>
             )}
             <div className="ml-auto flex items-center gap-0.5">
               {unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={markAllRead}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+                  className="inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-[13px] font-medium text-fg-muted transition-colors sm:min-h-0 sm:py-1.5 sm:text-xs hover:bg-surface-hover hover:text-fg"
                 >
                   <CheckCheck size={14} /> Mark all read
                 </button>
@@ -235,7 +276,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                 type="button"
                 onClick={onClose}
                 aria-label="Close notifications"
-                className="grid size-8 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+                className="grid size-10 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg sm:size-8"
               >
                 <X size={16} />
               </button>
@@ -250,8 +291,8 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
                 onClick={clearAll}
                 onBlur={() => setConfirmClear(false)}
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                  confirmClear ? "bg-down text-white" : "text-fg-subtle hover:bg-down-soft hover:text-down",
+                  "inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-[13px] font-medium transition-colors sm:min-h-0 sm:py-1.5 sm:text-xs",
+                  confirmClear ? "bg-down text-white max-sm:text-brand-fg" : "text-fg-subtle hover:bg-down-soft hover:text-down",
                 )}
               >
                 <Trash2 size={13} /> {confirmClear ? "Clear all?" : "Clear all"}
@@ -279,7 +320,7 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             ) : (
               groups.map(([label, items]) => (
                 <section key={label} aria-label={label}>
-                  <h3 className="sticky top-0 z-20 bg-surface/95 px-4 pt-3 pb-1.5 text-[11px] font-semibold tracking-wide text-fg-subtle uppercase backdrop-blur-sm">
+                  <h3 className="sticky top-0 z-20 bg-surface/95 px-4 pt-3 pb-1.5 text-2xs font-semibold tracking-wide text-fg-subtle uppercase backdrop-blur-sm">
                     {label}
                   </h3>
                   <ul>
@@ -294,7 +335,13 @@ const NotificationModal = ({ isOpen, onClose, triggerRef }) => {
             )}
           </div>
           {notifications.length > 0 && (
-            <p className="border-t border-line px-4 py-2 text-center text-[11px] text-fg-subtle sm:hidden">Swipe a notification sideways to delete it</p>
+            <p className="border-t border-line px-4 py-2.5 text-center text-xs text-fg-subtle sm:hidden">Swipe a notification sideways to delete it</p>
+          )}
+          {/* Swipe the handle up to close */}
+          {isPhone && (
+            <div className="flex shrink-0 cursor-grab touch-none justify-center pt-1.5 pb-3 active:cursor-grabbing" onPointerDown={(e) => drag.start(e)} aria-hidden="true">
+              <span className="h-1 w-10 rounded-full bg-line-strong" />
+            </div>
           )}
         </motion.div>
       )}

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, SearchX } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, SearchX, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { getCoinById } from "@/api/coinApis";
 import useUserContext from "@/hooks/useUserContext";
@@ -14,6 +14,9 @@ import { getBinancePair } from "@/utils/coinRegistry";
 import { toCoinInfo } from "@/utils/coinDetails";
 import { Card, EmptyState } from "@/Components/ui/card";
 import { Skeleton } from "@/Components/ui/skeleton";
+import { CoinAvatar } from "@/Components/ui/coin-avatar";
+import { Delta } from "@/Components/ui/delta";
+import { FlashPrice } from "@/Components/Crypto/LiveCoinRow";
 import TradeModal from "@/Components/TradeModal";
 import PriceAlertModal from "@/Components/Common/PriceAlertModal";
 import CoinHero from "@/Components/CoinDetails/CoinHero";
@@ -85,7 +88,7 @@ function CoinDetailsPage() {
     const paused = isError && /unavailable/i.test(error?.message);
     const notFound = error?.response?.status === 404;
     return (
-      <div className="mx-auto max-w-[1600px] px-3 py-4 sm:p-0">
+      <div className="mx-auto max-w-[1600px] px-4 py-5 sm:p-0">
         {isLoading || isFetching || coinsLoading ? (
           <PageSkeleton />
         ) : (
@@ -106,12 +109,12 @@ function CoinDetailsPage() {
                     <button
                       type="button"
                       onClick={() => refetch()}
-                      className="rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
+                      className="min-h-10 rounded-lg border border-line px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-hover"
                     >
                       Try again
                     </button>
                   )}
-                  <Link to="/cryptolist" className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg">
+                  <Link to="/cryptolist" className="inline-flex min-h-10 items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-fg">
                     Back to Markets
                   </Link>
                 </div>
@@ -125,13 +128,14 @@ function CoinDetailsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:p-0 lg:space-y-5">
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:space-y-4 sm:p-0 lg:space-y-5">
       <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-fg-subtle">
-        <Link to="/cryptolist" className="transition-colors hover:text-fg">
+        <Link to="/cryptolist" className="-ml-1 inline-flex min-h-8 items-center gap-1 rounded-md px-1 transition-colors hover:text-fg max-sm:min-h-10 max-sm:text-sm max-sm:font-medium max-sm:text-fg-muted">
+          <ArrowLeft size={16} className="sm:hidden" aria-hidden="true" />
           Markets
         </Link>
-        <ChevronRight size={13} aria-hidden="true" />
-        <span className="font-medium text-fg" aria-current="page">
+        <ChevronRight size={13} aria-hidden="true" className="max-sm:hidden" />
+        <span className="font-medium text-fg max-sm:hidden" aria-current="page">
           {info.name}
         </span>
       </nav>
@@ -148,20 +152,58 @@ function CoinDetailsPage() {
         onTrade={openTrade}
       />
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
-        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-8">
-          <PriceChart key={coinId} coinId={coinId} symbol={info.symbol} />
-          {full ? (
-            <AboutCard info={info} />
-          ) : isLoading ? (
-            <Skeleton className="h-[220px] w-full rounded-xl" />
-          ) : null}
+      {/* Phones: the two columns dissolve into one list: chart, position, stats, live market, about */}
+      <div className="grid grid-cols-1 items-start gap-4 max-sm:flex max-sm:flex-col max-sm:items-stretch max-sm:gap-5 lg:gap-5 xl:grid-cols-12">
+        <div className="min-w-0 space-y-4 max-sm:contents lg:space-y-5 xl:col-span-8">
+          <div className="min-w-0 max-sm:order-1">
+            <PriceChart key={coinId} coinId={coinId} symbol={info.symbol} />
+          </div>
+          <div className="min-w-0 max-sm:order-5">
+            {full ? (
+              <AboutCard info={info} />
+            ) : isLoading ? (
+              <Skeleton className="h-[220px] w-full rounded-xl" />
+            ) : null}
+          </div>
         </div>
 
-        <div className="min-w-0 space-y-4 lg:space-y-5 xl:col-span-4">
-          {holding && <PositionCard holding={holding} price={price} symbol={info.symbol} />}
-          <MarketActivityCard key={coinId} pair={pair} symbol={info.symbol} />
-          <MarketStatsCard info={info} price={price} high24h={high24h} low24h={low24h} />
+        <div className="min-w-0 space-y-4 max-sm:contents lg:space-y-5 xl:col-span-4">
+          {holding && (
+            <div className="min-w-0 max-sm:order-2">
+              <PositionCard holding={holding} price={price} symbol={info.symbol} />
+            </div>
+          )}
+          <div className="min-w-0 max-sm:order-4">
+            <MarketActivityCard key={coinId} pair={pair} symbol={info.symbol} />
+          </div>
+          <div className="min-w-0 max-sm:order-3">
+            <MarketStatsCard info={info} price={price} volume={volume} high24h={high24h} low24h={low24h} />
+          </div>
+        </div>
+      </div>
+
+      {/* Phones: the main action stays one thumb-tap away, above the tab bar */}
+      <div className="h-20 sm:hidden" aria-hidden="true" />
+      <div
+        className="coin-trade-bar mobile-tabbar fixed inset-x-3 z-[var(--z-tabbar)] rounded-2xl border border-line px-3 py-2 sm:hidden"
+        style={{ bottom: "calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 0.5rem)" }}
+      >
+        <div className="flex items-center gap-3">
+          <CoinAvatar src={info.image} symbol={info.symbol} size={32} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-fg-subtle">{info.symbol.toUpperCase()}/USD</p>
+            <div className="flex items-center gap-2">
+              <FlashPrice value={price} className="truncate text-base font-semibold text-fg" />
+              <Delta value={change24h} className="text-xs" />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={openTrade}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-brand px-5 text-sm font-semibold text-brand-fg"
+          >
+            <ArrowLeftRight size={16} aria-hidden="true" /> Trade
+          </button>
         </div>
       </div>
 

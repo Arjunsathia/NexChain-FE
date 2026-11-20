@@ -53,7 +53,7 @@ function FaqItem({ item, open, onToggle }) {
         <div className="px-4 pb-4 text-sm leading-relaxed text-fg-muted">
           <p>{item.a}</p>
           {item.link && (
-            <Link to={item.link.to} className="mt-2 inline-flex items-center gap-1 font-medium text-brand hover:underline">
+            <Link to={item.link.to} className="mt-1 inline-flex min-h-9 items-center gap-1 font-medium text-brand hover:underline sm:mt-2 sm:min-h-0">
               {item.link.label} <ArrowRight size={13} />
             </Link>
           )}
@@ -181,12 +181,12 @@ function SupportForm({ email }) {
             <FileText size={16} className="shrink-0 text-fg-subtle" />
             <span className="min-w-0 flex-1 truncate text-fg">{file.name}</span>
             <span className="tabular shrink-0 text-xs text-fg-subtle">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
-            <button type="button" onClick={() => setFile(null)} aria-label="Remove attachment" className="grid size-6 place-items-center rounded text-fg-subtle hover:text-down">
+            <button type="button" onClick={() => setFile(null)} aria-label="Remove attachment" className="tap-target grid size-8 shrink-0 place-items-center rounded text-fg-subtle hover:text-down sm:size-6">
               <X size={14} />
             </button>
           </div>
         ) : (
-          <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted hover:text-brand">
+          <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-fg-muted hover:text-brand sm:min-h-0">
             <Paperclip size={15} /> Attach a screenshot or PDF
             <span className="font-normal text-fg-subtle">(up to 5 MB)</span>
           </button>
@@ -278,7 +278,7 @@ export default function Support() {
     <div className="space-y-4 lg:space-y-5">
       <header>
         <h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Help &amp; support</h1>
-        <p className="mt-0.5 text-sm text-fg-subtle">Find a quick answer, or send a message and an admin will reply by email.</p>
+        <p className="mt-0.5 text-sm text-fg-subtle max-sm:hidden">Find a quick answer, or send a message and an admin will reply by email.</p>
       </header>
 
       <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 xl:grid-cols-12">
@@ -294,7 +294,7 @@ export default function Support() {
                   onClick={() => setTopic(t.value)}
                   aria-pressed={topic === t.value}
                   className={cn(
-                    "shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    "min-h-9 shrink-0 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium transition-colors sm:min-h-0 sm:px-3 sm:py-1 sm:text-xs",
                     topic === t.value ? "border-brand bg-brand-soft text-brand" : "border-line text-fg-muted hover:bg-surface-hover hover:text-fg",
                   )}
                 >

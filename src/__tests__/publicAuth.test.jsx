@@ -7,7 +7,7 @@ import { postForm, setMemoryToken } from "@/api/axiosConfig";
 
 const { dispatch } = vi.hoisted(() => ({ dispatch: vi.fn() }));
 vi.mock("react-redux", () => ({ useDispatch: () => dispatch }));
-vi.mock("@react-oauth/google", () => ({ useGoogleLogin: () => vi.fn() }));
+vi.mock("@react-oauth/google", () => ({ useGoogleLogin: () => vi.fn(), GoogleOAuthProvider: ({ children }) => children }));
 vi.mock("@/api/axiosConfig", () => ({ postForm: vi.fn(), setMemoryToken: vi.fn() }));
 vi.mock("@/redux/slices/userSlice", () => ({ setSession: payload => ({ type: "session", payload }) }));
 vi.mock("react-hot-toast", () => ({ default: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn(), loading: vi.fn(), dismiss: vi.fn() }) }));

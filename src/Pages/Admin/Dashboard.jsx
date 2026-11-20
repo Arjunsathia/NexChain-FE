@@ -208,7 +208,7 @@ const AdminDashboard = () => {
       <div className="space-y-4 lg:space-y-5">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div><h1 className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">Platform overview</h1><p className="mt-0.5 text-sm text-fg-subtle">Monitor platform activity, members, and service health.</p></div>
-          <span className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[11px] text-fg-muted">{isUsersLoading || isStatsLoading ? "Updating data…" : "Refreshes every 30 seconds"}</span>
+          <span className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-fg-muted">{isUsersLoading || isStatsLoading ? "Updating data…" : "Refreshes every 30 seconds"}</span>
         </header>
         {(usersError || reportsError || statsError) && <div role="alert" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-surface p-3 text-xs text-fg-muted"><span>Some platform data could not be loaded. The overview may be incomplete.</span><button onClick={() => { ["adminUsers", "adminReports", "adminPlatformStats"].forEach(key => queryClient.invalidateQueries({ queryKey: [key] })); }} className="font-medium text-brand">Retry</button></div>}
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -237,7 +237,7 @@ const AdminDashboard = () => {
             <thead className="bg-surface-2 text-fg-muted"><tr>{["Time", "User", "Side", "Asset", "Quantity", "Value"].map(h => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr></thead>
             <tbody className="divide-y divide-line">{todayTransactions.map(tx => <tr key={tx._id} className="hover:bg-surface-hover">
               <td className="whitespace-nowrap px-4 py-3 text-fg-muted">{new Date(tx.transactionDate).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
-              <td className="px-4 py-3"><p className="font-medium text-fg">{tx.userName}</p><p className="mt-0.5 text-[11px] text-fg-subtle">{tx.userEmail}</p></td>
+              <td className="px-4 py-3"><p className="font-medium text-fg">{tx.userName}</p><p className="mt-0.5 text-xs text-fg-subtle">{tx.userEmail}</p></td>
               <td className="px-4 py-3"><span className={tx.type === "buy" ? "text-up" : "text-down"}>{tx.type?.toUpperCase()}</span></td>
               <td className="px-4 py-3 uppercase text-fg">{tx.coinSymbol}</td><td className="px-4 py-3 text-fg">{Number(tx.quantity).toLocaleString(undefined,{maximumFractionDigits:6})}</td><td className="px-4 py-3 font-medium text-fg">{formatCurrency(tx.totalValue)}</td>
             </tr>)}</tbody>

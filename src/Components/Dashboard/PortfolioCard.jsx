@@ -82,7 +82,7 @@ function PortfolioCard() {
             <button
               type="button"
               onClick={() => navigate("/cryptolist")}
-              className="mt-2 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-brand-fg hover:bg-brand-hover"
+              className="mt-2 min-h-10 rounded-lg bg-brand px-4 py-2 text-[13px] sm:min-h-0 sm:text-xs font-semibold text-brand-fg hover:bg-brand-hover"
             >
               Explore markets
             </button>
@@ -96,9 +96,9 @@ function PortfolioCard() {
                 <div key={s.label} style={{ width: `${s.pct}%`, background: s.color }} className="h-full first:rounded-l-full last:rounded-r-full" />
               ))}
             </div>
-            <ul className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
+            <ul className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 sm:flex sm:flex-wrap sm:gap-y-1">
               {segments.map((s) => (
-                <li key={s.label} className="flex items-center gap-1.5 text-[11px] text-fg-muted">
+                <li key={s.label} className="flex items-center gap-1.5 text-xs text-fg-muted">
                   <span className="size-2 rounded-full" style={{ background: s.color }} />
                   {s.label} <span className="tabular text-fg-subtle">{s.pct.toFixed(1)}%</span>
                 </li>

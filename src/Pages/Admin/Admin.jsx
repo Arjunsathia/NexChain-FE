@@ -11,13 +11,13 @@ export default function Admin() {
   const roleLabel = user?.role === "superadmin" ? "Super administrator" : "Administrator";
 
   return (
-    <div className="admin-workspace mx-auto max-w-[1600px] space-y-5 px-3 py-4 sm:p-0">
+    <div className="admin-workspace mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:p-0">
       <div className="border-b border-line">
-        <div className="flex items-center gap-2 pb-2 text-xs text-fg-subtle">
-          <ShieldCheck size={15} className="text-brand" />
-          <span className="font-medium text-fg-muted">Admin console</span>
+        <div className="flex min-w-0 items-center gap-2 pb-2 text-xs text-fg-subtle">
+          <ShieldCheck size={15} className="shrink-0 text-brand" />
+          <span className="shrink-0 font-medium text-fg-muted">Admin console</span>
           <span aria-hidden="true">·</span>
-          <span>Signed in as {roleLabel.toLowerCase()}</span>
+          <span className="min-w-0 truncate">Signed in as {roleLabel.toLowerCase()}</span>
         </div>
         <AdminTabs />
       </div>

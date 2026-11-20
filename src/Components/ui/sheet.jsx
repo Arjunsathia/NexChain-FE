@@ -11,15 +11,18 @@ import { cn } from "@/utils/utils";
 function Sheet({ open, onClose, children, className, label }) {
   return (
     <Dialog open={open} onClose={onClose} className="relative z-[9000]" aria-label={label}>
-      <DialogBackdrop transition className="fixed inset-0 bg-black/45 transition-opacity duration-200 data-[closed]:opacity-0" />
+      <DialogBackdrop transition className="fixed inset-0 bg-black/45 transition-opacity duration-200 data-[closed]:opacity-0 max-sm:duration-300 max-sm:data-[leave]:duration-200" />
       <div className="fixed inset-0 flex items-end justify-end sm:items-stretch">
         <DialogPanel
           transition
           className={cn(
             "flex max-h-[92dvh] w-full flex-col overflow-hidden border-line surface-panel bg-surface text-fg shadow-pop",
-            "rounded-t-2xl border-t sm:max-h-none sm:max-w-[560px] sm:rounded-none sm:border-l sm:border-t-0",
-            "transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] data-[closed]:translate-y-8 data-[closed]:opacity-0",
-            "sm:data-[closed]:translate-x-8 sm:data-[closed]:translate-y-0",
+            "rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] sm:max-h-none sm:pb-0 sm:max-w-[560px] sm:rounded-none sm:border-l sm:border-t-0",
+            "transition duration-200 ease-[var(--ease-sheet)]",
+            "sm:data-[closed]:translate-x-8 sm:data-[closed]:opacity-0",
+            // Phones: the whole sheet slides up from the bottom edge
+            "max-sm:duration-300 max-sm:data-[leave]:duration-200 max-sm:data-[closed]:translate-y-full",
+            "motion-reduce:max-sm:data-[closed]:translate-y-0 motion-reduce:data-[closed]:opacity-0",
             className,
           )}
         >
@@ -46,7 +49,7 @@ function SheetHeader({ title, subtitle, onClose, children }) {
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="-mr-1.5 grid size-8 shrink-0 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
+        className="-mr-1.5 grid size-10 shrink-0 place-items-center rounded-lg sm:size-8 text-fg-subtle transition-colors hover:bg-surface-hover hover:text-fg"
       >
         <X size={18} />
       </button>
