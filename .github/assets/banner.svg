@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img" aria-labelledby="t d">
+  <title id="t">NexChain</title>
+  <desc id="d">Learn crypto trading without risking a cent</desc>
+  <style>
+    .bg { fill: #f6f8fa; } .edge { stroke: #d0d7de; } .grid { stroke: #e6e9ed; }
+    .ink { fill: #1f2328; } .muted { fill: #59636e; } .faint-s { stroke: #afb8c1; } .area { fill: #eaeef2; }
+    .chip { fill: #ffffff; stroke: #d0d7de; } .mark { stroke: #1f2328; } .dot { fill: #1f2328; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #161b22; } .edge { stroke: #30363d; } .grid { stroke: #1f252d; }
+      .ink { fill: #e6edf3; } .muted { fill: #9198a1; } .faint-s { stroke: #3d444d; } .area { fill: #1c2128; }
+      .chip { fill: #0d1117; stroke: #30363d; } .mark { stroke: #e6edf3; } .dot { fill: #e6edf3; }
+    }
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; }
+  </style>
+
+  <rect class="bg edge" x="1" y="1" width="1198" height="278" rx="16" stroke-width="2"/>
+
+  <g class="grid" stroke-width="1">
+    <path d="M700 60H1160M700 110H1160M700 160H1160M700 210H1160"/>
+  </g>
+
+  <!-- price line with soft area -->
+  <path class="area" d="M710 200L770 180L830 190L890 150L950 160L1010 115L1070 125L1130 75L1160 82V230H710Z"/>
+  <path class="faint-s" fill="none" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"
+        d="M710 200L770 180L830 190L890 150L950 160L1010 115L1070 125L1130 75L1160 82"/>
+  <circle class="dot" cx="1130" cy="75" r="6"/>
+
+  <g class="mark" fill="none" stroke-width="5" stroke-linejoin="round">
+    <path d="M96 92l26-15 26 15v30l-26 15-26-15z"/>
+    <path d="M126 118l26-15 26 15v30l-26 15-26-15z"/>
+  </g>
+
+  <text class="ink" x="210" y="128" font-size="50" font-weight="700">NexChain</text>
+  <text class="muted" x="212" y="168" font-size="21">Learn crypto trading without risking a cent</text>
+
+  <g font-size="15" font-weight="600">
+    <rect class="chip" x="96" y="200" width="100" height="34" rx="17" stroke-width="1.5"/>
+    <text class="muted" x="146" y="222" text-anchor="middle">React 19</text>
+    <rect class="chip" x="208" y="200" width="80" height="34" rx="17" stroke-width="1.5"/>
+    <text class="muted" x="248" y="222" text-anchor="middle">Vite 7</text>
+    <rect class="chip" x="300" y="200" width="130" height="34" rx="17" stroke-width="1.5"/>
+    <text class="muted" x="365" y="222" text-anchor="middle">Tailwind 4</text>
+    <rect class="chip" x="442" y="200" width="150" height="34" rx="17" stroke-width="1.5"/>
+    <text class="muted" x="517" y="222" text-anchor="middle">Live prices</text>
+  </g>
+</svg>
